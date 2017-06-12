@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Functionality and approach</h1>
+
+<p>
+A single-cell RNA sequencing run creates an expression matrix that contains, for each cell, the number of reads that mapped to each gene, often referred to as the expression count for that cell and gene. The ExpressionMatrix2 code processes such an expression matrix in ways that permit various types of analysis and visualization. 
+
+<p>
+It is possible to interpret each expression count as a coordinate in a high-dimensional space in which each dimension corresponds to a gene. The expression matrix then maps each cell to a point in this high-dimensional space.
+Most approaches to analyzing these expression matrices involve an initial step of <a href="https://en.wikipedia.org/wiki/Dimensionality_reduction">dimensionality reduction</a> which projects these points to a space of much lower dimensionality (often 2), which is then used for additional processing such as clustering, visualization, and othet types of analysis. With such approaches, it is critical that the dimensionality reduction step is done in a way that minimizes the loss of information incurred. Several approaches have been developed with this goal in mind.
+
+<p>
+In contrast, in the ExpressionMatrix2 code we do not use a dimensionality reduction step. All processing is done in a space of dimensionality equal to the number of genes, and two-dimensional representations are used exclusively for visualization, and not for analysis purposes.
+
+<p>
+To allow this, we use a "Cell Similarity Graph", an undirected graph in which each vertex represents a cell. Two vertices are joined by an undirected edge if the expression count vectors of the corresponding cells are sufficiently similar, according to some definition of similarity. Each edge is labeled with the similarity between the cells corresponding to the vertices it joins.  The Cell Similarity Graph then shows "communities" - highly connected regions that corresponds to groups of cells with similar gene expressions. We can then use a clustering algorithm to detect and characterize these communities. The clustering algorithm only takes into accound the graph connectivity, without any reference to the high-dimensional space defined by the gene expression counts.
+
+<p>
+We define similarity between two cells as the regression coefficient of the expression counts of the two cells. Other definitions are possible, and it is likely that future versions of the code will support alternate definitions of cell similarity.
+
+<p>
+For visualization purposes only, the ExpressionMatrix2 code visualizes the graph on a two-dimensional screen using <a href="http://graphviz.org">Graphviz</a>, a well known graph layout package. Graphviz uses a force-directed layour algorithm to compute two-dimensional coordinates suitable to display the graph, thus effectively performing a dimensionality reduction step. However, we do not use the computed two-dimensional coordinates for any purpose other than visualization. The graph "communities" are usually visible as "clumps" in the graph. However, note that if two "clumps" are shown on top of each other, it is not necessarily the case that they are highly connected to each other: the graph layout algorithm may need to show two unconnected communities on top of each other due to shortcomings of the two-dimensional representation of the graph.
+
+
+
+    
+</body>
+</html>

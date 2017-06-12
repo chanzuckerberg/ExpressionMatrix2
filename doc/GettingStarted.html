@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Getting started</h1>
+
+<p> 
+Use the following direction to get quickly started and run ExpressionMatrix2 on a toy dataset distributed as part of the repository.
+
+<ul>
+
+<li>
+Use a Linux machine running Ubuntu 16.04 (the current long term support release of Ubuntu). Other distributions using similar versions of the Linux kernel, such as Linux Mint 18, will also work.
+    
+<li>Make sure the following packages, all available from the standard Ubuntu repositories, are installed:
+<ul>
+<li>The Boost libraries (package libboost-all-dev).
+<li>Python3 (package python3-all-dev).
+<li>Graphviz (package graphviz).
+</ul>
+If one or more of these packages are not installed, you can install them using command "apt install packageName", where packageName is as indicated above. This requires root access.
+
+<li>
+Create an empty directory for the test you are going to run.
+
+<li>
+In GitHub, navigate to the bin directory of the chanzuckerberg/ExpressionMatrix2 repository and down to the library you want to use. There may be more than one version, each named ExpressionMatrix2.so and located in a directory named from the date the library was generated. Click on the selected library, then "Download". Copy it to the empty directory you created for the test. (If you prefer, you can instead clone the repository and get the library from you cloned copy. This would require running command "git clone https://github.com/chanzuckerberg/ExpressionMatrix2").
+
+<li> In the same way, copy to your test directory files ExpressionMatrix.csv, MetaData.csv, run.py, and runServer.py from the GitHub repository under tests/ToyTest1. These files contain the expression matrix and cell meta data for the test.
+
+<li>Run command "./run.py". This will read the csv files and create binary data structures stored in mapped files in a new directory named data.
+
+<li>Run command "./runServer.py". This starts the ExpressionMatrix2 code in a mode where if behaves as an http server that can be used for interactive visualization and analysis. This command continues running until you interrupt it. 
+
+<li>While the server is running, start a web browser on the same machine, and point it to the following URL: <a href="http://localhost:17100">http://localhost:17100</a>.
+
+<li>Interactively explore the functionality offered by the server. You will need a more real test case to perform any interesting visualization or analysis, but if you made it here you are ready to run the ExpressionMatrix2 on real data.
+
+</ul>
+
+<p>
+Note that to simplify the "Getting started" process we copied ExpressionMatrix2.so to the same directory containing the Python scripts, so it is found automatically. In real use, this will not be practical, and instead you will want to set environmnet variable PYTHONPATH to the directory containing ExpressionMatrix2.so. This will allow the Python interpreter to locate it.
+    
+</body>
+</html>
