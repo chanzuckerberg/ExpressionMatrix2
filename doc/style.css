@@ -1,0 +1,32 @@
+* {
+font-family: sans-serif;
+}
+pre {
+font-family: courier;
+}
+p, input {
+font-size: 16px;
+}
+h1, h2, h3 {
+color: LightCoral;
+}
+table {
+border-collapse: collapse;
+}
+th, td {
+border: 2px solid LightCoral;
+}
+th {
+font-weight: bold;
+text-align: center;
+}
+th.left {
+text-align: left;
+}
+td.centered {
+text-align: center;
+}
+a {
+color: LightCoral;
+}
+
