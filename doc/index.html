@@ -36,6 +36,42 @@ To allow this, we use a "Cell Similarity Graph", an undirected graph in which ea
 For visualization purposes only, the ExpressionMatrix2 code visualizes the graph on a two-dimensional screen using <a href="http://graphviz.org">Graphviz</a>, a well known graph layout package. Graphviz uses a force-directed layour algorithm to compute two-dimensional coordinates suitable to display the graph, thus effectively performing a dimensionality reduction scheme. However, we do not use the computed two-dimensional coordinates for any purpose other than visualization. The graph "communities" are usually visible as "clumps" in the graph. However, note that if two "clumps" are shown on top of each other, it is not necessarily the case that they are highly connected to each other: the graph layout algorithm may need to show two unconnected communities on top of each other due to shortcomings of the two-dimensional representation of the graph.
 
 
+
+<h2>Getting started</h2>
+
+<p> 
+Use the following direction to get quickly started and run ExpressionMatrix2 on a toy dataset distributed as part of the repository.
+
+<ul>
+
+<li>
+Use a Linux machine running Ubuntu 16.04 (the current long term support release of Ubuntu). Other distributions using similar versions of the Linux kernel, such as Linux Mint 18, will also work.
+    
+<li>Make sure the following packages, all available from the standard Ubuntu repositories, are installed:
+<ul>
+<li>The Boost libraries (package libboost-all-dev).
+<li>Python3 (package python3-all-dev).
+<li>Graphviz (package graphviz).
+</ul>
+If one or more of these packages are not installed, you can install them using command "apt install packageName", where packageName is as indicated above. This requires root access.
+
+<li>
+Create an empty directory for the test you are going to run.
+
+<li>
+In GitHub, navigate to the bin directory of the chanzuckerberg/ExpressionMatrix2 repository and down to the library you want to use. There may be more than one version, each named ExpressionMatrix2.so and located in a directory named from the date the library was generated. Click on the selected library, then "Download". Copy it to the empty directory you created for the test. (If you prefer, you can instead clone the repository and get the library from you cloned copy. This would require running command "git clone https://github.com/chanzuckerberg/ExpressionMatrix2").
+
+<li> In the same way, copy to your test directory files ExpressionMatrix.csv, MetaData.csv, run.py, and runServer.py from the GitHub repository under tests/ToyTest1. These files contain the expression matrix and cell meta data for the test.
+
+<li>Run command "./run.py". This will read the csv files and create binary data structures stored in mapped files in a new directory named data.
+
+<li>Run command "./runServer.py". This starts the ExpressionMatrix2 code in a mode where if behaves as an http server that can be used for interactive visualization and analysis. This command continues running until you interrupt it. 
+
+<li>While the server is running, start a web browser on the same machine, and point it to the following URL: <a href="http://localhost:17100">http://localhost:17100</a>.
+
+<li>Interactively explore the functionality offered by the server. You will need a more real test case to perform any interesting visualization or analysis, but if you made it here you are ready to run the ExpressionMatrix2 on real data.
+
+</ul>
     
 </body>
 </html>
