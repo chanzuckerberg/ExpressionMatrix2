@@ -19,7 +19,7 @@ If one or more of these packages are not installed, you can install them using c
 
 - Make a local copy of this GitHub repository, chanzuckerberg/ExpressionMatrix2. An easy way to so this is to click on the green button "Clone or download" on the top right of the GitHub page for this repository, click on "Download ZIP", then expand the zip file.
 
-- Make a copy of the test directory test/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts.
+- Make a copy of the test directory tests/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts.
 
 - To run the test, you need to select one of the versions of shared library ExpressionMatrix2.so stored in the bin/ubuntu-16.04 directory of the repository. Each of the versions resides in a directory named after the date when that version was created. If you are unsure which one to use, pick the most recent. Make a copy of the selected version of ExpressionMatrix.so in the copy of the test directory you created in the previous item.
 

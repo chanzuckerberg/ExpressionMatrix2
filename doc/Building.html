@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Building from source</h1>
+
+<p>
+You will need to build the code from source if you want to do one of the following:
+
+<ul>
+
+<li>
+Run the code on a platform for which a pre-built shared library is not available. Currently, we only provide a pre-built library for Ubuntu 16.04. This will also work on other distributions using similar versions of the Linux kernel, such as Linux Mint 18. However it will not work on other Linux distributions, or on other operating systems such as Windows or MacOS.
+
+<li>
+Modify the code, for example to add functionality, fix bugs, or port it to other systems.
+
+<li>
+Debug the code.
+
+</ul>
+
+<p>
+The code requires the following software packages to be available:
+<ul>
+<li>The gcc compiler. This is installed by default on most Linux distributions. Significant code changes may be required to port the code to systems other than Linux systems.
+<li>The Boost libraries. Boost version 1.58 is used for Ubuntu, but the code should not be strictly dependend on a specific version of the Boost libraries.
+<li>Python3. The code can also be built for Python2 by making appropriate changes in the include files and libraries used in the build process.
+<li>Graphviz.
+</ul>
+The means by which you can obtain and install these packages is dependent on the system you want to run the build the on.
+
+<p>
+Once you have a local copy of the repository, you have two choices to build from source:
+
+<ul>
+<li>
+Use the Eclipse C++ IDE. Eclipse project files .project and .cproject are provided in the top directory of the repository. After opening the project files in Eclipse, you can use Eclipse commands to build the Release or Debug version of the code.
+
+<li>
+Use the makefiles provided in the Release and Debug directories of the repository. Just cd to one of these directory, then run command "mke" to obtain a copy of ExpressionMatrix.so that reflects al the latest changes in the source code.
+ 
+
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Programming notes</h1>
+
+<p>
+The information contained here is only useful if you want to modify the source code, for example to add functionality, fix bugs, or port it to other platforms.
+
+<p>
+The code is written in the C++11 version of C++ (g++ option "-stdc++0x"). It does use some features unique to gcc and the x86-64 architecture, so porting to other compilers and/or architectures will not be immediate.
+
+<p>
+The code uses extensively the C++ standard libraries and the Boost libraries. The current version was developed on Linux Mint 18 (a Linux distribution derived from Ubuntu 16.04) and uses Boost version 1.58. However the code should not be strictly dependent on this specific version of Boost.
+
+<p>
+All code is defined in C++ namespace ChanZuckerberg::ExpressionMatrix2. This will reduce the chance of name conflicts if the code has to be compiled or linked with other C++ libraries. Several names from the std and boost namespaces are added to the ExpressionMatrix2 namespace via using directives (namespace composition). 
+
+<p>
+The code is build as a shared library that can be imported in Python. This is achieved using the boost python library. The code that does this is in src/PythonModule.cpp. It is little more than a list of the classes and functions to be made available in Python. The code is currently built for Python 3, but it should be possible to port it to Python 2 by simply changing the include files and libraries using during compilation and linking.
+
+<p>
+Persistent data structures are stored in binary files which are memory mapped for efficient access. Various container-like classes that use mapped files are defined for this purpose. See template class ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector an other classes defined in the same namespace. Mapped files are manipulated using native linux calls such as mmap and truncate. This presents some advantages compared to corresponding functionality in the boost iostreams library, however it reduces portability.
+
+</body>
+</html>
