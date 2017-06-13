@@ -4,6 +4,10 @@
 <head>
 <link rel=stylesheet href=style.css />
 <link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+<style>
+h2 {margin-top:30px;}
+h3 {margin-top:20px;}
+</style>
 </head>
 
 <body>
@@ -11,8 +15,10 @@
 <h1>Visualizing and analyzing using the http server</h1>
 
 <h2>Starting the server</h2>
+<p>
 The ExpressionMatrix2 code can be started in http server mode using the Python code seen in tests/ToyTest1/runServer.py. The call to explore specifies a port number for the server to listen to.
 In this mode of operation, ExpressionMatrix2 code maps all of its data structures in virtual memory, then waits for requests from a client, that is, a Web browser. This allows exploring the expression matrix data in a variety of ways, including creating cell similarity graphs.
+
 
 <h2> Security warning</H2>
 <p>
@@ -54,15 +60,58 @@ The server has no notion of users. If multiple users access the same server, the
 
 <h2 id=cellSets>Cell sets</h2>
 
+<p> 
+You can define a cell set to restrict processing (in particular, the creating of a cell similarity graph) to a subset to all the cells present in a run.
+
+<p>
+To create a cell set, click on the "Cell Sets" button at the top of the browser window. This presents two ways to define a new cell set: using meta data, or by intersection or union of other cell sets.
+
+<p>
+By combining these two ways to create cell sets, you have great flexibility in defining a subset of cells to work on. We will also see below that, after a graph has been created, clustering on the graph creates new meta data. That meta data can be used to define cell sets consisting of one or more clusters.
+
+<p>
+Cell sets are persistent: they exists until removed, even if the server is stopped and then restarted.
+
+
+
+<h3>Creating a cell set using meta data</h3>
+
+<p>
+Here, you can define a new cell set as the cet of cells for which a specified meta data field matches a <a href="https://en.wikipedia.org/wiki/Regular_expression">regular expression</a> you choose. For example, suppose your cells have a meta data field named "Sample" that contains the name of the sample from which each cell originated. Lets say you want to create a cell set including only the cells for which meta data "Sample" equals "BH22C". To define the cell set you choose a cell set name, pick meta data Sample, and in the regular expression field you just enter "BH22C". After pressing Enter, the newly created cell set will appear in the table of existing cell sets. You can use the button on the last column of that table to remove the cell set.
+
+<p>
+Regular expressions are very powerful and can do much more complex things than just select a value. For example, to select all the samples that begin with "BH" you could enter the following as the regular expression: "BH.*". See <a href="https://en.wikipedia.org/wiki/Regular_expression">the Wikipedia article</a> for more possibilities.
+
+
+<h3>Creating a cell set by intersection or union of other cell sets</h3>
+
+<p>
+Here you type the name of the cell set to be created, select "intersection" or "union", and then select two existing cell sets (using the Ctrl key).
+
 
 
 <h2 id=graphs>Cell similarity graphs</h2>
 
+<p>
+You can create any number of cell similarity graphs using different graph creation parameters and cell sets. However, keep in mind that graphs are not persistent, and they disappear if the server is stopped and then restarted.
 
+<p>
+To create a new graph, click on the "Graphs" button near the top of the browser window. A table appears, showing currently defined graphs. You can create a new graph by filling in the last row of the table then clicking on "Create a new graph". You can also remove an existing graph by clicking on a "Remove graph" button in the last ciolumn of the table. Here is a description of the entries you need to fill in:
 
+<ul>
+<li>Graph name: this is the name to be given to the graph. It cannot be identical to the name of an existing graph.
+<li>Cell set name: the name of the cell set you want to use. The graph you create will have a vertex for each cell in this set. You can only specify one set. If you want to create a graph between two or more sets you first have to define a cell set as the union of the sets you want to use.
+<li>Similar pairs name: the name of a set of similar cell pairs to be used to create the graph. Sets of similar pairs are created in Python code.
+<li>Similarity threshold: the minimum similarity between two cells in order for an edge to be created between the corresponding vertices in the graph.
+Note that, if the set of similar pairs being used was created using a higher similarity threshold, the higher similarity threshold effectively applies.
+<li>Maximum connectivity: the maximum number of neighbors (the k in the k-NN graph). Note that, because of the way a k-NN graph is created, some vertices can actually havemore than the number of edges specified here.
+</ul>
 
+<p>
+After you click on "Create a new graph" you will see a window with some log output created while the graph and its layout are computed, then a Continue button that, when clicked, will bring you back to the table containing all currently defined graph. The table will now include the graph you just created. You can click on the name of the graph in the first column of the table to display the graph.
 
-
+<p>
+When a graph is displayed, there are buttons to control the geometry of the display: you can make the graphics smaller or larger, you can zoom and pan, and you can draw vertices larger or smaller, and edges thicker or thinner. You can also control the way the graph is colored. The controls for that should be self-explanatory. 
 
 </body>
 </html>
