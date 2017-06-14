@@ -80,5 +80,11 @@ For a large run, approximate computation of similar pairs is much faster than ex
 <p>
 Future versions of the code will offer faster ways to find similar cell pairs that will have a better scaling than O(N<sup>2</sup>).
 
+
+<h2>Binary Compatibility warning</h2>
+
+<p> 
+The ExpressionMatrix2 code uses binary files mapped in memory to store its data structures. It is likely that the binary format of these files will change as the code gets developed. This means that newer versions of ExpressionMatrix2 will not be able to access binary files created by older versions. In other words, <span style='text-transform:uppercase'>binary compatibility between versions is not guaranteed</span>. For this reason, <span style='text-transform:uppercase'>the binary files should not be used for long-term storage of expression matrix data</span>.
+
 </body>
 </html>
