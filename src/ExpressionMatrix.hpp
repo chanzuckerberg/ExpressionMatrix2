@@ -199,6 +199,17 @@ public:
     // Approximate but fast computation of the similarity between two cells.
     double computeApproximateCellSimilarity(CellId, CellId) const;
 
+    // Approximate computation of the similarity between two cells using
+    // Locality Sensitive Hashing (LSH).
+    // Not to be used for code where performance is important,
+    // because it recompiutes the LSH vector every time.
+    double computeApproximateLshCellSimilarity(
+		size_t lshBandCount,
+		size_t lshRowCount,
+		unsigned int seed,
+		CellId,
+		CellId) const;
+
     // Compute a histogram of the difference between approximate and exact similarity,
     // looping over all pairs. This is O(N**2) slow.
     void analyzeAllPairs() const;
@@ -351,6 +362,37 @@ private:
 
     // Functionality to define and maintain cell sets.
     CellSets cellSets;
+
+
+
+    // Data and functions used for Locality Sensitive Hashing (LSH).
+    // LSH is used for efficiently finding pairs of similar cells.
+    // See Chapter 3 of Leskovec, Rajaraman, Ullman, Mining of Massive Datasets,
+    // Cambridge University Press, 2014, also freely downloadable here:
+    // http://www.mmds.org/#ver21
+    // and in particular sections 3.4 through 3.7.
+
+    // Generate random unit vectors in gene space.
+    // These are vectors of dimension equal to the number of genes,
+    // and with unit L2-norm (the sum of the square if the components is 1).
+    // These vectors are organized by band and row (see section 3.4.1 of the
+    // book referenced above). There are lshBandCount bands and lshRowCount
+    // rows per band, for a total lshBandCount*lshRowCount random vectors.
+    // Each of these vectors defines an hyperplane orthogonal to it.
+    // As described in section 3.7.2 of the book referenced above,
+    // each hyperplane provides a function of a locality-sensitive function.
+    void generateLshVectors(
+    	size_t lshBandCount,
+		size_t lshRowCount,
+		unsigned int seed,
+		vector< vector< vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
+        ) const;
+
+	// Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
+    double computeExpressionCountScalarProduct(CellId, const vector<double>& v) const;
+
+
+
 public:
 
     // Create a new cell set that contains cells for which
