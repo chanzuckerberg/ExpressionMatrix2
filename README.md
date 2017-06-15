@@ -8,7 +8,7 @@ This code is at a prototype, pre-alpha stage. It is hoped that it can be useful 
 
 Use the following directions to quickly get started and run ExpressionMatrix2 on a toy dataset distributed as part of the repository.
 
-- Use a Linux machine running Ubuntu 16.04 (the current long term support release of Ubuntu). Other distributions using similar versions of the Linux kernel, such as Linux Mint 18, will also work.
+- Use a Linux machine running Ubuntu 16.04 (the current long term support release of Ubuntu). Other distributions using similar versions of the Linux kernel, such as Linux Mint 18, may also work.
 
 - Make sure the following packages, all available from the standard Ubuntu repositories, are installed:
     * The Boost libraries (package libboost-all-dev).
