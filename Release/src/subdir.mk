@@ -7,9 +7,9 @@ CPP_SRCS += \
 ../src/CellSets.cpp \
 ../src/CellSimilarityGraph.cpp \
 ../src/ExpressionMatrix.cpp \
-../src/ExpressionMatrix2Lsh.cpp \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
+../src/ExpressionMatrixLsh.cpp \
 ../src/HttpServer.cpp \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
@@ -22,9 +22,9 @@ OBJS += \
 ./src/CellSets.o \
 ./src/CellSimilarityGraph.o \
 ./src/ExpressionMatrix.o \
-./src/ExpressionMatrix2Lsh.o \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHttpServer.o \
+./src/ExpressionMatrixLsh.o \
 ./src/HttpServer.o \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
@@ -37,9 +37,9 @@ CPP_DEPS += \
 ./src/CellSets.d \
 ./src/CellSimilarityGraph.d \
 ./src/ExpressionMatrix.d \
-./src/ExpressionMatrix2Lsh.d \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHttpServer.d \
+./src/ExpressionMatrixLsh.d \
 ./src/HttpServer.d \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \

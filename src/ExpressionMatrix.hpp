@@ -14,6 +14,7 @@
 #include "MemoryMappedStringTable.hpp"
 
 // Boost libraries.
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/shared_ptr.hpp>
 
 // Standard library, partially injected in the ExpressionMatrix2 namespace.
@@ -199,17 +200,6 @@ public:
     // Approximate but fast computation of the similarity between two cells.
     double computeApproximateCellSimilarity(CellId, CellId) const;
 
-    // Approximate computation of the similarity between two cells using
-    // Locality Sensitive Hashing (LSH).
-    // Not to be used for code where performance is important,
-    // because it recompiutes the LSH vector every time.
-    double computeApproximateLshCellSimilarity(
-		size_t lshBandCount,
-		size_t lshRowCount,
-		unsigned int seed,
-		CellId,
-		CellId) const;
-
     // Compute a histogram of the difference between approximate and exact similarity,
     // looping over all pairs. This is O(N**2) slow.
     void analyzeAllPairs() const;
@@ -390,6 +380,58 @@ private:
 
 	// Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
     double computeExpressionCountScalarProduct(CellId, const vector<double>& v) const;
+
+    // Approximate computation of the angle between the expression vectors of two cells
+    // using Locality Sensitive Hashing (LSH).
+    // The approximate similarity can be computed as the cosine of this angle.
+    // This recomputes every time the scalar product of the normalized cell expression vector
+    // with the LSH vectors.
+    double computeApproximateLshCellAngle(
+    	const vector< vector< vector<double> > >& lshVectors,
+		CellId,
+		CellId) const;
+
+    // Approximate computation of the angle between the expression vectors of two cells
+    // using Locality Sensitive Hashing (LSH).
+    double computeApproximateLshCellAngle(
+		const boost::dynamic_bitset<>& signature0,
+		const boost::dynamic_bitset<>& signature1) const;
+
+    // Given LSH vectors, compute the LSH signature of all cells.
+	// The LSH signature of a cell is a bit vector with one bit for each of the LSH vectors.
+	// Each bit is 1 if the scalar product of the cell expression vector
+    // (normalized to zero mean and unit variance) with the
+    // the LSH vector is positive, and 0 otherwise.
+    void computeCellLshSignatures(
+    	const vector< vector< vector<double> > >& lshVectors,
+		vector< boost::dynamic_bitset<> >& signatures
+		) const;
+
+public:
+    // Approximate computation of the similarity between two cells using
+    // Locality Sensitive Hashing (LSH).
+    // Not to be used for code where performance is important,
+    // because it recomputes the LSH vector every time.
+    double computeApproximateLshCellSimilarity(
+		size_t lshBandCount,
+		size_t lshRowCount,
+		unsigned int seed,
+		CellId,
+		CellId) const;
+
+    // Write a csv file containing, for every pair of cells,
+    // the exact similarity and the similarity computed using LSH.
+    void writeLshSimilarityComparisonSlow(
+		size_t lshBandCount,
+		size_t lshRowCount,
+		unsigned int seed
+		) const;
+    void writeLshSimilarityComparison(
+		size_t lshBandCount,
+		size_t lshRowCount,
+		unsigned int seed
+		) const;
+
 
 
 

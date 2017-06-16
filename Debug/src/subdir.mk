@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrix.cpp \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
+../src/ExpressionMatrixLsh.cpp \
 ../src/HttpServer.cpp \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
@@ -23,6 +24,7 @@ OBJS += \
 ./src/ExpressionMatrix.o \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHttpServer.o \
+./src/ExpressionMatrixLsh.o \
 ./src/HttpServer.o \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
@@ -37,6 +39,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrix.d \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHttpServer.d \
+./src/ExpressionMatrixLsh.d \
 ./src/HttpServer.d \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \
