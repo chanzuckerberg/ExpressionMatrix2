@@ -22,12 +22,12 @@
 
 
 #include "ExpressionMatrix.hpp"
+#include "BitSet.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -167,23 +167,16 @@ double ExpressionMatrix::computeApproximateLshCellAngle(
 // Approximate computation of the angle between the expression vectors of two cells
 // using Locality Sensitive Hashing (LSH).
 double ExpressionMatrix::computeApproximateLshCellAngle(
-	const boost::dynamic_bitset<>& signature0,
-	const boost::dynamic_bitset<>& signature1) const
+	const BitSet& signature0,
+	const BitSet& signature1,
+	double bitCountInverse) const
 {
 
-	const size_t bitCount = signature0.size();
-	CZI_ASSERT(signature1.size() == bitCount);
-
 	// Count the number of bits where the two signatures disagree.
-	size_t oppositeSignCount = 0;
-	for(size_t i=0; i<bitCount; i++) {
-		if(signature0[i] != signature1[i]) {
-			++oppositeSignCount;
-		}
-	}
+	size_t oppositeSignCount = countMismatches(signature0, signature1);
 
 	// Compute the estimated angle.
-	const double angle =  boost::math::double_constants::pi * double(oppositeSignCount) / double(bitCount);
+	const double angle =  boost::math::double_constants::pi * double(oppositeSignCount) * bitCountInverse;
 	return angle;
 }
 
@@ -268,7 +261,7 @@ void ExpressionMatrix::writeLshSimilarityComparison(
 
 	// Compute the LSH signatures of all cells.
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
-	vector< boost::dynamic_bitset<> > signatures;
+	vector<BitSet> signatures;
 	computeCellLshSignatures(lshVectors, signatures);
 
 	// Open the csv file
@@ -278,13 +271,14 @@ void ExpressionMatrix::writeLshSimilarityComparison(
 
     // Loop over all pairs.
 	cout << timestamp << "Computing similarities for all cell pairs." << endl;
+	const double bitCountInverse = 1. / double(lshBandCount * lshRowCount);
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
         if((cellId0%100) == 0) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
         for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
             const double exactSimilarity = computeCellSimilarity(cellId0, cellId1);
-            const double approximateAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1]);
+            const double approximateAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1], bitCountInverse);
             const double approximateSimilarity = std::cos(approximateAngle);
             const double delta = approximateSimilarity - exactSimilarity;
             csvOut << cellId0 << ",";
@@ -308,7 +302,7 @@ void ExpressionMatrix::writeLshSimilarityComparison(
 // the LSH vector is positive, and 0 otherwise.
 void ExpressionMatrix::computeCellLshSignatures(
 	const vector< vector< vector<double> > >& lshVectors,
-	vector< boost::dynamic_bitset<> >& signatures
+	vector<BitSet>& signatures
 	) const
 {
 	// Count the total number of lsh vectors, assuming that all the bands have the same
@@ -335,7 +329,7 @@ void ExpressionMatrix::computeCellLshSignatures(
 	}
 
 	// Initialize the signatures to all zero bits.
-	signatures.resize(cellCount(), boost::dynamic_bitset<>(bitCount, false));
+	signatures.resize(cellCount(), BitSet(bitCount));
 
 	// Vector to hold the scalar products of the normalized expression vector of a cell
 	// with each of the LSH vectors.
@@ -379,7 +373,7 @@ void ExpressionMatrix::computeCellLshSignatures(
 		auto& cellSignature = signatures[cellId];
 		for(size_t index=0; index<bitCount; index++) {
 			if(scalarProducts[index] >0) {
-				cellSignature.set(index, true);
+				cellSignature.set(index);
 			}
 		}
 	}
@@ -393,8 +387,8 @@ void ExpressionMatrix::computeCellLshSignatures(
 // and using an LSH approximation to compute the similarity between two cells.
 // See the beginning of ExpressionMatrixLsh.cpp for more information.
 // Like findSimilarPairs0, this is also O(N**2) slow. However
-// the coefficient of the N**2 term is much lower, at a cost of
-// additional O(N) work (typically 30 ms per cell for lshCount=1024.
+// the coefficient of the N**2 term is much lower (around 60 ns/pair), at a cost of
+// additional O(N) work (typically 30 ms per cell for lshCount=1024).
 // As a result, this can be much faster for large numbers of cells.
 // The error of the approximation is controlled by lshCount.
 // The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
@@ -418,7 +412,7 @@ void ExpressionMatrix::findSimilarPairs1(
 
 	// Compute the LSH signatures of all cells.
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
-	vector< boost::dynamic_bitset<> > signatures;
+	vector<BitSet> signatures;
 	computeCellLshSignatures(lshVectors, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
@@ -426,13 +420,14 @@ void ExpressionMatrix::findSimilarPairs1(
 
 
     // Loop over all pairs.
-	cout << timestamp << "Computing similarities for all cell pairs." << endl;
+    const double bitCountInverse = 1./double(lshCount);
+	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if((cellId0%100) == 0) {
+        if((cellId0%10000) == 0) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
         for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
-            const double lshAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1]);
+            const double lshAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1], bitCountInverse);
             const double lshSimilarity = std::cos(lshAngle);
 
             // If the similarity is sufficient, pass it to the SimilarPairs container,
@@ -447,5 +442,7 @@ void ExpressionMatrix::findSimilarPairs1(
 
 
     // Sort the similar pairs for each cell by decreasing similarity.
+	cout << timestamp << "Sorting pairs." << endl;
     similarPairs.sort();
+	cout << timestamp << "Done sorting pairs." << endl;
 }

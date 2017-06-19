@@ -14,7 +14,6 @@
 #include "MemoryMappedStringTable.hpp"
 
 // Boost libraries.
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/shared_ptr.hpp>
 
 // Standard library, partially injected in the ExpressionMatrix2 namespace.
@@ -26,6 +25,7 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
+    	class BitSet;
         class CellSimilarityGraph;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
@@ -233,8 +233,8 @@ public:
     // and using an LSH approximation to compute the similarity between two cells.
     // See the beginning of ExpressionMatrixLsh.cpp for more information.
     // Like findSimilarPairs0, this is also O(N**2) slow. However
-    // the coefficient of the N**2 term is much lower, at a cost of
-    // additional O(N) work (typically 30 ms per cell for lshCount=1024.
+    // the coefficient of the N**2 term is much lower (around 120 ns/pair), at a cost of
+    // additional O(N) work (typically 30 ms per cell for lshCount=1024).
     // As a result, this can be much faster for large numbers of cells.
     // The error of the approximation is controlled by lshCount.
     // The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
@@ -432,8 +432,9 @@ private:
     // Approximate computation of the angle between the expression vectors of two cells
     // using Locality Sensitive Hashing (LSH).
     double computeApproximateLshCellAngle(
-		const boost::dynamic_bitset<>& signature0,
-		const boost::dynamic_bitset<>& signature1) const;
+		const BitSet& signature0,
+		const BitSet& signature1,
+		double bitCountInverse) const;
 
     // Given LSH vectors, compute the LSH signature of all cells.
 	// The LSH signature of a cell is a bit vector with one bit for each of the LSH vectors.
@@ -442,7 +443,7 @@ private:
     // the LSH vector is positive, and 0 otherwise.
     void computeCellLshSignatures(
     	const vector< vector< vector<double> > >& lshVectors,
-		vector< boost::dynamic_bitset<> >& signatures
+		vector<BitSet>& signatures
 		) const;
 
 public:
