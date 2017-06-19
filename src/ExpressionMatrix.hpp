@@ -204,13 +204,29 @@ public:
     // looping over all pairs. This is O(N**2) slow.
     void analyzeAllPairs() const;
 
-    // Find similar cell pairs by looping over all pairs. This is O(N**2) slow.
+
+
+    // Find similar cell pairs by looping over all pairs.
+    // This can use an exact or approximate mode of operation, depending
+    // on the value of the last argument.
+    // In the exact mode of operation, all gene expression counts for both cells
+    // (stored in cellExpressionCounts) are taken into account.
+    // In the approximate mode of operation, only the largest gene expression counts for both cells
+    // (stored in largeCellExpressionCounts) are taken into account.
+    // The number of largest gene expression counts to be stored for each cell
+    // was specified when each cell was added, as an argument to addCell or addCells.
+    // Both the exact an the approximate mode of operation are O(N**2) slow
+    // because they loop over cell pairs. However the approximate mode of operation
+    // is usually much faster than the exact mode of operation
+    // (typically 10 times faster or better when the number of stored
+    // largest expression counts for each cell is 100.
     void findSimilarPairs0(
         const string& name,         // The name of the SimilarPairs object to be created.
-        size_t k,                   // The maximum number of similar pairs to be storeed for each cell.
+        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
         bool useExactSimilarity     // Use exact of approximate cell similarity computation.
         );
+
 
 
     // Dump cell to csv file a set of similar cell pairs.
