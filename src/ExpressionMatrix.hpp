@@ -229,6 +229,28 @@ public:
 
 
 
+    // Find similar cell pairs by looping over all pairs
+    // and using an LSH approximation to compute the similarity between two cells.
+    // See the beginning of ExpressionMatrixLsh.cpp for more information.
+    // Like findSimilarPairs0, this is also O(N**2) slow. However
+    // the coefficient of the N**2 term is much lower, at a cost of
+    // additional O(N) work (typically 30 ms per cell for lshCount=1024.
+    // As a result, this can be much faster for large numbers of cells.
+    // The error of the approximation is controlled by lshCount.
+    // The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
+    // or about 0.05 for lshCount=1024.
+    // The standard deviation decreases as the similarity increases. It becomes
+    // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
+    // of the standard deviation at similarity 0.
+    void findSimilarPairs1(
+        const string& name,         // The name of the SimilarPairs object to be created.
+        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold, // The minimum similarity for a pair to be stored.
+		size_t lshCount,			// The number of LSH functions (hyperplanes) to be used.
+		unsigned int seed 			// The seed used to generate the random hyperplanes.
+		);
+
+
     // Dump cell to csv file a set of similar cell pairs.
     void writeSimilarPairs(const string& name) const;
 

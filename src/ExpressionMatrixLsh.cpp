@@ -22,6 +22,7 @@
 
 
 #include "ExpressionMatrix.hpp"
+#include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -173,16 +174,16 @@ double ExpressionMatrix::computeApproximateLshCellAngle(
 	const size_t bitCount = signature0.size();
 	CZI_ASSERT(signature1.size() == bitCount);
 
-	// Count the number of bits where the two signatures agree.
-	size_t sameSignCount = 0;
+	// Count the number of bits where the two signatures disagree.
+	size_t oppositeSignCount = 0;
 	for(size_t i=0; i<bitCount; i++) {
-		if(signature0[i] == signature1[i]) {
-			++sameSignCount;
+		if(signature0[i] != signature1[i]) {
+			++oppositeSignCount;
 		}
 	}
 
 	// Compute the estimated angle.
-	const double angle =  boost::math::double_constants::pi * (1.-double(sameSignCount) / double(bitCount));
+	const double angle =  boost::math::double_constants::pi * double(oppositeSignCount) / double(bitCount);
 	return angle;
 }
 
@@ -388,3 +389,63 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 
 
+// Find similar cell pairs by looping over all pairs
+// and using an LSH approximation to compute the similarity between two cells.
+// See the beginning of ExpressionMatrixLsh.cpp for more information.
+// Like findSimilarPairs0, this is also O(N**2) slow. However
+// the coefficient of the N**2 term is much lower, at a cost of
+// additional O(N) work (typically 30 ms per cell for lshCount=1024.
+// As a result, this can be much faster for large numbers of cells.
+// The error of the approximation is controlled by lshCount.
+// The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
+// or about 0.05 for lshCount=1024.
+// The standard deviation decreases as the similarity increases. It becomes
+// zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
+// of the standard deviation at similarity 0.
+void ExpressionMatrix::findSimilarPairs1(
+    const string& name,         // The name of the SimilarPairs object to be created.
+    size_t k,                   // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold, // The minimum similarity for a pair to be stored.
+	size_t lshCount,			// The number of LSH functions (hyperplanes) to be used.
+	unsigned int seed 			// The seed used to generate the random hyperplanes.
+	)
+{
+	// Generate LSH vectors.
+	const size_t lshBandCount = lshCount;
+	const size_t lshRowCount = 1;
+	vector< vector< vector<double> > > lshVectors;
+	generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+
+	// Compute the LSH signatures of all cells.
+	cout << timestamp << "Computing LSH signatures for all cells." << endl;
+	vector< boost::dynamic_bitset<> > signatures;
+	computeCellLshSignatures(lshVectors, signatures);
+
+    // Create the SimilarPairs object where we will store the pairs.
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
+
+
+    // Loop over all pairs.
+	cout << timestamp << "Computing similarities for all cell pairs." << endl;
+    for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
+        if((cellId0%100) == 0) {
+            cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
+        }
+        for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
+            const double lshAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1]);
+            const double lshSimilarity = std::cos(lshAngle);
+
+            // If the similarity is sufficient, pass it to the SimilarPairs container,
+            // which will make the decision whether to store it, depending on the
+            // number of pairs already stored for cellId0 and cellId1.
+            if(lshSimilarity > similarityThreshold) {
+                similarPairs.add(cellId0, cellId1, lshSimilarity);
+            }
+        }
+    }
+
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    similarPairs.sort();
+}
