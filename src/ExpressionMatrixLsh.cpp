@@ -387,7 +387,7 @@ void ExpressionMatrix::computeCellLshSignatures(
 // and using an LSH approximation to compute the similarity between two cells.
 // See the beginning of ExpressionMatrixLsh.cpp for more information.
 // Like findSimilarPairs0, this is also O(N**2) slow. However
-// the coefficient of the N**2 term is much lower (around 60 ns/pair), at a cost of
+// the coefficient of the N**2 term is much lower (around 15 ns/pair when nothing gets stored), at a cost of
 // additional O(N) work (typically 30 ms per cell for lshCount=1024).
 // As a result, this can be much faster for large numbers of cells.
 // The error of the approximation is controlled by lshCount.
@@ -404,6 +404,9 @@ void ExpressionMatrix::findSimilarPairs1(
 	unsigned int seed 			// The seed used to generate the random hyperplanes.
 	)
 {
+	// Sanity check.
+	CZI_ASSERT(similarityThreshold <= 1.);
+
 	// Generate LSH vectors.
 	const size_t lshBandCount = lshCount;
 	const size_t lshRowCount = 1;
@@ -418,31 +421,97 @@ void ExpressionMatrix::findSimilarPairs1(
     // Create the SimilarPairs object where we will store the pairs.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
 
+    // Compute the angle threshold (in radians) corresponding to this similarity threshold.
+    const double angleThreshold = std::acos(similarityThreshold);
+
+    // Compute the corresponding threshold on the number of mismatching
+    // signature bits.
+    const size_t mismatchCountThreshold = size_t(double(lshCount) * angleThreshold / boost::math::double_constants::pi);
+
+    // Compute the similarity (cosine of the angle) corresponding to every number of mismatching bits
+    // up to the threshold.
+    vector<double> similarityTable(mismatchCountThreshold + 1);
+    for(size_t mismatchingBitCount=0; mismatchingBitCount<=mismatchCountThreshold; mismatchingBitCount++) {
+    	const double angle = double(mismatchingBitCount) * boost::math::double_constants::pi / double(lshCount);
+    	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+    	similarityTable[mismatchingBitCount] = std::cos(angle);
+    }
+
+
+
+// Change this to #if 0 to turn on the block code below.
+// The block code does not improve performance, at least when using 1024 LSH vectors.
+// They both run at about 15 ns per pair on my laptop, when nothing is stored
+// (similarity threshold is set to 1).
+#if 1
 
     // Loop over all pairs.
-    const double bitCountInverse = 1./double(lshCount);
 	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
         if((cellId0%10000) == 0) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
+        const BitSet& signature0 = signatures[cellId0];
         for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
-            const double lshAngle = computeApproximateLshCellAngle(signatures[cellId0], signatures[cellId1], bitCountInverse);
-            const double lshSimilarity = std::cos(lshAngle);
+            const BitSet& signature1 = signatures[cellId1];
+
+        	// Count the number of bits where the signatures of these two cells disagree.
+        	size_t mismatchingBitCount = countMismatches(signature0, signature1);
 
             // If the similarity is sufficient, pass it to the SimilarPairs container,
             // which will make the decision whether to store it, depending on the
             // number of pairs already stored for cellId0 and cellId1.
-            if(lshSimilarity > similarityThreshold) {
-                similarPairs.add(cellId0, cellId1, lshSimilarity);
+            if(mismatchingBitCount <= mismatchCountThreshold) {
+            	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+                similarPairs.add(cellId0, cellId1, similarityTable[mismatchingBitCount]);
             }
         }
     }
 
 
 
+
+#else
+
+
+    // Code that loops over all pairs in blocks, to improve locality of memory accesses.
+    // However this does not improve performance, at least when using 1024 LSH vectors.
+	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+	const CellId blockSize = 10;
+	for(CellId begin0=0; begin0<cellCount(); begin0+=blockSize) {
+		const CellId end0 = min(begin0+blockSize, cellCount());
+		for(CellId begin1=0; begin1<=begin0; begin1+=blockSize) {
+			const CellId end1 = min(begin1+blockSize, cellCount());
+			for(CellId cellId0=begin0; cellId0!=end0; cellId0++) {
+	            const BitSet& signature0 = signatures[cellId0];
+				CellId actualEnd1 = end1;
+				if(begin0 == begin1) {
+					actualEnd1 = cellId0;
+				}
+				for(CellId cellId1=begin1; cellId1<actualEnd1; cellId1++) {
+		            const BitSet& signature1 = signatures[cellId1];
+
+		        	// Count the number of bits where the signatures of these two cells disagree.
+		        	size_t mismatchingBitCount = countMismatches(signature0, signature1);
+
+		            // If the similarity is sufficient, pass it to the SimilarPairs container,
+		            // which will make the decision whether to store it, depending on the
+		            // number of pairs already stored for cellId0 and cellId1.
+		            if(mismatchingBitCount <= mismatchCountThreshold) {
+		            	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+		                similarPairs.add(cellId0, cellId1, similarityTable[mismatchingBitCount]);
+		            }
+				}
+			}
+
+		}
+	}
+#endif
+
+
     // Sort the similar pairs for each cell by decreasing similarity.
 	cout << timestamp << "Sorting pairs." << endl;
     similarPairs.sort();
 	cout << timestamp << "Done sorting pairs." << endl;
+
 }

@@ -107,12 +107,14 @@ void ExpressionMatrix::writeSimilarPairs(const string& name) const
 {
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name);
     ofstream csvOut("SimilarPairs-" + name + ".csv");
+    csvOut << "Cell0,Cell1,Computed,Exact\n";
 
     for(CellId cellId0=0; cellId0<cellCount(); cellId0++) {
         for(const auto& pairs0: similarPairs[cellId0]) {
             csvOut << cellId0 << ",";
             csvOut << pairs0.first << ",";
-            csvOut << pairs0.second << "\n";
+            csvOut << pairs0.second << ",";
+            csvOut << computeCellSimilarity(cellId0, pairs0.first) << "\n";
         }
     }
 
