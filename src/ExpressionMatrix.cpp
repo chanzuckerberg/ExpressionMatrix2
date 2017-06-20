@@ -420,6 +420,13 @@ void ExpressionMatrix::addCells(
             cout << "Found " << tokens.size() << " tokens." << endl;
             cout << "Offending line:" << endl;
             cout << line << endl;
+            cout << "Unexpected number of tokens in expression counts line." << endl;
+            cout << "Expected " << cellNames.size()+1 << " tokens." << endl;
+            cout << "Found " << tokens.size() << " tokens." << endl;
+            if(tokens.size() == cellNames.size()+2) {
+            	cout << "It is possible that the header line of the expression file "
+            		"is missing the first (ignored) token above the column containing gene names." << endl;
+            }
             throw runtime_error("Unexpected number of tokens in expression counts line.");
         }
         const string& geneName = tokens.front();
