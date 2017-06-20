@@ -506,11 +506,22 @@ void ExpressionMatrix::addCells(
                 for(size_t i=1; i<metaDataNames.size(); i++) {
                     cout << i << " " << metaDataNames[i] << endl;
                 }
+                cout << "Unexpected number of tokens in meta data file line:" << endl;
+                cout << line << endl;
+                // Write this portion of the message again, for better visibility.
+                cout << "Expected " << metaDataNames.size() << " tokens ";
+                cout << " for " << metaDataNames.size()-1 << " meta data items, but got ";
+                cout << tokens.size()  << " tokens." << endl;
+                if(tokens.size() == metaDataNames.size()+1) {
+                	cout << "It is possible that the meta data file is missing "
+                		"the first (ignored) field of the first line (the field above the cell name)." << endl;
+                }
                 throw runtime_error("Unexpected number of tokens in meta data file line.");
             }
             if(tokens.front() != cellNames[cellId]) {
                 cout << "Expected the following cell name in line of cell data file: " << cellNames[cellId];
-                cout << " but found " << tokens.front() << ". Offending line is:";
+                cout << " but found " << tokens.front() << "." << endl;
+                cout << " Offending line is:" << endl;
                 cout << line << endl;
                 throw runtime_error("Unexpected cell name in meta data file.");
             }
