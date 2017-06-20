@@ -33,8 +33,11 @@ public:
     // Access an existing SimilarPairs object.
     SimilarPairs(const string& name);
 
+    // The type used to store a cell similarity.
+    typedef float CellSimilarity;
+
     // The type used to store a single pair. (The first cell is implied).
-    typedef pair<CellId, float> Pair;
+    typedef pair<CellId, CellSimilarity> Pair;
 
     // Returns a MemoryAsContainer containing the pairs for a given cell.
     // This can be used to easily iterate over the pairs for a given cell.
@@ -97,6 +100,14 @@ private:
 
     // Vector to hold the number of pairs actually stored for each cell.
     MemoryMapped::Vector<uint32_t> usedCount;
+
+    // We also store, for each cell, a pair containing:
+    // - The index, relative to begin() for this cell, of the pair with lowest similarity
+    //   currently stored for this cell.
+    // - The value of the lowest similarity currently stored for this cell.
+    // If no pairs are stored for this cell, this stores a pair containing
+    // (std::numeric_limits<uint32_t>::max() std::numeric_limits<CellSimilarity>::max()).
+    MemoryMapped::Vector< pair<uint32_t, CellSimilarity> > lowestStoredSimilarityInfo;
 
     // Small size information about this table of similar pairs is stored
     // in a memory mapped object.

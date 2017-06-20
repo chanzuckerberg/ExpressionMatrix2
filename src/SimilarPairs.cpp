@@ -17,8 +17,15 @@ SimilarPairs::SimilarPairs(
     info->cellCount = cellCount;
 
     similarPairs.createNew(name + "-Pairs", k*cellCount);
-    usedCount.createNew(name + "-UsedCounts", k*cellCount);
+
+    // Initialized the usedCount for each cell to zero.
+    usedCount.createNew(name + "-UsedCounts", cellCount);
     fill(usedCount.begin(), usedCount.end(), 0);
+
+    // Initialized the lowestStoredSimilarity for each cell to its maximum possible value..
+    lowestStoredSimilarityInfo.createNew(name + "-LowestStoredSimilarityInfo", cellCount);
+    fill(lowestStoredSimilarityInfo.begin(), lowestStoredSimilarityInfo.end(),
+        make_pair(std::numeric_limits<uint32_t>::max(), std::numeric_limits<CellSimilarity>::max()));
 
 }
 
@@ -30,6 +37,7 @@ SimilarPairs::SimilarPairs(const string& name)
     info.accessExistingReadOnly(name + "-Info");
     similarPairs.accessExistingReadOnly(name + "-Pairs");
     usedCount.accessExistingReadOnly(name + "-UsedCounts");
+    lowestStoredSimilarityInfo.accessExistingReadOnly(name + "-LowestStoredSimilarityInfo");
 }
 
 
@@ -57,6 +65,7 @@ void SimilarPairs::add(CellId cellId, Pair pair)
     const CellId otherCellId = pair.first;
     uint32_t& n = usedCount[cellId];
     Pair* pairs = begin(cellId);
+    auto& lowestInfo = lowestStoredSimilarityInfo[cellId];
     if(n < k()) {
 
         // There are unused slots. Just check if this pair already exists.
@@ -65,31 +74,51 @@ void SimilarPairs::add(CellId cellId, Pair pair)
                return;  // Already exists.
             }
         }
+        // Update the lowest stored similarity info for this cell.
+        if(pair.second < lowestInfo.second) {
+        	lowestInfo.first = n;
+        	lowestInfo.second = pair.second;
+        }
+
         // Add it to one of the unused slots.
         pairs[n++] = pair;
+
         return;
 
     } else {
 
-        // There are no unused slots. Check if this pair already exists,
-        // and at the same time find the slot with the lowest similarity.
-        uint32_t iLowestSimilarity = 0;
-        double lowestSimilarity = std::numeric_limits<double>::max();
+        // There are no unused slots.
+
+    	// If the similarity of this pair is less than the lowest stored
+    	// similarity for this cell, do nothing.
+    	// This way we avoid a scan of the stored pairs for this cell.
+    	if(pair.second <= lowestInfo.second) {
+    		return;
+    	}
+
+
+    	// Check if this pair already exists.
         for(uint32_t i=0; i<n; i++) {
             const Pair& existingPair = pairs[i];
             if(existingPair.first == otherCellId) {
                return;  // Already exists.
             }
-            const double similarity = existingPair.second;
-            if(similarity < lowestSimilarity) {
-                iLowestSimilarity = i;
-                lowestSimilarity = similarity;
+        }
+
+        // Store the pair in the slot containing the pair with the lowest similarity.
+        pairs[lowestInfo.first] = pair;
+
+        // Update the lowest similarity.
+        lowestInfo.first = std::numeric_limits<uint32_t>::max();
+        lowestInfo.second = std::numeric_limits<CellSimilarity>::max();
+        for(uint32_t i=0; i<n; i++) {
+            const Pair& existingPair = pairs[i];
+            if(existingPair.second < lowestInfo.second) {
+               lowestInfo.first = i;
+               lowestInfo.second = existingPair.second;
             }
         }
-        // Replace the entry in the slot with lowest similarity.
-        if(pair.second > lowestSimilarity) {
-            pairs[iLowestSimilarity] = pair;
-        }
+
         return;
     }
 }
