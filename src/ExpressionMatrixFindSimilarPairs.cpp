@@ -70,13 +70,17 @@ void ExpressionMatrix::findSimilarPairs0(
     bool useExactSimilarity     // Use exact of approximate cell similarity computation.
     )
 {
+	if(cellCount() == 0) {
+		cout << "There are no cells. Skipping findSimilarPairs0." << endl;
+		return;
+	}
 
     // Create the SimilarPairs object where we will store the pairs.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
 
     // Loop over all pairs.
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if((cellId0%100) == 0) {
+        if(cellId0>0 && ((cellId0%100) == 0)) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
 

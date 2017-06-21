@@ -16,6 +16,7 @@ CPP_SRCS += \
 ../src/PythonModule.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
+../src/tokenize.cpp \
 ../src/touchMemory.cpp 
 
 OBJS += \
@@ -31,6 +32,7 @@ OBJS += \
 ./src/PythonModule.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
+./src/tokenize.o \
 ./src/touchMemory.o 
 
 CPP_DEPS += \
@@ -46,6 +48,7 @@ CPP_DEPS += \
 ./src/PythonModule.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
+./src/tokenize.d \
 ./src/touchMemory.d 
 
 

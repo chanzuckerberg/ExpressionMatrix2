@@ -21,22 +21,25 @@ This assumes that you completed successfuly the test described under <a href=Get
 You will need an input text file containing the expression matrix. This file can be a standard comma separated file (csv), which follows the following rules:
 
 <ul>
-<li>Fields in each row are separated by commas.
-<li>A field cannot contain a comma, unless the entire field is quoted or the comma is escaped (preceeded by an extra "\" character). 
+<li>Fields in each row are separated by commas or any other separator, which is specified when calling addCells.
+<li>A field cannot contain a separator, unless the entire field is quoted or the separator is escaped (preceeded by an extra "\" character). 
 <li>If a field contains quotes, the quotes in the field must be escaped (preceeded by an extra "\" character).
 </ul>
 
 <p>
-The expression matrix file has a row for each gene and a column for each cell, plus an initial row containing cell names and an initial column containing gene names. Note the first field of the first row is ignored (can be anything), but must be present, so it must be manually added if it is not present. See the expression matrix file used in <a href=GettingStarted.html>Getting Started</a> for an example. Except for the initial row and column, each entry in the file contains a number which is the expression count for the gene and cell corresponding to the row and column that the field belongs to. These expression counts do not have to be integers (floating-point values are accepted), so prenormalization of the data can be done, if desired (for example to convert reads to reads per Megabase).
+The expression matrix file has a row for each gene and a column for each cell, plus an initial row containing cell names and an initial column containing gene names. The first field of the first row is optional, and is ignored if present. See the expression matrix file used in <a href=GettingStarted.html>Getting Started</a> for an example. Except for the initial row and column, each entry in the file contains a number which is the expression count for the gene and cell corresponding to the row and column that the field belongs to. These expression counts do not have to be integers (floating-point values are accepted), so prenormalization or recalibration of the data can be done, if desired (for example to convert reads to reads per Megabase, or to apply a logarithm or other non-linear function to alter the weighing of low expression counts).
 
 <p>
 You need to modify the call to addCells in run.py so the first argument is the name of your file containing the expression matrix. The second argument specifies the separator used in the file. If your file is a comma separated file, you can leave it as is. Otherwise, you can replace it with the appropriate separator.
 
 <p>
-Some pipelines create expression matrices that contain rows, near the beginning or the end of the file, which contain extraneous information other than gene expression data. Such information should be removed. Also, expression counts for artificial ERCC sequence should be removed from, the expression file, if present.
+Some pipelines create expression matrices that contain rows, near the beginning or the end of the file, which contain extraneous information other than gene expression data. Such information must be removed. Also, expression counts for artificial ERCC sequence should be removed from the expression file, if present.
 
 <p>
-An input file containing cell meta data can also be provided, but is not mandatory. The name of this file is the third argument toaddCells in run.py. It can be specified as an empty string if the file is not available. The cell meta data file contains a row for each cell and a column for each meta data field, plus an initial column containing cell names and an initial row containing meta data field names. See the meta data file used in <a href=GettingStarted.html>Getting Started</a> for an example. The fourth argument to addCells is the separator for the meta data file, and can be left as a comma if the meta data file is comma separated.
+An input file containing cell meta data must also be provided. The name of this file is the third argument toaddCells in run.py. The cell meta data file contains a row for each cell and a column for each meta data field, plus an initial column containing cell names and an initial row containing meta data field names. Like for the expression matrix file, the first field of the first row is optional, and is ignored if present. See the meta data file used in <a href=GettingStarted.html>Getting Started</a> for an example. The fourth argument to addCells is the separator for the meta data file, and can be left as a comma if the meta data file is comma separated.
+
+<p>
+The cell names in the first row of the expression count file and in the first column of the meta data file don't have to be in the same order. If a cell name is present in only one of the files, that cell is ignored.
 
 <p>
 If either the expression file or the meta data file were generated by a Windows system, you will need to use the dos2unix command to convert the line ends. If dos2unix is not available, install it using command "apt install dos2unix" (this requires root privileges).

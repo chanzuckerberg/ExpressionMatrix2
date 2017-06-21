@@ -130,30 +130,43 @@ public:
 
 
 
-    // Add cells from data in files with fields separated by commas or by other separators.
-    // A fields can contain separators, as long as the entire field is quoted.
-    // This requires two input files, one for expression counts and one for cell meta data.
-    // The file for cell meta data is optional (if not available, specify an empty string as its name).
-    // If the meta data file is missing, no cell meta data is created.
-    // The separators for each file are specified as arguments to this function.
-    // The expression counts file must have geneCount+1 rows and cellCount+1 columns,
-    // with cell names in the first row and gene names in the first column,
-    // and expression counts everywhere else.
-    // The entry in the first column of the first row is ignored but must be present (can be empty).
-    // The meta data file must contain cellCount+1 rows and m+1 columns,
-    // where m is the number of meta data fields. Cell names are in the first column
-    // and meta data field names are in the first row.
-    // Again, the entry in the first column of the first row is ignored but must be present (can be empty).
-    // An example of the two files follow:
-    // Expression counts file:
-    // Dontcare,Cell1,Cell2,Cell3
-    // Gene1,10,20,30
-    // Gene2,30,40,50
-    // Meta data file:
-    // Dontcare,Name1,Name2
-    // Cell1,abc,def
-    // Cell2,123,456
-    // Cell3,xyz,uv
+/*******************************************************************************
+
+    Add cells from data in files with fields separated by commas or by other separators.
+    A fields can contain separators, as long as the entire field is quoted.
+
+    This requires two input files, one for expression counts and one for cell meta data.
+    The separators for each file are specified as arguments to this function.
+
+    The expression counts file has a row for each gene and a column for each cell.
+    In addition, it has an additional header row, before all other rows, containing cell names,
+    and an additional column, before all other columns, containing gene names.
+    The entry in the first column of the first row is ignored but must be present (can be empty).
+
+    The meta data file has a row for each cell and a colun for each meta data field name.
+    In addition, it has an additional header row, before all other rows, containing meta data names,
+    and an additional column, before all other columns, containing cell names.
+    Again, the entry in the first column of the first row is ignored but must be present (can be empty).
+
+    The cell names in the first row of the expression count file and in the first column of the meta data file
+    don't have to be in the same order.
+
+    If a cell name is present in only one of the files, that cell is ignored.
+
+    An example of the two files follow:
+
+    Expression counts file:
+    Dontcare,Cell1,Cell2,Cell3
+    Gene1,10,20,30
+    Gene2,30,40,50
+
+    Meta data file:
+    Dontcare,Name1,Name2
+    Cell1,abc,def
+    Cell2,123,456
+    Cell3,xyz,uv
+
+*******************************************************************************/
     void addCells(
         const string& expressionCountsFileName,
         const string& expressionCountsFileSeparators,
@@ -161,6 +174,7 @@ public:
         const string& metaDataFileSeparators,
         size_t maxTermCountForApproximateSimilarityComputation
         );
+
 
 
     // Return the number of genes.

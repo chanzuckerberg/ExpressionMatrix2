@@ -97,6 +97,10 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
 // with zero counts on all cells are added.
 void ExpressionMatrix::addGene(const string& geneName)
 {
+    const StringId stringId = geneNames(geneName);
+    if(stringId != geneNames.invalidStringId) {
+    	throw runtime_error("Gene " + geneName + " already exists.");
+    }
     geneNames[geneName];
 }
 
@@ -366,6 +370,161 @@ CellId ExpressionMatrix::addCell(
 
 // Add cells from data in files with fields separated by commas or by other separators.
 // See ExpressionMatrix.hpp for usage information.
+// This is new version is more flexible than the old version, ifdef'ed out below.
+void ExpressionMatrix::addCells(
+    const string& expressionCountsFileName,
+    const string& expressionCountsFileSeparators,
+    const string& cellMetaDataFileName,
+    const string& cellMetaDataFileSeparators,
+    size_t maxTermCountForApproximateSimilarityComputation
+    )
+{
+	// Tokenize the cell meta data file and the expression counts file and verify
+	// that all lines have the same number of tokens (which cannot be zero), with the possible exception
+	// of line one which could have one less token than all other lines.
+	vector< vector<string> > cellMetaDataFileLines, expressionCountsFileLines;
+	cout << timestamp << "Reading cell meta data file " << cellMetaDataFileName << "." << endl;
+	tokenizeFileAndCheck(cellMetaDataFileName, cellMetaDataFileSeparators, cellMetaDataFileLines);
+	cout << timestamp << "Reading expression counts file " << expressionCountsFileName << "." << endl;
+	tokenizeFileAndCheck(expressionCountsFileName, expressionCountsFileSeparators, expressionCountsFileLines);
+
+
+
+	// Get the meta data field names from the header of the cell meta data file.
+	// We have to account for the fact that the header line might or might not contain an
+	// initial field, which if present is ignored.
+	vector<string> metaDataFieldNames;
+	{
+		size_t skip = 1;
+		if(cellMetaDataFileLines[0].size() != cellMetaDataFileLines[1].size()) {
+			CZI_ASSERT(cellMetaDataFileLines[0].size() == cellMetaDataFileLines[1].size()-1); // This was checked by tokenizeFileAndCheck.
+			skip = 0;
+		}
+		copy(cellMetaDataFileLines[0].begin()+skip, cellMetaDataFileLines[0].end(), back_inserter(metaDataFieldNames));
+	}
+
+
+
+	// Check that there are no duplications in the meta data field names.
+	{
+		set<string> metaDataFieldNamesSet;
+		for(const string& metaDataFieldName: metaDataFieldNames) {
+			if(metaDataFieldNamesSet.find(metaDataFieldName) != metaDataFieldNamesSet.end()) {
+				throw runtime_error("Duplicate meta data field " + metaDataFieldName);
+			}
+			metaDataFieldNamesSet.insert(metaDataFieldName);
+		}
+	}
+
+
+
+	// Get the cell names from the header of the expression count file, and create a
+	// corresponding index map.
+	// We have to account for the fact that the header line might or might not contain an
+	// initial field, which if present is ignored.
+	// Note that not all of these cells will make it into the system:
+	// the ones that have no entry in the meta data file will be skipped.
+	vector<string> expressionFileCellNames;
+	{
+		size_t skip = 1;
+		if(expressionCountsFileLines[0].size() != expressionCountsFileLines[1].size()) {
+			CZI_ASSERT(expressionCountsFileLines[0].size() == expressionCountsFileLines[1].size()-1); // This was checked by tokenizeFileAndCheck.
+			skip = 0;
+		}
+		copy(expressionCountsFileLines[0].begin()+skip, expressionCountsFileLines[0].end(), back_inserter(expressionFileCellNames));
+	}
+	map<string, CellId> expressionFileCellNamesMap;
+	for(size_t i=0; i<expressionFileCellNames.size(); i++) {
+		const string& cellName = expressionFileCellNames[i];
+		if(expressionFileCellNamesMap.find(cellName) != expressionFileCellNamesMap.end()) {
+			throw runtime_error("Cell " + cellName + " has more than one column in the expression counts file.");
+		}
+		expressionFileCellNamesMap.insert(make_pair(cellName, i));
+	}
+
+
+
+	// Summarize the number of cells, genes, and meta data names seen in each file.
+	cout << "Cell meta data file " << cellMetaDataFileName << " contains data for ";
+	cout << cellMetaDataFileLines.size()-1 << " cells and " << metaDataFieldNames.size() << " meta data names." << endl;
+	cout << "Expression counts file " << expressionCountsFileName << " contains data for ";
+	cout << expressionFileCellNames.size() << " cells and " << expressionCountsFileLines.size()-1 << " genes." << endl;
+
+
+	// Add the genes.
+	// We want to add them independently of the cells, so they all get added, even the ones
+	// for which all cells have zero count.
+	CZI_ASSERT(expressionCountsFileLines.size() > 0); 	// This was checked by tokenizeFileAndCheck.
+	for(size_t i=1; i<expressionCountsFileLines.size(); i++) {
+		const vector<string>& line = expressionCountsFileLines[i];
+		CZI_ASSERT(line.size() > 0); 	// This was checked by tokenizeFileAndCheck.
+		addGene(line.front());
+	}
+
+
+
+	// Loop over cells in the cell meta data file, but only add the ones that also appear
+	// in the expression counts file.
+	cout << timestamp << "Processing cell data." << endl;
+	CZI_ASSERT(cellMetaDataFileLines.size() > 1);	// This was checked by tokenizeFileAndCheck.
+	CellId addedCellCount = 0;
+	for(size_t cellMetaDataFileLine=1; cellMetaDataFileLine<cellMetaDataFileLines.size(); cellMetaDataFileLine++) {
+		const vector<string>& metaDataLine = cellMetaDataFileLines[cellMetaDataFileLine];
+		CZI_ASSERT(metaDataLine.size() > 1);	// This was checked by tokenizeFileAndCheck.
+		const string& cellName = metaDataLine.front();
+
+		// See if this cell appears in the expression counts file.
+		// If not, skip this cell.
+		const auto it = expressionFileCellNamesMap.find(cellName);
+		if(it == expressionFileCellNamesMap.end()) {
+			continue;	// It's not in the expression counts file. Skip it.
+		}
+
+		// Find the column in the expression counts file that contains data for this cell.
+		const size_t expressionFileColumn = it->second + 1;
+
+		// Gather the meta data for this cell.
+		CZI_ASSERT(metaDataLine.size() == metaDataFieldNames.size() + 1); // This was checked by tokenizeFileAndCheck.
+	    vector< pair<string, string> > thisCellMetaData;
+	    thisCellMetaData.push_back(make_pair("CellName", cellName));
+	    for(size_t i=0; i<metaDataFieldNames.size(); i++) {
+	    	thisCellMetaData.push_back(make_pair(metaDataFieldNames[i], metaDataLine[i+1]));
+	    }
+
+	    // Gather the expression counts for this cell.
+	    vector< pair<string, float> > thisCellExpressionCounts;
+		for(size_t i=1; i<expressionCountsFileLines.size(); i++) {
+			const vector<string>& line = expressionCountsFileLines[i];
+			CZI_ASSERT(line.size() > 0); 	// This was checked by tokenizeFileAndCheck.
+			const string& geneName = line.front();
+			const string& expressionCountString = line[expressionFileColumn];
+			float expressionCount;
+			try {
+				expressionCount = lexical_cast<float>(expressionCountString);
+			} catch(boost::bad_lexical_cast) {
+				throw runtime_error("Invalid expression count " + expressionCountString +
+					" for cell " + cellName + " gene " + geneName);
+			}
+			thisCellExpressionCounts.push_back(make_pair(geneName, expressionCount));
+		}
+
+		// Now we can add this cell.
+		++addedCellCount;
+		addCell(thisCellMetaData, thisCellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
+	}
+
+	cout << timestamp << "Added " << addedCellCount << " cells that appear in both the cell meta data file and the expression counts file." << endl;
+	cout << "There are " << cellCount() << " cells and " << geneCount() << " genes." << endl;
+
+}
+
+
+
+#if 0
+// Add cells from data in files with fields separated by commas or by other separators.
+// See ExpressionMatrix.hpp for usage information.
+// This is the old version that requires the expression count file and the meta data file
+// to have exactly the same cells, in the same order.
 void ExpressionMatrix::addCells(
     const string& expressionCountsFileName,
     const string& expressionCountsFileSeparators,
@@ -395,7 +554,7 @@ void ExpressionMatrix::addCells(
     }
     tokenize(expressionCountsFileSeparators, line, tokens);
     if(tokens.size() < 2) {
-        throw runtime_error("The first line of the expression count file does not contain the specified separators.");
+        throw runtime_error("The first line of the expression count file does not contain the specified separator.");
     }
     vector<string> cellNames(tokens.begin()+1, tokens.end());
 
@@ -475,7 +634,7 @@ void ExpressionMatrix::addCells(
         }
         tokenize(metaDataFileSeparators, line, tokens);
         if(tokens.size() < 2) {
-            throw runtime_error("Unexpected format of first line of meta data file.");
+            throw runtime_error("Unexpected format of first line of meta data file. It is possible that the incorrect separator was specified.");
         }
         metaDataNames.insert(metaDataNames.end(), tokens.begin()+1, tokens.end());
 
@@ -578,6 +737,7 @@ void ExpressionMatrix::addCells(
     cout << "The total number of expression counts is " << cellExpressionCounts.totalSize() << endl;
     cout << "The total number of large expression counts is " << largeCellExpressionCounts.totalSize() << endl;
 }
+#endif
 
 
 

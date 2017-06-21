@@ -9,29 +9,30 @@
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
-        inline void tokenize(
-            const string& separators,
-            const string& inputString,
-            vector<string>& tokens);
+
+    void tokenize(
+        const string& separators,
+        const string& inputString,
+        vector<string>& tokens);
+
+    void tokenizeFile(
+    	const string& fileName,
+        const string& separators,
+        vector< vector<string> >& lines);
+
+
+
+    // This also checks that  the file is acceptable as an expression count or meta data file:
+    // - It must have at least two lines.
+    // - All lines must have the same number of tokens (which cannot be zero), with the possible exception of the
+    //   first line, which can have one less tokens than all other lines.
+    void tokenizeFileAndCheck(
+    	const string& fileName,
+        const string& separators,
+        vector< vector<string> >& lines);
+
     }
 }
-
-
-// See http://www.boost.org/doc/libs/1_58_0/libs/tokenizer/escaped_list_separator.htm
-inline void ChanZuckerberg::ExpressionMatrix2::tokenize(
-    const string& separators,
-    const string& inputString,
-    vector<string>& tokens)
-{
-    typedef boost::escaped_list_separator<char> EscapedListSeparator;
-    const EscapedListSeparator escapedListSeparator("\\", separators, "\"");
-
-    boost::tokenizer<EscapedListSeparator> tokenizer(inputString, escapedListSeparator);
-
-    tokens.clear();
-    tokens.insert(tokens.begin(), tokenizer.begin(), tokenizer.end());
-}
-
 
 #endif
 

@@ -337,7 +337,7 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 	// Loop over all cells.
 	for(CellId cellId=0; cellId<cellCount(); cellId++) {
-		if((cellId % 100)==0) {
+		if((cellId>0) && ((cellId % 100)==0)) {
 			cout << timestamp << "Working on cell " << cellId << endl;
 		}
 
@@ -407,6 +407,11 @@ void ExpressionMatrix::findSimilarPairs1(
 	// Sanity check.
 	CZI_ASSERT(similarityThreshold <= 1.);
 
+	if(cellCount() == 0) {
+		cout << "There are no cells. Skipping findSimilarPairs1." << endl;
+		return;
+	}
+
 	// Generate LSH vectors.
 	const size_t lshBandCount = lshCount;
 	const size_t lshRowCount = 1;
@@ -448,7 +453,7 @@ void ExpressionMatrix::findSimilarPairs1(
     // Loop over all pairs.
 	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if((cellId0%10000) == 0) {
+        if(cellId0>0 && ((cellId0%100) == 0)) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
         const BitSet& signature0 = signatures[cellId0];
