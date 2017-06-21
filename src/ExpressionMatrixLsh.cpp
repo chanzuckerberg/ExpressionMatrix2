@@ -453,7 +453,7 @@ void ExpressionMatrix::findSimilarPairs1(
     // Loop over all pairs.
 	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
     for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if(cellId0>0 && ((cellId0%100) == 0)) {
+        if(cellId0>0 && ((cellId0%10000) == 0)) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
         }
         const BitSet& signature0 = signatures[cellId0];

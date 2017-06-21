@@ -505,7 +505,9 @@ void ExpressionMatrix::addCells(
 				throw runtime_error("Invalid expression count " + expressionCountString +
 					" for cell " + cellName + " gene " + geneName);
 			}
-			thisCellExpressionCounts.push_back(make_pair(geneName, expressionCount));
+			if(expressionCount != 0.) {
+				thisCellExpressionCounts.push_back(make_pair(geneName, expressionCount));
+			}
 		}
 
 		// Now we can add this cell.
