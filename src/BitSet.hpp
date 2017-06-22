@@ -27,6 +27,22 @@ public:
 
 
 
+	// Get the bit at a given position.
+	bool get(uint64_t bitPosition) const
+	{
+		// Find the word containing the bit.
+		const uint64_t wordIndex = bitPosition >> 6ULL;
+		const uint64_t& word = data[wordIndex];
+
+		// Find the position of this bit in the word.
+		const uint64_t bitPositionInWord = bitPosition & 63ULL;
+
+		// Test the bit.
+		const uint64_t mask = 1ULL << bitPositionInWord;
+		return (word & mask) != 0ULL;
+
+	}
+
 	// Set a bit at a given position.
 	void set(uint64_t bitPosition)
 	{

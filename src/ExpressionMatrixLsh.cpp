@@ -381,6 +381,30 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 
 
+// Write to a csv file statistics of the cell LSH signatures..
+void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const
+{
+	ofstream csvOut("LshSignatureStatistics.csv");
+	csvOut << "Bit,Set,Unset,Total\n";
+
+	for(size_t i=0; i<bitCount; i++) {
+
+		// Count the numebr of cells that have this bit set.
+		size_t setCount = 0;
+		for(CellId cellId=0; cellId<cellCount(); cellId++) {
+			if(signatures[cellId].get(i)) {
+				++setCount;
+			}
+		}
+		const size_t unsetCount = cellCount() - setCount;
+
+		csvOut << i << "," << setCount << "," << unsetCount << "," << cellCount() << "\n";
+
+	}
+
+}
+
+
 
 
 // Find similar cell pairs by looping over all pairs
@@ -422,6 +446,9 @@ void ExpressionMatrix::findSimilarPairs1(
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
 	vector<BitSet> signatures;
 	computeCellLshSignatures(lshVectors, signatures);
+
+	// Write signature statistics to a csv file.
+	// writeLshSignatureStatistics(lshCount, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());

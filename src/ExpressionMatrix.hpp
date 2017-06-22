@@ -460,6 +460,9 @@ private:
 		vector<BitSet>& signatures
 		) const;
 
+	// Write to a csv file statistics of the LSH signatures..
+	void writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const;
+
 public:
     // Approximate computation of the similarity between two cells using
     // Locality Sensitive Hashing (LSH).
