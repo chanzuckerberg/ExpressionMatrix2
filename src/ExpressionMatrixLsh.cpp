@@ -610,7 +610,7 @@ void ExpressionMatrix::findSimilarPairs2(
     // Create the SimilarPairs object where we will store the pairs.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
 
-    // Vector of vectors tused to contain the cells assigned to each bucket.
+    // Vector of vectors used to contain the cells assigned to each bucket.
     const uint64_t bucketCount = nextPowerOfTwoGreaterThanOrEqual(uint64_t(double(cellCount()) / loadFactor));
     const uint64_t bucketMask = bucketCount - 1ULL;
     MemoryMapped::VectorOfVectors<CellId, uint64_t> buckets;
@@ -654,7 +654,7 @@ void ExpressionMatrix::findSimilarPairs2(
     	uint64_t bandCheckedPairCount = 0ULL;
     	for(uint64_t bucketIndex=0; bucketIndex<bucketCount; bucketIndex++) {
     		const auto& bucket = buckets[bucketIndex];
-    		const auto bucketSize = buckets.size();
+    		const auto bucketSize = bucket.size();
     		maxBucketSize = max(maxBucketSize, bucketSize);
 
     		// If the bucket contains less than two cells, there is nothing to do.
