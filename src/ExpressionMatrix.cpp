@@ -465,10 +465,13 @@ void ExpressionMatrix::addCells(
 
 	// Loop over cells in the cell meta data file, but only add the ones that also appear
 	// in the expression counts file.
-	cout << timestamp << "Processing cell data." << endl;
+	cout << timestamp << "Storing expression counts and cell meta data." << endl;
 	CZI_ASSERT(cellMetaDataFileLines.size() > 1);	// This was checked by tokenizeFileAndCheck.
 	CellId addedCellCount = 0;
 	for(size_t cellMetaDataFileLine=1; cellMetaDataFileLine<cellMetaDataFileLines.size(); cellMetaDataFileLine++) {
+		if((cellMetaDataFileLine%1000) == 0) {
+			cout << timestamp << "Working on cell meta data file line " << cellMetaDataFileLine+1 << " of " << cellMetaDataFileLines.size() << endl;
+		}
 		const vector<string>& metaDataLine = cellMetaDataFileLines[cellMetaDataFileLine];
 		CZI_ASSERT(metaDataLine.size() > 1);	// This was checked by tokenizeFileAndCheck.
 		const string& cellName = metaDataLine.front();
