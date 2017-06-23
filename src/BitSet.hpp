@@ -73,8 +73,12 @@ public:
 		CZI_ASSERT(firstBitPositionInWord + bitCount <= 64ULL);
 
 		// Extract the bits.
-		const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
-		return (word >> firstBitPositionInWord) & bitMask;
+		if(bitCount == 64) {
+			return word;
+		} else {
+			const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
+			return (word >> firstBitPositionInWord) & bitMask;
+		}
 	}
 
 	vector<uint64_t> data;
