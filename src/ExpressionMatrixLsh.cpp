@@ -23,6 +23,8 @@
 
 #include "ExpressionMatrix.hpp"
 #include "BitSet.hpp"
+#include "lapack.hpp"
+#include "nextPowerOfTwo.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
@@ -257,7 +259,14 @@ void ExpressionMatrix::writeLshSimilarityComparison(
 {
 	// Generate LSH vectors.
 	vector< vector< vector<double> > > lshVectors;
+	cout << timestamp << "Generating the LSH vectors." << endl;
 	generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+
+	// Orthogonalize the LSH vectors.
+    // This did not seem to give any benefit, so I turned it off to eliminate the
+    // dependency on Lapack.
+	// cout << timestamp << "Orthogonalizing the LSH vectors." << endl;
+	// orthogonalizeLshVectors(lshVectors, lshBandCount*lshRowCount);
 
 	// Compute the LSH signatures of all cells.
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
@@ -547,3 +556,244 @@ void ExpressionMatrix::findSimilarPairs1(
 	cout << timestamp << "Done sorting pairs." << endl;
 
 }
+
+
+
+// Find similar cell pairs using LSH, without looping over all pairs.
+// See the beginning of ExpressionMatrixLsh.cpp for more information.
+// This implementation requires lshRowCount to be a power of 2 not greater than 64.
+void ExpressionMatrix::findSimilarPairs2(
+    const string& name,         // The name of the SimilarPairs object to be created.
+    size_t k,                   // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold, // The minimum similarity for a pair to be stored.
+	size_t lshBandCount,		// The number of LSH bands, each generated using lshRowCount LSH vectors.
+	size_t lshRowCount,         // The number of LSH vectors in each of the lshBandCount LSH bands.
+	unsigned int seed,			// The seed used to generate the LSH vectors.
+	double loadFactor           // Of the hash table used to assign cells to bucket.
+	)
+{
+	// Sanity check.
+	CZI_ASSERT(similarityThreshold <= 1.);
+
+	if(cellCount() == 0) {
+		cout << "There are no cells. Skipping findSimilarPairs2." << endl;
+		return;
+	}
+
+    // Compute the angle threshold (in radians) corresponding to this similarity threshold.
+    const double angleThreshold = std::acos(similarityThreshold);
+
+    // Compute the corresponding threshold on the number of mismatching
+    // signature bits.
+    const size_t lshCount = lshBandCount * lshRowCount;
+    const size_t mismatchCountThreshold = size_t(double(lshCount) * angleThreshold / boost::math::double_constants::pi);
+
+    // Compute the similarity (cosine of the angle) corresponding to every number of mismatching bits
+    // up to the threshold.
+    vector<double> similarityTable(mismatchCountThreshold + 1);
+    for(size_t mismatchingBitCount=0; mismatchingBitCount<=mismatchCountThreshold; mismatchingBitCount++) {
+    	const double angle = double(mismatchingBitCount) * boost::math::double_constants::pi / double(lshCount);
+    	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+    	similarityTable[mismatchingBitCount] = std::cos(angle);
+    }
+
+
+	// Generate LSH vectors.
+	vector< vector< vector<double> > > lshVectors;
+	generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+
+	// Compute the LSH signatures of all cells.
+	cout << timestamp << "Computing LSH signatures for all cells." << endl;
+	vector<BitSet> signatures;
+	computeCellLshSignatures(lshVectors, signatures);
+
+    // Create the SimilarPairs object where we will store the pairs.
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
+
+    // Vector of vectors tused to contain the cells assigned to each bucket.
+    const uint64_t bucketCount = nextPowerOfTwoGreaterThanOrEqual(uint64_t(double(cellCount()) / loadFactor));
+    const uint64_t bucketMask = bucketCount - 1ULL;
+    MemoryMapped::VectorOfVectors<CellId, uint64_t> buckets;
+    buckets.createNew(directoryName + "/SimilarPairsBuckets-" + name);
+
+
+
+    // Loop over the LSH bands.
+	uint64_t checkedPairCount = 0ULL;
+    for(size_t band=0; band<lshBandCount; band++) {
+    	cout << timestamp << "Begin working on band " << band << " of " << lshBandCount << endl;
+
+    	// The index of the first bit of this band.
+    	const uint64_t firstBit = band * lshRowCount;
+
+    	// Assign cells to buckets. In pass 1 we just count the number of cells
+    	// in each bucket.
+    	buckets.beginPass1(bucketCount);
+    	for(CellId cellId=0; cellId<cellCount(); cellId++) {
+    		const BitSet& signature = signatures[cellId];
+    		const uint64_t signatureSlice = signature.getBits(firstBit, lshRowCount);
+    		const uint64_t bucket = MurmurHash64A(&signatureSlice, sizeof(signatureSlice), 231) & bucketMask;
+    		buckets.incrementCount(bucket);
+    	}
+
+    	// Assign cells to buckets. In pass 2 we actually store the cells in buckets.
+    	buckets.beginPass2();
+    	for(CellId cellId=0; cellId<cellCount(); cellId++) {
+    		const BitSet& signature = signatures[cellId];
+    		const uint64_t signatureSlice = signature.getBits(firstBit, lshRowCount);
+    		const uint64_t bucket = MurmurHash64A(&signatureSlice, sizeof(signatureSlice), 231) & bucketMask;
+    		buckets.store(bucket, cellId);
+    	}
+    	buckets.endPass2();
+
+
+
+    	// Now loop over buckets.
+    	// For each bucket, check all pairs of cells in the bucket.
+    	uint64_t maxBucketSize = 0ULL;
+    	uint64_t bandCheckedPairCount = 0ULL;
+    	for(uint64_t bucketIndex=0; bucketIndex<bucketCount; bucketIndex++) {
+    		const auto& bucket = buckets[bucketIndex];
+    		const auto bucketSize = buckets.size();
+    		maxBucketSize = max(maxBucketSize, bucketSize);
+
+    		// If the bucket contains less than two cells, there is nothing to do.
+    		if(bucketSize < 2) {
+    			continue;
+    		}
+
+    		// Check all pairs in this bucket.
+    		for(size_t i0=1; i0<bucket.size(); i0++) {
+    			const CellId cellId0 = bucket[i0];
+    			const auto& signature0 = signatures[cellId0];
+    			for(size_t i1=0; i1<i0; i1++, ++bandCheckedPairCount) {
+        			const CellId cellId1 = bucket[i1];
+        			const auto& signature1 = signatures[cellId1];
+
+        			// Count the number of bits where the signatures of these two cells disagree.
+		        	size_t mismatchingBitCount = countMismatches(signature0, signature1);
+
+		            // If the similarity is sufficient, pass it to the SimilarPairs container,
+		            // which will make the decision whether to store it, depending on the
+		            // number of pairs already stored for cellId0 and cellId1.
+		            if(mismatchingBitCount <= mismatchCountThreshold) {
+		            	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+		                similarPairs.add(cellId0, cellId1, similarityTable[mismatchingBitCount]);
+		            }
+    			}
+    		}
+    	}
+    	cout << "Band " << band << ": maximum bucket size " << maxBucketSize;
+    	cout << ". Checked " << bandCheckedPairCount << " pairs." << endl;
+    	checkedPairCount += bandCheckedPairCount;
+
+    }
+    cout << "Total number of pairs checked is " << checkedPairCount << endl;
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+	cout << timestamp << "Sorting pairs." << endl;
+    similarPairs.sort();
+	cout << timestamp << "Done sorting pairs." << endl;
+}
+
+
+
+#if 0
+// Orthogonalize the LSH vectors in groups of k.
+// Ji et al. (2012) have shown that orthogonalization of
+// groups of LSH vectors can result in significant reduction of the
+// variance of the distance estimate provided by LSH.
+// See J. Ji, J. Li, S. Yan, B. Zhang, and Q. Tian,
+// Super-Bit Locality-Sensitive Hashing, In NIPS, pages 108–116, 2012.
+// https://pdfs.semanticscholar.org/64d8/3ccbcb1d87bfafee57f0c2d49043ee3f565b.pdf
+// This did not seem to give any benefit, so I turned it off to eliminate the
+// dependency on Lapack.
+void ExpressionMatrix::orthogonalizeLshVectors(
+	vector< vector< vector<double> > >& lshVectors,
+	size_t k
+    ) const
+{
+
+	// Create a vector of pair(band, row) for all the LSH vectors,
+	// We will then partition that in groups of k.
+	const size_t lshBandCount = lshVectors.size();
+	CZI_ASSERT(lshBandCount > 0);
+	const size_t lshRowCount = lshVectors.front().size();
+	CZI_ASSERT(lshRowCount > 0);
+	vector< pair<size_t, size_t> > lshVectorsInfo;
+	for(size_t band=0; band<lshBandCount; band++) {
+		CZI_ASSERT(lshVectors[band].size() == lshRowCount);
+		for(size_t row=0; row<lshRowCount; row++) {
+			CZI_ASSERT(lshVectors[band][row].size() == geneCount());
+			lshVectorsInfo.push_back(make_pair(band, row));
+		}
+	}
+
+
+
+	// Matrix to hold a group of k LSH vectors to be orthogonalized.
+	// Each vector is a column of the matrix, of length geneCount(),
+	// stored contiguously in memory. This is the format required
+	// by Lapack routine dgeqrf.
+	vector<double> a(geneCount() * k);
+
+	// Work vectors for Lapack calls.
+	vector<double> tau(k);
+	const size_t lWork = k * 128;
+	vector<double> work(lWork);
+
+
+
+	// Loop over groups of k LSH vectors.
+	// Orthogonalize each group.
+	for(size_t begin=0; begin<lshVectorsInfo.size(); begin+=k) {
+		const size_t end = min(begin+k, lshVectorsInfo.size());
+
+		// The number of vectors we are orthogonalizing in this iteration.
+		// Always equal to k, except possibly for the last group.
+		const size_t n = end - begin;
+
+		// Copy the LSH vectors into the columns of matrix a.
+		size_t aIndex = 0ULL;
+		for(size_t i=begin; i!=end; i++) {
+			const auto& p = lshVectorsInfo[i];
+			const size_t band = p.first;
+			const size_t row = p.second;
+			const vector<double>& v = lshVectors[band][row];
+			CZI_ASSERT(v.size() == geneCount());
+			copy(v.begin(), v.end(), a.begin()+aIndex);
+			aIndex += geneCount();
+		}
+		CZI_ASSERT(aIndex == n * geneCount());
+
+
+
+		// Use Lapack to orthogonalize the vectors stored in a.
+		// This uses a Householder QR factorization, which is
+		// numerically much more stable than the simple
+		// Gram-Schmidt orthogonalization procedure.
+	    int info = 0;
+	    dgeqrf_(int(geneCount()), int(n), &a.front(), int(geneCount()), &tau.front(), &work.front(), int(lWork), info);
+	    CZI_ASSERT(info == 0);
+	    dorgqr_(int(geneCount()), int(n), int(n), &a.front(), int(geneCount()), &tau.front(), &work.front(), int(lWork), info);
+	    CZI_ASSERT(info == 0);
+
+
+		// Copy back the columns of matrix a,
+		// which now contain the orthogonalized LSH vectors.
+		aIndex = 0ULL;
+		for(size_t i=begin; i!=end; i++) {
+			const auto& p = lshVectorsInfo[i];
+			const size_t band = p.first;
+			const size_t row = p.second;
+			vector<double>& v = lshVectors[band][row];
+			CZI_ASSERT(v.size() == geneCount());
+			copy(a.begin()+aIndex, a.begin()+aIndex+geneCount(), v.begin());
+			aIndex += geneCount();
+		}
+		CZI_ASSERT(aIndex == n * geneCount());
+	}
+}
+#endif
+

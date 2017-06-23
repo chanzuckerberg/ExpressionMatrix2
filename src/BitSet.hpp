@@ -58,6 +58,25 @@ public:
 
 	}
 
+	// Get a uint64_t containing the bits in a specified bit range.
+	// This range must be entirely contained in one word (it cannot cross word boundaries).
+	uint64_t getBits(uint64_t firstBitPosition, uint64_t bitCount) const
+	{
+		// Find the word containing the bit.
+		const uint64_t firstBitWordIndex = firstBitPosition >> 6ULL;
+		const uint64_t& word = data[firstBitWordIndex];
+
+		// Find the position of the first bit in the word.
+		const uint64_t firstBitPositionInWord = firstBitPosition & 63ULL;
+
+		// Check that the entire range is contained in this word.
+		CZI_ASSERT(firstBitPositionInWord + bitCount <= 64ULL);
+
+		// Extract the bits.
+		const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
+		return (word >> firstBitPositionInWord) & bitMask;
+	}
+
 	vector<uint64_t> data;
 
 

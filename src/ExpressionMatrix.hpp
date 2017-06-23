@@ -247,8 +247,8 @@ public:
     // and using an LSH approximation to compute the similarity between two cells.
     // See the beginning of ExpressionMatrixLsh.cpp for more information.
     // Like findSimilarPairs0, this is also O(N**2) slow. However
-    // the coefficient of the N**2 term is much lower (around 120 ns/pair), at a cost of
-    // additional O(N) work (typically 30 ms per cell for lshCount=1024).
+    // the coefficient of the N**2 term is much lower (around 15 ns/pair for lshCount=1024),
+    // at a cost of additional O(N) work (typically 40 ms per cell for lshCount=1024).
     // As a result, this can be much faster for large numbers of cells.
     // The error of the approximation is controlled by lshCount.
     // The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
@@ -260,8 +260,22 @@ public:
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
-		size_t lshCount,			// The number of LSH functions (hyperplanes) to be used.
-		unsigned int seed 			// The seed used to generate the random hyperplanes.
+		size_t lshCount,		    // The number of LSH vectors to use.
+		unsigned int seed			// The seed used to generate the LSH vectors.
+		);
+
+
+    // Find similar cell pairs using LSH, without looping over all pairs.
+    // See the beginning of ExpressionMatrixLsh.cpp for more information.
+    // This implementation requires lshRowCount to be a power of 2 not greater than 64.
+    void findSimilarPairs2(
+        const string& name,         // The name of the SimilarPairs object to be created.
+        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold, // The minimum similarity for a pair to be stored.
+		size_t lshBandCount,		// The number of LSH bands, each generated using lshRowCount LSH vectors.
+		size_t lshRowCount,         // The number of LSH vectors in each of the lshBandCount LSH bands.
+		unsigned int seed,			// The seed used to generate the LSH vectors.
+		double loadFactor           // Of the hash table used to assign cells to bucket.
 		);
 
 
@@ -429,6 +443,24 @@ private:
 		unsigned int seed,
 		vector< vector< vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
         ) const;
+
+
+#if 0
+    // Orthogonalize the LSH vectors in groups of k.
+    // Ji et al. (2012) have shown that orthogonalization of
+    // groups of LSH vectors can result in significant reduction of the
+    // variance of the distance estimate provided by LSH.
+    // See J. Ji, J. Li, S. Yan, B. Zhang, and Q. Tian,
+    // Super-Bit Locality-Sensitive Hashing, In NIPS, pages 108–116, 2012.
+    // https://pdfs.semanticscholar.org/64d8/3ccbcb1d87bfafee57f0c2d49043ee3f565b.pdf
+    // This did not seem to give any benefit, so I turned it off to eliminate the
+    // dependency on Lapack.
+    void orthogonalizeLshVectors(
+		vector< vector< vector<double> > >& lshVectors,
+		size_t k
+        ) const;
+#endif
+
 
 	// Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
     double computeExpressionCountScalarProduct(CellId, const vector<double>& v) const;
