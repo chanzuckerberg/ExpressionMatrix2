@@ -1223,9 +1223,20 @@ void ExpressionMatrix::createCellSimilarityGraph(
         maxConnectivity
         ));
 
+    // Create the GraphInformation object that will be stored with the graph.
+    GraphInformation graphInformation;
+    graphInformation.cellSetName = cellSetName;
+	graphInformation.similarPairsName = similarPairsName;
+	graphInformation.similarityThreshold = similarityThreshold;
+	graphInformation.maxConnectivity = maxConnectivity;
+
+	// Remove isolated vertices.
+	graphInformation.isolatedVertexCount = graph->removeIsolatedVertices();
+	graphInformation.vertexCount = num_vertices(*graph);
+	graphInformation.edgeCount = num_edges(*graph);
+
     // Store it.
-    const GraphCreationParameters graphCreationParameters(cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
-    graphs.insert(make_pair(graphName, make_pair(graphCreationParameters, graph)));
+    graphs.insert(make_pair(graphName, make_pair(graphInformation, graph)));
 
 }
 

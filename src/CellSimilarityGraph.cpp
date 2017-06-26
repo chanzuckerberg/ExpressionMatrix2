@@ -205,11 +205,11 @@ void CellSimilarityGraph::keepBestEdgesOnly(std::size_t n)
 		boost::remove_edge(e, graph());
 	}
 }
+#endif
 
 
-
-// Remove isolated vertices.
-void CellSimilarityGraph::removeIsolatedVertices()
+// Remove isolated vertices and returns\ the number of vertices that were removed
+size_t CellSimilarityGraph::removeIsolatedVertices()
 {
     vector<vertex_descriptor> verticesToBeRemoved;
     BGL_FORALL_VERTICES(v, graph(), Graph) {
@@ -224,37 +224,9 @@ void CellSimilarityGraph::removeIsolatedVertices()
         boost::remove_vertex(v, graph());
     }
 
+    return verticesToBeRemoved.size();
 }
 
-
-
-// Simple graph statistics.
-ostream& CellSimilarityGraph::writeStatistics(std::ostream& s) const
-{
-	const auto vertexCount = num_vertices(graph());
-	const auto edgeCount = num_edges(graph());
-	s << vertexCount << " vertices, ";
-	s << edgeCount << " edges, average connectivity " << (2.*double(edgeCount)) / vertexCount;
-
-	return s;
-}
-
-
-#endif
-
-
-
-// Return the number of isolated vertices.
-size_t CellSimilarityGraph::isolatedVertexCount() const
-{
-    size_t count = 0;
-    BGL_FORALL_VERTICES(v, graph(), CellSimilarityGraph) {
-        if(out_degree(v, graph()) == 0) {
-            ++count;
-        }
-    }
-    return count;
-}
 
 
 
@@ -510,7 +482,10 @@ void CellSimilarityGraph::labelPropagationClustering(
     // Vector with all the vertices in the graph, in the same order as in the vertex table.
     vector<vertex_descriptor> allVertices;
     for(const auto& p: vertexTable) {
-        allVertices.push_back(p.second);
+    	const vertex_descriptor v = p.second;
+    	if(v != null_vertex()) {
+    		allVertices.push_back(p.second);
+    	}
     }
 
 
@@ -704,7 +679,7 @@ void CellSimilarityGraph::assignColorsToGroups(vector<uint32_t>& colorTable)
         // cout << endl;
         deduplicate(adjacentColors);
         // cout << "Already assigned colors adjacent to group " << group0 << ": ";
-        copy(adjacentColors.begin(), adjacentColors.end(), ostream_iterator<uint32_t>(cout, " "));
+        // copy(adjacentColors.begin(), adjacentColors.end(), ostream_iterator<uint32_t>(cout, " "));
         // cout << endl;
 
         // Assign to this group the smallest integer color that does not appear

@@ -99,11 +99,8 @@ public:
 	// Simple graph statistics.
 	ostream& writeStatistics(ostream&) const;
 
-	// Remove isolated vertices.
-	void removeIsolatedVertices();
-
-	// Return the number of isolated vertices.
-	size_t isolatedVertexCount() const;
+	// Remove isolated vertices and returns\ the number of vertices that were removed
+	size_t removeIsolatedVertices();
 
 	// Use Graphviz to compute the graph layout and store it in the vertex positions.
 	void computeLayout();

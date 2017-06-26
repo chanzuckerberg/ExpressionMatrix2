@@ -29,7 +29,7 @@ namespace ChanZuckerberg {
         class CellSimilarityGraph;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
-        class GraphCreationParameters;
+        class GraphInformation;
 
     }
 }
@@ -57,27 +57,17 @@ public:
 
 
 
-// Class used to store various parameters that control the creation of
-// a cell similarity graph.
-class ChanZuckerberg::ExpressionMatrix2::GraphCreationParameters {
+// Class used to store information about a cell similarity graph.
+class ChanZuckerberg::ExpressionMatrix2::GraphInformation {
 public:
     string cellSetName;
     string similarPairsName;
     double similarityThreshold;
     size_t maxConnectivity;
-    GraphCreationParameters() {}
-    GraphCreationParameters(
-        string cellSetName,
-        string similarPairsName,
-        double similarityThreshold,
-        size_t maxConnectivity
-        ) :
-        cellSetName(cellSetName),
-        similarPairsName(similarPairsName),
-        similarityThreshold(similarityThreshold),
-        maxConnectivity(maxConnectivity)
-    {
-    }
+    size_t vertexCount;
+    size_t edgeCount;
+    size_t isolatedVertexCount;		// The number of isolated vertices that were removed.
+    GraphInformation() {}
 };
 
 
@@ -547,7 +537,7 @@ public:
 
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
-    map<string, pair<GraphCreationParameters, boost::shared_ptr<CellSimilarityGraph> > > graphs;
+    map<string, pair<GraphInformation, boost::shared_ptr<CellSimilarityGraph> > > graphs;
 
     // Store the cluster ids in a graph in a meta data field.
     void storeClusterId(const string& metaDataName, const CellSimilarityGraph&);

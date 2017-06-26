@@ -48,7 +48,7 @@ void ExpressionMatrix::processRequest(
     // The processing function is only responsible for writing the html body.
     try {
         (this->*function)(request, html);
-    } catch(std::exception e) {
+    } catch(std::exception& e) {
         html << e.what();
     }
 
@@ -1221,21 +1221,23 @@ void ExpressionMatrix::exploreGraphs(
         "<th class=centered>Similarity<br>threshold"
         "<th class=centered>Maximum<br>connectivity"
         "<th class=centered>Number<br>of<br>vertices"
-        "<th class=centered>Number<br>of<br>edges"
+		"<th class=centered>Number<br>of<br>edges"
+		"<th class=centered>Number<br>of<br>isolated<br>vertices<br>removed"
         "<th class=centered>Clustering"
         "<th class=centered>Action";
     for(const auto& p: graphs) {
         const string& graphName = p.first;
-        const GraphCreationParameters& parameters = p.second.first;
-        const CellSimilarityGraph& graph = *(p.second.second);
+        const GraphInformation& info = p.second.first;
+        // const CellSimilarityGraph& graph = *(p.second.second);
         html << "<tr><td><a href='graph?graphName=" << graphName << "'>" << graphName << "</a>";
-        html << "<td><a href='cellSet?cellSetName=" << parameters.cellSetName;
-        html << "'>" << parameters.cellSetName << "</a>";
-        html << "<td>" << parameters.similarPairsName;
-        html << "<td class=centered>" << parameters.similarityThreshold;
-        html << "<td class=centered>" << parameters.maxConnectivity;
-        html << "<td class=centered>" << boost::num_vertices(graph);
-        html << "<td class=centered>" << boost::num_edges(graph);
+        html << "<td><a href='cellSet?cellSetName=" << info.cellSetName;
+        html << "'>" << info.cellSetName << "</a>";
+        html << "<td>" << info.similarPairsName;
+        html << "<td class=centered>" << info.similarityThreshold;
+        html << "<td class=centered>" << info.maxConnectivity;
+        html << "<td class=centered>" << info.vertexCount;
+        html << "<td class=centered>" << info.edgeCount;
+        html << "<td class=centered>" << info.isolatedVertexCount;
         html << "<td class=centered><form action=clusterDialog><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Run clustering on graph " << graphName << "'></form>";
         html << "<td class=centered><form action=removeGraph><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Remove graph " << graphName << "'></form>";
     }
@@ -1264,7 +1266,7 @@ void ExpressionMatrix::exploreGraphs(
     html <<
         "<td class=centered><input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
         "<td class=centered><input type=text style='text-align:center' size=8 name=maxConnectivity value='3'>"
-        "<td><td><td><td class=centered><input type=submit value='Create a new graph'>"
+        "<td><td><td><td><td class=centered><input type=submit value='Create a new graph'>"
         "</form>";
 
     html << "</table>";
@@ -1310,8 +1312,8 @@ void ExpressionMatrix::compareGraphs(
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
     }
-    const GraphCreationParameters& graphCreationParameters0 = it0->second.first;
-    const GraphCreationParameters& graphCreationParameters1 = it1->second.first;
+    const GraphInformation& graphCreationParameters0 = it0->second.first;
+    const GraphInformation& graphCreationParameters1 = it1->second.first;
     const auto graphPointer0 = it0->second.second;
     const auto graphPointer1 = it1->second.second;
     CZI_ASSERT(graphPointer0);
@@ -1455,8 +1457,8 @@ void ExpressionMatrix::compareGraphs(
     }
 
     // Number of isolated vertices.
-    const size_t isolatedVertexCount0 = graph0.isolatedVertexCount();
-    const size_t isolatedVertexCount1 = graph1.isolatedVertexCount();
+    const size_t isolatedVertexCount0 = graphCreationParameters0.isolatedVertexCount;
+    const size_t isolatedVertexCount1 = graphCreationParameters1.isolatedVertexCount;
     html << "<tr><td>Number of isolated vertices (cells);";
     html << "<td class=centered>" << isolatedVertexCount0;
     html << "<td class=centered>" << isolatedVertexCount1;
@@ -1551,7 +1553,7 @@ void ExpressionMatrix::exploreGraph(
         html << "<p>Graph " << graphName << " does not exists.";
         return;
     }
-    const GraphCreationParameters& graphCreationParameters = it->second.first;
+    const GraphInformation& graphInfo = it->second.first;
     CellSimilarityGraph& graph = *(it->second.second);
 
     // Write the title.
@@ -1563,14 +1565,14 @@ void ExpressionMatrix::exploreGraph(
     // Write a table with the graph creation parameters.
     html << "<div style='float:left;margin:10px'>";
     html << "<table>";
-    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << graphCreationParameters.cellSetName;
-    html << "'>" << graphCreationParameters.cellSetName << "</a>";
-    html << "<tr><td>Similar pairs name<td>" << graphCreationParameters.similarPairsName;
-    html << "<tr><td>Similarity threshold<td class=centered>" << graphCreationParameters.similarityThreshold;
-    html << "<tr><td>Maximum connectivity<td class=centered>" << graphCreationParameters.maxConnectivity;
+    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << graphInfo.cellSetName;
+    html << "'>" << graphInfo.cellSetName << "</a>";
+    html << "<tr><td>Similar pairs name<td>" << graphInfo.similarPairsName;
+    html << "<tr><td>Similarity threshold<td class=centered>" << graphInfo.similarityThreshold;
+    html << "<tr><td>Maximum connectivity<td class=centered>" << graphInfo.maxConnectivity;
     html << "<tr><td>Number of vertices (cells)<td class=centered>" << boost::num_vertices(graph);
-    html << "<tr><td>Number of isolated vertices (cells)<td class=centered>" << graph.isolatedVertexCount();
     html << "<tr><td>Number of edges<td class=centered>" << boost::num_edges(graph);
+    html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>" << graphInfo.isolatedVertexCount;
     html << "</table>";
     html << "</div>";
 
@@ -2334,7 +2336,7 @@ void ExpressionMatrix::clusterDialog(
         "Random number generator seed: <input type=text name=seed value=231>"
         "<br>Stop after this many iterations without changes: <input type=text name=stableIterationCountThreshold value=3>"
         "<br>Maximum number of iterations: <input type=text name=maxIterationCount value=10>"
-        "<br>Meta data name to store the cluster of each cell: <input type=text name=metaDataName required>"
+        "<br>Meta data name to store the cluster of each cell: <input type=text name=metaDataName required autofocus>"
         "<input type=hidden name=graphName value=" << graphName << ">"
         "<br><input type=submit value='Run clustering'>"
         "</form>";
@@ -2445,10 +2447,12 @@ void ExpressionMatrix::createNewGraph(
     html << "<div style='font-family:courier'>";
     html << timestamp << "Graph creation begins.";
     createCellSimilarityGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
-    CellSimilarityGraph& graph = *(graphs[graphName].second);
+    const GraphInformation& graphInfo = graphs[graphName].first;
+    CellSimilarityGraph& graph = *(graphs[graphName].second);	// Cannot be const because we are going to call computeLayout below.
     html <<
-        "<br>" << timestamp << "New graph " << graphName << " was created. It has " << boost::num_vertices(graph) <<
-        " vertices and " << boost::num_edges(graph) << " edges.";
+        "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<
+        " vertices and " << graphInfo.edgeCount << " edges"
+		" after " << graphInfo.isolatedVertexCount << " isolated vertices were removed.";
 
     // Compute the graph layout.
     html << "<br>" << timestamp << "Graph layout computation begins.";

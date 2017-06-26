@@ -109,6 +109,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1040278431" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.955945568" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-msse4.2" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.debugging.other.748177729" superClass="gnu.cpp.compiler.option.debugging.other" value="-ggdb3" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1396589168" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.13926179" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
