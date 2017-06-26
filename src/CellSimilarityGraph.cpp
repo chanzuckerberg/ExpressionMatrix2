@@ -320,6 +320,7 @@ void CellSimilarityGraph::computeCoordinateRange(
 // with its own color.
 void CellSimilarityGraph::writeSvg(
     ostream& s,
+	bool hideEdges,
     double svgSizePixels,
     double xViewBoxCenter,
     double yViewBoxCenter,
@@ -345,32 +346,34 @@ void CellSimilarityGraph::writeSvg(
 
     // Draw the edges first.
     // This makes it easier to see the vertices and their tooltips.
-    s << "<g id=edges>";
-    BGL_FORALL_EDGES(e, graph(), Graph) {
-        const vertex_descriptor v1 = source(e, graph());
-        const vertex_descriptor v2 = target(e, graph());
+    if(!hideEdges) {
+		s << "<g id=edges>";
+		BGL_FORALL_EDGES(e, graph(), Graph) {
+			const vertex_descriptor v1 = source(e, graph());
+			const vertex_descriptor v2 = target(e, graph());
 
-        const CellSimilarityGraphVertex& vertex1 = graph()[v1];
-        const CellSimilarityGraphVertex& vertex2 = graph()[v2];
+			const CellSimilarityGraphVertex& vertex1 = graph()[v1];
+			const CellSimilarityGraphVertex& vertex2 = graph()[v2];
 
-        const double x1 = vertex1.position[0];
-        const double y1 = vertex1.position[1];
-        const double x2 = vertex2.position[0];
-        const double y2 = vertex2.position[1];
+			const double x1 = vertex1.position[0];
+			const double y1 = vertex1.position[1];
+			const double x2 = vertex2.position[0];
+			const double y2 = vertex2.position[1];
 
-        s << "<line x1='" << x1 << "' y1='" << y1 << "'";
-        s << " x2='" << x2 << "' y2='" << y2 << "'";
+			s << "<line x1='" << x1 << "' y1='" << y1 << "'";
+			s << " x2='" << x2 << "' y2='" << y2 << "'";
 
-        s << " style='stroke:";
-        const string& color = graph()[e].color;
-        if(color.empty()) {
-            s << "black";
-        } else {
-            s << color;
-        }
-        s << ";stroke-width:" << edgeThickness << "' />";
+			s << " style='stroke:";
+			const string& color = graph()[e].color;
+			if(color.empty()) {
+				s << "black";
+			} else {
+				s << color;
+			}
+			s << ";stroke-width:" << edgeThickness << "' />";
+		}
+		s << "</g>";
     }
-    s << "</g>";
 
 
 

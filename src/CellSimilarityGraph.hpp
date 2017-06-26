@@ -141,6 +141,7 @@ public:
 	// with its own color.
 	void writeSvg(
 	    ostream& s,
+		bool hideEdges,
 	    double svgSizePixels,
 	    double xViewBoxCenter,
 	    double yViewBoxCenter,

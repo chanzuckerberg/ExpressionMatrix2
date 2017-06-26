@@ -1229,7 +1229,12 @@ void ExpressionMatrix::exploreGraphs(
         const string& graphName = p.first;
         const GraphInformation& info = p.second.first;
         // const CellSimilarityGraph& graph = *(p.second.second);
-        html << "<tr><td><a href='graph?graphName=" << graphName << "'>" << graphName << "</a>";
+        html << "<tr><td><a href='graph?graphName=" << graphName;
+        if(info.edgeCount>50000) {
+        	// The graph has lots of edges. Don't display them initially.
+        	html << "&hideEdges=on";
+        }
+        html << "'>" << graphName << "</a>";
         html << "<td><a href='cellSet?cellSetName=" << info.cellSetName;
         html << "'>" << info.cellSetName << "</a>";
         html << "<td>" << info.similarPairsName;
@@ -1623,6 +1628,8 @@ void ExpressionMatrix::exploreGraph(
     getParameterValue(request, "coloringOption", coloringOption);
     string reuseColors = "off";
     getParameterValue(request, "reuseColors", reuseColors);
+    string hideEdges = "off";
+    getParameterValue(request, "hideEdges", hideEdges);
 
     // Values corresponding to the minimum and maximum color.
     double minColorValue, maxColorValue;
@@ -1752,6 +1759,11 @@ void ExpressionMatrix::exploreGraph(
     html << "</select>";
     html << ". Allow using a color for multiple non-adjacent categories <input type=checkbox name=reuseColors";
     if(reuseColors=="on") {
+        html << " checked";
+    }
+    html << ">";
+    html << "<br>Hide graph edges  <input type=checkbox name=hideEdges";
+    if(hideEdges=="on") {
         html << " checked";
     }
     html << ">";
@@ -2197,7 +2209,7 @@ Thinner edge
 
     // Write the graph as an svg object.
     html << "<div style='float:left;margin:10px''>";
-    graph.writeSvg(html, svgSizePixels, xViewBoxCenter, yViewBoxCenter, viewBoxHalfSize, vertexRadius, edgeThickness, colorMap);
+    graph.writeSvg(html, hideEdges=="on", svgSizePixels, xViewBoxCenter, yViewBoxCenter, viewBoxHalfSize, vertexRadius, edgeThickness, colorMap);
     html << "</div>";
 
 
