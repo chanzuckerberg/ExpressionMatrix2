@@ -1272,7 +1272,7 @@ void ExpressionMatrix::exploreGraphs(
 
     html <<
         "<td class=centered><input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
-        "<td class=centered><input type=text style='text-align:center' size=8 name=maxConnectivity value='3'>"
+        "<td class=centered><input type=text style='text-align:center' size=8 name=maxConnectivity value='20'>"
         "<td><td><td><td><td class=centered><input type=submit value='Create a new graph'>"
         "</form>";
 
