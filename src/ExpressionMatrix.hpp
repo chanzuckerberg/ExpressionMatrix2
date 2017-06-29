@@ -208,6 +208,17 @@ public:
     // looping over all pairs. This is O(N**2) slow.
     void analyzeAllPairs() const;
 
+    // Compute the average expression vector for a given set of cells.
+    // The last parameter controls the normalization used for the expression counts
+    // for averaging:
+    // 0: no normalization (raw read counts).
+    // 1: L1 normalization (fractional read counts).
+    // 2: L2 normalization.
+    void computeAverageExpression(
+    	const vector<CellId> cells,
+		vector<double>& averageExpression,
+		size_t normalization) const;
+
 
 
     // Find similar cell pairs by looping over all pairs.

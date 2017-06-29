@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../src/CellSets.cpp \
 ../src/CellSimilarityGraph.cpp \
+../src/ClusterGraph.cpp \
 ../src/ExpressionMatrix.cpp \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
@@ -16,12 +17,14 @@ CPP_SRCS += \
 ../src/PythonModule.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
+../src/regressionCoefficient.cpp \
 ../src/tokenize.cpp \
 ../src/touchMemory.cpp 
 
 OBJS += \
 ./src/CellSets.o \
 ./src/CellSimilarityGraph.o \
+./src/ClusterGraph.o \
 ./src/ExpressionMatrix.o \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHttpServer.o \
@@ -32,12 +35,14 @@ OBJS += \
 ./src/PythonModule.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
+./src/regressionCoefficient.o \
 ./src/tokenize.o \
 ./src/touchMemory.o 
 
 CPP_DEPS += \
 ./src/CellSets.d \
 ./src/CellSimilarityGraph.d \
+./src/ClusterGraph.d \
 ./src/ExpressionMatrix.d \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHttpServer.d \
@@ -48,6 +53,7 @@ CPP_DEPS += \
 ./src/PythonModule.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
+./src/regressionCoefficient.d \
 ./src/tokenize.d \
 ./src/touchMemory.d 
 

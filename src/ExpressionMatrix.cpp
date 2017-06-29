@@ -894,6 +894,95 @@ float ExpressionMatrix::getExpressionCount(CellId cellId, GeneId geneId) const
 
 
 
+// Compute the average expression vector for a given set of cells.
+// The last parameter controls the normalization used for the expression counts
+// for averaging:
+// 0: no normalization (raw read counts).
+// 1: L1 normalization (fractional read counts).
+// 2: L2 normalization.
+void ExpressionMatrix::computeAverageExpression(
+	const vector<CellId> cellIds,
+	vector<double>& averageExpression,
+	size_t normalization) const
+{
+	// Initialize the average expression to zero.
+	averageExpression.resize(geneCount());
+	fill(averageExpression.begin(), averageExpression.end(), 0.);
+
+
+
+	// Accumulate the contribution of all the cells.
+	for(const CellId cellId: cellIds) {
+
+		// Compute the normalization factor for this cell.
+		const Cell& cell = cells[cellId];
+		double factor;
+		switch(normalization) {
+		case 0:
+			factor = 1.;
+			break;
+		case 1:
+			factor = cell.norm1Inverse;
+			break;
+		case 2:
+			factor = cell.norm2Inverse;
+			break;
+		default:
+			CZI_ASSERT(0);
+		}
+
+
+		// Add all of the expression counts for this cell.
+		for(const auto& p: cellExpressionCounts[cellId]) {
+			const GeneId geneId = p.first;
+			float count = p.second;
+			const double normalizedCount = factor * double(count);
+			averageExpression[geneId] += normalizedCount;
+		}
+	}
+
+
+
+	// Divide by the number of cells.
+	const double factor = 1./double(cellIds.size());
+	for(double& a: averageExpression) {
+		a *= factor;
+	}
+
+
+
+	// Normalize as requested.
+	switch(normalization) {
+	case 0:
+		break;
+	case 1:
+	{
+		const double factor = 1. / accumulate(averageExpression.begin(), averageExpression.end(), 0.);
+		for(double& a: averageExpression) {
+			a *= factor;
+		}
+		break;
+	}
+	case 2:
+	{
+		double sum = 0.;
+		for(const double& a: averageExpression) {
+			sum += a*a;;
+		}
+		const double factor = 1./sqrt(sum);
+		for(double& a: averageExpression) {
+			a *= factor;
+		}
+		break;
+	}
+	default:
+		CZI_ASSERT(0);
+	}
+
+}
+
+
+
 // Compute a sorted histogram of a given meta data field.
 void ExpressionMatrix::histogramMetaData(
     const CellSets::CellSet& cellSet,

@@ -1,6 +1,7 @@
 #include "ExpressionMatrix.hpp"
 #include "color.hpp"
 #include "CellSimilarityGraph.hpp"
+#include "ClusterGraph.hpp"
 #include "orderPairs.hpp"
 #include "randIndex.hpp"
 #include "timestamp.hpp"
@@ -12,6 +13,7 @@ using namespace ExpressionMatrix2;
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/regex.hpp>
 
+#include "fstream.hpp"
 
 
 // Function that provides simple http functionality
@@ -2348,7 +2350,8 @@ void ExpressionMatrix::clusterDialog(
         "Random number generator seed: <input type=text name=seed value=231>"
         "<br>Stop after this many iterations without changes: <input type=text name=stableIterationCountThreshold value=3>"
         "<br>Maximum number of iterations: <input type=text name=maxIterationCount value=10>"
-        "<br>Meta data name to store the cluster of each cell: <input type=text name=metaDataName required autofocus>"
+        "<br>Meta data name to store the cluster of each cell: <input type=text name=metaDataName autofocus>"
+        "<br>If the above field is empty, no meta data will be created or modified."
         "<input type=hidden name=graphName value=" << graphName << ">"
         "<br><input type=submit value='Run clustering'>"
         "</form>";
@@ -2375,13 +2378,9 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "maxIterationCount", maxIterationCount);
     string metaDataName;
     getParameterValue(request, "metaDataName", metaDataName);
-    if(metaDataName.empty()) {
-        html << "<p>Missing meta data name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
-    }
 
 
-    // Find the graph.
+    // Find the cell similarity graph.
     const auto it = graphs.find(graphName);
     if(it == graphs.end()) {
         html << "<p>Graph " << graphName << " does not exists.";
@@ -2394,12 +2393,54 @@ void ExpressionMatrix::cluster(
     // Write the title.
     html << "<h1>Graph " << graphName << "</h1>";
 
-    // Do the clustering and store the resulting cluster ids in the specified meta data field.
+    // Do the clustering.
     html << "<pre>";
     graph.labelPropagationClustering(html, seed, stableIterationCountThreshold, maxIterationCount);
-    storeClusterId(metaDataName, graph);
-    html << "The clusters found were stored in cell meta data name " << metaDataName << endl;
     html << "</pre>";
+
+
+    // If a meta data name was specified, store the  cluster ids in the specified meta data field.
+    if(!metaDataName.empty()) {
+    	storeClusterId(metaDataName, graph);
+    	html << "<p>The clusters found were stored in cell meta data name " << metaDataName << endl;
+    }
+
+    // Create the ClusterGraph.
+    ClusterGraph clusterGraph(graph);
+
+	// Compute the average expression for each cluster - that is, for each vertex
+    // of the cluster graph.
+	BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
+		ClusterGraphVertex& vertex = clusterGraph[v];
+		const size_t normalization = 2;	// Use L2 normalization. We might need to make this configurable.
+		computeAverageExpression(vertex.cells, vertex.averageGeneExpression, normalization);
+	}
+
+	// Store in each edge the similarity of the two clusters, computed using the clusters
+	// average expression stored in each vertex.
+	clusterGraph.computeSimilarities();
+
+	// Remove edges with low similarity.
+	clusterGraph.removeWeakEdges(0.5);	// This may need to be made configurable.
+    html << "<p>The cluster graph has " << num_vertices(clusterGraph);
+    html << " vertices and " << num_edges(clusterGraph) << " edges.";
+
+	// Write out the cluster graph in graphviz format.
+    clusterGraph.write("ClusterGraph.dot", geneNames);
+
+    // Use Graphviz to create a layout of the ClusterGraph in svg format.
+    const int returnCode = ::system("sfdp -O -T svg ClusterGraph.dot -Goverlap=false -Gsplines=true");
+    if(returnCode == -1) {
+        throw runtime_error("Error running sfdp.");
+    }
+
+    // Copy the output svg file to html.
+    html << "<p>The cluster graph is shown below. Each vertex represents a cluster. "
+    		"The most expressed genes for each cluster are listed."
+    		"The size of each cluster is loosely related to the number of cells, but it is "
+    		"also affected by the space needed to display the gene expression information.<br>";
+
+    html << ifstream("ClusterGraph.dot.svg").rdbuf();
 
     // Add a button to continue.
     html << "<p><form action=graphs><input type=submit autofocus value=Continue></form>";
