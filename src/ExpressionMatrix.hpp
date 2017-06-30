@@ -87,11 +87,8 @@ public:
     ExpressionMatrix(const string& directoryName);
 
     // Add a gene.
-    // This does nothing if the gene already exists.
-    // Genes are are also automatically added by addCell
-    // as they are encountered, but calling this makes sure even genes
-    // with zero counts on all cells are added.
-    void addGene(const string& geneName);
+    // Returns true if the gene was added, false if it was already present.
+    bool addGene(const string& geneName);
 
     // Add a cell to the expression matrix.
     // The meta data is passed as a vector of names and values, which are all strings.

@@ -92,16 +92,17 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
 
 
 
-// Add a gene. Genes are are also automatically added by addCell
-// as they are encountered, but calling this makes sure even genes
-// with zero counts on all cells are added.
-void ExpressionMatrix::addGene(const string& geneName)
+// Add a gene.
+// Returns true if the gene was added, false if it was already present.
+bool ExpressionMatrix::addGene(const string& geneName)
 {
     const StringId stringId = geneNames(geneName);
-    if(stringId != geneNames.invalidStringId) {
-    	throw runtime_error("Gene " + geneName + " already exists.");
+    if(stringId == geneNames.invalidStringId) {
+		geneNames[geneName];
+		return true;
+    } else {
+    	return false;	// Was already present.
     }
-    geneNames[geneName];
 }
 
 
@@ -192,6 +193,16 @@ CellId ExpressionMatrix::addCell(
     // Sort the expression counts we just stored by GeneId.
     const auto storedExpressionCounts = cellExpressionCounts[cellExpressionCounts.size()-1];
     sort(storedExpressionCounts.begin(), storedExpressionCounts.end());
+
+
+
+    // Verify that all the gene ids in the expression counts we just stored are distinct.
+    for(size_t i=1; i<storedExpressionCounts.size(); i++) {
+    	if(storedExpressionCounts[i-1].first == storedExpressionCounts[i].first) {
+    		const string duplicateGeneName = geneNames[storedExpressionCounts[i].first];
+    		throw runtime_error("Duplicate expression count for cell " + cellName + " gene " + duplicateGeneName);
+    	}
+    }
 
     // We need to sort the input expression counts by decreasing count.
     sort(expressionCounts.begin(), expressionCounts.end(),
