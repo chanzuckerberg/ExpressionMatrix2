@@ -1,0 +1,4 @@
+Cell,Organ,Tumor,Plate
+Cell3,Brain,Yes,10
+Cell5,Liver,No,20
+Cell4,Pancreas,No,30
