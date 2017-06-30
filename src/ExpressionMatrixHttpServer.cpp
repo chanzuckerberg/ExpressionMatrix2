@@ -324,7 +324,7 @@ void ExpressionMatrix::exploreCell(
         CZI_ASSERT(geneId < geneCount());
         const string geneName = geneNames[geneId];
         const float count = p.second;
-        html <<  "<tr><td class=centered><a href=gene?geneId=" << geneName << ">" << geneName << "</a>";
+        html <<  "<tr><td class=centered><a href=gene?geneId=" << urlEncode(geneName) << ">" << geneName << "</a>";
         html <<
             "<td class=centered>" << count;
         const auto oldPrecision = html.precision(3);
@@ -824,10 +824,10 @@ void ExpressionMatrix::exploreCellSets(
     for(const auto& p: cellSets.cellSets) {
         const string& name = p.first;
         const auto& cellSet = *p.second;
-        html << "<tr><td><a href='cellSet?cellSetName=" << name << "'>" << name << "</a><td class=centered>" << cellSet.size();
+        html << "<tr><td><a href='cellSet?cellSetName=" << urlEncode(name) << "'>" << name << "</a><td class=centered>" << cellSet.size();
         html << "<td  class=centered>";
         if(name != "AllCells") {
-            html << "<a href='removeCellSet?cellSetName=" << name << "'>Remove</a>";
+            html << "<a href='removeCellSet?cellSetName=" << urlEncode(name) << "'>Remove</a>";
         }
     }
     html << "</table>";
@@ -1114,9 +1114,9 @@ void ExpressionMatrix::exploreGene(
     // Links with information on this gene on various web sites.
     html <<
         "<p>Look up this gene on "
-        "<a href='https://www.ncbi.nlm.nih.gov/gene/?term=" << geneName << "'>NCBI</a>, "
-        "<a href='https://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=hg38&position=" << geneName << "'>UCSC</a>, "
-        "<a href='https://en.wikipedia.org/wiki/" << geneName << "'>Wikipedia</a>."
+        "<a href='https://www.ncbi.nlm.nih.gov/gene/?term=" << urlEncode(geneName) << "'>NCBI</a>, "
+        "<a href='https://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=hg38&position=" << urlEncode(geneName) << "'>UCSC</a>, "
+        "<a href='https://en.wikipedia.org/wiki/" << urlEncode(geneName) << "'>Wikipedia</a>."
         ;
 
     // If there is no cell set name, stop here.
@@ -1231,13 +1231,13 @@ void ExpressionMatrix::exploreGraphs(
         const string& graphName = p.first;
         const GraphInformation& info = p.second.first;
         // const CellSimilarityGraph& graph = *(p.second.second);
-        html << "<tr><td><a href='graph?graphName=" << graphName;
+        html << "<tr><td><a href='graph?graphName=" << urlEncode(graphName);
         if(info.edgeCount>50000) {
         	// The graph has lots of edges. Don't display them initially.
         	html << "&hideEdges=on";
         }
         html << "'>" << graphName << "</a>";
-        html << "<td><a href='cellSet?cellSetName=" << info.cellSetName;
+        html << "<td><a href='cellSet?cellSetName=" << urlEncode(info.cellSetName);
         html << "'>" << info.cellSetName << "</a>";
         html << "<td>" << info.similarPairsName;
         html << "<td class=centered>" << info.similarityThreshold;
@@ -1415,9 +1415,9 @@ void ExpressionMatrix::compareGraphs(
 
     // Cell sets.
     html << "<tr><td>Cell set name";
-    html << "<td><a href='cellSet?cellSetName=" << graphCreationParameters0.cellSetName;
+    html << "<td><a href='cellSet?cellSetName=" << urlEncode(graphCreationParameters0.cellSetName);
     html << "'>" << graphCreationParameters0.cellSetName << "</a>";
-    html << "<td><a href='cellSet?cellSetName=" << graphCreationParameters1.cellSetName;
+    html << "<td><a href='cellSet?cellSetName=" << urlEncode(graphCreationParameters1.cellSetName);
     html << "'>" << graphCreationParameters1.cellSetName << "</a>";
     html << "<td class=centered>";
     if(graphCreationParameters0.cellSetName == graphCreationParameters1.cellSetName) {
@@ -1572,7 +1572,7 @@ void ExpressionMatrix::exploreGraph(
     // Write a table with the graph creation parameters.
     html << "<div style='float:left;margin:10px'>";
     html << "<table>";
-    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << graphInfo.cellSetName;
+    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << urlEncode(graphInfo.cellSetName);
     html << "'>" << graphInfo.cellSetName << "</a>";
     html << "<tr><td>Similar pairs name<td>" << graphInfo.similarPairsName;
     html << "<tr><td>Similarity threshold<td class=centered>" << graphInfo.similarityThreshold;

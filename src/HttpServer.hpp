@@ -73,6 +73,14 @@ public:
     // This is necessary if we want to be able to accept form data that
     // contain characters that are forbidden in an URL.
     bool urlDecode(const string& in, string& out);
+
+
+    // Function to do URL encoding.
+    // This is necessary when we create a hyperlink that contains special characters.
+    // Adapted from here:
+    // https://stackoverflow.com/questions/154536/encode-decode-urls-in-c
+    static string urlEncode(const string&);
+
 private:
 
 	void processRequest(boost::asio::ip::tcp::iostream&);

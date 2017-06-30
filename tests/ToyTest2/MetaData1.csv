@@ -1,4 +1,4 @@
-Cell,Organ,Tumor
-Cell0,Brain,Yes
-Cell1,Liver,No
-Cell2,Pancreas,No
+Cell,Organ(test1),Tumor
+Cel%l0,Brain,Yes
+Cel?l1,Liver,No
+Cel=l2,Pancreas(test2),No

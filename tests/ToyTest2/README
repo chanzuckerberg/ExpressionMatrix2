@@ -1,0 +1,3 @@
+A toy test case that tests the following:
+- Adding cells in batches by calling addCells multiple times.
+- Gene names and cell meta data containing special characters.

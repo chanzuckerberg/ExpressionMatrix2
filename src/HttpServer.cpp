@@ -1,6 +1,7 @@
 // Implementation of class HttpServer - see HttpServer.hpp for more information.
 
 #include "HttpServer.hpp"
+#include "sstream.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -85,6 +86,19 @@ void HttpServer::processRequest(tcp::iostream& s)
     // Parse the request.
     cout << requestLine << endl;
     boost::algorithm::split(tokens, request, boost::algorithm::is_any_of("?=&"));
+
+    // Do URl decoding on each token.
+    // This takes care of % encoding, which the browser will do if it has to send special characters.
+    // Note that we have to do this after parsing the request into tokens.
+    // With this, we can support special characters in cell meta data, cell set names, graph names, etc.
+    for(string& token: tokens) {
+    	string newToken;
+    	urlDecode(token, newToken);
+    	if(newToken != token) {
+    		cout << "Request token " << token << " decoded as " << newToken << endl;
+    	}
+    	token = newToken;
+    }
 
     // Read the rest of the input from the client, but ignore it.
     // We have to do this, otherwise the client may get a timeout.
@@ -176,6 +190,36 @@ bool HttpServer::urlDecode(const string& in, string& out)
     }
   }
   return true;
+}
+
+
+
+// Function to do URL encoding.
+// This is necessary when we create a hyperlink that contains special characters.
+// Adapted from here:
+// https://stackoverflow.com/questions/154536/encode-decode-urls-in-c
+string HttpServer::urlEncode(const string& s)
+{
+    ostringstream escaped;
+    escaped.fill('0');
+    escaped << hex;
+
+    for (string::const_iterator i = s.begin(), n = s.end(); i != n; ++i) {
+        string::value_type c = (*i);
+
+        // Keep alphanumeric and other accepted characters intact
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << int((unsigned char) c);
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
 }
 
 
