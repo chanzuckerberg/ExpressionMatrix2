@@ -120,7 +120,7 @@ CellId ExpressionMatrix::addCell(
     vector< pair<string, float> >& expressionCounts,
     size_t maxTermCountForApproximateSimilarityComputation)
 {
-    // Check that we don't obverflow the CellId type.
+    // Check that we don't overflow the CellId type.
     CZI_ASSERT(CellId(cells.size()) < std::numeric_limits<CellId>::max());
 
     // Make sure the cellName entry exists and place it at the beginning
