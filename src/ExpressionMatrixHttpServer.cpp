@@ -127,12 +127,27 @@ void ExpressionMatrix::exploreSummary(
     const vector<string>& request,
     ostream& html)
 {
+
+
+
+    // If the run directory contains a README file, copy it to html.
+    // The README file can contain html, if it is well behaved.
+    if(boost::filesystem::exists("README") && boost::filesystem::is_regular_file("README")) {
+    	ifstream readMeFile("README");
+    	html << "<h1>README file</h1>";
+    	html << readMeFile.rdbuf();
+    }
+
+
+
     html <<
         "<h1>Expression matrix</h1>"
         "<p>The expression matrix has " << cellCount() <<
         " cells and " << geneCount() <<
         " genes.";
 
+
+    // Write the summary of hash table usage.
     writeHashTableAnalysis(html);
 }
 
