@@ -58,6 +58,12 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("cellMetaDataValueCapacity", &ExpressionMatrixCreationParameters::cellMetaDataValueCapacity)
         ;
 
+    // Expose class ServerParameters to Python.
+    class_<ServerParameters>("ServerParameters", init<>())
+        .def_readwrite("port", &ServerParameters::port)
+        .def_readwrite("docDirectory", &ServerParameters::docDirectory)
+        ;
+
 #if 0
     // Expose class ExpressionMatrix::ApproximateCellSimilarity to Python.
     // An object of this type is returned by function ExpressionMatrix::computeApproximateCellSimilarity.

@@ -30,6 +30,7 @@ namespace ChanZuckerberg {
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
         class GraphInformation;
+        class ServerParameters;
 
     }
 }
@@ -70,6 +71,14 @@ public:
     GraphInformation() {}
 };
 
+
+
+// Class used to specify parameters when starting the http server.
+class ChanZuckerberg::ExpressionMatrix2::ServerParameters {
+public:
+	uint16_t port = 17100;	// The port number to listen to.
+	string docDirectory;	// The directory containing the documentation (optional).
+};
 
 
 
@@ -350,6 +359,10 @@ private:
     MemoryMapped::VectorOfVectors<pair<GeneId, float>, uint64_t> largeCellExpressionCounts;
 
     // Functions used to implement HttpServer functionality.
+public:
+    void explore(const ServerParameters& serverParameters);
+private:
+    ServerParameters serverParameters;
     void processRequest(const vector<string>& request, ostream& html);
     typedef void (ExpressionMatrix::*ServerFunction)(const vector<string>& request, ostream& html);
     map<string, ServerFunction> serverFunctionTable;

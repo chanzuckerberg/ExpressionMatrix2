@@ -9,8 +9,9 @@ import ExpressionMatrix2
 e = ExpressionMatrix2.ExpressionMatrix('data')
 
 # Run the server.
-port = 17100
-e.explore(port)
+serverParameters = ExpressionMatrix2.ServerParameters()
+serverParameters.port = 17100
+e.explore(serverParameters)
 
 
 

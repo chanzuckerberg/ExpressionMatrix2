@@ -12,8 +12,10 @@ using namespace ExpressionMatrix2;
 #include <boost/filesystem.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "fstream.hpp"
+
 
 
 // Function that provides simple http functionality
@@ -25,14 +27,39 @@ void ExpressionMatrix::processRequest(
     const vector<string>& request,
     ostream& html)
 {
-    // Find the function that will process this request.
+    // Look up the keyword to find the function that will process this request.
     const string& keyword = request.front();
     const auto it = serverFunctionTable.find(keyword);
+
+
+    // If we did not find the keyword, see if it is a documentation request.
     if(it == serverFunctionTable.end()) {
+
+    	// See if it is of the form help/xyz.
+    	// Here, xyz is not allowed to contain any slashes,
+    	// otherwise we would open a big security hole: requests of the form help/../../file
+    	// would give access to anywhere in the file system.
+    	vector<string> tokens;
+        boost::algorithm::split(tokens, keyword, boost::algorithm::is_any_of("/"));
+        if(tokens.size()==3 && tokens.front().empty() && tokens[1]=="help") {
+        	ifstream file(serverParameters.docDirectory + "/" + tokens[2]);
+        	if(file) {
+        		html << "\r\n" << file.rdbuf();
+        		return;
+        	}
+        }
+
+    	// This is not a documentation request. Write a message and stop here.
         html << "\r\nUnsupported keyword " << keyword;
         return;
     }
+
+
+
+    // We found the keyword. Get the function that processes this keyword.
     const auto function = it->second;
+
+
 
     // Write everything that goes before the html body.
     html <<
@@ -56,6 +83,30 @@ void ExpressionMatrix::processRequest(
 
     html << "</body>";
     html << "</html>";
+}
+
+
+
+void ExpressionMatrix::explore(const ServerParameters& serverParameters)
+{
+	// Store the server parameters.
+	this->serverParameters = serverParameters;
+
+	// Validate the docDirectory in the server parameters.
+	// If specified and not valid, set it to an empty string.
+	if(this->serverParameters.docDirectory.empty()) {
+		cout << "A documentation directory was not specified. Documentation will not be available from the server." << endl;
+	} else {
+		ifstream file(serverParameters.docDirectory + "/index.html");
+		if(!file) {
+			cout << "Documentation index file " << serverParameters.docDirectory;
+			cout << "/index.html could not be open. Documentation will not be available from the server." << endl;
+			this->serverParameters.docDirectory.clear();
+		}
+	}
+
+	// Invoke teh base class.
+	HttpServer::explore(serverParameters.port);
 }
 
 
@@ -97,6 +148,11 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Cell sets", "cellSets");
     writeNavigation(html, "Cell meta data", "metaData");
     writeNavigation(html, "Graphs", "graphs");
+
+    if(!serverParameters.docDirectory.empty()) {
+        writeNavigation(html, "Help", "help/index.html");
+    }
+
     html << "<div style='clear:both;height:10px;'></div>";
 
 }
@@ -120,7 +176,6 @@ void ExpressionMatrix::writeNavigation(ostream& html, const string& text, const 
         "'>\n"
         << text << "</button>";
 }
-
 
 
 
