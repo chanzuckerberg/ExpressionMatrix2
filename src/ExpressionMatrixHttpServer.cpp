@@ -64,6 +64,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable[""]                                 = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/"]                                = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/index"]                           = &ExpressionMatrix::exploreSummary;
+    serverFunctionTable["/exploreHashTableSummary"]         = &ExpressionMatrix::exploreHashTableSummary;
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
@@ -147,15 +148,15 @@ void ExpressionMatrix::exploreSummary(
         " genes.";
 
 
-    // Write the summary of hash table usage.
-    writeHashTableAnalysis(html);
+    // Link to the summary of hash table usage.
+    html << "<p>See a <a href=exploreHashTableSummary>summary of hash table utilization</a>.";
 }
 
 
 
-void ExpressionMatrix::writeHashTableAnalysis(ostream& html) const
+void ExpressionMatrix::exploreHashTableSummary(const vector<string>& request, ostream& html)
 {
-    html << "<h2>Hash table usage analysis</h2>";
+    html << "<h1>Hash table usage analysis</h1>";
 
     html <<
         "<p>"

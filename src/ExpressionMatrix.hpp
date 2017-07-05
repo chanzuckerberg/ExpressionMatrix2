@@ -357,7 +357,7 @@ private:
     void writeNavigation(ostream& html);
     void writeNavigation(ostream& html, const string& text, const string& url);
     void exploreSummary(const vector<string>& request, ostream& html);
-    void writeHashTableAnalysis(ostream&) const;
+    void exploreHashTableSummary(const vector<string>& request, ostream&);
     void exploreGene(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
