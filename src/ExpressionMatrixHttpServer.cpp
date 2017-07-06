@@ -1637,6 +1637,18 @@ void ExpressionMatrix::exploreGraph(
     // Write the title.
     html << "<h1>Graph " << graphName << "</h1>";
 
+
+    // Compute the graph layout, if necessary.
+    if(!graph.layoutWasComputed) {
+        html << "<div style='font-family:courier'>";
+		html << timestamp << "Graph layout computation begins.";
+		graph.computeLayout();
+		html << "<br>" << timestamp << "Graph layout computation ends.";
+		html << "</div>";
+		graph.layoutWasComputed = true;
+    }
+
+
     // Div to contain the table and the form for coloring.
     html << "<div>";
 
@@ -1653,6 +1665,9 @@ void ExpressionMatrix::exploreGraph(
     html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>" << graphInfo.isolatedVertexCount;
     html << "</table>";
     html << "</div>";
+
+
+
 
     // Compute maximum and minimum coordinates for the vertices in the graph,
     // then enlarge them to a square.
@@ -2588,16 +2603,10 @@ void ExpressionMatrix::createNewGraph(
     html << timestamp << "Graph creation begins.";
     createCellSimilarityGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
     const GraphInformation& graphInfo = graphs[graphName].first;
-    CellSimilarityGraph& graph = *(graphs[graphName].second);	// Cannot be const because we are going to call computeLayout below.
     html <<
         "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<
         " vertices and " << graphInfo.edgeCount << " edges"
 		" after " << graphInfo.isolatedVertexCount << " isolated vertices were removed.";
-
-    // Compute the graph layout.
-    html << "<br>" << timestamp << "Graph layout computation begins.";
-    graph.computeLayout();
-    html << "<br>" << timestamp << "Graph layout computation ends.";
     html << "</div>";
 
     // Add a button to continue.

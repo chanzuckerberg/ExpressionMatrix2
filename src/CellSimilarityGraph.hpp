@@ -104,6 +104,7 @@ public:
 
 	// Use Graphviz to compute the graph layout and store it in the vertex positions.
 	void computeLayout();
+	bool layoutWasComputed = false;
 
 	// Clustering using the label propagation algorithm.
 	// The cluster each vertex is assigned to is stored in the clusterId data member of the vertex.
