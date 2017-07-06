@@ -808,7 +808,7 @@ ostream& ExpressionMatrix::writeCellSetSelection(
     if(multiple) {
         html << " multiple";
     }
-    html << " name=" << selectName << ">";
+    html << " name=" << selectName << " style='vertical-align:text-top;'>";
     html << "<option value=''></option>";
     for(const auto& p: cellSets.cellSets) {
         const string& cellSetName = p.first;
@@ -874,14 +874,14 @@ void ExpressionMatrix::exploreCellSets(
 
     // Form to create a new cell set using existing cell sets.
     html <<
-        "<h2>Create a new cell set using existing cell sets</h2>"
+        "<br><h2>Create a new cell set by union/intersection of existing cell sets</h2>"
         "<p><form action=createCellSetIntersectionOrUnion>"
         "<input type=submit value='Create a new cell set'> with name "
         "<input type=text required name=cellSetName>"
         " as the "
         "<select name=operation>"
-        "<option value=intersection>intersection</option>"
         "<option value=union>union</option>"
+        "<option value=intersection>intersection</option>"
         "</select>"
         " of the selected cell sets: ";
     writeCellSetSelection(html, "inputCellSets", true);
