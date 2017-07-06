@@ -123,6 +123,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/cellSet"]                         = &ExpressionMatrix::exploreCellSet;
     serverFunctionTable["/createCellSetUsingMetaData"]      = &ExpressionMatrix::createCellSetUsingMetaData;
     serverFunctionTable["/createCellSetIntersectionOrUnion"]= &ExpressionMatrix::createCellSetIntersectionOrUnion;
+    serverFunctionTable["/downsampleCellSet"]				= &ExpressionMatrix::downsampleCellSet;
     serverFunctionTable["/removeCellSet"]                   = &ExpressionMatrix::removeCellSet;
     serverFunctionTable["/graphs"]                          = &ExpressionMatrix::exploreGraphs;
     serverFunctionTable["/compareGraphs"]                   = &ExpressionMatrix::compareGraphs;
@@ -853,11 +854,23 @@ void ExpressionMatrix::exploreCellSets(
     // Write a title.
     html << "<h1>Cell sets</h1>";
 
+    // Write a table listing the cell sets in existence.
+    html << "<p><table><th>Cell<br>set<br>name<th>Number<br>of<br>cells<th class=centered>Click<br>to<br>remove";
+    for(const auto& p: cellSets.cellSets) {
+        const string& name = p.first;
+        const auto& cellSet = *p.second;
+        html << "<tr><td><a href='cellSet?cellSetName=" << urlEncode(name) << "'>" << name << "</a><td class=centered>" << cellSet.size();
+        html << "<td  class=centered>";
+        if(name != "AllCells") {
+            html << "<a href='removeCellSet?cellSetName=" << urlEncode(name) << "'>Remove</a>";
+        }
+    }
+    html << "</table>";
 
 
     // Form to create a new cell set from meta data.
     html <<
-        "<h2>Create a new cell set using meta data</h2>"
+        "<br><h2>Create a new cell set using meta data</h2>"
         "<p><form action=createCellSetUsingMetaData>"
         "<input type=submit value='Create a new cell set'> with name "
         "<input type=text required name=cellSetName>"
@@ -872,7 +885,7 @@ void ExpressionMatrix::exploreCellSets(
 
 
 
-    // Form to create a new cell set using existing cell sets.
+    // Form to create a new cell set by union/intersection existing cell sets.
     html <<
         "<br><h2>Create a new cell set by union/intersection of existing cell sets</h2>"
         "<p><form action=createCellSetIntersectionOrUnion>"
@@ -889,19 +902,24 @@ void ExpressionMatrix::exploreCellSets(
 
 
 
-    // Write a table listing the cell sets in existence.
-    html << "<h2>Existing cell sets</h2>";
-    html << "<p><table><th>Cell<br>set<br>name<th>Number<br>of<br>cells<th class=centered>Click<br>to<br>remove";
-    for(const auto& p: cellSets.cellSets) {
-        const string& name = p.first;
-        const auto& cellSet = *p.second;
-        html << "<tr><td><a href='cellSet?cellSetName=" << urlEncode(name) << "'>" << name << "</a><td class=centered>" << cellSet.size();
-        html << "<td  class=centered>";
-        if(name != "AllCells") {
-            html << "<a href='removeCellSet?cellSetName=" << urlEncode(name) << "'>Remove</a>";
-        }
-    }
-    html << "</table>";
+    // Form to create a new cell set by downsampling an existing cell set.
+    html <<
+        "<br><h2>Create a new cell set by downsampling an existing cell set</h2>"
+        "<p>The new cell set will be a random subset of the specified cell set."
+    	" Each cell in the specified cell set is inserted in the random subset with the specified probability."
+    	" Therefore, the downsampling rate will be approximately equal to the specified probability."
+        "<p><form action=downsampleCellSet>"
+        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=text required name=cellSetName>"
+        " by downsampling cell set ";
+    writeCellSetSelection(html, "inputCellSet", false);
+    html <<
+		" with probability "
+		"<input type=text required name=probability size=6>"
+		" and random seed "
+		"<input type=text required name=seed value='231' size=6>"
+    	"</form>";
+
 }
 
 
@@ -1075,13 +1093,53 @@ void ExpressionMatrix::createCellSetIntersectionOrUnion(const vector<string>& re
     inputCellSetsString.resize(inputCellSetsString.size()-1);
 
 
-    // Dp the intersection or union.
+    // Do the intersection or union.
     if(createCellSetIntersectionOrUnion(inputCellSetsString, cellSetName, doUnion)) {
         html << "<p>Newly created cell set " << cellSetName << " has ";
         html << cellSets.cellSets[cellSetName]->size() << " cells.";
     } else {
         html << "<p>Unable to create cell set " << cellSetName << ".";
     }
+    html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+
+}
+
+
+
+void ExpressionMatrix::downsampleCellSet(const vector<string>& request, ostream& html)
+{
+    // Get the name of the cell set to be created.
+    string cellSetName;
+    if(!getParameterValue(request, "cellSetName", cellSetName)) {
+        html << "Missing cell set name.";
+        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+
+    // Get the name of the input cell set.
+    string inputCellSet;
+    getParameterValue(request, "inputCellSet", inputCellSet);
+
+    // Get the downsampling parameters.
+    double probability;
+    getParameterValue(request, "probability", probability);
+    int seed;
+    getParameterValue(request, "seed", seed);
+
+
+    // Do the downsampling.
+    if(downsampleCellSet(inputCellSet, cellSetName, probability, seed)) {
+        html << "<p>Newly created cell set " << cellSetName << " has ";
+        html << cellSets.cellSets[cellSetName]->size() << " cells.";
+        html << "<p>Downsampling probability was " << probability;
+        html << "<p>Actual downsampling rate was " << double(cellSets.cellSets[cellSetName]->size()) / double(cellSets.cellSets[inputCellSet]->size());
+    } else {
+        html << "<p>Unable to create cell set " << cellSetName << ".";
+    }
+
+
+    // The button to continue goes back to the cell sets page.
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
 }

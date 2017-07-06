@@ -11,6 +11,9 @@ using namespace ExpressionMatrix2;
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <boost/regex.hpp>
 
 #include "fstream.hpp"
@@ -1289,6 +1292,49 @@ bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSepar
     return true;
 }
 
+
+
+// Create a new cell set by downsampling an existing cell set.
+bool ExpressionMatrix::downsampleCellSet(
+	const string& inputCellSetName,
+	const string& outputCellSetName,
+	double probability,
+	int seed)
+{
+
+	// Locate the input cell set.
+	const auto it = cellSets.cellSets.find(inputCellSetName);
+	if(it == cellSets.cellSets.end()) {
+		return false;
+	}
+    const CellSets::CellSet& inputCellSet = *(it->second);
+
+    // Create the new cell set.
+    vector<CellId> outputCellSet;
+
+	// Prepare to generate uniformly distributed numbers between 0 and 1.
+	using RandomSource = boost::mt19937;
+	using UniformDistribution = boost::uniform_01<>;
+	RandomSource randomSource(seed);
+	UniformDistribution uniformDistribution;
+	boost::variate_generator<RandomSource, UniformDistribution> uniformGenerator(randomSource, uniformDistribution);
+
+
+    // Loop over all cells in the input cell set.
+    // Add each one of them to the output cell set with the specified probability.
+    for(const CellId cellId: inputCellSet) {
+    	if(uniformGenerator() < probability) {
+    		outputCellSet.push_back(cellId);
+    	}
+    }
+
+
+
+    // Store the new cell set.
+    cellSets.addCellSet(outputCellSetName, outputCellSet);
+
+    return true;
+}
 
 
 
