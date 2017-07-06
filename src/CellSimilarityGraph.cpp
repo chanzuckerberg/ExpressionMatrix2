@@ -601,10 +601,12 @@ void CellSimilarityGraph::labelPropagationClustering(
         clusterSizeVector.push_back(make_pair(p.second, p.first));
     }
     sort(clusterSizeVector.begin(), clusterSizeVector.end(), std::greater< pair<size_t, size_t> >());
+    out << "Cluster sizes:";
     for(size_t newClusterId=0; newClusterId<clusterSizeVector.size(); newClusterId++) {
         const auto& p = clusterSizeVector[newClusterId];
-        out << "Cluster " << newClusterId << " has " << p.first << " cells." << endl;
+        out << " " << p.first;
     }
+    out << endl;
     map<uint32_t, uint32_t> clusterMap; // Key: old clusterId. Value: new clustyerId.
     for(uint32_t newClusterId=0; newClusterId<clusterSizeVector.size(); newClusterId++) {
         const uint32_t oldClusterId = clusterSizeVector[newClusterId].second;

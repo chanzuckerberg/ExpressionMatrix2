@@ -2494,16 +2494,32 @@ void ExpressionMatrix::cluster(
 	// Remove edges with low similarity.
 	clusterGraph.removeWeakEdges(0.5);	// This may need to be made configurable.
     html << "<p>The cluster graph has " << num_vertices(clusterGraph);
-    html << " vertices and " << num_edges(clusterGraph) << " edges.";
+    html << " vertices and " << num_edges(clusterGraph) << " edges.</p>";
 
 	// Write out the cluster graph in graphviz format.
     clusterGraph.write("ClusterGraph.dot", geneNames);
 
+
+
     // Use Graphviz to create a layout of the ClusterGraph in svg format.
-    const int returnCode = ::system("sfdp -O -T svg ClusterGraph.dot -Goverlap=false -Gsplines=true");
-    if(returnCode == -1) {
-        throw runtime_error("Error running sfdp.");
+    // For better layouts, we would like to use -Goverlap=false because that does not work with the
+    // ubuntu graphviz package (it is built without the triangulation library).
+    const string command = "sfdp -O -T svg ClusterGraph.dot -Goverlap=scalexy -Gsplines=true";
+    const int commandStatus = ::system(command.c_str());
+    if(WIFEXITED(commandStatus)) {
+    	const int exitStatus = WEXITSTATUS(commandStatus);
+		if(exitStatus!=0 && exitStatus!=1) {	// sfdp returns 1 all the time just because of the message about missing triangulation.
+			throw runtime_error("Error " + lexical_cast<string>(exitStatus) + " running graph layout command: " + command);
+		}
+    } else if(WIFSIGNALED(commandStatus)) {
+    	const int signalNumber = WTERMSIG(commandStatus);
+		throw runtime_error("Signal " + lexical_cast<string>(signalNumber) + " while running graph layout command: " + command);
+    } else {
+		throw runtime_error("Abnormal status " + lexical_cast<string>(commandStatus) + " while running graph layout command: " + command);
+
     }
+
+
 
     // Copy the output svg file to html.
     html << "<p>The cluster graph is shown below. Each vertex represents a cluster. "
