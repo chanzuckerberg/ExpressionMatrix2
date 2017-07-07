@@ -34,7 +34,9 @@
 								<option id="gnu.cpp.compiler.option.other.pic.1899604589" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1587461728" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/python3.5m"/>
+									<listOptionValue builtIn="false" value="/usr/include/hdf5/serial"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.include.files.45825771" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" valueType="includeFiles"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1086298445" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.269164854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -53,7 +55,10 @@
 									<listOptionValue builtIn="false" value="boost_system"/>
 									<listOptionValue builtIn="false" value="python3.5m"/>
 									<listOptionValue builtIn="false" value="boost_regex"/>
+									<listOptionValue builtIn="false" value="hdf5_cpp"/>
+									<listOptionValue builtIn="false" value="hdf5_serial"/>
 								</option>
+								<option id="gnu.cpp.link.option.paths.1574368927" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.113209161" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -106,10 +111,12 @@
 								<option id="gnu.cpp.compiler.option.other.pic.1135906770" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1892601243" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/python3.5m"/>
+									<listOptionValue builtIn="false" value="/usr/include/hdf5/serial"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.1040278431" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.955945568" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-msse4.2" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.debugging.other.748177729" superClass="gnu.cpp.compiler.option.debugging.other" value="-ggdb3" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.debugging.other.748177729" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" value="-ggdb3" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.include.files.981806943" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" valueType="includeFiles"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1396589168" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.13926179" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
@@ -128,7 +135,10 @@
 									<listOptionValue builtIn="false" value="boost_system"/>
 									<listOptionValue builtIn="false" value="python3.5m"/>
 									<listOptionValue builtIn="false" value="boost_regex"/>
+									<listOptionValue builtIn="false" value="hdf5_cpp"/>
+									<listOptionValue builtIn="false" value="hdf5_serial"/>
 								</option>
+								<option id="gnu.cpp.link.option.paths.755783387" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.502997275" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
