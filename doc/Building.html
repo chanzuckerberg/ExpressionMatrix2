@@ -30,11 +30,12 @@ Debug the code.
 The code requires the following software packages to be available:
 <ul>
 <li>The gcc compiler. This is installed by default on most Linux distributions. Significant code changes may be required to port the code to systems other than Linux systems.
-<li>The Boost libraries. Boost version 1.58 is used for Ubuntu, but the code should not be strictly dependend on a specific version of the Boost libraries.
-<li>Python3. The code can also be built for Python2 by making appropriate changes in the include files and libraries used in the build process.
-<li>Graphviz.
+<li>The Boost libraries. Boost version 1.58 is used for Ubuntu (package libbost-all-dev), but the code should not be strictly dependend on a specific version of the Boost libraries.
+<li>Python3 (on ubuntu 16.04, package python3-all-dev). The code can also be built for Python2 by making appropriate changes in the include files and libraries used in the build process.
+<li>Graphviz (on ubuntu 16.04, package graphviz).
+<li>Libraries and development files needed to read HDF5 files (on ubuntu-16.04, packages libhdf5-10, libhdf5-cpp-11, and libhdf5-dev).
 </ul>
-The means by which you can obtain and install these packages is dependent on the system you want to run the build the on.
+The means by which you can obtain and install these packages is dependent on the system you want to run the build the on. The package names given above allow you to download these packages, for ubuntu 16.04, from the standard ubuntu repositories.
 
 <p>
 Once you have a local copy of the repository, you have two choices to build from source:

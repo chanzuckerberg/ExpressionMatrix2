@@ -14,6 +14,7 @@ Use the following directions to quickly get started and run ExpressionMatrix2 on
     * The Boost libraries (package libboost-all-dev).
     * Python3 (package python3-all-dev).
     * Graphviz (package graphviz). 
+    * Libraries needed to read HDF5 files (packages libhdf5-10 and libhdf5-cpp-11).
 
 If one or more of these packages are not installed, you can install them using command "apt install packageName", where packageName is as indicated above. This requires root access.
 

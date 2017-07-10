@@ -11,11 +11,68 @@
 <h1>Analyzing using the Python API</h1>
 
 
-<p>
-This section of the documentation has not yet been written, but see src/PythonModule.cpp for a list of the Python bindings.
 
-<p>
-The rest of the documentation is <a href=index.html>here</a>.
+<h2>Accessing ExpressionMatrix2 functionality from Python code</h2>
+
+<p>Users access ExpressionMatrix2 functionality via shared library ExpressionMatrix2.so, which can by imported in a Python script as a Python package. The build assumes that the library will be used with Python Version 3, but could be modified (by changing some include file paths and library names) to work with Python 2 instead. You can import ExpressionMatrix2 in Python 3 code just like any other Python package, for example adding the following near the beginning of your Python script or after starting a Python shell for interactive use:
+
+<pre>
+import ExpressionMatrix2
+</pre>
+
+<p>For this to work, the ExpressionMatrix2 library must be made available to the Python interpreter in one of the standard ways - for example:
+
+<ul>
+<li>Set environment variable PYTHONPATH to point to the directory containing the library.
+<li>Make a copy of the library in the directory which is the current directory at the time the Python import command executes. A symbolic link will also work.
+</ul>
+
+<p>All the code examples in the next sections assume that the import command before was executed successfully.
+
+
+
+<h2>Creating and accessing expression matrix objects</h2>
+
+<p>To begin working with a new data set, you must first create a new Python object to describe the expression matrix for the new data set. This can be done as shown in the following example:
+
+<pre>
+parameters = ExpressionMatrix2.ExpressionMatrixCreationParameters()
+parameters.geneCapacity = 50000                 # Maximum number of genes.
+parameters.cellCapacity = 100000                # Maximum number of cells.           
+parameters.cellMetaDataNameCapacity = 10000     # Maximum number of distinct cell meta data name strings.
+parameters.cellMetaDataValueCapacity = 1000000  # Maximum number of distinct cell meta data value strings.
+e = ExpressionMatrix.ExpressionMatrix('data', parameters)
+</pre>
+
+<p>The parameters object is used to specify the capacity of various hash tables used to store genes, cells, and cell meta data, as explained in the comments. Keep in mind that the present version of the code does not provide a way to redefine these capacities later by rehashing the tables. 
+
+<p> The last line creates the expression matrix object. The first parameter is the name of a directory that will be used to hold various binary files containing expression matrix data structures. The directory will be create is it does not exist.
+
+<p>Since most data structures are stored in files, the expression matrix object is persistent: it can be reaccessed in the future, even after the Python object used for the original creation disappears. This can be done by simply specifying the name of the directory containing the binary data, without specifying creation parameters:
+
+<pre>
+e = ExpressionMatrix.ExpressionMatrix('data')
+</pre>
+
+<p>The code examples in the next sections assume that an expression matrix object named "e" was accessed in one of the two ways shown in this section.
+
+
+
+<h2>Adding cells</h2>
+
+<p>After the expression matrix object is first created, the first thing you will want to do is add cells to it. To provide flexibility in adding cells, three paths to add cells are provided:
+
+<ul>
+<li>Function <code>addCells</code> can be used to add cells and meta data from files in comma separated format (csv) or similar delimited formats.
+<li>Function <code>addCellsFromHdf5</code> can be used to add cells from expression matrix data in HDF5 format created by the 10x Genomics pipeline.
+<li>Function <code>addCell</code> can be used to add a single cell and meta data specified using a simple JSON format.
+</ul>
+
+<p>Each of these three methods is described in more details in one of the sections below. You can use any combination of the three methods, in any sequence, to add different batches of cells to a single expression matrix object.
+
+<h3>Adding cells in comma separated format or similar delimited formats</h3>
+<h3>Adding cells from expression matrix data in HDF5 format created by the 10x Genomics pipeline</h3>
+<h3>Addint cells in simple JSON format</h3>
 
 </body>
 </html>

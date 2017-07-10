@@ -1,7 +1,7 @@
 * {
 font-family: sans-serif;
 }
-pre {
+pre, code {
 font-family: courier;
 }
 p, input {
