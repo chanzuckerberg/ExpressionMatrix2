@@ -68,12 +68,14 @@ void HttpServer::processRequest(tcp::iostream& s)
     boost::algorithm::split(tokens, requestLine, boost::algorithm::is_any_of(" "));
     if(tokens.size() != 3) {
         s << "Unexpected number of tokens in http request: expected 3, got " << tokens.size();
-        cout << "Unexpected number of tokens in http request: expected 3, got " << tokens.size();
+        cout << "Unexpected number of tokens in http request: expected 3, got " << tokens.size() << endl;
+        cout << "Request was: " << requestLine << endl;
         return;
     }
     if(tokens.front() != "GET") {
         s << "Unexpected keyword in http request: " << tokens.front();
-        cout << "Unexpected keyword in http request: " << tokens.front();
+        cout << "Unexpected keyword in http request: " << tokens.front() << endl;
+        cout << "Request was: " << requestLine << endl;
         return;
     }
     const string& request = tokens[1];
