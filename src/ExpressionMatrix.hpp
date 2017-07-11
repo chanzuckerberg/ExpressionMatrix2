@@ -117,8 +117,7 @@ public:
     // The expected JSON can be constructed using Python code modeled from the following:
     // import json
     // cell = {'metaData': {'cellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
-    // jSonString = json.dumps(cell)
-    // expressionMatrix.addCell(json.dumps(jSonString))
+    // expressionMatrix.addCell(json.dumps(jSonString), maxTermCountForApproximateSimilarityComputation)
     // Note the cellName metaData entry is required.
     CellId addCell(
         const string&,
