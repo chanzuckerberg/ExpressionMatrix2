@@ -177,7 +177,7 @@ e.addCellsFromHdf5('file.h5', maxTermCountForApproximateSimilarityComputation)
 </pre>
 
 <p>
-Here, the first parameter specified the name of the HDF5 and the second parameter specifies the maximum number of genes to be used for approximate similarity computations involving these cells. A value of 100 is usually appropriate. Note then, when using this format, cells have no meta data except for their name.
+Here, the first parameter specifies the name of the HDF5 and the second parameter specifies the maximum number of genes to be used for approximate similarity computations involving these cells. A value of 100 is usually appropriate. Note then, when using this format, cells have no meta data except for their name.
 
 
 
@@ -197,6 +197,115 @@ Each cell is required ot have the <code>cellName</code> meta data field, but oth
 
 <p>
 As before, the last parameter specifies the maximum number of genes to be used for approximate similarity computations involving these cells. A value of 100 is usually appropriate.
+
+<p>
+Your code will need a loop over all cells to be added. For each cell, the code would read information for that cell in your custom format, create the required JSON, then call <code>addCell</code> as shown above. This provides complete flexibility on the input format, but requires some Python coding.
+
+
+
+<h2>Finding pairs of similar cells</h2>
+
+<p>
+In order to be able to create a <a href="Approach.html#cellSimilarityGraph">cell similarity graph</a>, it is necessary to first find pairs of similar cells. This is the most computationally intense portion of the ExpressionMatrix2 code, and is done in Python code.
+
+<p>
+A set of pairs of similar pairs can be created in Python code using a choice of methods. On creation, it is also given a name. That name can later be used, from the http server or in other Python code, to create a cell similarity graph.
+
+<p>
+The following two parameters are common to all methods to find pairs of similar cells:
+
+<ul>
+<li><code>k</code> is the maximum number cells similar to a given cell that will be stored. For each cell, only the <code>k</code> most similar cells will be stored.
+<li><code>similarityThreshold</code> is the minimum similarity required to store a pair of similar cells.
+</ul>
+
+<p>
+Note that, if cells A and B are found to have similarity greater than the threshold, we will normally store cell B in the list of cells similar to cell A, and cell A in the list of cells similar to cell B. However, one or both of these stores may have to be omitted to enforce the <code>k</code> parameter. As a result, the cell similarity described by a given set of cell similarities is not necessarily symmetric: if cell A is stored as being similar to cell B, it is not necessarily the case that cell B is stored as being similar to cell A. 
+
+<p>
+The next sections describe the currently supported methods of finsding sets os similar pairs of cells.
+
+
+
+<h3>Function findSimilarPairs0</h3>
+
+<p>
+Function <code>findSimilarPairs0</code> loops over pairs of cells, and explicitly computes the similarity of the two cells in each pair, defined as the <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression counts of the two cells. It is called as follows:
+
+<pre>
+e.findSimilarPairs0(name, k, similarityThreshold, exactFlag)
+</pre>
+
+<p>
+The first three parameters were described above. The last parameter is a Boolean flag. If <code>True</code>, the computation is exact and takes into account all of the non-zero expression counts for the two cells. If <code>False</code>, the computation is done approximately and taking only into account, for each cell, a subset of <code>maxTermCountForApproximateSimilarityComputation</code> genes with the highest expression counts for each of the two cells. The value of <code>maxTermCountForApproximateSimilarityComputation</code> was specified for each cell when the cell was added to the expression matrix.
+
+<p>Usually, <code>maxTermCountForApproximateSimilarityComputation=100</code> results in an approximate computation that is much faster than exact computation while giving similar similarity values for most pairs of cells. However, whether exact or approximate computation is used, the time to perform the computation is proportional to the number of cell pairs and therefore grows with the square of the number of cells. Typically, exact computation becomes prohibitive when the number of cells is in the several thousands, and approximate computation when the number of cells is in the tens of thousands.
+
+
+
+<h3>Function findSimilarPairs1 (preliminary documentation)</h3>
+
+<p>
+Until more complete documentation on the Locality Sensitive Hashing methods used in ExpressionMatrix2 code is available, this will serve as preliminary documentation for function <code>findSimilarPairs1</code> .
+
+<p>
+Function <code>findSimilarPairs1</code> loops over pairs of cells, and approximately computes the similarity of the two cells in each pair, defined as the <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression counts of the two cells, using Locality Sensitive Hashing (LSH). It is called as follows:
+
+<pre>
+seed = 231
+lshCount = 1024
+e.findSimilarPairs1(name, k, similarityThreshold, lshCount, seed)
+</pre>
+
+<p>
+The first three parameters were described above. Until complete documentation is available, the above parameter values for the last two parameters should be used. This is much faster than even approximate computation using <code>findSimilarPairs0</code> described above, however it still grows with the square of the number of cells. It typically becomes computationally prohibitive when the number of cells is in the hundreds of thousands. With the parameter values above, it computes similarity values that typically have a standard deviation 0.03 through 0.05 from the exact value.
+
+<p>
+Note that, for this function to perform at high speed, use of the POPCOUNT instruction must be enabled. For the Ubuntu build under Eclipse, this is done using compiler option <code>-msse4.2</code>. Equivalent means would have to be used by a port to a different platform to ensure high performance of function <code>findSimilarPairs1</code>.
+
+
+
+<h3>Function findSimilarPairs2 (preliminary documentation)</h3>
+
+<p>
+Function <code>findSimilarPairs2</code>, under development, uses Locality Sensitive Hashing (LSH) to find cell pairs with high similarity without looping over all pairs of cells. This provides scaling to large number of cells with compute cost increasing in a slower fashion than proportionally to the square of the number of cells.
+
+
+
+<h2 id=server>Starting the http server</h2>
+
+<p> See <a href="Server.html">here</a> for a description of functionality offered by the http server. Before you can use that functionality, you need to start the server using Python code like the one shown below:
+
+<pre>
+serverParameters = ExpressionMatrix2.ServerParameters()
+serverParameters.port = 17100
+serverParameters.docDirectory = pathToDocumentationDirectory
+e.explore(serverParameters)
+</pre>
+
+<p>
+Specifying the port number is optional. If not specified, the port number defaults to 17100. It is best to use high port numbers (between 1025 and 65535). The call to <code>explore</code> will fail if the specified port number is already in use in the system. If you want to have http servers running for multiple runs, each run will need to use a different port number. 
+
+<p>
+Occasionally, even after a server is interrupted, the port the server was using remains in use for a short period of time (a few seconds or up to a few minutes). This behavior is dictated by the TCP/IP stack and cannot be overridden.
+
+<p>
+Specifying <code>serverParameters.docDirectory</code> is also optional. This should be set to the local path of the ExpressionMatrix2/doc directory and is necessary for the server to be able to locate the documentation. If not specified, the server will still start, but will be unable to display the documentation.
+
+<p>
+The server can be stopped at any time using Ctrl^C. However, if this is done, this causes a hard termination of the Python script that was running the server. Python destructors and other Python clean up code will not be executed.
+
+
+
+<h2>Interrupting Python code</h2>
+
+<p>
+You can interrupt running Python code using Ctrl^C as usual. This sends a signal, and when the Python interpreter sees the signal it calls the necessary cleanup code and terminates. However, if the Ctrl^C is sent while ExpressionMatrix2 code is running, the Python interpreter will only see the signal when the ExpressionMatrix2 code returns, which means that it may take a long time for termination to occur, depending on what the code was doing. A practical way to obtain immediate termination is to first use Ctrl^Z, followed by a "kill %" command to kill the process.
+
+<p>
+The http server is an exception to this behavior, because it sets up its own signal handler. As explained above, the server can be stopped at any time using Ctrl^C. However, if this is done, this causes a hard termination of the Python script that was running the server. Python destructors and other Python clean up code will not be executed.
+
+
 
 
 
