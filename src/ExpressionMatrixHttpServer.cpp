@@ -2535,7 +2535,7 @@ void ExpressionMatrix::cluster(
     CellSimilarityGraph& graph = *(it->second.second);
 
     // Write the title.
-    html << "<h1>Graph " << graphName << "</h1>";
+    html << "<h1>Clustering on graph " << graphName << "</h1>";
 
     // Do the clustering.
     html << "<pre>";
