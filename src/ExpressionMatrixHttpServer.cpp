@@ -1245,7 +1245,9 @@ void ExpressionMatrix::exploreGene(
         "<p>Look up this gene on "
         "<a href='https://www.ncbi.nlm.nih.gov/gene/?term=" << urlEncode(geneName) << "'>NCBI</a>, "
         "<a href='https://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=hg38&position=" << urlEncode(geneName) << "'>UCSC</a>, "
-        "<a href='https://en.wikipedia.org/wiki/" << urlEncode(geneName) << "'>Wikipedia</a>."
+        "<a href='http://www.ensembl.org/Multi/Search/Results?q=" << urlEncode(geneName) << ";site=ensembl'>Ensembl</a>, "
+        "<a href='https://en.wikipedia.org/wiki/" << urlEncode(geneName) << "'>Wikipedia</a>, "
+        "<a href='https://www.google.com/#q=gene+" << urlEncode(geneName) << "'>Google</a>."
         ;
 
     // If there is no cell set name, stop here.
