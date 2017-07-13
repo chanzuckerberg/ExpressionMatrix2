@@ -171,7 +171,10 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
     // Begin vertex attributes.
     s << "[";
 
-    // Label.
+
+
+#if 0
+    // HTML-style Label.
     s << "label=< <table border='0' cellpadding='0'>";
     s << "<tr><td align='left'><b>Cluster</b></td><td align='right'><b> " << vertex.clusterId << "</b></td></tr>";
     s << "<tr><td align='left'><b>Cells</b></td><td align='right'><b> " << vertex.cells.size() << "</b></td></tr>";
@@ -185,13 +188,29 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
     s << "</table>";
     s << ">";
     s.precision(oldPrecision);
+#endif
+
+    // Label.
+    s << "label=\"";
+    s << "Cluster " << vertex.clusterId << "\\n";
+    s << vertex.cells.size() << " cells\\n";
+    const auto oldPrecision = s.precision(3);
+    for(const auto& p: sortedExpressionCounts) {
+    	if(p.second < 0.2) {
+    		break;
+    	}
+    	s << geneNames[p.first] << " " << p.second << "\\n";
+    }
+    s << "\"";
+    s.precision(oldPrecision);
+
 
     // Font size.
-    const int fontSize = 8; // max(12, int(2.0*sqrt(double(vertex.cells.size()))));
+    const int fontSize = max(12, int(2.0*sqrt(double(vertex.cells.size()))));
     s << " fontsize=" << fontSize;
 
     // Vertex size.
-    s << " width=" << 0.2 * sqrt(double(vertex.cells.size()));
+    // s << " width=" << 0.2 * sqrt(double(vertex.cells.size()));
 
     // Tooltip.
     s << " tooltip=\"Cluster " << vertex.clusterId << "\"";
