@@ -557,7 +557,11 @@ void CellSimilarityGraph::labelPropagationClustering(
             }
 
         }
-        out << "Iteration " << iteration << ": " << changeCount << " changes." << endl;
+        out << "<br>Iteration " << iteration << ": " << changeCount << " changes." << flush;
+
+        // Scroll to the bottom of the page to show the line we just wrote.
+        // But for some reason it does not work.
+        // out << "<script>window.scrollTo(0, document.body.scrollHeight);</scr‌​ipt>" << endl;
 
         // Update the number of stable iterations (iterations without changes).
         if(changeCount) {

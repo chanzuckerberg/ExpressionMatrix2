@@ -2638,10 +2638,9 @@ void ExpressionMatrix::cluster(
 
 
     // Copy the output svg file to html.
-    html << "<p>The cluster graph is shown below. Each vertex represents a cluster. "
-    		"The most expressed genes for each cluster are listed."
-    		"The size of each cluster is loosely related to the number of cells, but it is "
-    		"also affected by the space needed to display the gene expression information.<br>";
+    html <<
+    	"<p>The cluster graph is shown below. Each vertex represents a cluster. "
+    	"The most expressed genes for each cluster are listed.<br>";
 
     html << ifstream("ClusterGraph.dot.svg").rdbuf();
 
