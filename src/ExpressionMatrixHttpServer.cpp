@@ -1943,6 +1943,13 @@ void ExpressionMatrix::exploreGraph(
     html << "</div>";
 
 
+    // Alternatives for the arrow symbols used below.
+    // right		left		up			down
+    // &#129094;	&#129092;	&#129093;	&#129095;  	// Original fat arrows, don't work on Mac Chrome
+    // &#10145;		&#11013;	&#11014;	&#11015;  	// Suggested by Andrey, less fat but seem to work everywhere
+    // &#8594;		&#8592;		&#8593;		&#8595;  	// Suggested by W3C, but they are not fat
+    // &rarr;		&larr;		&uarr;		&darr;  	// Same as above, using HTML symbols
+
 
     // Controls and code to change the graph display.
     html <<
@@ -2090,16 +2097,16 @@ Thinner edge
 </button>
 <br>
 <button onClick='moveRight()' style='width:120px;height:30px;margin:2px;vertical-align:middle;border-radius:6px;background-color:pink;'>
-&#129094;
+&#10145;
 </button>
 <button onClick='moveLeft()' style='width:120px;height:30px;margin:2px;vertical-align:middle;border-radius:6px;background-color:pink;'>
-&#129092;
+&#11013;
 </button>
 <button onClick='moveUp()' style='width:120px;height:30px;margin:2px;vertical-align:middle;border-radius:6px;background-color:pink;'>
-&#129093;
+&#11014;
 </button>
 <button onClick='moveDown()' style='width:120px;height:30px;margin:2px;vertical-align:middle;border-radius:6px;background-color:pink;'>
-&#129095;
+&#11015;
 </button>
 </div>
     )%";
@@ -2909,8 +2916,8 @@ void ExpressionMatrix::metaDataContingencyTable(
     html << "<table>";
 
     // Header row.
-    html << "<tr style='vertical-align:top;'><th>" << cellMetaDataNames[metaDataNameId1] << "&#129094";
-    html << "<br>" << cellMetaDataNames[metaDataNameId0] << "&#129095";
+    html << "<tr style='vertical-align:top;'><th>" << cellMetaDataNames[metaDataNameId1] << "&#10145;";
+    html << "<br>" << cellMetaDataNames[metaDataNameId0] << "&#11015;";
     html << "<th class=left>Total";
     for(size_t i1=0; i1<n1; i1++) {
         html << "<th class=centered>" << sortedHistogram1[i1].first;
