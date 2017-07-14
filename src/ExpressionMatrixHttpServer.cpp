@@ -2509,8 +2509,10 @@ void ExpressionMatrix::clusterDialog(
         "In the cluster graph, each vertex corresponds to a cluster of the cell similarity graph."
 		"<br>Minimum number of cells for cluster graph vertices: <input type=text name=clusterSizeThreshold value='100'>"
 		" Vertices of the cluster graph with fewer than this number of cells will be removed."
-		"<br>Similarity threshold for cluster graph edges: <input type=text name=similarityThreshold value='0.8'>"
+		"<br>Similarity threshold for cluster graph edges: <input type=text name=similarityThreshold value='0.5'>"
 		" Edges of the cluster graph with similarity lower than this will be removed."
+    	"<br>Maximum connectivity <input type=text name=maxConnectivity value='3'>"
+    	" Keep up to this number of best edges for each vertex (this is k of k-NN cluster graph)."
         "<input type=hidden name=graphName value=" << graphName << ">"
         "<p><input type=submit value='Run clustering' autofocus>"
         "</form>";
@@ -2541,6 +2543,8 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "clusterSizeThreshold", clusterSizeThreshold);
     double similarityThreshold;
     getParameterValue(request, "similarityThreshold", similarityThreshold);
+    size_t maxConnectivity;
+    getParameterValue(request, "maxConnectivity", maxConnectivity);
 
 
     // Find the cell similarity graph.
@@ -2590,6 +2594,9 @@ void ExpressionMatrix::cluster(
 	clusterGraph.removeWeakEdges(similarityThreshold);	// This may need to be made configurable.
     html << "<p>The cluster graph has " << num_vertices(clusterGraph);
     html << " vertices and " << num_edges(clusterGraph) << " edges.</p>";
+
+    // Make it a k-nn graph.
+    clusterGraph.makeKnn(maxConnectivity);
 
 	// Write out the cluster graph in graphviz format.
     clusterGraph.write("ClusterGraph.dot", geneNames);

@@ -5,6 +5,7 @@
 #include "ClusterGraph.hpp"
 #include "CellSimilarityGraph.hpp"
 #include "CZI_ASSERT.hpp"
+#include "deduplicate.hpp"
 #include "MemoryMappedStringTable.hpp"
 #include "orderPairs.hpp"
 #include "regressionCoefficient.hpp"
@@ -135,6 +136,57 @@ void ClusterGraph::removeWeakEdges(double similarityThreshold)
 		boost::remove_edge(e, *this);
 	}
 }
+
+
+
+// Turn the cluster graph into a k-nn graph.
+// For each vertex, keep the best k edges.
+void ClusterGraph::makeKnn(size_t k)
+{
+	// Find the edges to be kept.
+	vector<edge_descriptor> edgesToBeKept;
+	vector< pair<double, edge_descriptor> > vertexEdges;
+	BGL_FORALL_VERTICES(v, *this, ClusterGraph) {
+
+		// Gather all the edges of this vertex.
+		vertexEdges.clear();
+		BGL_FORALL_OUTEDGES(v, e, *this, ClusterGraph) {
+			vertexEdges.push_back(make_pair((*this)[e].similarity, e));
+		}
+
+		// Sort them by decreasing similarity.
+		sort(vertexEdges.begin(), vertexEdges.end(), std::greater< pair<double, edge_descriptor> >());
+
+		// Keep up to k.
+		if(vertexEdges.size() > k) {
+			vertexEdges.resize(k);
+		}
+
+		// Mark them as edges to be kept.
+		for(const auto& p: vertexEdges) {
+			edgesToBeKept.push_back(p.second);
+		}
+
+	}
+	deduplicate(edgesToBeKept);
+
+
+
+	// Find the edges to be removed.
+	vector<edge_descriptor> edgesToBeRemoved;
+	BGL_FORALL_EDGES(e, *this, ClusterGraph) {
+		if(!binary_search(edgesToBeKept.begin(), edgesToBeKept.end(), e)) {
+			edgesToBeRemoved.push_back(e);
+		}
+	}
+
+	// Now remove them.
+	for(const edge_descriptor e: edgesToBeRemoved) {
+		boost::remove_edge(e, *this);
+	}
+
+}
+
 
 
 // Write the graph in Graphviz format.

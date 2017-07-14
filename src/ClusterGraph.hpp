@@ -79,6 +79,10 @@ public:
 	// Remove edges with low similarity.
 	void removeWeakEdges(double similarityThreshold);
 
+	// Make it a k-nn graph.
+	// For each vertex, keep the best k edges.
+	void makeKnn(size_t k);
+
 	// Write in Graphviz format.
     void write(ostream&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
     void write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const;
