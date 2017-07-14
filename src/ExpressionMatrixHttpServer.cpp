@@ -2513,6 +2513,7 @@ void ExpressionMatrix::clusterDialog(
 		" Edges of the cluster graph with similarity lower than this will be removed."
     	"<br>Maximum connectivity <input type=text name=maxConnectivity value='3'>"
     	" Keep up to this number of best edges for each vertex (this is k of k-NN cluster graph)."
+        "<br>Timeout in seconds to compute cluster graph layout <input type=text name=timeout value='30'>"
         "<input type=hidden name=graphName value=" << graphName << ">"
         "<p><input type=submit value='Run clustering' autofocus>"
         "</form>";
@@ -2545,6 +2546,8 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "similarityThreshold", similarityThreshold);
     size_t maxConnectivity;
     getParameterValue(request, "maxConnectivity", maxConnectivity);
+    double timeout;
+    getParameterValue(request, "timeout", timeout);
 
 
     // Find the cell similarity graph.
@@ -2606,11 +2609,22 @@ void ExpressionMatrix::cluster(
     // Use Graphviz to create a layout of the ClusterGraph in svg format.
     // For better layouts, we would like to use -Goverlap=false because that does not work with the
     // ubuntu graphviz package (it is built without the triangulation library).
-    const string command = "sfdp -O -T svg ClusterGraph.dot -Goverlap=scalexy -Gsplines=true";
+    const string command = "timeout " + lexical_cast<string>(timeout) + " sfdp -O -T svg ClusterGraph.dot -Goverlap=scalexy -Gsplines=true";
     const int commandStatus = ::system(command.c_str());
     if(WIFEXITED(commandStatus)) {
     	const int exitStatus = WEXITSTATUS(commandStatus);
-		if(exitStatus!=0 && exitStatus!=1) {	// sfdp returns 1 all the time just because of the message about missing triangulation.
+    	if(exitStatus == 124) {
+    		html <<
+    			"<p>Computation of the cluster graph layout was interrupted because if was taking too long."
+    			"<p>You can take one or more of the following steps:<ul>"
+				"<li>Decrease the maximum connectivity."
+				"<li>Increase the cluster size threshold."
+				"<li>Increase the edge similarity threshold."
+				"<li>Increase the timeout."
+    			"</ul>";
+    		return;
+    	}
+    	else if(exitStatus!=0 && exitStatus!=1) {	// sfdp returns 1 all the time just because of the message about missing triangulation.
 			throw runtime_error("Error " + lexical_cast<string>(exitStatus) + " running graph layout command: " + command);
 		}
     } else if(WIFSIGNALED(commandStatus)) {
