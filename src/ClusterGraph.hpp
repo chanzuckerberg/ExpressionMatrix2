@@ -73,6 +73,9 @@ public:
 	// average expression stored in each vertex.
 	void computeSimilarities();
 
+	// Remove the vertices that correspond to small clusters.
+	void removeSmallVertices(size_t clusterSizeThreshold);
+
 	// Remove edges with low similarity.
 	void removeWeakEdges(double similarityThreshold);
 

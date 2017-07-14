@@ -55,8 +55,6 @@ ClusterGraph::ClusterGraph(const CellSimilarityGraph& cellSimilarityGraph)
 	}
 
 
-
-
 	// Create the edges by looping over all edges of the CellSimilarityGraph.
 	BGL_FORALL_EDGES(ce, cellSimilarityGraph, CellSimilarityGraph) {
 
@@ -102,6 +100,22 @@ void ClusterGraph::computeSimilarities()
 		graph[e].similarity = regressionCoefficient(
 			vertex0.averageGeneExpression,
 			vertex1.averageGeneExpression);
+	}
+}
+
+
+// Remove the vertices that correspond to small clusters.
+void ClusterGraph::removeSmallVertices(size_t clusterSizeThreshold)
+{
+	vector<vertex_descriptor> verticesToBeRemoved;
+	BGL_FORALL_VERTICES(cv, *this, ClusterGraph) {
+		if((*this)[cv].cells.size() < clusterSizeThreshold) {
+			verticesToBeRemoved.push_back(cv);
+		}
+	}
+	for(const vertex_descriptor cv: verticesToBeRemoved) {
+		clear_vertex(cv, *this);
+		remove_vertex(cv, *this);
 	}
 }
 

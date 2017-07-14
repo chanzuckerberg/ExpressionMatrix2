@@ -2499,15 +2499,20 @@ void ExpressionMatrix::clusterDialog(
 
     // Form to enter the clustering parameters.
     html <<
-        "<p>Enter parameters for label propagation clustering:"
         "<form action=cluster>"
+        "<h4>Parameters for label propagation clustering</h4>"
         "Random number generator seed: <input type=text name=seed value=231>"
         "<br>Stop after this many iterations without changes: <input type=text name=stableIterationCountThreshold value=3>"
         "<br>Maximum number of iterations: <input type=text name=maxIterationCount value=100>"
 		"<br>Meta data name to store the cluster of each cell (leave empty for none): <input type=text name=metaDataName>"
-		"<br>Similarity threshold for graph edges: <input type=text name=similarityThreshold value='0.8'>"
+        "<br><h4>Parameters for creation and display of the cluster graph</h4>"
+        "In the cluster graph, each vertex corresponds to a cluster of the cell similarity graph."
+		"<br>Minimum number of cells for cluster graph vertices: <input type=text name=clusterSizeThreshold value='100'>"
+		" Vertices of the cluster graph with fewer than this number of cells will be removed."
+		"<br>Similarity threshold for cluster graph edges: <input type=text name=similarityThreshold value='0.8'>"
+		" Edges of the cluster graph with similarity lower than this will be removed."
         "<input type=hidden name=graphName value=" << graphName << ">"
-        "<br><input type=submit value='Run clustering' autofocus>"
+        "<p><input type=submit value='Run clustering' autofocus>"
         "</form>";
 }
 
@@ -2532,6 +2537,8 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "maxIterationCount", maxIterationCount);
     string metaDataName;
     getParameterValue(request, "metaDataName", metaDataName);
+    size_t clusterSizeThreshold;
+    getParameterValue(request, "clusterSizeThreshold", clusterSizeThreshold);
     double similarityThreshold;
     getParameterValue(request, "similarityThreshold", similarityThreshold);
 
@@ -2563,6 +2570,9 @@ void ExpressionMatrix::cluster(
 
     // Create the ClusterGraph.
     ClusterGraph clusterGraph(graph);
+
+	// Remove the vertices that correspond to small clusters.
+    clusterGraph.removeSmallVertices(clusterSizeThreshold);
 
 	// Compute the average expression for each cluster - that is, for each vertex
     // of the cluster graph.
