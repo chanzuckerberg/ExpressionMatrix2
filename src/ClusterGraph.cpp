@@ -206,8 +206,7 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
 
 
     // Font size.
-    const int fontSize = max(12, int(2.0*sqrt(double(vertex.cells.size()))));
-    s << " fontsize=" << fontSize;
+    s << " fontsize=" << fontSize(vertex.cells.size());
 
     // Vertex size.
     // s << " width=" << 0.2 * sqrt(double(vertex.cells.size()));
@@ -223,7 +222,11 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
 
 void ClusterGraph::Writer::operator()(std::ostream& s, edge_descriptor e) const
 {
-    // Get the edge.
+    // Get the edge information we need.
+    const vertex_descriptor v0 = source(e, graph);
+    const vertex_descriptor v1 = target(e, graph);
+    const ClusterGraphVertex& vertex0 = graph[v0];
+    const ClusterGraphVertex& vertex1 = graph[v1];
     const ClusterGraphEdge& edge = graph[e];
 
     // Begin edge attributes.
@@ -235,8 +238,37 @@ void ClusterGraph::Writer::operator()(std::ostream& s, edge_descriptor e) const
     s.precision(oldPrecision);
     s.setf(oldOptions);
 
+    // Font size.
+    s << " fontsize=" << fontSize(vertex0.cells.size(), vertex1.cells.size());
+
     // End edge attributes.
     s << "]";
+}
+
+
+
+// Compute font size for a vertex  given number of cells.
+int ClusterGraph::Writer::fontSize(size_t cellCount)
+{
+	// Make it proportional to a power of the number of cells.
+	int size = int(2.5 * pow(double(cellCount), 0.2));
+
+	// Not too large.
+	size = min(size, 24);
+
+	// Not to small.
+	size = max(size, 6);
+
+	return size;
+}
+
+
+
+// Compute font size for an edge  given numbers of cells of the two vertices.
+int ClusterGraph::Writer::fontSize(size_t cellCount0, size_t cellCount1)
+{
+	// Just return the smaller font size of the two vertices.
+	return fontSize(min(cellCount0, cellCount1));
 }
 
 

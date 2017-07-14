@@ -90,6 +90,11 @@ private:
         void operator()(ostream&, edge_descriptor) const;
         const ClusterGraph& graph;
         const MemoryMapped::StringTable<GeneId>& geneNames;
+    private:
+        // Compute font size for a vertex  given number of cells.
+        static int fontSize(size_t cellCount);
+        // Compute font size for an edge  given numbers of cells of the two vertices.
+        static int fontSize(size_t cellCount0, size_t cellCount1);
     };
 };
 

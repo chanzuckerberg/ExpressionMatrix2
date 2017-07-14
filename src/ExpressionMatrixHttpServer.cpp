@@ -67,7 +67,8 @@ void ExpressionMatrix::processRequest(
         "<!DOCTYPE html>"
         "<html>"
         "<head>"
-        "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />";
+        "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
+    	"<meta charset='UTF-8'>";
     writeStyle(html);
     html <<
         "</head>"
@@ -2495,11 +2496,11 @@ void ExpressionMatrix::clusterDialog(
         "<form action=cluster>"
         "Random number generator seed: <input type=text name=seed value=231>"
         "<br>Stop after this many iterations without changes: <input type=text name=stableIterationCountThreshold value=3>"
-        "<br>Maximum number of iterations: <input type=text name=maxIterationCount value=10>"
-        "<br>Meta data name to store the cluster of each cell: <input type=text name=metaDataName autofocus>"
-        "<br>If the above field is empty, no meta data will be created or modified."
+        "<br>Maximum number of iterations: <input type=text name=maxIterationCount value=100>"
+		"<br>Meta data name to store the cluster of each cell (leave empty for none): <input type=text name=metaDataName>"
+		"<br>Similarity threshold for graph edges: <input type=text name=similarityThreshold value='0.8'>"
         "<input type=hidden name=graphName value=" << graphName << ">"
-        "<br><input type=submit value='Run clustering'>"
+        "<br><input type=submit value='Run clustering' autofocus>"
         "</form>";
 }
 
@@ -2524,6 +2525,8 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "maxIterationCount", maxIterationCount);
     string metaDataName;
     getParameterValue(request, "metaDataName", metaDataName);
+    double similarityThreshold;
+    getParameterValue(request, "similarityThreshold", similarityThreshold);
 
 
     // Find the cell similarity graph.
@@ -2567,7 +2570,7 @@ void ExpressionMatrix::cluster(
 	clusterGraph.computeSimilarities();
 
 	// Remove edges with low similarity.
-	clusterGraph.removeWeakEdges(0.5);	// This may need to be made configurable.
+	clusterGraph.removeWeakEdges(similarityThreshold);	// This may need to be made configurable.
     html << "<p>The cluster graph has " << num_vertices(clusterGraph);
     html << " vertices and " << num_edges(clusterGraph) << " edges.</p>";
 
