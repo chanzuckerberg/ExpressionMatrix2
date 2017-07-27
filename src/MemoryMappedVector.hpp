@@ -57,7 +57,8 @@ public:
     Vector();
     ~Vector();
 
-    // Disallow copy and assignment.
+    // Disallow C++ copy and assignment
+    // (see below for how to make a copy).
     Vector(const Vector&) = delete;
     Vector& operator=(const Vector&) = delete;
 
@@ -100,7 +101,8 @@ public:
     void reserve();
     void reserve(size_t capacity);
 
-
+    // Make a copy of the Vector.
+    void makeCopy(Vector<T>& copy, const string& newName) const;
 
 private:
 
@@ -649,6 +651,13 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
     fileName = name;
 }
 
+// Make a copy of the Vector.
+template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::makeCopy(
+	Vector<T>& copy, const string& newName) const
+{
+	copy.createNew(newName, size());
+	std::copy(begin(), end(), copy.begin());
+}
 
 
 #endif

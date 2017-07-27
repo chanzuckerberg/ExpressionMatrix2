@@ -390,6 +390,91 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 
 
+
+// Same as above, but only for a set of cells given in a vector of cell ids (cell set).
+void ExpressionMatrix::computeCellLshSignatures(
+	const vector< vector< vector<double> > >& lshVectors,
+	const MemoryMapped::Vector<CellId>& cellSet,
+	vector<BitSet>& signatures
+	) const
+{
+	// Count the total number of lsh vectors, assuming that all the bands have the same
+	// number of rows.
+	CZI_ASSERT(!lshVectors.empty());
+	const size_t lshBandCount = lshVectors.size();
+	CZI_ASSERT(!lshVectors.front().empty());
+	const size_t lshRowCount = lshVectors.front().size();
+	const size_t bitCount = lshBandCount * lshRowCount;
+
+	// Compute the sum of the components of each lsh vector.
+	// It is needed below to compute the contribution of the
+	// expression counts that are zero.
+	vector<double> lshVectorsSums(bitCount);
+	size_t index = 0;
+	for(size_t band=0; band<lshBandCount; band++) {
+		const auto& bandVectors = lshVectors[band];
+		CZI_ASSERT(bandVectors.size() == lshRowCount);	// All bands must have the same number of rows.
+		for(size_t row=0; row<lshRowCount; row++, index++) {
+			const auto& rowVector = bandVectors[row];
+			CZI_ASSERT(rowVector.size() == geneCount());
+			lshVectorsSums[index] = std::accumulate(rowVector.begin(), rowVector.end(), 0.);
+		}
+	}
+
+	// Initialize the signatures to all zero bits.
+	signatures.resize(cellSet.size(), BitSet(bitCount));
+
+	// Vector to hold the scalar products of the normalized expression vector of a cell
+	// with each of the LSH vectors.
+	vector<double> scalarProducts(bitCount);
+
+	// Loop over all cells.
+	for(CellId localCellId=0; localCellId<cellSet.size(); localCellId++) {
+		if((localCellId>0) && ((localCellId % 100)==0)) {
+			cout << timestamp << "Working on cell " << localCellId << " of " << cellSet.size() << endl;
+		}
+
+		// Compute the mean and standard deviation for this cell.
+		const CellId globalCellId = cellSet[localCellId];
+		const Cell& cell = cells[globalCellId];
+		const double mean = cell.sum1 / double(geneCount());
+		const double sigmaInverse = 1./sqrt(cell.sum2/geneCount() - mean*mean);
+
+		// Initialize the scalar products to what they would be if all counts were zero.
+		const double zeroContribution =  - mean * sigmaInverse;
+		for(size_t index=0; index<bitCount; index++) {
+			scalarProducts[index] = lshVectorsSums[index] * zeroContribution;
+		}
+
+		// Add the contributions of the non-zero expression counts for this cell.
+		for(const auto& p: cellExpressionCounts[globalCellId]) {
+			const GeneId geneId = p.first;
+			const float& count = p.second;
+			const double scaledCount = sigmaInverse * double(count);
+
+			// Accumulate into the scalar products.
+			size_t index = 0;
+			for(size_t band=0; band<lshBandCount; band++) {
+				const auto& bandVectors = lshVectors[band];
+				for(size_t row=0; row<lshRowCount; row++, index++) {
+					CZI_ASSERT(index < scalarProducts.size());
+					scalarProducts[index] += scaledCount * bandVectors[row][geneId];
+				}
+			}
+		}
+
+		// Set to 1 the signature bits corresponding to positive scalar products.
+		auto& cellSignature = signatures[localCellId];
+		for(size_t index=0; index<bitCount; index++) {
+			if(scalarProducts[index] >0) {
+				cellSignature.set(index);
+			}
+		}
+	}
+}
+
+
+
 // Write to a csv file statistics of the cell LSH signatures..
 void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const
 {
@@ -430,6 +515,7 @@ void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector
 // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
 // of the standard deviation at similarity 0.
 void ExpressionMatrix::findSimilarPairs1(
+	const string& cellSetName,	// The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
     size_t k,                   // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -440,8 +526,14 @@ void ExpressionMatrix::findSimilarPairs1(
 	// Sanity check.
 	CZI_ASSERT(similarityThreshold <= 1.);
 
-	if(cellCount() == 0) {
-		cout << "There are no cells. Skipping findSimilarPairs1." << endl;
+	// Locate the cell set.
+	const auto& it = cellSets.cellSets.find(cellSetName);
+	if(it == cellSets.cellSets.end()) {
+		throw runtime_error("Cell set " + cellSetName + " does not exist.");
+	}
+	const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+	if(cellSet.size() == 0) {
+		cout << "Cell set " << cellSetName << " is empty. Skipping findSimilarPairs1." << endl;
 		return;
 	}
 
@@ -454,13 +546,13 @@ void ExpressionMatrix::findSimilarPairs1(
 	// Compute the LSH signatures of all cells.
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
 	vector<BitSet> signatures;
-	computeCellLshSignatures(lshVectors, signatures);
+	computeCellLshSignatures(lshVectors, cellSet, signatures);
 
 	// Write signature statistics to a csv file.
 	// writeLshSignatureStatistics(lshCount, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellSet);
 
     // Compute the angle threshold (in radians) corresponding to this similarity threshold.
     const double angleThreshold = std::acos(similarityThreshold);
@@ -480,21 +572,17 @@ void ExpressionMatrix::findSimilarPairs1(
 
 
 
-// Change this to #if 0 to turn on the block code below.
-// The block code does not improve performance, at least when using 1024 LSH vectors.
-// They both run at about 15 ns per pair on my laptop, when nothing is stored
-// (similarity threshold is set to 1).
-#if 1
-
-    // Loop over all pairs.
+    // Loop over all pairs. This is much faster than findSimilarPairs0
+    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
+    // still scales like the square of the number of cells in the cell set.
 	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
-    for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if(cellId0>0 && ((cellId0%10000) == 0)) {
-            cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
+    for(CellId localCellId0=0; localCellId0!=cellSet.size()-1; localCellId0++) {
+        if(localCellId0>0 && ((localCellId0%10000) == 0)) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
         }
-        const BitSet& signature0 = signatures[cellId0];
-        for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
-            const BitSet& signature1 = signatures[cellId1];
+        const BitSet& signature0 = signatures[localCellId0];
+        for(CellId localCellId1=localCellId0+1; localCellId1!=cellSet.size(); localCellId1++) {
+            const BitSet& signature1 = signatures[localCellId1];
 
         	// Count the number of bits where the signatures of these two cells disagree.
         	size_t mismatchingBitCount = countMismatches(signature0, signature1);
@@ -504,50 +592,11 @@ void ExpressionMatrix::findSimilarPairs1(
             // number of pairs already stored for cellId0 and cellId1.
             if(mismatchingBitCount <= mismatchCountThreshold) {
             	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
-                similarPairs.add(cellId0, cellId1, similarityTable[mismatchingBitCount]);
+                similarPairs.add(localCellId0, localCellId1, similarityTable[mismatchingBitCount]);
             }
         }
     }
 
-
-
-
-#else
-
-
-    // Code that loops over all pairs in blocks, to improve locality of memory accesses.
-    // However this does not improve performance, at least when using 1024 LSH vectors.
-	cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
-	const CellId blockSize = 10;
-	for(CellId begin0=0; begin0<cellCount(); begin0+=blockSize) {
-		const CellId end0 = min(begin0+blockSize, cellCount());
-		for(CellId begin1=0; begin1<=begin0; begin1+=blockSize) {
-			const CellId end1 = min(begin1+blockSize, cellCount());
-			for(CellId cellId0=begin0; cellId0!=end0; cellId0++) {
-	            const BitSet& signature0 = signatures[cellId0];
-				CellId actualEnd1 = end1;
-				if(begin0 == begin1) {
-					actualEnd1 = cellId0;
-				}
-				for(CellId cellId1=begin1; cellId1<actualEnd1; cellId1++) {
-		            const BitSet& signature1 = signatures[cellId1];
-
-		        	// Count the number of bits where the signatures of these two cells disagree.
-		        	size_t mismatchingBitCount = countMismatches(signature0, signature1);
-
-		            // If the similarity is sufficient, pass it to the SimilarPairs container,
-		            // which will make the decision whether to store it, depending on the
-		            // number of pairs already stored for cellId0 and cellId1.
-		            if(mismatchingBitCount <= mismatchCountThreshold) {
-		            	CZI_ASSERT(mismatchingBitCount < similarityTable.size());
-		                similarPairs.add(cellId0, cellId1, similarityTable[mismatchingBitCount]);
-		            }
-				}
-			}
-
-		}
-	}
-#endif
 
 
     // Sort the similar pairs for each cell by decreasing similarity.
@@ -563,6 +612,7 @@ void ExpressionMatrix::findSimilarPairs1(
 // See the beginning of ExpressionMatrixLsh.cpp for more information.
 // This implementation requires lshRowCount to be a power of 2 not greater than 64.
 void ExpressionMatrix::findSimilarPairs2(
+	const string& cellSetName,	// The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
     size_t k,                   // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -575,8 +625,14 @@ void ExpressionMatrix::findSimilarPairs2(
 	// Sanity check.
 	CZI_ASSERT(similarityThreshold <= 1.);
 
-	if(cellCount() == 0) {
-		cout << "There are no cells. Skipping findSimilarPairs2." << endl;
+	// Locate the cell set.
+	const auto& it = cellSets.cellSets.find(cellSetName);
+	if(it == cellSets.cellSets.end()) {
+		throw runtime_error("Cell set " + cellSetName + " does not exist.");
+	}
+	const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+	if(cellSet.size() == 0) {
+		cout << "Cell set " << cellSetName << " is empty. Skipping findSimilarPairs1." << endl;
 		return;
 	}
 
@@ -605,10 +661,10 @@ void ExpressionMatrix::findSimilarPairs2(
 	// Compute the LSH signatures of all cells.
 	cout << timestamp << "Computing LSH signatures for all cells." << endl;
 	vector<BitSet> signatures;
-	computeCellLshSignatures(lshVectors, signatures);
+	computeCellLshSignatures(lshVectors, cellSet, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellSet);
 
     // Vector of vectors used to contain the cells assigned to each bucket.
     const uint64_t bucketCount = nextPowerOfTwoGreaterThanOrEqual(uint64_t(double(cellCount()) / loadFactor));

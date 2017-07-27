@@ -19,8 +19,17 @@ namespace ChanZuckerberg {
 
 // A class to store similar pairs of cells.
 // For each cell, we only store up to k similar cells.
-// Therefore, if (cellId0, cellId1) is s stored pair,
+// Therefore, if (cellId0, cellId1) is a stored pair,
 // (cellId1, cellId0) is not guaranteed to also be a stored pair.
+
+// IMPORTANT WARNING ABOUT CELL IDS:
+// Note that all cell ids used and stored by this class are not true cell ids
+// for the Expressionmatrix object. They are just indexes in the cell set
+// vector used by the SimilarPairs object. The true CellId is the
+// element of the cell set vector at that position.
+
+// Only cell pairs where both cells are in the specified cell set are stored.
+
 class ChanZuckerberg::ExpressionMatrix2::SimilarPairs {
 public:
 
@@ -28,7 +37,7 @@ public:
     SimilarPairs(
         const string& name,
         size_t k,
-        CellId cellCount);
+        const MemoryMapped::Vector<CellId>& cellSet);
 
     // Access an existing SimilarPairs object.
     SimilarPairs(const string& name);
@@ -91,6 +100,34 @@ public:
     // Sort the similar pairs for each cell by decreasing similarity.
     void sort();
 
+    // Given a cell id local to this SimilarPairs object
+    // (index in the cell set vector), return the corresponding
+    // global CellId (index in the cells vector of the ExpressionMatrix object).
+    // See the warning about cell ids before the definition of this class.
+    CellId getGlobalCellId(CellId localCellId) const
+    {
+    	CZI_ASSERT(localCellId < cellSet.size());
+    	return cellSet[localCellId];
+    }
+
+    // Inverse of the above.
+    // Returns the local cell id corresponding to a global cell id.
+    // Returns invalidCellId if none found.
+    CellId getLocalCellId(CellId globalCellId) const
+    {
+    	const auto it = std::lower_bound(cellSet.begin(), cellSet.end(), globalCellId);
+    	if(it == cellSet.end() || *it != globalCellId) {
+    		return invalidCellId;
+    	} else {
+    		return CellId(it - cellSet.begin());
+    	}
+    }
+
+    CellId cellCount() const
+    {
+    	return CellId(cellSet.size());
+    }
+
 private:
 
     // All the pairs we could possibly store (k of them for each cell).
@@ -120,6 +157,12 @@ private:
         CellId cellCount;
     };
     MemoryMapped::Object<Info> info;
+
+    // The cell set used by this SimilarPairs object.
+    // This is a copy of the cell set passed to the constructor
+    // when the SimilarPairs object was created.
+    // This copy is owned by the SimilarPairs object.
+    MemoryMapped::Vector<CellId> cellSet;
 
     // Add a pair (low level version).
     void add(CellId, Pair);

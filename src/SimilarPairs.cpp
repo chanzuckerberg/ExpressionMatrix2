@@ -10,15 +10,17 @@ using namespace ExpressionMatrix2;
 SimilarPairs::SimilarPairs(
     const string& name,
     size_t k,
-    CellId cellCount)
+	const MemoryMapped::Vector<CellId>& cellSetArgument)
 {
+	const CellId cellCount = CellId(cellSetArgument.size());
+
     info.createNew(name + "-Info");
     info->k = k;
     info->cellCount = cellCount;
 
-    similarPairs.createNew(name + "-Pairs", k*cellCount);
+    similarPairs.createNew(name + "-Pairs", k*cellSetArgument.size());
 
-    // Initialized the usedCount for each cell to zero.
+    // Initialize the usedCount for each cell to zero.
     usedCount.createNew(name + "-UsedCounts", cellCount);
     fill(usedCount.begin(), usedCount.end(), 0);
 
@@ -26,6 +28,9 @@ SimilarPairs::SimilarPairs(
     lowestStoredSimilarityInfo.createNew(name + "-LowestStoredSimilarityInfo", cellCount);
     fill(lowestStoredSimilarityInfo.begin(), lowestStoredSimilarityInfo.end(),
         make_pair(std::numeric_limits<uint32_t>::max(), std::numeric_limits<CellSimilarity>::max()));
+
+    // Create a copy of the cell set, owned by the SimilarPairs object.
+    cellSetArgument.makeCopy(cellSet, name + "-CellSet");
 
 }
 
@@ -38,6 +43,7 @@ SimilarPairs::SimilarPairs(const string& name)
     similarPairs.accessExistingReadOnly(name + "-Pairs");
     usedCount.accessExistingReadOnly(name + "-UsedCounts");
     lowestStoredSimilarityInfo.accessExistingReadOnly(name + "-LowestStoredSimilarityInfo");
+    cellSet.accessExistingReadOnly(name + "-CellSet");
 }
 
 

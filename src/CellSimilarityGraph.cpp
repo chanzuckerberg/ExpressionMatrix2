@@ -52,19 +52,30 @@ CellSimilarityGraph::CellSimilarityGraph(
     // The similar pairs are sorted by decreasing similarity.
     vector< pair<vertex_descriptor, float > > pairs;
     for(const CellId cellId0: cellSet) {
+
+    	// Find the local cell id (in the cell set of the SimilarPairs object)
+    	// corresponding to this global cell id.
+    	// If the cell set of the SimilarPairs object does not contain this cell,
+    	// this is an invalid cell id and in that case we skip this cell.
+    	const CellId localCellId0 = similarPairs.getLocalCellId(cellId0);
+    	if(localCellId0 == invalidCellId) {
+    		continue;
+    	}
+
+    	// Locate the corresponding vertex.
         const vertex_descriptor v0 = vertexTable[cellId0];
 
         // Find the best up to k pairs such that the other vertex
         // is also in the cell set.
         pairs.clear();
-        const Pair* begin = similarPairs.begin(cellId0);
-        const Pair* end = similarPairs.end(cellId0);
+        const Pair* begin = similarPairs.begin(localCellId0);
+        const Pair* end = similarPairs.end(localCellId0);
         for(const Pair* p=begin; p!=end; ++p) {
             const float similarity = p->second;
             if(similarity < similarityThreshold) {
                 break;
             }
-            const CellId cellId1 = p->first;
+            const CellId cellId1 = similarPairs.getGlobalCellId(p->first);
             const auto it1 = vertexTable.find(cellId1);
             if(it1 == vertexTable.end()) {
                 continue;

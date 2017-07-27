@@ -64,6 +64,7 @@ void ExpressionMatrix::analyzeAllPairs() const
 // (typically 10 times faster or better when the number of stored
 // largest expression counts for each cell is 100.
 void ExpressionMatrix::findSimilarPairs0(
+	const string& cellSetName,	// The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
     size_t k,                   // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -76,24 +77,30 @@ void ExpressionMatrix::findSimilarPairs0(
 	}
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellCount());
+	const auto& it = cellSets.cellSets.find(cellSetName);
+	if(it == cellSets.cellSets.end()) {
+		throw runtime_error("Cell set " + cellSetName + " does not exist.");
+	}
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, *(it->second));
 
     // Loop over all pairs.
-    for(CellId cellId0=0; cellId0!=cellCount()-1; cellId0++) {
-        if(cellId0>0 && ((cellId0%100) == 0)) {
-            cout << timestamp << "Working on cell " << cellId0 << " of " << cells.size() << endl;
+    for(CellId localCellId0=0; localCellId0!=similarPairs.cellCount()-1; localCellId0++) {
+        if(localCellId0>0 && ((localCellId0%100) == 0)) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << similarPairs.cellCount() << endl;
         }
+        const CellId globalCellId0 = similarPairs.getGlobalCellId(localCellId0);
 
         // Find all cells with similarity better than the specified threshold.
-        for(CellId cellId1=cellId0+1; cellId1!=cellCount(); cellId1++) {
+        for(CellId localCellId1=localCellId0+1; localCellId1!=similarPairs.cellCount(); localCellId1++) {
+            const CellId globalCellId1 = similarPairs.getGlobalCellId(localCellId1);
             const double similarity =
-                useExactSimilarity ? computeCellSimilarity(cellId0, cellId1) : computeApproximateCellSimilarity(cellId0, cellId1);
+                useExactSimilarity ? computeCellSimilarity(globalCellId0, globalCellId1) : computeApproximateCellSimilarity(globalCellId0, globalCellId1);
 
             // If the similarity is sufficient, pass it to the SimilarPairs container,
             // which will make the decision whether to store it, depending on the
             // number of pairs already stored for cellId0 and cellId1.
             if(similarity > similarityThreshold) {
-                similarPairs.add(cellId0, cellId1, similarity);
+                similarPairs.add(localCellId0, localCellId1, similarity);
             }
         }
     }

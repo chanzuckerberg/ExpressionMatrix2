@@ -279,6 +279,7 @@ public:
     // (typically 10 times faster or better when the number of stored
     // largest expression counts for each cell is 100.
     void findSimilarPairs0(
+   		const string& cellSetName,	// The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -301,6 +302,7 @@ public:
     // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
     // of the standard deviation at similarity 0.
     void findSimilarPairs1(
+    	const string& cellSetName,	// The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -313,6 +315,7 @@ public:
     // See the beginning of ExpressionMatrixLsh.cpp for more information.
     // This implementation requires lshRowCount to be a power of 2 not greater than 64.
     void findSimilarPairs2(
+   		const string& cellSetName,	// The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -538,6 +541,13 @@ private:
     // the LSH vector is positive, and 0 otherwise.
     void computeCellLshSignatures(
     	const vector< vector< vector<double> > >& lshVectors,
+		vector<BitSet>& signatures
+		) const;
+
+    // Same as above, but only for a set of cells given in a vector of cell ids (cell set).
+    void computeCellLshSignatures(
+    	const vector< vector< vector<double> > >& lshVectors,
+    	const MemoryMapped::Vector<CellId>& cellSet,
 		vector<BitSet>& signatures
 		) const;
 

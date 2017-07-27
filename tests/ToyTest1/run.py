@@ -33,7 +33,7 @@ e.addCells('ExpressionMatrix.csv', ',', 'MetaData.csv', ',', maxTermCountForAppr
 k = 100                     # The maximum number of similar pairs to be stored for each cell.
 similarityThreshold = 0.2   # The minimum similarity for a pair to be stored.
 useExactComputation = True
-e.findSimilarPairs0('Exact', k, similarityThreshold, useExactComputation)
+e.findSimilarPairs0('AllCells', 'Exact', k, similarityThreshold, useExactComputation)
 
 
 
