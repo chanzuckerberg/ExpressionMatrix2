@@ -765,7 +765,7 @@ ostream& ExpressionMatrix::writeMetaDataSelection(
     if(multiple) {
         html << " multiple";
     }
-    html << " style='width:8em;'>";
+    html << " style='width:8em;vertical-align:text-top;'>";
 
 
     // Write an <option> element for each meta data field.
@@ -1206,22 +1206,35 @@ void ExpressionMatrix::exploreGene(
         }
     }
 
-    // Write the form.
+    // Write the form for information on a single gene.
     html <<
-        "<form>"
-        "Specify a gene using a case-sensitive name or a numeric id between 0 and  " << geneCount()-1 <<
-        " included:<br><input type=text name=geneId";
+        "<hr><form>"
+    	"<input type=submit value='Show information about gene'>"
+        " <input type=text name=geneId";
     if(geneIdIsPresent) {
         html << " value=" << geneIdString;
     }
-    html << " autofocus>";
-    html << "<br>Write expression counts for cells in cell set ";
+    html <<
+    	" autofocus>"
+    	" (specify a gene using a case-sensitive name or a numeric id between 0 and  " << geneCount()-1 << "),";
+    html << "<br>displaying expression counts for this gene for cells in cell set ";
     const set<string> selectedCellSet = {cellSetName};
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
-    html << "<br>Display these cell meta data fields:";
+    html << "<br>and showing for each cell the following cell meta data fields: ";
     writeMetaDataSelection(html, "metaDataName", metaDataToDisplay, true);
-    html << "<br><input type=submit value='Submit'>";
     html << "</form>";
+
+
+
+    // Write the form for gene information content.
+    html <<
+    	"<hr><form action=geneInformationContent>"
+    	"<input type=submit value='Display gene information content for gene set'>"
+    	"<br>cell set ";
+    writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
+    html <<
+    	"<br>using"
+    	"</form><hr>";
 
 
 

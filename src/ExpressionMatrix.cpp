@@ -33,9 +33,16 @@ ExpressionMatrix::ExpressionMatrix(
     const ExpressionMatrixCreationParameters& parameters) :
     directoryName(directoryName)
 {
-    // If the directory does not exist, create it.
-    if(!boost::filesystem::exists(directoryName)) {
-        boost::filesystem::create_directory(directoryName);
+    // If directory already exists, don't do anything.
+	// This ensures that we don't delete or overwrite anything,
+	// and that the directory does not contain stale data.
+    if(boost::filesystem::exists(directoryName)) {
+    	throw runtime_error("Directory "  + directoryName + " already exists.");
+    }
+
+    // Create the directory. This guarantees that we start with an empty directory.
+    if(!boost::filesystem::create_directory(directoryName)) {
+    	throw runtime_error("Unable to create directory "  + directoryName);
     }
 
     geneNames.createNew(directoryName + "/" + "GeneNames", parameters.geneCapacity);
@@ -52,6 +59,9 @@ ExpressionMatrix::ExpressionMatrix(
     cellSets.createNew(directoryName);
     vector<CellId> emptyCellSet;
     cellSets.addCellSet("AllCells", emptyCellSet);
+
+    // Initialize the gene sets.
+    geneSets["AllGenes"].createNew(directoryName + "/GeneSet-AllGenes");
 
     // Sanity checks.
     CZI_ASSERT(cellNames.size() == cells.size());
@@ -82,12 +92,31 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
     largeCellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "LargeCellExpressionCounts");
     cellSets.accessExisting(directoryName);
 
+
+
+    // Access the gene sets.
+	using boost::filesystem::directory_iterator;
+	boost::regex regex(directoryName + "/GeneSet-(.*)-Genes");
+	for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
+		const string fileName = it->path().string();
+		boost::smatch regexMatchResults;
+		if(!boost::regex_match(fileName, regexMatchResults, regex)) {
+			continue;
+		}
+		CZI_ASSERT(regexMatchResults.size() == 2);
+		const string& geneSetName = regexMatchResults[1];
+		geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
+	}
+
+
+
     // Sanity checks.
     CZI_ASSERT(cellNames.size() == cells.size());
     CZI_ASSERT(cellMetaData.size() == cells.size());
     CZI_ASSERT(cellExpressionCounts.size() == cells.size());
     CZI_ASSERT(cellSets.cellSets["AllCells"]->size() == cells.size());
     CZI_ASSERT(cellMetaDataNamesUsageCount.size() == cellMetaDataNames.size());
+    CZI_ASSERT(geneSets["AllGenes"].size() == geneCount());
 
     // Fill the table containing commands known to the http server.
     fillServerFunctionTable();
@@ -101,7 +130,8 @@ bool ExpressionMatrix::addGene(const string& geneName)
 {
     const StringId stringId = geneNames(geneName);
     if(stringId == geneNames.invalidStringId) {
-		geneNames[geneName];
+		const GeneId geneId = GeneId(geneNames[geneName]);
+		geneSets["AllGenes"].addGene(geneId);
 		return true;
     } else {
     	return false;	// Was already present.

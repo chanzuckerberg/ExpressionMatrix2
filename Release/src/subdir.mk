@@ -12,6 +12,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrixHdf5.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
 ../src/ExpressionMatrixLsh.cpp \
+../src/GeneSet.cpp \
 ../src/HttpServer.cpp \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
@@ -32,6 +33,7 @@ OBJS += \
 ./src/ExpressionMatrixHdf5.o \
 ./src/ExpressionMatrixHttpServer.o \
 ./src/ExpressionMatrixLsh.o \
+./src/GeneSet.o \
 ./src/HttpServer.o \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
@@ -52,6 +54,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrixHdf5.d \
 ./src/ExpressionMatrixHttpServer.d \
 ./src/ExpressionMatrixLsh.d \
+./src/GeneSet.d \
 ./src/HttpServer.d \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \

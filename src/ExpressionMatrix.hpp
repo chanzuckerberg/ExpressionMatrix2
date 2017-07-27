@@ -6,6 +6,7 @@
 // CZI.
 #include "Cell.hpp"
 #include "CellSets.hpp"
+#include "GeneSet.hpp"
 #include "HttpServer.hpp"
 #include "Ids.hpp"
 #include "MemoryMappedVector.hpp"
@@ -470,6 +471,10 @@ private:
 
     // Functionality to define and maintain cell sets.
     CellSets cellSets;
+
+    // Gene sets, keyed by gene set name.
+    // This always contains gene set AllGenes.
+    map<string, GeneSet> geneSets;
 
 
 
