@@ -2,6 +2,7 @@
 #include "color.hpp"
 #include "CellSimilarityGraph.hpp"
 #include "ClusterGraph.hpp"
+#include "NormalizationMethod.hpp"
 #include "orderPairs.hpp"
 #include "randIndex.hpp"
 #include "timestamp.hpp"
