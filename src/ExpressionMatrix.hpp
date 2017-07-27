@@ -413,6 +413,7 @@ private:
     void exploreSummary(const vector<string>& request, ostream& html);
     void exploreHashTableSummary(const vector<string>& request, ostream&);
     void exploreGene(const vector<string>& request, ostream& html);
+    void exploreGeneInformationContent(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
     ostream& writeCellLink(ostream&, const string& cellName, bool writeId=false);
@@ -429,8 +430,11 @@ private:
     void downsampleCellSet(const vector<string>& request, ostream& html);
     ostream& writeCellSetSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeCellSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
+    ostream& writeGeneSetSelection(ostream& html, const string& selectName, bool multiple) const;
+    ostream& writeGeneSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeGraphSelection(ostream& html, const string& selectName, bool multiple) const;
-    void removeCellSet(const vector<string>& request, ostream& html);
+    ostream& writeNormalizationSelection(ostream& html, const string& selectedNormalizationOption) const;
+	void removeCellSet(const vector<string>& request, ostream& html);
     void exploreGraphs(const vector<string>& request, ostream& html);
     void compareGraphs(const vector<string>& request, ostream& html);
     void exploreGraph(const vector<string>& request, ostream& html);

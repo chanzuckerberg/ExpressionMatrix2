@@ -118,6 +118,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/index"]                           = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/exploreHashTableSummary"]         = &ExpressionMatrix::exploreHashTableSummary;
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
+    serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
@@ -827,6 +828,42 @@ ostream& ExpressionMatrix::writeCellSetSelection(
 
 
 
+ostream& ExpressionMatrix::writeGeneSetSelection(
+    ostream& html,
+    const string& selectName,
+    bool multiple) const
+{
+    set<string> selected;
+    return writeGeneSetSelection(html, selectName, selected, multiple);
+}
+
+ostream& ExpressionMatrix::writeGeneSetSelection(
+    ostream& html,
+    const string& selectName,
+    const set<string>& selected,
+    bool multiple) const
+{
+    html << "<select";
+    if(multiple) {
+        html << " multiple";
+    }
+    html << " name=" << selectName << " style='vertical-align:text-top;'>";
+    html << "<option value=''></option>";
+    for(const auto& p: geneSets) {
+        const string& geneSetName = p.first;
+        html << "<option value=" << geneSetName;
+        if(selected.find(geneSetName) != selected.end()) {
+            html << " selected=selected";
+        }
+        html << ">" << geneSetName << "</option>";
+    }
+    html << "</select>";
+
+    return html;
+}
+
+
+
 ostream& ExpressionMatrix::writeGraphSelection(
     ostream& html,
     const string& selectName,
@@ -844,6 +881,46 @@ ostream& ExpressionMatrix::writeGraphSelection(
     html << "</select>";
 
     return html;
+}
+
+
+
+ostream& ExpressionMatrix::writeNormalizationSelection(
+    ostream& html,
+	const string& selectedNormalizationOption) const
+{
+	// Begin the select element.
+	html << "<select name=normalizationOption>";
+
+
+
+	// No normalization.
+	html << "<option value=none";
+	if(selectedNormalizationOption == "none") {
+		html << " selected=selected";
+	}
+	html << ">no normalization (raw read count)</option>";
+
+	// L1 normalization
+	html << "<option value=norm1";
+	if(selectedNormalizationOption == "norm1") {
+		html << " selected=selected";
+	}
+	html << ">L1 normalization (fractional read count)</option>";
+
+	// L2 normalization.
+	html << "<option value=norm2";
+	if(selectedNormalizationOption == "norm2") {
+		html << " selected=selected";
+	}
+	html << ">L2 normalization</option>";
+
+
+
+	// End the select element.
+	html << "</select>";
+
+	return html;
 }
 
 
@@ -1208,7 +1285,8 @@ void ExpressionMatrix::exploreGene(
 
     // Write the form for information on a single gene.
     html <<
-        "<hr><form>"
+        "<h2>Detailed information for a single gene</h2>"
+        "<form>"
     	"<input type=submit value='Show information about gene'>"
         " <input type=text name=geneId";
     if(geneIdIsPresent) {
@@ -1228,13 +1306,15 @@ void ExpressionMatrix::exploreGene(
 
     // Write the form for gene information content.
     html <<
-    	"<hr><form action=geneInformationContent>"
-    	"<input type=submit value='Display gene information content for gene set'>"
-    	"<br>cell set ";
+    	"<h2>Gene information content</h2>"
+    	"<form action=geneInformationContent>"
+    	"<input type=submit value='Display gene information content for gene set'> ";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << "<br>cell set ";
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
-    html <<
-    	"<br>using"
-    	"</form><hr>";
+    html << "<br>using ";
+    writeNormalizationSelection(html, "norm2");
+    html << "</form>";
 
 
 
@@ -1347,6 +1427,44 @@ void ExpressionMatrix::exploreGene(
         "$(document).ready(function(){$('#countTable').tablesorter();});"
         "</script>"
         ;
+}
+
+
+
+void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& request, ostream& html)
+{
+    // Get the name of the gene set to use to compute gene information content.
+    string geneSetName;
+    getParameterValue(request, "geneSetName", geneSetName);
+
+    // Get the name of the cell set to use to compute gene information content.
+    string cellSetName;
+    getParameterValue(request, "cellSetName", cellSetName);
+
+    // Get the nornmalization method to be used to compute gene information content.
+    string normalizationOption;
+    getParameterValue(request, "normalizationOption", normalizationOption);
+    if(normalizationOption.empty()) {
+        normalizationOption = "norm2";
+    }
+    if(normalizationOption!="none"&& normalizationOption!="norm1" && normalizationOption!="norm2") {
+    	html << "<p>Invalid normalization option " << normalizationOption;
+    	return;
+    }
+
+    html << "<h1>Gene information content</h1>";
+    html << "<p>Gene information content was computed taking only into account genes in gene set " << geneSetName;
+    html << " and cells in cell set " << cellSetName << " and using ";
+    if(normalizationOption == "none") {
+    	html << "no normalization (raw read count)";
+    } else if(normalizationOption == "norm1") {
+    	html << "L1 normalization (fractional read count)";
+	} else if(normalizationOption == "norm2") {
+		html << "L2 normalization";
+	}
+    html << ".";
+
+    html << "<p>This is not yet implemented.";
 }
 
 
@@ -1853,23 +1971,8 @@ void ExpressionMatrix::exploreGraph(
     }
     html << ">";
 
-    html << " using <select name=normalizationOption id=normalizationOption>";
-    html << "<option value=none";
-    if(normalizationOption == "none") {
-        html << " selected=selected";
-    }
-    html << ">no normalization (raw read count)</option>";
-    html << "<option value=norm1";
-    if(normalizationOption == "norm1") {
-        html << " selected=selected";
-    }
-    html << ">L1 normalization (fractional read count)</option>";
-    html << "<option value=norm2";
-    if(normalizationOption == "norm2") {
-        html << " selected=selected";
-    }
-    html << ">L2 normalization</option>";
-    html << "</select>";
+    html << " using ";
+    writeNormalizationSelection(html, normalizationOption);
 
 
 
