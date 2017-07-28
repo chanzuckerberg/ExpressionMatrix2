@@ -211,6 +211,21 @@ public:
 
 
 
+    // Add cells from files created by the BioHub pipeline.
+    // See the beginning of ExpressionMatrixBioHub.cpp for a detailed description
+    // of the expected formats.
+    void addCellsFromBioHub(
+		const string& expressionCountsFileName,	// The name of the csv file containing expression counts.
+		size_t initialMetaDataCount,			// The number of initial columns containing meta data.
+		size_t finalMetaDataCount,				// The number of final columns containing meta data.
+		const string& plateMetaDataFileName,	// The name of the file containing per-plate meta data.
+		const string& cellMetaDataFileName,     // The name of the file containing per-cell meta data.
+		size_t maxTermCountForApproximateSimilarityComputation
+    	);
+
+
+
+
     // Return the number of genes.
     GeneId geneCount() const
     {

@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/CellSimilarityGraph.cpp \
 ../src/ClusterGraph.cpp \
 ../src/ExpressionMatrix.cpp \
+../src/ExpressionMatrixBioHub.cpp \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHdf5.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
@@ -29,6 +30,7 @@ OBJS += \
 ./src/CellSimilarityGraph.o \
 ./src/ClusterGraph.o \
 ./src/ExpressionMatrix.o \
+./src/ExpressionMatrixBioHub.o \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHdf5.o \
 ./src/ExpressionMatrixHttpServer.o \
@@ -50,6 +52,7 @@ CPP_DEPS += \
 ./src/CellSimilarityGraph.d \
 ./src/ClusterGraph.d \
 ./src/ExpressionMatrix.d \
+./src/ExpressionMatrixBioHub.d \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHdf5.d \
 ./src/ExpressionMatrixHttpServer.d \
