@@ -188,18 +188,6 @@ void ExpressionMatrix::exploreSummary(
     ostream& html)
 {
 
-
-
-    // If the run directory contains a README file, copy it to html.
-    // The README file can contain html, if it is well behaved.
-    if(boost::filesystem::exists("README") && boost::filesystem::is_regular_file("README")) {
-    	ifstream readMeFile("README");
-    	html << "<h1>README file</h1>";
-    	html << readMeFile.rdbuf();
-    }
-
-
-
     html <<
         "<h1>Expression matrix</h1>"
         "<p>The expression matrix has " << cellCount() <<
@@ -209,6 +197,28 @@ void ExpressionMatrix::exploreSummary(
 
     // Link to the summary of hash table usage.
     html << "<p>See a <a href=exploreHashTableSummary>summary of hash table utilization</a>.";
+
+
+
+    // If the run directory contains a README.html file, copy it to html.
+    if(boost::filesystem::exists("README.html") && boost::filesystem::is_regular_file("README.html")) {
+    	ifstream readMeFile("README.html");
+    	html << "<h1>README.html file</h1>";
+    	html << readMeFile.rdbuf();
+    }
+
+
+
+    // If the run directory contains a README file, copy it to html (enclosed in a <pre> element).
+    if(boost::filesystem::exists("README") && boost::filesystem::is_regular_file("README")) {
+    	ifstream readMeFile("README");
+    	html << "<h1>README file</h1><pre>";
+    	html << readMeFile.rdbuf();
+    	html << "</pre>";
+    }
+
+
+
 }
 
 

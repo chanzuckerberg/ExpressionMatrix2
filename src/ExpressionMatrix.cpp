@@ -167,7 +167,11 @@ CellId ExpressionMatrix::addCell(
         }
     }
     if(!cellNameWasFound) {
-        throw std::runtime_error("CellName missing from meta data.");
+    	cout << "CellName is missing from the following cell meta data:" << endl;
+    	for(const auto& p: metaData) {
+    		cout << p.first << " " << p.second << endl;
+    	}
+        throw std::runtime_error("CellName missing from cell meta data.");
     }
     CZI_ASSERT(metaData.front().first == "CellName");
 

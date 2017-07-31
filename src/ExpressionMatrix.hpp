@@ -219,9 +219,17 @@ public:
 		size_t initialMetaDataCount,			// The number of initial columns containing meta data.
 		size_t finalMetaDataCount,				// The number of final columns containing meta data.
 		const string& plateMetaDataFileName,	// The name of the file containing per-plate meta data.
-		const string& cellMetaDataFileName,     // The name of the file containing per-cell meta data.
 		size_t maxTermCountForApproximateSimilarityComputation
     	);
+	void getPlateMetaDataFromBioHub(
+		const string& plateName,
+		const string&plateMetaDataFileName,
+		vector< pair<string, string> >& plateMetaData);
+
+	// Add cell meta data contained in a csv file, one line per cell.
+	// This can be used to read cell mata data in the BioHub pipeline
+	// stored in the .log-by-cell.csv files.
+    void addCellMetaData(const string& cellMetaDataName);
 
 
 
@@ -376,7 +384,7 @@ private:
     // Given the cell name, it can find the corresponding CellId.
     // The name of reach cell is also stored as the first entry
     // in the meta data for the cell, called "cellName".
-    MemoryMapped::StringTable<GeneId> cellNames;
+    MemoryMapped::StringTable<CellId> cellNames;
 
     // The meta data for each cell.
     // For each cell we store pairs of string ids for each meta data (name, value) pair.

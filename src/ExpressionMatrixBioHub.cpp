@@ -2,8 +2,7 @@
 
 Functionality to read expression matrix data from the BioHub pipeline.
 
-Each call to this function is used to add a set of cells from a single plate
-using information contained in three input csv files:
+The BioHub pipeline creates three files for each plate:
 
 - A csv file containing expression counts by cell, with one row per cell
   and one column per gene plus a header line containing gene names.
@@ -19,8 +18,14 @@ using information contained in three input csv files:
   The row in this file corresponding to that plate name is used to assign meta
   data to all the cells.
 - A csv file containing cell meta data, with one row for each cell and one
-  column for each meta data field. The cells in this file are not required
+  column for each meta data field. The first column containes the cell name
+  (which matches the cell name used in the excpression count file).
+  The cells in this file are not required
   to be in the same order as the cells in the expression counts file.
+
+The names of the first two files are passed as arguments to addCellGFromBioHub.
+The additional cell meta datga in the third file can then be added using a call
+to addCellMetaData.
 
 *******************************************************************************/
 
@@ -44,7 +49,6 @@ void ExpressionMatrix::addCellsFromBioHub(
 	size_t initialMetaDataCount,			// The number of initial columns containing meta data.
 	size_t finalMetaDataCount,				// The number of final columns containing meta data.
 	const string& plateMetaDataFileName,	// The name of the file containing per-plate meta data.
-	const string& cellMetaDataFileName,     // The name of the file containing per-cell meta data.
 	size_t maxTermCountForApproximateSimilarityComputation
 	)
 {
@@ -128,12 +132,22 @@ void ExpressionMatrix::addCellsFromBioHub(
 
 	// Get the meta data for the plate corresponding to this expression counts file.
 	// This meta data will be assigned to all of the cells in the file.
+	vector< pair<string, string> > plateMetaData;
+	getPlateMetaDataFromBioHub(plateName, plateMetaDataFileName, plateMetaData);
 
 
 
 	// Vectors to contain expression counts and meta data for a single cell.
     vector< pair<string, float> > cellExpressionCounts;
     vector< pair<string, string> > cellMetaData;
+    cellMetaData.push_back(make_pair("CellName", ""));
+    cellMetaData.insert(cellMetaData.end(), plateMetaData.begin(), plateMetaData.end());
+    for(const string& metaDataName: initialMetaDataNames) {
+    	cellMetaData.push_back(make_pair(metaDataName, ""));
+    }
+    for(const string& metaDataName: finalMetaDataNames) {
+    	cellMetaData.push_back(make_pair(metaDataName, ""));
+    }
 
 
 
@@ -153,9 +167,38 @@ void ExpressionMatrix::addCellsFromBioHub(
 			throw runtime_error("Invalid number of tokens in line of input expression count file.");
 		}
 
+		// Store the initial and final meta data names.
+		cellMetaData.front().second = tokens.front();
+		for(size_t i=0; i!=initialMetaDataCount; i++) {
+			cellMetaData[i + 1 + plateMetaData.size()].second = tokens[initialMetaDataBegin+i];
+		}
+		for(size_t i=0; i!=finalMetaDataCount; i++) {
+			cellMetaData[i + 1 + plateMetaData.size() + initialMetaDataCount].second = tokens[finalMetaDataBegin+i];
+		}
+
+		// Store the expression counts.
+		cellExpressionCounts.clear();
+		for(size_t i=0; i<genesInCsvFileCount; i++) {
+			const string& token = tokens[expressionCountBegin + i];
+			float count;
+			try {
+				count = lexical_cast<float>(token);
+			} catch (bad_lexical_cast) {
+				throw runtime_error("Invalid format of expression count " + token + " for cell " + tokens.front());
+			}
+			if(count == 0.) {
+				continue;
+			}
+			if(count > 0.) {
+				cellExpressionCounts.push_back(make_pair(geneNamesInCsvFile[i], count));
+			} else {
+				throw runtime_error("Negative expression count " + token + " for cell " + tokens.front());
+			}
+		}
+
 
 		// Add the cell.
-		// addCell(cellMetaData, cellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
+		addCell(cellMetaData, cellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
 		++newCellCount;
 	}
 	cout << "Read expression counts for " << newCellCount << " cells." << endl;
@@ -164,3 +207,126 @@ void ExpressionMatrix::addCellsFromBioHub(
 
 }
 
+
+
+void ExpressionMatrix::getPlateMetaDataFromBioHub(
+	const string& plateName,
+	const string&plateMetaDataFileName,
+	vector< pair<string, string> >& plateMetaData)
+{
+	// Open the plate meta data file.
+	ifstream plateMetaDataFile(plateMetaDataFileName);
+	if(!plateMetaDataFile) {
+		throw runtime_error("Error opening " + plateMetaDataFileName);
+	}
+
+	// Read the first row.
+	string line;
+	getline(plateMetaDataFile, line);
+	if(!plateMetaDataFile) {
+		throw runtime_error("Error reading the header line from file " + plateMetaDataFileName);
+	}
+
+	// Parse the first row. They are the meta data names.
+    vector<string> metaDataNames;
+	tokenize(",", line, metaDataNames);
+	if(metaDataNames.size() == 0) {
+		throw runtime_error("Invalid format of plate meta data file " + plateMetaDataFileName);
+	}
+	metaDataNames.front() = "PlateName";
+
+
+
+	// Find the row for the plate we are looking for.
+	vector<string> metaDataValues;
+	while(true) {
+
+		getline(plateMetaDataFile, line);
+		if(!plateMetaDataFile) {
+			break;
+		}
+		tokenize(",", line, metaDataValues);
+
+		if(metaDataValues.size() != metaDataNames.size()) {
+			throw runtime_error("Unexpected number of meta data values for plate " + plateName);
+		}
+
+		if(metaDataValues.front() != plateName) {
+			continue;
+		}
+
+		// We found the line for this plate.
+		// Now we have both names and values of the meta data for this cell.
+		plateMetaData.clear();
+		for(size_t i=0; i<metaDataNames.size(); i++) {
+			plateMetaData.push_back(make_pair(metaDataNames[i], metaDataValues[i]));
+		}
+		return;
+
+	}
+
+	throw runtime_error(
+		"Did not find line for plate " + plateName +
+		" in plate meta data file " + plateMetaDataFileName
+		);
+}
+
+
+
+void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
+{
+	// Open the cell meta data file.
+	ifstream cellMetaDataFile(cellMetaDataFileName);
+	if(!cellMetaDataFile) {
+		throw runtime_error("Error opening " + cellMetaDataFileName);
+	}
+	cout << timestamp << "Adding cell meta data in " << cellMetaDataFileName << endl;
+
+	// Read the first row.
+	string line;
+	getline(cellMetaDataFile, line);
+	if(!cellMetaDataFile) {
+		throw runtime_error("Error reading the header line from file " + cellMetaDataFileName);
+	}
+
+	// Parse the first row. They are the meta data names (except for the first one which is ignored).
+    vector<string> metaDataNames;
+	tokenize(",", line, metaDataNames);
+	if(metaDataNames.size() == 0) {
+		throw runtime_error("Invalid format of cell meta data file " + cellMetaDataFileName);
+	}
+
+
+
+	// Process each row.
+	vector<string> metaDataValues;
+	while(true) {
+
+		getline(cellMetaDataFile, line);
+		if(!cellMetaDataFile) {
+			break;
+		}
+		tokenize(",", line, metaDataValues);
+
+		if(metaDataValues.size() != metaDataNames.size()) {
+			throw runtime_error("Unexpected number of meta data values in " + cellMetaDataFileName);
+		}
+
+		// Locate the cell.
+		const string& cellName = metaDataValues.front();
+		const StringId cellNameStringId = cellNames(cellName);
+		if(cellNameStringId == cellNames.invalidStringId) {
+			throw runtime_error("Attempt to add meta data for undefined cell " + cellName);
+		}
+		const CellId cellId = CellId(cellNameStringId);
+		CZI_ASSERT(cellId < cellCount());
+
+
+		for(size_t i=1; i<metaDataNames.size(); i++) {
+			if(metaDataNames[i].size() > 0) {
+				setMetaData(cellId, metaDataNames[i], metaDataValues[i]);
+			}
+		}
+	}
+
+}
