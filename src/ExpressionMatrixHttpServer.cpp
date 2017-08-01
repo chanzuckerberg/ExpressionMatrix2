@@ -904,7 +904,7 @@ ostream& ExpressionMatrix::writeNormalizationSelection(
 	html << "<select name=normalizationMethod id=normalizationMethod>";
 
 	// Write an <option> element for each possible normalization method.
-	for(NormalizationMethod method: {NormalizationMethod::None, NormalizationMethod::L1, NormalizationMethod::L2}) {
+	for(NormalizationMethod method: validNormalizationMethods) {
 		html << "<option value=" << normalizationMethodToShortString(method);
 		if(method == selectedMethod) {
 			html << " selected=selected";

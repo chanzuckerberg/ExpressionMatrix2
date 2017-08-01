@@ -15,6 +15,15 @@ namespace ChanZuckerberg {
 			Invalid
     	};
 
+    	// This can be used to loop over the valid values of NormalizationMthod.
+    	// The unused attribute is necessary to suppress compilation warnings (due to -Wall).
+    	const auto validNormalizationMethods __attribute__((unused)) =
+    	{
+    		NormalizationMethod::None,
+			NormalizationMethod::L1,
+			NormalizationMethod::L2
+    	};
+
 
 
     	// Convert a NormalizationMethod to a short string and vice versa.
@@ -60,6 +69,7 @@ namespace ChanZuckerberg {
     			return "Invalid normalization";
     		}
     	}
+
 
     }
 }
