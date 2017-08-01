@@ -3,6 +3,7 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include <boost/algorithm/string/trim.hpp>
 #include "boost_lexical_cast.hpp"
 
 #include "stdexcept.hpp"
@@ -14,7 +15,8 @@ using namespace ExpressionMatrix2;
 void ChanZuckerberg::ExpressionMatrix2::tokenize(
     const string& separators,
     const string& inputString,
-    vector<string>& tokens)
+    vector<string>& tokens,
+	bool removeLeadingAndTrailingBlanks)
 {
     typedef boost::escaped_list_separator<char> EscapedListSeparator;
     const EscapedListSeparator escapedListSeparator("\\", separators, "\"");
@@ -23,6 +25,12 @@ void ChanZuckerberg::ExpressionMatrix2::tokenize(
 
     tokens.clear();
     tokens.insert(tokens.begin(), tokenizer.begin(), tokenizer.end());
+
+    if(removeLeadingAndTrailingBlanks) {
+    	for(string& token: tokens) {
+    		boost::algorithm::trim(token);
+    	}
+    }
 }
 
 

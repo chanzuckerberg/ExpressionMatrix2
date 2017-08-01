@@ -68,7 +68,7 @@ void ExpressionMatrix::addCellsFromBioHub(
 
 	// Parse the first row.
     vector<string> tokens;
-	tokenize(",", line, tokens);
+	tokenize(",", line, tokens, true);
 	const size_t minimumExpectedTokenCount = initialMetaDataCount + finalMetaDataCount + 2;
 	if(tokens.size() < minimumExpectedTokenCount) {
 		throw runtime_error("Insufficient number of tokens in first line of file " + expressionCountsFileName +
@@ -160,7 +160,7 @@ void ExpressionMatrix::addCellsFromBioHub(
 		if(!expressionCountsFile) {
 			break;
 		}
-		tokenize(",", line, tokens);
+		tokenize(",", line, tokens, true);
 		if(tokens.size() != tokenCount) {
 			cout << line << endl;
 			cout << "The previous line has " << tokens.size() << " tokens. Expected " << tokenCount << endl;
@@ -229,7 +229,7 @@ void ExpressionMatrix::getPlateMetaDataFromBioHub(
 
 	// Parse the first row. They are the meta data names.
     vector<string> metaDataNames;
-	tokenize(",", line, metaDataNames);
+	tokenize(",", line, metaDataNames, true);
 	if(metaDataNames.size() == 0) {
 		throw runtime_error("Invalid format of plate meta data file " + plateMetaDataFileName);
 	}
@@ -245,7 +245,7 @@ void ExpressionMatrix::getPlateMetaDataFromBioHub(
 		if(!plateMetaDataFile) {
 			break;
 		}
-		tokenize(",", line, metaDataValues);
+		tokenize(",", line, metaDataValues, true);
 
 		if(metaDataValues.size() != metaDataNames.size()) {
 			throw runtime_error("Unexpected number of meta data values for plate " + plateName);
@@ -291,7 +291,7 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
 
 	// Parse the first row. They are the meta data names (except for the first one which is ignored).
     vector<string> metaDataNames;
-	tokenize(",", line, metaDataNames);
+	tokenize(",", line, metaDataNames, true);
 	if(metaDataNames.size() == 0) {
 		throw runtime_error("Invalid format of cell meta data file " + cellMetaDataFileName);
 	}
@@ -306,7 +306,7 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
 		if(!cellMetaDataFile) {
 			break;
 		}
-		tokenize(",", line, metaDataValues);
+		tokenize(",", line, metaDataValues, true);
 
 		if(metaDataValues.size() != metaDataNames.size()) {
 			throw runtime_error("Unexpected number of meta data values in " + cellMetaDataFileName);
@@ -324,7 +324,7 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
 
 		for(size_t i=1; i<metaDataNames.size(); i++) {
 			if(metaDataNames[i].size() > 0) {
-				setMetaData(cellId, metaDataNames[i], metaDataValues[i]);
+			setMetaData(cellId, metaDataNames[i], metaDataValues[i]);
 			}
 		}
 	}

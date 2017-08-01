@@ -13,7 +13,8 @@ namespace ChanZuckerberg {
     void tokenize(
         const string& separators,
         const string& inputString,
-        vector<string>& tokens);
+        vector<string>& tokens,
+		bool removeLeadingAndTrailingBlanks = false);
 
     void tokenizeFile(
     	const string& fileName,
