@@ -13,6 +13,7 @@
 #include "MemoryMappedVectorOfLists.hpp"
 #include "MemoryMappedVectorOfVectors.hpp"
 #include "MemoryMappedStringTable.hpp"
+#include "NormalizationMethod.hpp"
 
 // Boost libraries.
 #include <boost/shared_ptr.hpp>
@@ -284,7 +285,7 @@ public:
     void computeAverageExpression(
     	const vector<CellId> cells,
 		vector<double>& averageExpression,
-		size_t normalization) const;
+		NormalizationMethod normalizationMethod) const;
 
 
 
@@ -456,7 +457,8 @@ private:
     ostream& writeGeneSetSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeGeneSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeGraphSelection(ostream& html, const string& selectName, bool multiple) const;
-    ostream& writeNormalizationSelection(ostream& html, const string& selectedNormalizationOption) const;
+    ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
+    NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
 	void removeCellSet(const vector<string>& request, ostream& html);
     void exploreGraphs(const vector<string>& request, ostream& html);
     void compareGraphs(const vector<string>& request, ostream& html);

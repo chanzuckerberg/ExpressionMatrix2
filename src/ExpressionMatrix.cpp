@@ -951,7 +951,7 @@ float ExpressionMatrix::getExpressionCount(CellId cellId, GeneId geneId) const
 void ExpressionMatrix::computeAverageExpression(
 	const vector<CellId> cellIds,
 	vector<double>& averageExpression,
-	size_t normalization) const
+	NormalizationMethod normalizationMethod) const
 {
 	// Initialize the average expression to zero.
 	averageExpression.resize(geneCount());
@@ -965,14 +965,14 @@ void ExpressionMatrix::computeAverageExpression(
 		// Compute the normalization factor for this cell.
 		const Cell& cell = cells[cellId];
 		double factor;
-		switch(normalization) {
-		case 0:
+		switch(normalizationMethod) {
+		case NormalizationMethod::None:
 			factor = 1.;
 			break;
-		case 1:
+		case NormalizationMethod::L1:
 			factor = cell.norm1Inverse;
 			break;
-		case 2:
+		case NormalizationMethod::L2:
 			factor = cell.norm2Inverse;
 			break;
 		default:
@@ -1000,10 +1000,10 @@ void ExpressionMatrix::computeAverageExpression(
 
 
 	// Normalize as requested.
-	switch(normalization) {
-	case 0:
+	switch(normalizationMethod) {
+	case NormalizationMethod::None:
 		break;
-	case 1:
+	case NormalizationMethod::L1:
 	{
 		const double factor = 1. / accumulate(averageExpression.begin(), averageExpression.end(), 0.);
 		for(double& a: averageExpression) {
@@ -1011,7 +1011,7 @@ void ExpressionMatrix::computeAverageExpression(
 		}
 		break;
 	}
-	case 2:
+	case NormalizationMethod::L2:
 	{
 		double sum = 0.;
 		for(const double& a: averageExpression) {

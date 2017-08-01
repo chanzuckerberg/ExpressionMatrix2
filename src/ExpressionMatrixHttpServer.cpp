@@ -898,34 +898,19 @@ ostream& ExpressionMatrix::writeGraphSelection(
 
 ostream& ExpressionMatrix::writeNormalizationSelection(
     ostream& html,
-	const string& selectedNormalizationOption) const
+	NormalizationMethod selectedMethod) const
 {
 	// Begin the select element.
-	html << "<select name=normalizationOption>";
+	html << "<select name=normalizationMethod id=normalizationMethod>";
 
-
-
-	// No normalization.
-	html << "<option value=none";
-	if(selectedNormalizationOption == "none") {
-		html << " selected=selected";
+	// Write an <option> element for each possible normalization method.
+	for(NormalizationMethod method: {NormalizationMethod::None, NormalizationMethod::L1, NormalizationMethod::L2}) {
+		html << "<option value=" << normalizationMethodToShortString(method);
+		if(method == selectedMethod) {
+			html << " selected=selected";
+		}
+		html << ">" << normalizationMethodToLongString(method) << "</option>";
 	}
-	html << ">no normalization (raw read count)</option>";
-
-	// L1 normalization
-	html << "<option value=norm1";
-	if(selectedNormalizationOption == "norm1") {
-		html << " selected=selected";
-	}
-	html << ">L1 normalization (fractional read count)</option>";
-
-	// L2 normalization.
-	html << "<option value=norm2";
-	if(selectedNormalizationOption == "norm2") {
-		html << " selected=selected";
-	}
-	html << ">L2 normalization</option>";
-
 
 
 	// End the select element.
@@ -1323,8 +1308,6 @@ void ExpressionMatrix::exploreGene(
     writeGeneSetSelection(html, "geneSetName", false);
     html << "<br>cell set ";
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
-    html << "<br>using ";
-    writeNormalizationSelection(html, "norm2");
     html << "</form>";
 
 
@@ -1452,30 +1435,31 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
     string cellSetName;
     getParameterValue(request, "cellSetName", cellSetName);
 
-    // Get the nornmalization method to be used to compute gene information content.
-    string normalizationOption;
-    getParameterValue(request, "normalizationOption", normalizationOption);
-    if(normalizationOption.empty()) {
-        normalizationOption = "norm2";
-    }
-    if(normalizationOption!="none"&& normalizationOption!="norm1" && normalizationOption!="norm2") {
-    	html << "<p>Invalid normalization option " << normalizationOption;
+    // Get the normalization method to be used to compute gene information content.
+    const NormalizationMethod normalizationMethod = getNormalizationMethod(request, NormalizationMethod::L2);
+    if(normalizationMethod == NormalizationMethod::Invalid) {
+    	html << "<p>Invalid normalization method.";
     	return;
     }
 
     html << "<h1>Gene information content</h1>";
     html << "<p>Gene information content was computed taking only into account genes in gene set " << geneSetName;
-    html << " and cells in cell set " << cellSetName << " and using ";
-    if(normalizationOption == "none") {
-    	html << "no normalization (raw read count)";
-    } else if(normalizationOption == "norm1") {
-    	html << "L1 normalization (fractional read count)";
-	} else if(normalizationOption == "norm2") {
-		html << "L2 normalization";
-	}
-    html << ".";
-
+    html << " and cells in cell set " << cellSetName << ".";
     html << "<p>This is not yet implemented.";
+}
+
+
+
+NormalizationMethod ExpressionMatrix::getNormalizationMethod(
+	const vector<string>& request,
+	NormalizationMethod defaultValue)
+{
+	string normalizationMethodString;
+	if(getParameterValue(request, "normalizationMethod", normalizationMethodString)) {
+		return normalizationMethodFromShortString(normalizationMethodString);
+	} else {
+		return defaultValue;
+	}
 }
 
 
@@ -1903,11 +1887,7 @@ void ExpressionMatrix::exploreGraph(
     getParameterValue(request, "viewBoxHalfSize", viewBoxHalfSize);
     string geneIdStringForColoringByGeneExpression;
     getParameterValue(request, "geneIdForColoringByGeneExpression", geneIdStringForColoringByGeneExpression);
-    string normalizationOption;
-    getParameterValue(request, "normalizationOption", normalizationOption);
-    if(normalizationOption.empty()) {
-        normalizationOption = "norm2";
-    }
+    const NormalizationMethod normalizationMethod = getNormalizationMethod(request, NormalizationMethod::L2);
     string cellIdStringForColoringBySimilarity;
     getParameterValue(request, "cellIdStringForColoringBySimilarity", cellIdStringForColoringBySimilarity);
     CellId cellIdForColoringBySimilarity = cellIdFromString(cellIdStringForColoringBySimilarity);
@@ -1940,13 +1920,14 @@ void ExpressionMatrix::exploreGraph(
         "    // window.alert('Coloring option changed: ' + coloringOptionChanged);\n"
         "    geneIdChanged = document.getElementById('geneIdInput').value != '" << geneIdStringForColoringByGeneExpression << "';\n"
         "    // window.alert('Gene id changed: ' + geneIdChanged);\n"
-        "    normalizationOptionChanged = document.getElementById('normalizationOption').value != '" << normalizationOption << "';\n"
-        "    // window.alert('Normalization option changed: ' + normalizationOptionChanged);\n"
+        "    normalizationMethodChanged = document.getElementById('normalizationMethod').value != '" <<
+		normalizationMethodToShortString(normalizationMethod) << "';\n"
+        "    // window.alert('Normalization method changed: ' + normalizationMethodChanged);\n"
         "    cellIdChanged = document.getElementById('cellIdInput').value != '" << cellIdStringForColoringBySimilarity << "';\n"
         "    // window.alert('Cell id changed: ' + cellIdChanged);\n"
         "    metaDataChanged = document.getElementById('metaDataName').value != '" << metaDataName << "';\n"
         "    // window.alert('Meta data changed: ' + metaDataChanged);\n"
-        "    if(coloringOptionChanged || geneIdChanged || normalizationOptionChanged || cellIdChanged || metaDataChanged) {\n"
+        "    if(coloringOptionChanged || geneIdChanged || normalizationMethodChanged || cellIdChanged || metaDataChanged) {\n"
         "        document.getElementById('minColorInput').value = '';"
         "        document.getElementById('maxColorInput').value = '';"
         "    }\n"
@@ -1983,7 +1964,7 @@ void ExpressionMatrix::exploreGraph(
     html << ">";
 
     html << " using ";
-    writeNormalizationSelection(html, normalizationOption);
+    writeNormalizationSelection(html, normalizationMethod);
 
 
 
@@ -2264,16 +2245,16 @@ Thinner edge
         BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
             CellSimilarityGraphVertex& vertex = graph[v];
             const double rawCount = getExpressionCount(vertex.cellId, geneId);
-            if(normalizationOption == "none") {
+            if(normalizationMethod == NormalizationMethod::None) {
                 vertex.value = rawCount;
             } else {
                 const Cell& cell = cells[vertex.cellId];
-                if(normalizationOption == "norm1") {
+                if(normalizationMethod == NormalizationMethod::L1) {
                     vertex.value = rawCount * cell.norm1Inverse;
-                } else if(normalizationOption == "norm2") {
+                } else if(normalizationMethod == NormalizationMethod::L2) {
                     vertex.value = rawCount * cell.norm2Inverse;
-                } else {
-                    html << "<p>Invalid normalization option.";
+                } else if(normalizationMethod == NormalizationMethod::Invalid){
+                    html << "<p>Invalid normalization method.";
                     return;
                 }
             }
@@ -2712,8 +2693,8 @@ void ExpressionMatrix::cluster(
     // of the cluster graph.
 	BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
 		ClusterGraphVertex& vertex = clusterGraph[v];
-		const size_t normalization = 2;	// Use L2 normalization. We might need to make this configurable.
-		computeAverageExpression(vertex.cells, vertex.averageGeneExpression, normalization);
+		const NormalizationMethod normalizationMethod = NormalizationMethod::L2;	// Use L2 normalization. We might need to make this configurable.
+		computeAverageExpression(vertex.cells, vertex.averageGeneExpression, normalizationMethod);
 	}
 
 	// Store in each edge the similarity of the two clusters, computed using the clusters
