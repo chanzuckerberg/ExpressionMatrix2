@@ -2,3 +2,5 @@
 *.d
 Debug/ExpressionMatrix2.so
 Release/ExpressionMatrix2.so
+*.tar
+
