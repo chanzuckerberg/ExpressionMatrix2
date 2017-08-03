@@ -505,6 +505,17 @@ private:
     // This always contains gene set AllGenes.
     map<string, GeneSet> geneSets;
 
+    // Compute gene information content in bits for a given gene set and cell set,
+    // using the specified normalization method.
+    void computeGeneInformationContent(
+    	const GeneSet&,
+		const CellSets::CellSet&,
+		NormalizationMethod,
+		vector<float>& geneInformationContent) const;
+
+    // Same, for a single gene.
+    float computeGeneInformationContent(GeneId, const CellSets::CellSet&, NormalizationMethod) const;
+
 
 
     // Data and functions used for Locality Sensitive Hashing (LSH).

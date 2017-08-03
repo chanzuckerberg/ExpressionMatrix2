@@ -20,6 +20,7 @@ using namespace ExpressionMatrix2;
 #include "iostream.hpp"
 #include "utility.hpp"
 #include "vector.hpp"
+#include <numeric>
 #include <sstream>
 
 
@@ -1005,7 +1006,7 @@ void ExpressionMatrix::computeAverageExpression(
 		break;
 	case NormalizationMethod::L1:
 	{
-		const double factor = 1. / accumulate(averageExpression.begin(), averageExpression.end(), 0.);
+		const double factor = 1. / std::accumulate(averageExpression.begin(), averageExpression.end(), 0.);
 		for(double& a: averageExpression) {
 			a *= factor;
 		}
@@ -1443,4 +1444,81 @@ void ExpressionMatrix::storeClusterId(
         // If the name already exists for this cell, the value is replaced.
         setMetaData(cellId, metaDataNameStringId, lexical_cast<string>(clusterId));
     }
+}
+
+
+
+// Compute gene information content in bits for a given gene set and cell set,
+// using the specified normalization method.
+// We do it one gene at a time to avoid the need for an amount of
+// memory proportional to the product of the number of cells
+// times the number of genes.
+void ExpressionMatrix::computeGeneInformationContent(
+	const GeneSet& geneSet,
+	const CellSets::CellSet& cellSet,
+	NormalizationMethod normalizationMethod,
+	vector<float>& geneInformationContent) const
+{
+	geneInformationContent.reserve(geneSet.size());
+	geneInformationContent.clear();
+	for(const GeneId geneId: geneSet) {
+		if(geneId>0 && (geneId%1000)==0) {
+			cout << geneId << endl;
+		}
+		geneInformationContent.push_back(computeGeneInformationContent(geneId, cellSet, normalizationMethod));
+	}
+
+}
+
+
+float ExpressionMatrix::computeGeneInformationContent(
+	GeneId geneId,
+	const CellSets::CellSet& cellSet,
+	NormalizationMethod normalizationMethod) const
+{
+
+	// Create a vector of expression counts for this gene and for all cells in the cell set,
+	// using the requested normalization.
+	// Note that we use the normalization defined using all genes.
+	vector<float> count;
+	count.reserve(cellSet.size());
+	for(const CellId cellId: cellSet) {
+		const Cell& cell = cells[cellId];
+		float c = getExpressionCount(cellId, geneId);
+		switch(normalizationMethod) {
+		case NormalizationMethod::L1:
+			c *= float(cell.norm1Inverse);
+			break;
+		case NormalizationMethod::L2:
+			c *= float(cell.norm2Inverse);
+			break;
+		default:
+			break;
+		}
+		count.push_back(c);
+	}
+
+
+
+	// Compute the sum, using double precision.
+	double sum = 0.;
+	for(const float c: count) {
+		sum += double(c);
+	}
+
+	// Compute the information content.
+	double informationContent = log(double(cellSet.size())); // Equally distributed.
+	const double inverseSum = 1./sum;	// No problem with division by zero - never used if sum is zero
+	for(const float c: count) {
+		if(c > 0.) {
+			const double p = c * inverseSum;
+			informationContent += p*log(p);
+		}
+	}
+
+
+	// Convert to bits.
+	informationContent /= log(2.);
+
+	return float(informationContent);
 }

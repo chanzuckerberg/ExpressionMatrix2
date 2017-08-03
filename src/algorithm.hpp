@@ -7,7 +7,7 @@
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
-        using std::copy;
+		using std::copy;
         using std::fill;
         using std::find;
         using std::max;

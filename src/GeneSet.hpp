@@ -39,6 +39,22 @@ public:
 		return geneVector.size();
 	}
 
+
+	const GeneId* begin() const
+	{
+		return geneVector.begin();
+	}
+
+	const GeneId* end() const
+	{
+		return geneVector.end();
+	}
+
+	GeneId operator[](size_t i) const
+	{
+		return geneVector[i];
+	}
+
 private:
 
 	// The ids of the genes in this set.

@@ -399,11 +399,11 @@ void ExpressionMatrix::exploreCell(
     // Write a table of the expression counts for this cell.
     html << "<h2>Gene expression counts for this cell</h2>";
     html <<
-        "<p>The following table of expression counts for this cell is sortable. Click on a header to sort by that header. "
+        "<p><strong>The following table of expression counts for this cell is sortable.</strong> Click on a header to sort by that header. "
         "Click again to reverse the sorting order."
         "<p><table id=countTable class=tablesorter><thead><tr><th>Gene<br>name<th>Raw<br>count"
-            "<th>L1-normalized<br>count<br>(sum is 1)"
-            "<th>L2-normalized<br>count<br>(sum<br>of<br>squares is 1)</thead><tbody>";
+        "<th>L1-normalized<br>count<br>(sum is 1)"
+        "<th>L2-normalized<br>count<br>(sum<br>of<br>squares is 1)</thead><tbody>";
     for(const auto& p: expressionCounts) {
         const GeneId geneId = p.first;
         CZI_ASSERT(geneId < geneCount());
@@ -1306,7 +1306,7 @@ void ExpressionMatrix::exploreGene(
     	"<form action=geneInformationContent>"
     	"<input type=submit value='Display gene information content for gene set'> ";
     writeGeneSetSelection(html, "geneSetName", false);
-    html << "<br>cell set ";
+    html << " cell set ";
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
     html << "</form>";
 
@@ -1435,17 +1435,73 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
     string cellSetName;
     getParameterValue(request, "cellSetName", cellSetName);
 
-    // Get the normalization method to be used to compute gene information content.
-    const NormalizationMethod normalizationMethod = getNormalizationMethod(request, NormalizationMethod::L2);
-    if(normalizationMethod == NormalizationMethod::Invalid) {
-    	html << "<p>Invalid normalization method.";
+    // Locate the gene set.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+    	html << "<p>Invalid gene set name " << geneSetName;
     	return;
     }
+    const GeneSet& geneSet = itGeneSet->second;
 
-    html << "<h1>Gene information content</h1>";
-    html << "<p>Gene information content was computed taking only into account genes in gene set " << geneSetName;
-    html << " and cells in cell set " << cellSetName << ".";
-    html << "<p>This is not yet implemented.";
+    // Locate the cell set.
+    const auto itCellSet = cellSets.cellSets.find(cellSetName);
+    if(itCellSet == cellSets.cellSets.end()) {
+    	html << "<p>Invalid cell set name " << cellSetName;
+    	return;
+    }
+    const CellSets::CellSet& cellSet = *(itCellSet->second);
+
+
+    html <<
+    	"<h1>Gene information content</h1>"
+    	"<p>Gene information content computed taking only into account genes in gene set " << geneSetName <<
+    	" (" << geneSet.size() << " genes) "
+    	" and cells in cell set " << cellSetName <<
+    	" (" << cellSet.size() << " cells)."
+		"<p><strong>The table below is sortable.</strong> Click on a header to sort by that column. "
+		"Click again to reverse the sorting order."
+		"<p>This preliminary implementation is very slow (typically around 20 seconds per thousand cells)."
+		" Future versions will be faster.";
+
+    // Compute gene information content for all normalization methods.
+    vector<float> informationContent0;
+    vector<float> informationContent1;
+    vector<float> informationContent2;
+    computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::None, informationContent0);
+    computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::L1  , informationContent1);
+    computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::L2  , informationContent2);
+
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
+
+    // Write the table of gene information content.
+    const auto oldPrecision = html.precision(3);
+    html << "<table id=countTable class=tablesorter style='table-layout:fixed;width:480px;'><thead><th>Gene";
+    for(const NormalizationMethod normalizationMethod: validNormalizationMethods) {
+    	html << "<th>Gene information content in bits computed using " << normalizationMethodToLongString(normalizationMethod);
+    }
+    html << "</thead><tbody>";
+    for(size_t i=0; i<geneSet.size(); i++) {
+    	const GeneId geneId = geneSet[i];
+        CZI_ASSERT(geneId < geneCount());
+        const string geneName = geneNames[geneId];
+        html <<  "<tr><td class=centered style='width:160px;'><a href='gene?geneId=" << urlEncode(geneName) << "'>" << geneName << "</a>";
+        html <<
+			"<td class=centered style='width:160px;'>" << informationContent0[i] <<
+			"<td class=centered style='width:160px;'>" << informationContent1[i] <<
+			"<td class=centered style='width:160px;'>" << informationContent2[i];
+    }
+    html.precision(oldPrecision);
+
+
+    // Finish the table and make it sortable.
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#countTable').tablesorter({sortList:[[3,0]]});});"
+        "</script>"
+        ;
 }
 
 
