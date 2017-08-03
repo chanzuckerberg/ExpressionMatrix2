@@ -28,17 +28,20 @@ Make sure the following packages, all available from the standard Ubuntu reposit
 </ul>
 If one or more of these packages are not installed, you can install them using command "apt install packageName", where packageName is as indicated above. This requires root access.
 
-<li>
-Make a local copy of this GitHub repository, chanzuckerberg/ExpressionMatrix2. An easy way to so this is to click on the green button "Clone or download" on the top right of the GitHub page for this repository, click on "Download ZIP", then expand the zip file.
+<li>Select one of the <a href='https://github.com/chanzuckerberg/ExpressionMatrix2/releases'>available releases</a> and download the tar file for the release you selected. 
 
-<li>
-Make a copy of the test directory tests/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts.
+<li>Create an empty directory. In the rest of these directions we assume that the directory you created is ~/ExpressionMatrix2. If you use a different name, make sure to use the correct name instead of the one used in the rest of these directions.
 
-<li>
-To run the test, you need to select one of the versions of shared library ExpressionMatrix2.so stored in the bin/ubuntu-16.04 directory of the repository. Each of the versions resides in a directory named after the date when that version was created. If you are unsure which one to use, pick the most recent. Make a copy of the selected version of ExpressionMatrix.so in the copy of the test directory you created in the previous item.
+<li> Move the tar file you downloaded from the directory where your browser stores downloads (usually ~/Downloads) to the ~/ExpressionMatrix2 directory your just created, then cd to ~/ExpressionMatrix2.
 
-<li>
-In your copy of the test directory, run command "./run.py". This will read the csv files and create binary data structures stored in mapped files in a new directory named data.
+<li>Extract the files contained in the tar file you downloaded using command "tar -xvf file.tar", replacing the name of tar file
+with the name of the file you downloaded. This will create a doc directory, a test directory, and, most important, a shared library ExpressionMatrix2.so which works as a Python package.
+
+<li>To make ExpressionMatrix2.so visible as a Python package, set environment variable PYTHONPATH to the name of the directory you are using for your tests, ~/ExpressionMatrix2. 
+
+<li>Now cd to test directory tests/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts. 
+
+
 
 <li>
 Run command "./runServer.py". This starts the ExpressionMatrix2 code in a mode where if behaves as an http server that can be used for interactive visualization and analysis. This command continues running until you interrupt it.
@@ -50,13 +53,6 @@ While the server is running, start a web browser on the same machine, and point 
 Interactively explore the functionality offered by the server. You will need a more real test case to perform any interesting visualization or analysis, but if you made it here you are ready to run the ExpressionMatrix2 software on real data. 
 
 </ul>
-
-<p>
-Note that to simplify the "Getting started" process we copied ExpressionMatrix2.so to the same directory containing the Python scripts, so it is found automatically. In real use, this will not be practical, and instead you will want to set environment variable PYTHONPATH to the directory containing ExpressionMatrix2.so. This will allow the Python interpreter to locate it. 
-
-<p>
-You can finds more detailed documentation in the doc directory of the local copy of the repository you created. You can point your browser to doc/index.html to get started.
-
     
 </body>
 </html>
