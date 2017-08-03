@@ -438,6 +438,8 @@ private:
     void exploreHashTableSummary(const vector<string>& request, ostream&);
     void exploreGene(const vector<string>& request, ostream& html);
     void exploreGeneInformationContent(const vector<string>& request, ostream& html);
+    void exploreGeneSets(const vector<string>& request, ostream& html);
+    void exploreGeneSet(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
     ostream& writeCellLink(ostream&, const string& cellName, bool writeId=false);

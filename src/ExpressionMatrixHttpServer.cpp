@@ -120,6 +120,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/exploreHashTableSummary"]         = &ExpressionMatrix::exploreHashTableSummary;
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
     serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
+    serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
+    serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
@@ -147,6 +149,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
 {
     writeNavigation(html, "Summary", "index");
     writeNavigation(html, "Genes", "gene");
+    writeNavigation(html, "Gene sets", "geneSets");
     writeNavigation(html, "Cells", "cell");
     writeNavigation(html, "Compare two cells", "compareTwoCells");
     writeNavigation(html, "Cell sets", "cellSets");
@@ -844,8 +847,7 @@ ostream& ExpressionMatrix::writeGeneSetSelection(
     const string& selectName,
     bool multiple) const
 {
-    set<string> selected;
-    return writeGeneSetSelection(html, selectName, selected, multiple);
+    return writeGeneSetSelection(html, selectName, {"AllGenes"}, multiple);
 }
 
 ostream& ExpressionMatrix::writeGeneSetSelection(
@@ -1281,7 +1283,6 @@ void ExpressionMatrix::exploreGene(
 
     // Write the form for information on a single gene.
     html <<
-        "<h2>Detailed information for a single gene</h2>"
         "<form>"
     	"<input type=submit value='Show information about gene'>"
         " <input type=text name=geneId";
@@ -1296,18 +1297,6 @@ void ExpressionMatrix::exploreGene(
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
     html << "<br>and showing for each cell the following cell meta data fields: ";
     writeMetaDataSelection(html, "metaDataName", metaDataToDisplay, true);
-    html << "</form>";
-
-
-
-    // Write the form for gene information content.
-    html <<
-    	"<h2>Gene information content</h2>"
-    	"<form action=geneInformationContent>"
-    	"<input type=submit value='Display gene information content for gene set'> ";
-    writeGeneSetSelection(html, "geneSetName", false);
-    html << " cell set ";
-    writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
     html << "</form>";
 
 
@@ -1502,6 +1491,97 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
         "$(document).ready(function(){$('#countTable').tablesorter({sortList:[[3,0]]});});"
         "</script>"
         ;
+}
+
+
+
+void ExpressionMatrix::exploreGeneSets(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Write a title.
+    html << "<h1>Gene sets</h1>";
+
+    // Write a table listing the gene sets in existence.
+    html << "<p><table><th>Gene<br>set<br>name<th>Number<br>of<br>genes<th class=centered>Click<br>to<br>remove";
+    for(const auto& p: geneSets) {
+        const string& name = p.first;
+        const auto& geneSet = p.second;
+        html << "<tr><td><a href='geneSet?geneSetName=" << urlEncode(name) << "'>" << name << "</a><td class=centered>" << geneSet.size();
+        html << "<td  class=centered>";
+        if(name != "AllGenes") {
+            html << "<a href='removeGeneSet?geneSetName=" << urlEncode(name) << "'>Remove</a>";
+        }
+    }
+    html << "</table>";
+
+
+
+    // Write the form to display gene information content.
+    html <<
+    	"<h2>Show gene information content</h2>"
+    	"<form action=geneInformationContent>"
+    	"<input type=submit value='Show gene information content for gene set'> ";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << " cell set ";
+    writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
+    html << "</form>";
+
+
+
+
+    // Form to create a gene set using gene information content.
+    html <<
+    	"<br><h2>Create a gene set using gene information content</h2>"
+        "<form action=createGeneSetUsingInformationContent>"
+        "<input type=submit value='Create a new gene set using gene information content'>"
+    	" as follows: <br>starting with with gene set ";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << ",<br>compute gene information content using cell set ";
+	writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
+	html << " and ";
+	writeNormalizationSelection(html, NormalizationMethod::L2);
+	html <<
+		",<br>then keep genes with at information content at least "
+		"<input type=text name=threshold>"
+		" bits<br>and name the resulting gene set "
+		"<input type=text name=newGeneSetName>"
+		"</form>";
+}
+
+
+
+void ExpressionMatrix::exploreGeneSet(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Get the name of the gene set we want to look at.
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        return;
+    }
+
+    // Write a title.
+    html << "<h1>Gene set " << geneSetName << "</h1>";
+
+    // Locate the cell set.
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        html << "<p>This gene set does not exist.";
+        return;
+    }
+    const auto& geneSet = it->second;
+    html << "<p>This gene set has " << geneSet.size() << " genes." << endl;
+
+    // Write a table containing the genes in this gene set.
+    html << "<table>";
+    for(const GeneId geneId: geneSet) {
+    	const string geneName = geneNames[geneId];
+        html <<  "<tr><td class=centered><a href=gene?geneId=" << urlEncode(geneName) << ">" << geneName << "</a>";
+    }
+    html << "</table>";
+
 }
 
 
