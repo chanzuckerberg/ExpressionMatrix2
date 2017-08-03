@@ -27,7 +27,7 @@ If one or more of these packages are not installed, you can install them using c
 - Extract the files contained in the tar file you downloaded using command "tar -xvf file.tar", replacing the name of tar file
 with the name of the file you downloaded. This will create a doc directory, a test directory, and, most important, a shared library ExpressionMatrix2.so which works as a Python package.
 
--To make ExpressionMatrix2.so visible as a Python package, set environmenty variable PYTHONPATH to the name of the directory you are using for your tests, ~/ExpressionMatrix2. If you are using the bash shell, you can use command "export PYTHONPATH=~/ExpressionMatrix2".
+-To make ExpressionMatrix2.so visible as a Python package, set environment variable PYTHONPATH to the name of the directory you are using for your tests, ~/ExpressionMatrix2. 
 
 - Now cd to test directory tests/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts. 
 
