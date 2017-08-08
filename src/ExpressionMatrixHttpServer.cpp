@@ -122,6 +122,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
+    serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
+    serverFunctionTable["/createGeneSetUsingInformationContent"]	= &ExpressionMatrix::createGeneSetUsingInformationContent;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
@@ -1495,6 +1497,92 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
 
 
 
+void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>& request, ostream& html)
+{
+    // Get the name of the gene set to use to compute gene information content.
+    string geneSetName;
+    getParameterValue(request, "geneSetName", geneSetName);
+
+    // Get the name of the new gene set to be created.
+    string newGeneSetName;
+    getParameterValue(request, "newGeneSetName", newGeneSetName);
+
+    // Get the name of the cell set to use to compute gene information content.
+    string cellSetName;
+    getParameterValue(request, "cellSetName", cellSetName);
+
+    // Get the normalization method to be used to compute gene information content.
+    const NormalizationMethod normalizationMethod = getNormalizationMethod(request, NormalizationMethod::L2);
+
+    // Get the threshold on gene information content.
+    // This is the minimum gene information content required for a gene to be included
+    // in the gene set being created.
+    float threshold = 2;
+    getParameterValue(request, "threshold", threshold);
+
+    // Locate the gene set.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+    	html << "<p>Invalid gene set name " << geneSetName;
+    	return;
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+
+    // Verify that the new gene set does not already exist.
+    if(geneSets.find(newGeneSetName) != geneSets.end()) {
+    	html << "<p>Gene set " << newGeneSetName << " already exists.";
+    	return;
+    }
+
+    // Locate the cell set.
+    const auto itCellSet = cellSets.cellSets.find(cellSetName);
+    if(itCellSet == cellSets.cellSets.end()) {
+    	html << "<p>Invalid cell set name " << cellSetName;
+    	return;
+    }
+    const CellSets::CellSet& cellSet = *(itCellSet->second);
+
+    // Write a title.
+    html << "<h1>Creation of gene set " << newGeneSetName;
+    html << " using gene information content</h1>";
+
+    // Write a table summarizing the creation parameters used.
+    html <<
+    	"<p>Summary of creation parameters for new gene set " << newGeneSetName <<
+		":<p><table style='table-layout:fixed;width:500px;'>"
+		"<tr><th class=left style='width:300px;'>Input gene set<td class=centered>" << geneSetName <<
+		" (" << geneSet.size() << " genes)"
+		"<tr><th class=left style='width:300px;'>Cell set used to compute gene information content<td class=centered>" <<
+		cellSetName << " (" << cellSet.size() << " cells)"
+		"<tr><th class=left style='width:300px;'>Normalization method used to compute gene information content<td class=centered>" <<
+		normalizationMethodToLongString(normalizationMethod) <<
+		"<tr><th class=left style='width:300px;'>Gene information content threshold (bits)<td class=centered>" << threshold <<
+		"</table>"
+		"<p>This preliminary implementation is very slow (typically around 10 seconds per thousand cells)."
+		" Future versions will be faster.</p>";
+    	;
+
+    // Compute gene information content using the requested normalization method.
+    vector<float> informationContent;
+    computeGeneInformationContent(geneSet, cellSet, normalizationMethod, informationContent);
+
+    // Create the new gene set.
+    GeneSet& newGeneSet = geneSets[newGeneSetName];
+    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName);
+    for(size_t i=0; i!=geneSet.size(); i++) {
+    	if(informationContent[i] > threshold) {
+    		const GeneId geneId = geneSet[i];
+    		newGeneSet.addGene(geneId);
+    	}
+    }
+    html << "<p>Gene set " << newGeneSetName << " created. It has " << newGeneSet.size() << " genes.";
+
+
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+}
+
+
+
 void ExpressionMatrix::exploreGeneSets(
     const vector<string>& request,
     ostream& html)
@@ -1565,10 +1653,10 @@ void ExpressionMatrix::exploreGeneSet(
     // Write a title.
     html << "<h1>Gene set " << geneSetName << "</h1>";
 
-    // Locate the cell set.
+    // Locate the gene set.
     const auto it = geneSets.find(geneSetName);
     if(it == geneSets.end()) {
-        html << "<p>This gene set does not exist.";
+        html << "<p>Gene set " << geneSetName << " does not exist.";
         return;
     }
     const auto& geneSet = it->second;
@@ -1582,6 +1670,40 @@ void ExpressionMatrix::exploreGeneSet(
     }
     html << "</table>";
 
+}
+
+
+
+void ExpressionMatrix::removeGeneSet(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Get the name of the gene set we want to remove.
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        return;
+    }
+
+    // Locate the gene set.
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        html << "<p>Gene set " << geneSetName << " does not exist.";
+        return;
+    }
+
+    // Remove it.
+    GeneSet& geneSet = it->second;
+    try{
+    	geneSet.remove();
+    } catch(...) {
+        html << "<p>Unable to remove gene set " << geneSetName << ".";
+        throw;
+    }
+    geneSets.erase(it);
+    html << "<p>Gene set " << geneSetName << " was removed.";
+
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
 }
 
 

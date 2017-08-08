@@ -8,6 +8,7 @@
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
+#include <boost/filesystem/operations.hpp>
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
 #include <cstring>
@@ -85,6 +86,8 @@ public:
     // This is automatically called by the destructor.
     void close();
 
+    // Close and remove the supporting file.
+    void remove();
 
     // Resize works as for std::vector;
     void resize(size_t);
@@ -526,6 +529,16 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
     CZI_ASSERT(isOpen);
     syncToDisk();
     unmap();
+}
+
+// Close it and remove thge supporting file.
+template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::remove()
+{
+	const string savedFileName = fileName;
+    close();	// This forgets the fileName.
+    if(!boost::filesystem::remove(savedFileName)) {
+    	throw runtime_error("Error removing " + savedFileName);
+    }
 }
 
 

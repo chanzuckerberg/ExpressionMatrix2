@@ -55,6 +55,12 @@ public:
 		return geneVector[i];
 	}
 
+	void remove()
+	{
+		geneVector.remove();
+		isGeneInSet.remove();
+	}
+
 private:
 
 	// The ids of the genes in this set.
