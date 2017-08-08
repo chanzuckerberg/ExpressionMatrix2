@@ -1542,7 +1542,7 @@ void ExpressionMatrix::exploreGeneSets(
 	html << " and ";
 	writeNormalizationSelection(html, NormalizationMethod::L2);
 	html <<
-		",<br>then keep genes with at information content at least "
+		",<br>then keep genes with information content at least "
 		"<input type=text name=threshold>"
 		" bits<br>and name the resulting gene set "
 		"<input type=text name=newGeneSetName>"
