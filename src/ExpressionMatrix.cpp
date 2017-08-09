@@ -1200,6 +1200,31 @@ double
 
 
 
+// Create a new gene set consisting of genes whose name matches a given reguklar expression.
+bool ExpressionMatrix::createGeneSetUsingGeneNames(const string& geneSetName, const string& regexString)
+{
+	// Check if a gene set with this name already exists.
+	if(geneSets.find(geneSetName) != geneSets.end()) {
+		return false;
+	}
+
+	// Create the regular expression we are going to match.
+    const boost::regex regex(regexString);
+
+	// Create the new gene set.
+	GeneSet& geneSet = geneSets[geneSetName];
+	geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
+	for(GeneId geneId=0; geneId!=geneCount(); geneId++) {
+		const string geneName = geneNames[geneId];
+		if(boost::regex_match(geneName, regex)) {
+			geneSet.addGene(geneId);
+		}
+	}
+
+
+	return true;
+}
+
 
 
 // Create a new cell set that contains cells for which

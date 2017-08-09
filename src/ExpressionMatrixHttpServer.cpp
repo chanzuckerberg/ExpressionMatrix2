@@ -123,6 +123,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
     serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
+    serverFunctionTable["/createGeneSetUsingGeneNames"]		= &ExpressionMatrix::createGeneSetUsingGeneNames;
     serverFunctionTable["/createGeneSetUsingInformationContent"]	= &ExpressionMatrix::createGeneSetUsingInformationContent;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
@@ -1545,6 +1546,35 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
 
 
 
+void ExpressionMatrix::createGeneSetUsingGeneNames(const vector<string>& request, ostream& html)
+{
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    string regex;
+    if(!getParameterValue(request, "regex", regex)) {
+        html << "Missing regular expression.";
+        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        return;
+    }
+    string decodedRegex;
+    urlDecode(regex, decodedRegex);
+
+    if(createGeneSetUsingGeneNames(geneSetName, decodedRegex)) {
+        html << "<p>Newly created gene set " << geneSetName << " has ";
+        html << geneSets[geneSetName].size() << " genes.";
+    } else {
+        html << "<p>Unable to create gene set " << geneSetName << ".";
+    }
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+}
+
+
+
 void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>& request, ostream& html)
 {
     // Get the name of the gene set to use to compute gene information content.
@@ -1653,16 +1683,15 @@ void ExpressionMatrix::exploreGeneSets(
 
 
 
-    // Write the form to display gene information content.
+    // Form to create a gene set using gene names.
     html <<
-    	"<h2>Show gene information content</h2>"
-    	"<form action=geneInformationContent>"
-    	"<input type=submit value='Show gene information content for gene set'> ";
-    writeGeneSetSelection(html, "geneSetName", false);
-    html << " cell set ";
-    writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
-    html << "</form>";
-
+        "<br><h2>Create a new gene set using gene names</h2>"
+        "<p><form action=createGeneSetUsingGeneNames>"
+        "<input type=submit value='Create a new gene set'> named "
+        "<input type=text required name=geneSetName>"
+        " consisting of genes with names matching this regular expression: "
+        "<input type=text name=regex>"
+        "</form>";
 
 
 
@@ -1683,6 +1712,19 @@ void ExpressionMatrix::exploreGeneSets(
 		" bits<br>and name the resulting gene set "
 		"<input type=text name=newGeneSetName>"
 		"</form>";
+
+
+
+	// Write the form to display gene information content.
+    html <<
+    	"<h2>Show gene information content</h2>"
+    	"<form action=geneInformationContent>"
+    	"<input type=submit value='Show gene information content for gene set'> ";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << " cell set ";
+    writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
+    html << "</form>";
+
 }
 
 

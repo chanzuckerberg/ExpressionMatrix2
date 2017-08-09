@@ -441,6 +441,7 @@ private:
     void exploreGeneSets(const vector<string>& request, ostream& html);
     void exploreGeneSet(const vector<string>& request, ostream& html);
     void removeGeneSet(const vector<string>& request, ostream& html);
+    void createGeneSetUsingGeneNames(const vector<string>& request, ostream& html);
     void createGeneSetUsingInformationContent(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
@@ -633,6 +634,9 @@ public:
 
 
 public:
+
+    // Create a new gene set consisting of genes whose name matches a given reguklar expression.
+    bool createGeneSetUsingGeneNames(const string& geneSetName, const string& regex);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field matches
