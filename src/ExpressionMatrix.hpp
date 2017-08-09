@@ -455,6 +455,7 @@ private:
     void exploreCellSet(const vector<string>& request, ostream& html);
     void createCellSetUsingMetaData(const vector<string>& request, ostream& html);
     void createCellSetIntersectionOrUnion(const vector<string>& request, ostream& html);
+    void createCellSetDifference(const vector<string>& request, ostream& html);
     void downsampleCellSet(const vector<string>& request, ostream& html);
     ostream& writeCellSetSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeCellSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
@@ -651,6 +652,11 @@ public:
     bool createCellSetIntersection(const string& inputSets, const string& outputSet);
     bool createCellSetUnion(const string& inputSets, const string& outputSet);
     bool createCellSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
+
+    // Create a new cell set as the difference between two existing cell sets.
+    // Return true if successful, false if one of the input cell sets does not exist
+    // or the output cell set already exists.
+    bool createCellSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
 
     // Create a new cell set by downsampling an existing cell set
     // Return true if successful, false if the input cell set does not exist.

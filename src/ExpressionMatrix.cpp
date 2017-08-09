@@ -1329,6 +1329,51 @@ bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSepar
 
 
 
+bool ExpressionMatrix::createCellSetDifference(
+	const string& inputSetName0,
+	const string& inputSetName1,
+	const string& outputSetName)
+{
+    // See if a cell set with the name of the output cell set already exists.
+    if(cellSets.exists(outputSetName)) {
+        cout << "Cell set " << outputSetName << " already exists." << endl;
+        return false;
+    }
+
+
+
+    // Locate the input cell sets.
+    const auto it0 = cellSets.cellSets.find(inputSetName0);
+    if(it0 == cellSets.cellSets.end()) {
+        cout << "Cell set " << inputSetName0 << " does not exists." << endl;
+    	return false;
+    }
+    const CellSets::CellSet& inputSet0 = *(it0->second);
+    const auto it1 = cellSets.cellSets.find(inputSetName1);
+    if(it1 == cellSets.cellSets.end()) {
+        cout << "Cell set " << inputSetName1 << " does not exists." << endl;
+    	return false;
+    }
+    const CellSets::CellSet& inputSet1 = *(it1->second);
+
+
+
+    // Compute the difference.
+    vector<CellId> outputSet;
+	std::set_difference(
+		inputSet0.begin(), inputSet0.end(),
+		inputSet1.begin(), inputSet1.end(),
+		back_inserter(outputSet));
+
+
+
+    // Store this cell set.
+    cellSets.addCellSet(outputSetName, outputSet);
+    return true;
+}
+
+
+
 // Create a new cell set by downsampling an existing cell set.
 bool ExpressionMatrix::downsampleCellSet(
 	const string& inputCellSetName,

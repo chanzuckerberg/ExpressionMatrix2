@@ -130,6 +130,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/cellSet"]                         = &ExpressionMatrix::exploreCellSet;
     serverFunctionTable["/createCellSetUsingMetaData"]      = &ExpressionMatrix::createCellSetUsingMetaData;
     serverFunctionTable["/createCellSetIntersectionOrUnion"]= &ExpressionMatrix::createCellSetIntersectionOrUnion;
+    serverFunctionTable["/createCellSetDifference"]			= &ExpressionMatrix::createCellSetDifference;
     serverFunctionTable["/downsampleCellSet"]				= &ExpressionMatrix::downsampleCellSet;
     serverFunctionTable["/removeCellSet"]                   = &ExpressionMatrix::removeCellSet;
     serverFunctionTable["/graphs"]                          = &ExpressionMatrix::exploreGraphs;
@@ -825,7 +826,9 @@ ostream& ExpressionMatrix::writeCellSetSelection(
 {
     html << "<select";
     if(multiple) {
-        html << " multiple";
+        html << " multiple title='Select two or more'";
+    } else {
+        html << " title='Select one'";
     }
     html << " name=" << selectName << " style='vertical-align:text-top;'>";
     html << "<option value=''></option>";
@@ -962,7 +965,6 @@ void ExpressionMatrix::exploreCellSets(
 
 
 
-
     // Form to create a new cell set by union/intersection existing cell sets.
     html <<
         "<br><h2>Create a new cell set by union/intersection of existing cell sets</h2>"
@@ -977,6 +979,20 @@ void ExpressionMatrix::exploreCellSets(
         " of the selected cell sets: ";
     writeCellSetSelection(html, "inputCellSets", true);
     html << "</form>";
+
+
+
+    // Form to create a new cell set as the set difference of existing cell sets.
+    html <<
+        "<br><h2>Create a new cell set as the set difference of existing cell sets</h2>"
+        "<p><form action=createCellSetDifference>"
+        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=text required name=cellSetName>"
+        " as the set difference of cell set ";
+    writeCellSetSelection(html, "inputCellSet0", false);
+    html << " minus cell set ";
+    writeCellSetSelection(html, "inputCellSet1", false);
+    html << ".</form>";
 
 
 
@@ -1173,6 +1189,38 @@ void ExpressionMatrix::createCellSetIntersectionOrUnion(const vector<string>& re
 
     // Do the intersection or union.
     if(createCellSetIntersectionOrUnion(inputCellSetsString, cellSetName, doUnion)) {
+        html << "<p>Newly created cell set " << cellSetName << " has ";
+        html << cellSets.cellSets[cellSetName]->size() << " cells.";
+    } else {
+        html << "<p>Unable to create cell set " << cellSetName << ".";
+    }
+    html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+
+}
+
+
+
+void ExpressionMatrix::createCellSetDifference(const vector<string>& request, ostream& html)
+{
+    // Get the name of the cell set to be created.
+    string cellSetName;
+    if(!getParameterValue(request, "cellSetName", cellSetName)) {
+        html << "Missing cell set name.";
+        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+
+
+    // Get the names of the input cell sets.
+    string inputCellSet0, inputCellSet1;
+    getParameterValue(request, "inputCellSet0", inputCellSet0);
+    getParameterValue(request, "inputCellSet1", inputCellSet1);
+
+
+
+    // Do the difference.
+    if(createCellSetDifference(inputCellSet0, inputCellSet1, cellSetName)) {
         html << "<p>Newly created cell set " << cellSetName << " has ";
         html << cellSets.cellSets[cellSetName]->size() << " cells.";
     } else {
