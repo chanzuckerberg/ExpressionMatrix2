@@ -443,6 +443,7 @@ private:
     void removeGeneSet(const vector<string>& request, ostream& html);
     void createGeneSetUsingGeneNames(const vector<string>& request, ostream& html);
     void createGeneSetIntersectionOrUnion(const vector<string>& request, ostream& html);
+    void createGeneSetDifference(const vector<string>& request, ostream& html);
     void createGeneSetUsingInformationContent(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
@@ -646,6 +647,11 @@ public:
     bool createGeneSetIntersection(const string& inputSets, const string& outputSet);
     bool createGeneSetUnion(const string& inputSets, const string& outputSet);
     bool createGeneSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
+
+    // Create a new gene set as the difference between two existing gene sets.
+    // Return true if successful, false if one of the input gene sets does not exist
+    // or the output gene set already exists.
+    bool createGeneSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field matches

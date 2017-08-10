@@ -1297,6 +1297,58 @@ bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
 
 
 
+bool ExpressionMatrix::createGeneSetDifference(
+    const string& inputSetName0,
+    const string& inputSetName1,
+    const string& outputSetName)
+{
+    // See if a gene set with the name of the output gene set already exists.
+    if(geneSets.find(outputSetName) != geneSets.end()) {
+        cout << "Gene set " << outputSetName << " already exists." << endl;
+        return false;
+    }
+
+
+
+    // Locate the input gene sets.
+    const auto it0 = geneSets.find(inputSetName0);
+    if(it0 == geneSets.end()) {
+        cout << "Gene set " << inputSetName0 << " does not exists." << endl;
+        return false;
+    }
+    GeneSet& inputSet0 = it0->second;
+    const auto it1 = geneSets.find(inputSetName1);
+    if(it1 == geneSets.end()) {
+        cout << "Gene set " << inputSetName1 << " does not exists." << endl;
+        return false;
+    }
+    GeneSet& inputSet1 = it1->second;
+
+
+    // Compute the difference.
+    vector<GeneId> inputSet0Genes;
+    vector<GeneId> inputSet1Genes;
+    inputSet0.getSortedGenes(inputSet0Genes);
+    inputSet1.getSortedGenes(inputSet1Genes);
+    vector<GeneId> outputSetGenes;
+    std::set_difference(
+        inputSet0Genes.begin(), inputSet0Genes.end(),
+        inputSet1Genes.begin(), inputSet1Genes.end(),
+        back_inserter(outputSetGenes));
+
+
+
+    // Store this cell set.
+    GeneSet& outputGeneSet = geneSets[outputSetName];
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
+    for(const GeneId geneId: outputSetGenes) {
+        outputGeneSet.addGene(geneId);
+    }
+    return true;
+}
+
+
+
 // Create a new cell set that contains cells for which
 // the value of a specified meta data field matches
 // a given regular expression.

@@ -125,6 +125,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
     serverFunctionTable["/createGeneSetUsingGeneNames"]		= &ExpressionMatrix::createGeneSetUsingGeneNames;
     serverFunctionTable["/createGeneSetIntersectionOrUnion"]= &ExpressionMatrix::createGeneSetIntersectionOrUnion;
+    serverFunctionTable["/createGeneSetDifference"]         = &ExpressionMatrix::createGeneSetDifference;
     serverFunctionTable["/createGeneSetUsingInformationContent"]	= &ExpressionMatrix::createGeneSetUsingInformationContent;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
@@ -1637,6 +1638,37 @@ void ExpressionMatrix::createGeneSetIntersectionOrUnion(const vector<string>& re
 
 
 
+void ExpressionMatrix::createGeneSetDifference(const vector<string>& request, ostream& html)
+{
+    // Get the name of the gene set to be created.
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+
+
+    // Get the names of the input gene sets.
+    string inputGeneSet0, inputGeneSet1;
+    getParameterValue(request, "inputGeneSet0", inputGeneSet0);
+    getParameterValue(request, "inputGeneSet1", inputGeneSet1);
+
+
+
+    // Do the difference.
+    if(createGeneSetDifference(inputGeneSet0, inputGeneSet1, geneSetName)) {
+        html << "<p>Newly created gene set " << geneSetName << " has ";
+        html << geneSets[geneSetName].size() << " genes.";
+    } else {
+        html << "<p>Unable to create gene set " << geneSetName << ".";
+    }
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+}
+
+
+
 void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>& request, ostream& html)
 {
     // Get the name of the gene set to use to compute gene information content.
@@ -1771,6 +1803,20 @@ void ExpressionMatrix::exploreGeneSets(
         " of the selected gene sets: ";
     writeGeneSetSelection(html, "inputGeneSets", true);
     html << "</form>";
+
+
+
+    // Form to create a new gene set as the set difference of existing gene sets.
+    html <<
+        "<br><h2>Create a new gene set as the set difference of existing gene sets</h2>"
+        "<p><form action=createGeneSetDifference>"
+        "<input type=submit value='Create a new gene set'> named "
+        "<input type=text required name=geneSetName>"
+        " as the set difference of gene set ";
+    writeGeneSetSelection(html, "inputGeneSet0", false);
+    html << " minus gene set ";
+    writeGeneSetSelection(html, "inputGeneSet1", false);
+    html << ".</form>";
 
 
 
