@@ -3,6 +3,7 @@
 
 #include "Ids.hpp"
 #include "MemoryMappedVector.hpp"
+#include "vector.hpp"
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
@@ -60,6 +61,8 @@ public:
 		geneVector.remove();
 		isGeneInSet.remove();
 	}
+
+	void getSortedGenes(vector<GeneId>&);
 
 private:
 

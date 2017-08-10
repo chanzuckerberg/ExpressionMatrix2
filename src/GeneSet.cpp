@@ -75,3 +75,14 @@ void GeneSet::sort()
 		isSorted = true;
 	}
 }
+
+
+
+// Get a vector of genes in the set, sorted by GeneId.
+void GeneSet::getSortedGenes(vector<GeneId>& sortedGenes)
+{
+    sort();
+    sortedGenes.clear();
+    sortedGenes.resize(geneVector.size());
+    copy(geneVector.begin(), geneVector.end(), sortedGenes.begin());
+}

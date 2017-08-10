@@ -1227,13 +1227,72 @@ bool ExpressionMatrix::createGeneSetUsingGeneNames(const string& geneSetName, co
 
 
 
+bool ExpressionMatrix::createGeneSetIntersection(const string& inputSetsNames, const string& outputSetName)
+{
+    return createGeneSetIntersectionOrUnion(inputSetsNames, outputSetName, false);
+}
+bool ExpressionMatrix::createGeneSetUnion(const string& inputSetsNames, const string& outputSetName)
+{
+    return createGeneSetIntersectionOrUnion(inputSetsNames, outputSetName, true);
+}
 bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
-	const string& inputSets,
-	const string& outputSet,
+	const string& commaSeparatedInputSetsNames,
+	const string& outputSetName,
 	bool doUnion)
 {
-	CZI_ASSERT(0);
+    // See if a gene set with the name of the output gene set already exists.
+    if(geneSets.find(outputSetName) != geneSets.end()) {
+        cout << "Gene set " << outputSetName << " already exists." << endl;
+        return false;
+    }
 
+    // Parse the input gene sets.
+    vector<string> inputSetsNames;
+    boost::algorithm::split(inputSetsNames, commaSeparatedInputSetsNames, boost::is_any_of(","));
+
+    // Check that all input gene sets exist.
+    for(const string& inputSetName: inputSetsNames) {
+        if(geneSets.find(inputSetName) == geneSets.end()) {
+            cout << "gene set " << inputSetName << " does not exists." << endl;
+            return false;
+        }
+    }
+
+    // Compute the intersection or union.
+    vector<GeneId> outputSetGenes;
+    for(size_t i=0; i<inputSetsNames.size(); i++) {
+        const string& inputSetName = inputSetsNames[i];
+        vector<GeneId> inputSetGenes;
+        geneSets[inputSetName].getSortedGenes(inputSetGenes);
+        if(i == 0) {
+            outputSetGenes = inputSetGenes;
+        } else {
+            vector<GeneId> newOutputSetGenes;
+            if(doUnion) {
+                std::set_union(
+                    outputSetGenes.begin(), outputSetGenes.end(),
+                    inputSetGenes.begin(), inputSetGenes.end(),
+                    back_inserter(newOutputSetGenes));
+            } else {
+                std::set_intersection(
+                    outputSetGenes.begin(), outputSetGenes.end(),
+                    inputSetGenes.begin(), inputSetGenes.end(),
+                    back_inserter(newOutputSetGenes));
+            }
+            outputSetGenes.swap(newOutputSetGenes);
+        }
+    }
+
+
+
+    // Store this gene set.
+    GeneSet& outputGeneSet = geneSets[outputSetName];
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
+    for(const GeneId geneId: outputSetGenes) {
+        outputGeneSet.addGene(geneId);
+    }
+
+    return true;
 }
 
 
