@@ -1227,6 +1227,17 @@ bool ExpressionMatrix::createGeneSetUsingGeneNames(const string& geneSetName, co
 
 
 
+bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
+	const string& inputSets,
+	const string& outputSet,
+	bool doUnion)
+{
+	CZI_ASSERT(0);
+
+}
+
+
+
 // Create a new cell set that contains cells for which
 // the value of a specified meta data field matches
 // a given regular expression.
