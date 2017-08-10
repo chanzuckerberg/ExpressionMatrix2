@@ -124,6 +124,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
     serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
     serverFunctionTable["/createGeneSetUsingGeneNames"]		= &ExpressionMatrix::createGeneSetUsingGeneNames;
+    serverFunctionTable["/createGeneSetIntersectionOrUnion"]= &ExpressionMatrix::createGeneSetIntersectionOrUnion;
     serverFunctionTable["/createGeneSetUsingInformationContent"]	= &ExpressionMatrix::createGeneSetUsingInformationContent;
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
@@ -864,7 +865,9 @@ ostream& ExpressionMatrix::writeGeneSetSelection(
 {
     html << "<select";
     if(multiple) {
-        html << " multiple";
+        html << " multiple title='Select two or more'";
+    } else {
+        html << " title='Select one'";
     }
     html << " name=" << selectName << " style='vertical-align:text-top;'>";
     html << "<option value=''></option>";
@@ -954,7 +957,7 @@ void ExpressionMatrix::exploreCellSets(
     html <<
         "<br><h2>Create a new cell set using meta data</h2>"
         "<p><form action=createCellSetUsingMetaData>"
-        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=submit value='Create a new cell set'> named "
         "<input type=text required name=cellSetName>"
         " consisting of cells for which meta data field ";
         set<string> metaDataNames;
@@ -970,7 +973,7 @@ void ExpressionMatrix::exploreCellSets(
     html <<
         "<br><h2>Create a new cell set by union/intersection of existing cell sets</h2>"
         "<p><form action=createCellSetIntersectionOrUnion>"
-        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=submit value='Create a new cell set'> named "
         "<input type=text required name=cellSetName>"
         " as the "
         "<select name=operation>"
@@ -987,7 +990,7 @@ void ExpressionMatrix::exploreCellSets(
     html <<
         "<br><h2>Create a new cell set as the set difference of existing cell sets</h2>"
         "<p><form action=createCellSetDifference>"
-        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=submit value='Create a new cell set'> named "
         "<input type=text required name=cellSetName>"
         " as the set difference of cell set ";
     writeCellSetSelection(html, "inputCellSet0", false);
@@ -1004,7 +1007,7 @@ void ExpressionMatrix::exploreCellSets(
     	" Each cell in the specified cell set is inserted in the random subset with the specified probability."
     	" Therefore, the downsampling rate will be approximately equal to the specified probability."
         "<p><form action=downsampleCellSet>"
-        "<input type=submit value='Create a new cell set'> with name "
+        "<input type=submit value='Create a new cell set'> named "
         "<input type=text required name=cellSetName>"
         " by downsampling cell set ";
     writeCellSetSelection(html, "inputCellSet", false);
@@ -1575,6 +1578,65 @@ void ExpressionMatrix::createGeneSetUsingGeneNames(const vector<string>& request
 
 
 
+void ExpressionMatrix::createGeneSetIntersectionOrUnion(const vector<string>& request, ostream& html)
+{
+    // Get the name of the gene set to be created.
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    // Get the name of the operation to be performed (intersection or union).
+    string operation;
+    if(!getParameterValue(request, "operation", operation)) {
+        html << "Missing operation.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+    bool doUnion;
+    if(operation == "intersection") {
+        doUnion = false;
+    } else if(operation == "union") {
+        doUnion = true;
+    } else {
+        html << "Invalid operation.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+
+    // Get the names of the input gene sets.
+    set<string> inputGeneSets;
+    getParameterValues(request, string("inputGeneSets"), inputGeneSets);
+    if(inputGeneSets.size() < 2) {
+        html << "At least two input gene sets should be specified.";
+        return;
+    }
+
+    // Concatenate the input gene sets with commas.
+    string inputGeneSetsString;
+    for(const string& inputGeneSet: inputGeneSets) {
+        inputGeneSetsString.append(inputGeneSet);
+        inputGeneSetsString.append(",");
+    }
+    inputGeneSetsString.resize(inputGeneSetsString.size()-1);
+
+
+    // Do the intersection or union.
+    if(createGeneSetIntersectionOrUnion(inputGeneSetsString, geneSetName, doUnion)) {
+        html << "<p>Newly created gene set " << geneSetName << " has ";
+        html << geneSets[geneSetName].size() << " genes.";
+    } else {
+        html << "<p>Unable to create gene set " << geneSetName << ".";
+    }
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+
+}
+
+
+
 void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>& request, ostream& html)
 {
     // Get the name of the gene set to use to compute gene information content.
@@ -1692,6 +1754,23 @@ void ExpressionMatrix::exploreGeneSets(
         " consisting of genes with names matching this regular expression: "
         "<input type=text name=regex>"
         "</form>";
+
+
+
+    // Form to create a new gene set by union/intersection of existing gene sets.
+    html <<
+        "<br><h2>Create a new gene set by union/intersection of existing gene sets</h2>"
+        "<p><form action=createGeneSetIntersectionOrUnion>"
+        "<input type=submit value='Create a new gene set'> named "
+        "<input type=text required name=geneSetName>"
+        " as the "
+        "<select name=operation>"
+        "<option value=union>union</option>"
+        "<option value=intersection>intersection</option>"
+        "</select>"
+        " of the selected gene sets: ";
+    writeGeneSetSelection(html, "inputGeneSets", true);
+    html << "</form>";
 
 
 

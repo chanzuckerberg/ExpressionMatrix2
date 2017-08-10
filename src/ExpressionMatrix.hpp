@@ -442,6 +442,7 @@ private:
     void exploreGeneSet(const vector<string>& request, ostream& html);
     void removeGeneSet(const vector<string>& request, ostream& html);
     void createGeneSetUsingGeneNames(const vector<string>& request, ostream& html);
+    void createGeneSetIntersectionOrUnion(const vector<string>& request, ostream& html);
     void createGeneSetUsingInformationContent(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
@@ -637,6 +638,14 @@ public:
 
     // Create a new gene set consisting of genes whose name matches a given reguklar expression.
     bool createGeneSetUsingGeneNames(const string& geneSetName, const string& regex);
+
+    // Create a new gene set as the intersection or union of two or more existing gene sets.
+    // The input gene sets are specified comma separated in the first argument.
+    // Return true if successful, false if one of the input gene sets does not exist
+    // or the output gene set already exists.
+    bool createGeneSetIntersection(const string& inputSets, const string& outputSet);
+    bool createGeneSetUnion(const string& inputSets, const string& outputSet);
+    bool createGeneSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field matches
