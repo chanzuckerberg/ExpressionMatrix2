@@ -1,5 +1,5 @@
-#ifndef CZI_EXPRESSION_MATRIX2_UTILITY_H
-#define CZI_EXPRESSION_MATRIX2_UTILITY_H
+#ifndef CZI_EXPRESSION_MATRIX2_UTILITY_HPP
+#define CZI_EXPRESSION_MATRIX2_UTILITY_HPP
 
 // Add to the ExpressionMatrix2 namespace some names defined in namespace std.
 

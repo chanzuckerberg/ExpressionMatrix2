@@ -2,8 +2,8 @@
 // It is always compiled in, regardless of compilation settings.
 // It throws a standard exception if the assertion fails.
 
-#ifndef CZI_EXPRESSION_MATRIX2_CZI_ASSERT_H
-#define CZI_EXPRESSION_MATRIX2_CZI_ASSERT_H
+#ifndef CZI_EXPRESSION_MATRIX2_CZI_ASSERT_HPP
+#define CZI_EXPRESSION_MATRIX2_CZI_ASSERT_HPP
 
 #include <boost/lexical_cast.hpp>
 #include <stdexcept>

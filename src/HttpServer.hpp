@@ -3,8 +3,8 @@
 // The derived class only has to override
 // function processRequest.
 
-#ifndef CZI_EXPRESSION_MATRIX2_HTTP_SERVER_H
-#define CZI_EXPRESSION_MATRIX2_HTTP_SERVER_H
+#ifndef CZI_EXPRESSION_MATRIX2_HTTP_SERVER_HPP
+#define CZI_EXPRESSION_MATRIX2_HTTP_SERVER_HPP
 
 #include <boost/asio/ip/tcp.hpp>
 #include "boost_lexical_cast.hpp"

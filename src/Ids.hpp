@@ -1,5 +1,5 @@
-#ifndef CZI_EXPRESSION_MATRIX2_IDS_H
-#define CZI_EXPRESSION_MATRIX2_IDS_H
+#ifndef CZI_EXPRESSION_MATRIX2_IDS_HPP
+#define CZI_EXPRESSION_MATRIX2_IDS_HPP
 
 #include "cstdint.hpp"
 #include <limits>

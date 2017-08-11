@@ -1,5 +1,5 @@
-#ifndef CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_H
-#define CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_H
+#ifndef CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_HPP
+#define CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_HPP
 
 // In the cluster graph, each vertex represents a cluster of the cell similarity graph.
 

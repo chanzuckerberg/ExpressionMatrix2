@@ -4,8 +4,8 @@
 // if the there is good similarity between the
 // expression vectors of the corresponding cells.
 
-#ifndef CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_H
-#define CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_H
+#ifndef CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_HPP
+#define CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_HPP
 
 #include "Ids.hpp"
 

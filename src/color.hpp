@@ -1,8 +1,8 @@
 // Functions to generate color strings that can be used with Graphviz and HTML.
 
 
-#ifndef CZI_EXPRESSION_MATRIX2_COLOR_H
-#define CZI_EXPRESSION_MATRIX2_COLOR_H
+#ifndef CZI_EXPRESSION_MATRIX2_COLOR_HPP
+#define CZI_EXPRESSION_MATRIX2_COLOR_HPP
 
 #include "string.hpp"
 

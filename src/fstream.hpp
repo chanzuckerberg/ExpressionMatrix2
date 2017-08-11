@@ -1,5 +1,5 @@
-#ifndef CZI_EXPRESSION_MATRIX2_FSTREAM_H
-#define CZI_EXPRESSION_MATRIX2_FSTREAM_H
+#ifndef CZI_EXPRESSION_MATRIX2_FSTREAM_HPP
+#define CZI_EXPRESSION_MATRIX2_FSTREAM_HPP
 
 // Add to the ExpressionMatrix1 namespace some names defined in namespace std.
 
