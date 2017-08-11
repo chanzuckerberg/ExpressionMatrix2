@@ -2,10 +2,12 @@
 #include "color.hpp"
 #include "CellSimilarityGraph.hpp"
 #include "ClusterGraph.hpp"
+#include "iterator.hpp"
 #include "NormalizationMethod.hpp"
 #include "orderPairs.hpp"
 #include "randIndex.hpp"
 #include "timestamp.hpp"
+#include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -123,7 +125,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
     serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
-    serverFunctionTable["/createGeneSetUsingGeneNames"]		= &ExpressionMatrix::createGeneSetUsingGeneNames;
+    serverFunctionTable["/createGeneSetFromRegex"]		    = &ExpressionMatrix::createGeneSetFromRegex;
+    serverFunctionTable["/createGeneSetFromGeneNames"]	    = &ExpressionMatrix::createGeneSetFromGeneNames;
     serverFunctionTable["/createGeneSetIntersectionOrUnion"]= &ExpressionMatrix::createGeneSetIntersectionOrUnion;
     serverFunctionTable["/createGeneSetDifference"]         = &ExpressionMatrix::createGeneSetDifference;
     serverFunctionTable["/createGeneSetUsingInformationContent"]	= &ExpressionMatrix::createGeneSetUsingInformationContent;
@@ -1550,7 +1553,7 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
 
 
 
-void ExpressionMatrix::createGeneSetUsingGeneNames(const vector<string>& request, ostream& html)
+void ExpressionMatrix::createGeneSetFromRegex(const vector<string>& request, ostream& html)
 {
     string geneSetName;
     if(!getParameterValue(request, "geneSetName", geneSetName)) {
@@ -1562,15 +1565,66 @@ void ExpressionMatrix::createGeneSetUsingGeneNames(const vector<string>& request
     string regex;
     if(!getParameterValue(request, "regex", regex)) {
         html << "Missing regular expression.";
-        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
         return;
     }
     string decodedRegex;
     urlDecode(regex, decodedRegex);
 
-    if(createGeneSetUsingGeneNames(geneSetName, decodedRegex)) {
+    if(createGeneSetFromRegex(geneSetName, decodedRegex)) {
         html << "<p>Newly created gene set " << geneSetName << " has ";
         html << geneSets[geneSetName].size() << " genes.";
+    } else {
+        html << "<p>Unable to create gene set " << geneSetName << ".";
+    }
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+}
+
+
+
+void ExpressionMatrix::createGeneSetFromGeneNames(const vector<string>& request, ostream& html)
+{
+    string geneSetName;
+    if(!getParameterValue(request, "geneSetName", geneSetName)) {
+        html << "Missing gene set name.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    string geneNamesString;
+    if(!getParameterValue(request, "genes", geneNamesString)) {
+        html << "Missing gene names.";
+        html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    // Parse the gene names into a vector.
+    vector<string> geneNames;
+    tokenize(" ,\t\n\r", geneNamesString, geneNames, false);
+
+#if 0
+    // Debug output to show detail of tokenization.
+    html << "<p>";
+    for(const char c: geneNamesString) {
+        html << hex << int(c) << dec << " ";
+    }
+    for(const string& geneName: geneNames) {
+        html << "<p>Gena name of length " << geneName.size() << ": ";
+        for(const char c: geneName) {
+            html << hex << int(c) << dec << " ";
+        }
+    }
+#endif
+
+    // Create the gene set.
+    int ignoredCount, emptyCount;
+    if(createGeneSetFromGeneNames(geneSetName, geneNames, ignoredCount, emptyCount)) {
+        html << "<p>Newly created gene set " << geneSetName << " has ";
+        html << geneSets[geneSetName].size() << " genes.";
+        if(ignoredCount) {
+            html << "<p>" << ignoredCount << " of the " << geneNames.size()-emptyCount <<
+                " specified names were ignored because they don't correspond to valid gene names.";
+        }
     } else {
         html << "<p>Unable to create gene set " << geneSetName << ".";
     }
@@ -1777,15 +1831,28 @@ void ExpressionMatrix::exploreGeneSets(
 
 
 
-    // Form to create a gene set using gene names.
+    // Form to create a gene set from a regular expression.
     html <<
-        "<br><h2>Create a new gene set using gene names</h2>"
-        "<p><form action=createGeneSetUsingGeneNames>"
+        "<br><h2>Create a new gene set using a regular expression for gene names</h2>"
+        "<p><form action=createGeneSetFromRegex>"
         "<input type=submit value='Create a new gene set'> named "
         "<input type=text required name=geneSetName>"
         " consisting of genes with names matching this regular expression: "
         "<input type=text name=regex>"
         "</form>";
+
+
+
+    // Form to create a gene set by pasting gene names.
+    html <<
+        "<br><h2>Create a new gene by pasting gene names</h2>"
+        "<p><form id=createGeneSetFromGeneNames action=createGeneSetFromGeneNames>"
+        "<input type=submit value='Create a new gene set'> named "
+        "<input type=text required name=geneSetName>"
+        " consisting of the following genes: "
+        "</form>"
+        "<textarea form=createGeneSetFromGeneNames name=genes rows=6 cols=80></textarea>"
+        "<br>Paste gene names here. White space and commas can be used as separators.";
 
 
 
@@ -3612,5 +3679,3 @@ void ExpressionMatrix::removeMetaData(
     html << " was removed from all cells of cell set " << cellSetName;
 
 }
-
-

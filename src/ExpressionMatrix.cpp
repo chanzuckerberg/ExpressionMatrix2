@@ -1200,8 +1200,8 @@ double
 
 
 
-// Create a new gene set consisting of genes whose name matches a given reguklar expression.
-bool ExpressionMatrix::createGeneSetUsingGeneNames(const string& geneSetName, const string& regexString)
+// Create a new gene set consisting of genes whose name matches a given regular expression.
+bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const string& regexString)
 {
 	// Check if a gene set with this name already exists.
 	if(geneSets.find(geneSetName) != geneSets.end()) {
@@ -1223,6 +1223,44 @@ bool ExpressionMatrix::createGeneSetUsingGeneNames(const string& geneSetName, co
 
 
 	return true;
+}
+
+
+
+// Create a gene set consisting of the genes with names passed in a vector.
+// Names that don't correspond to valid gene names are ignored.
+// Returns true if successful, false if the specified gene set already exists.
+bool ExpressionMatrix::createGeneSetFromGeneNames(
+    const string& geneSetName,
+    const vector<string>& geneNamesVector,
+    int& ignoredCount,
+    int& emptyCount)
+{
+    // Check if a gene set with this name already exists.
+    if(geneSets.find(geneSetName) != geneSets.end()) {
+        return false;
+    }
+
+    // Create the new gene set.
+    GeneSet& geneSet = geneSets[geneSetName];
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
+    ignoredCount = 0;
+    emptyCount = 0;
+    for(const string& geneName: geneNamesVector) {
+        if(geneName.empty()) {
+            ++emptyCount;
+            continue;
+        }
+        const StringId stringId = geneNames(geneName);
+        if(stringId == geneNames.invalidStringId) {
+            ++ignoredCount;
+        } else {
+            geneSet.addGene(GeneId(stringId));
+        }
+    }
+
+
+    return true;
 }
 
 

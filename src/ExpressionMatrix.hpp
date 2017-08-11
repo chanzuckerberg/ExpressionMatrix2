@@ -441,7 +441,8 @@ private:
     void exploreGeneSets(const vector<string>& request, ostream& html);
     void exploreGeneSet(const vector<string>& request, ostream& html);
     void removeGeneSet(const vector<string>& request, ostream& html);
-    void createGeneSetUsingGeneNames(const vector<string>& request, ostream& html);
+    void createGeneSetFromRegex(const vector<string>& request, ostream& html);
+    void createGeneSetFromGeneNames(const vector<string>& request, ostream& html);
     void createGeneSetIntersectionOrUnion(const vector<string>& request, ostream& html);
     void createGeneSetDifference(const vector<string>& request, ostream& html);
     void createGeneSetUsingInformationContent(const vector<string>& request, ostream& html);
@@ -637,8 +638,17 @@ public:
 
 public:
 
-    // Create a new gene set consisting of genes whose name matches a given reguklar expression.
-    bool createGeneSetUsingGeneNames(const string& geneSetName, const string& regex);
+    // Create a new gene set consisting of genes whose name matches a given regular expression.
+    bool createGeneSetFromRegex(const string& geneSetName, const string& regex);
+
+    // Create a gene set consisting of the genes with names passed in a vector.
+    // Names that don't correspond to valid gene names are ignored.
+    // Returns true if successful, false if the specified gene set already exists.
+    bool createGeneSetFromGeneNames(
+        const string& geneSetName,
+        const vector<string>& geneNames,
+        int& ignoredCount,
+        int& emptyCount);
 
     // Create a new gene set as the intersection or union of two or more existing gene sets.
     // The input gene sets are specified comma separated in the first argument.
