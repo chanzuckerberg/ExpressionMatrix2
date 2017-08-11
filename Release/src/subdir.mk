@@ -12,6 +12,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHdf5.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
+../src/ExpressionMatrixHttpServerCells.cpp \
 ../src/ExpressionMatrixHttpServerGenes.cpp \
 ../src/ExpressionMatrixLsh.cpp \
 ../src/GeneSet.cpp \
@@ -35,6 +36,7 @@ OBJS += \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHdf5.o \
 ./src/ExpressionMatrixHttpServer.o \
+./src/ExpressionMatrixHttpServerCells.o \
 ./src/ExpressionMatrixHttpServerGenes.o \
 ./src/ExpressionMatrixLsh.o \
 ./src/GeneSet.o \
@@ -58,6 +60,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHdf5.d \
 ./src/ExpressionMatrixHttpServer.d \
+./src/ExpressionMatrixHttpServerCells.d \
 ./src/ExpressionMatrixHttpServerGenes.d \
 ./src/ExpressionMatrixLsh.d \
 ./src/GeneSet.d \

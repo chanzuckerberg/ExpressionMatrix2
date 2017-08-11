@@ -1,4 +1,4 @@
-// This file congtains the implementation of http server functionality
+// This file contains the implementation of http server functionality
 // of class ExpressionMatrix related to genes.
 
 #include "ExpressionMatrix.hpp"
