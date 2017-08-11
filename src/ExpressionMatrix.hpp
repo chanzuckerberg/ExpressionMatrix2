@@ -27,7 +27,7 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
-    	class BitSet;
+        class BitSet;
         class CellSimilarityGraph;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
@@ -163,7 +163,7 @@ public:
     Cell2,123,456
     Cell3,xyz,uv
 
-     *******************************************************************************/
+    *******************************************************************************/
     void addCells(
         const string& expressionCountsFileName,
         const string& expressionCountsFileSeparators,
@@ -206,9 +206,9 @@ public:
 
 	*******************************************************************************/
     void addCellsFromHdf5(
-    	const string& fileName,
-    	size_t maxTermCountForApproximateSimilarityComputation
-    );
+        const string& fileName,
+        size_t maxTermCountForApproximateSimilarityComputation
+        );
 
 
 
@@ -216,22 +216,21 @@ public:
     // See the beginning of ExpressionMatrixBioHub.cpp for a detailed description
     // of the expected formats.
     void addCellsFromBioHub(
-		const string& expressionCountsFileName,	// The name of the csv file containing expression counts.
-		size_t initialMetaDataCount,			// The number of initial columns containing meta data.
-		size_t finalMetaDataCount,				// The number of final columns containing meta data.
-		const string& plateMetaDataFileName,	// The name of the file containing per-plate meta data.
-		size_t maxTermCountForApproximateSimilarityComputation
-    	);
-	void getPlateMetaDataFromBioHub(
-		const string& plateName,
-		const string&plateMetaDataFileName,
-		vector< pair<string, string> >& plateMetaData);
+        const string& expressionCountsFileName,	// The name of the csv file containing expression counts.
+        size_t initialMetaDataCount,// The number of initial columns containing meta data.
+        size_t finalMetaDataCount,// The number of final columns containing meta data.
+        const string& plateMetaDataFileName,// The name of the file containing per-plate meta data.
+        size_t maxTermCountForApproximateSimilarityComputation
+        );
+    void getPlateMetaDataFromBioHub(
+        const string& plateName,
+        const string&plateMetaDataFileName,
+        vector<pair<string, string> >& plateMetaData);
 
-	// Add cell meta data contained in a csv file, one line per cell.
-	// This can be used to read cell mata data in the BioHub pipeline
-	// stored in the .log-by-cell.csv files.
+    // Add cell meta data contained in a csv file, one line per cell.
+    // This can be used to read cell mata data in the BioHub pipeline
+    // stored in the .log-by-cell.csv files.
     void addCellMetaData(const string& cellMetaDataName);
-
 
 
 
@@ -283,9 +282,9 @@ public:
     // 1: L1 normalization (fractional read counts).
     // 2: L2 normalization.
     void computeAverageExpression(
-    	const vector<CellId> cells,
-		vector<double>& averageExpression,
-		NormalizationMethod normalizationMethod) const;
+        const vector<CellId> cells,
+        vector<double>& averageExpression,
+        NormalizationMethod normalizationMethod) const;
 
 
 
@@ -304,7 +303,7 @@ public:
     // (typically 10 times faster or better when the number of stored
     // largest expression counts for each cell is 100.
     void findSimilarPairs0(
-   		const string& cellSetName,	// The name of the cell set to be used.
+        const string& cellSetName,  // The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
@@ -327,28 +326,28 @@ public:
     // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
     // of the standard deviation at similarity 0.
     void findSimilarPairs1(
-    	const string& cellSetName,	// The name of the cell set to be used.
-        const string& name,         // The name of the SimilarPairs object to be created.
-        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold, // The minimum similarity for a pair to be stored.
-		size_t lshCount,		    // The number of LSH vectors to use.
-		unsigned int seed			// The seed used to generate the LSH vectors.
-		);
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& name,             // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
 
 
     // Find similar cell pairs using LSH, without looping over all pairs.
     // See the beginning of ExpressionMatrixLsh.cpp for more information.
     // This implementation requires lshRowCount to be a power of 2 not greater than 64.
     void findSimilarPairs2(
-   		const string& cellSetName,	// The name of the cell set to be used.
+        const string& cellSetName,  // The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
-		size_t lshBandCount,		// The number of LSH bands, each generated using lshRowCount LSH vectors.
-		size_t lshRowCount,         // The number of LSH vectors in each of the lshBandCount LSH bands.
-		unsigned int seed,			// The seed used to generate the LSH vectors.
-		double loadFactor           // Of the hash table used to assign cells to bucket.
-		);
+        size_t lshBandCount,        // The number of LSH bands, each generated using lshRowCount LSH vectors.
+        size_t lshRowCount,         // The number of LSH vectors in each of the lshBandCount LSH bands.
+        unsigned int seed,          // The seed used to generate the LSH vectors.
+        double loadFactor           // Of the hash table used to assign cells to bucket.
+        );
 
 
     // Dump cell to csv file a set of similar cell pairs.
@@ -468,7 +467,7 @@ private:
     ostream& writeGraphSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
-	void removeCellSet(const vector<string>& request, ostream& html);
+    void removeCellSet(const vector<string>& request, ostream& html);
     void exploreGraphs(const vector<string>& request, ostream& html);
     void compareGraphs(const vector<string>& request, ostream& html);
     void exploreGraph(const vector<string>& request, ostream& html);
@@ -517,10 +516,10 @@ private:
     // Compute gene information content in bits for a given gene set and cell set,
     // using the specified normalization method.
     void computeGeneInformationContent(
-    	const GeneSet&,
-		const CellSets::CellSet&,
-		NormalizationMethod,
-		vector<float>& geneInformationContent) const;
+        const GeneSet&,
+        const CellSets::CellSet&,
+        NormalizationMethod,
+        vector<float>& geneInformationContent) const;
 
     // Same, for a single gene.
     float computeGeneInformationContent(GeneId, const CellSets::CellSet&, NormalizationMethod) const;
@@ -544,10 +543,10 @@ private:
     // As described in section 3.7.2 of the book referenced above,
     // each hyperplane provides a function of a locality-sensitive function.
     void generateLshVectors(
-    	size_t lshBandCount,
-		size_t lshRowCount,
-		unsigned int seed,
-		vector< vector< vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
+        size_t lshBandCount,
+        size_t lshRowCount,
+        unsigned int seed,
+        vector<vector<vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
         ) const;
 
 
@@ -562,13 +561,13 @@ private:
     // This did not seem to give any benefit, so I turned it off to eliminate the
     // dependency on Lapack.
     void orthogonalizeLshVectors(
-		vector< vector< vector<double> > >& lshVectors,
-		size_t k
-        ) const;
+        vector< vector< vector<double> > >& lshVectors,
+        size_t k
+    ) const;
 #endif
 
 
-	// Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
+    // Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
     double computeExpressionCountScalarProduct(CellId, const vector<double>& v) const;
 
     // Approximate computation of the angle between the expression vectors of two cells
@@ -577,36 +576,36 @@ private:
     // This recomputes every time the scalar product of the normalized cell expression vector
     // with the LSH vectors.
     double computeApproximateLshCellAngle(
-    	const vector< vector< vector<double> > >& lshVectors,
-		CellId,
-		CellId) const;
+        const vector<vector<vector<double> > >& lshVectors,
+        CellId,
+        CellId) const;
 
     // Approximate computation of the angle between the expression vectors of two cells
     // using Locality Sensitive Hashing (LSH).
     double computeApproximateLshCellAngle(
-		const BitSet& signature0,
-		const BitSet& signature1,
-		double bitCountInverse) const;
+        const BitSet& signature0,
+        const BitSet& signature1,
+        double bitCountInverse) const;
 
     // Given LSH vectors, compute the LSH signature of all cells.
-	// The LSH signature of a cell is a bit vector with one bit for each of the LSH vectors.
-	// Each bit is 1 if the scalar product of the cell expression vector
+    // The LSH signature of a cell is a bit vector with one bit for each of the LSH vectors.
+    // Each bit is 1 if the scalar product of the cell expression vector
     // (normalized to zero mean and unit variance) with the
     // the LSH vector is positive, and 0 otherwise.
     void computeCellLshSignatures(
-    	const vector< vector< vector<double> > >& lshVectors,
-		vector<BitSet>& signatures
-		) const;
+        const vector<vector<vector<double> > >& lshVectors,
+        vector<BitSet>& signatures
+        ) const;
 
     // Same as above, but only for a set of cells given in a vector of cell ids (cell set).
     void computeCellLshSignatures(
-    	const vector< vector< vector<double> > >& lshVectors,
-    	const MemoryMapped::Vector<CellId>& cellSet,
-		vector<BitSet>& signatures
-		) const;
+        const vector<vector<vector<double> > >& lshVectors,
+        const MemoryMapped::Vector<CellId>& cellSet,
+        vector<BitSet>& signatures
+        ) const;
 
-	// Write to a csv file statistics of the LSH signatures..
-	void writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const;
+    // Write to a csv file statistics of the LSH signatures.
+    void writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const;
 
 public:
     // Approximate computation of the similarity between two cells using
@@ -614,24 +613,24 @@ public:
     // Not to be used for code where performance is important,
     // because it recomputes the LSH vector every time.
     double computeApproximateLshCellSimilarity(
-		size_t lshBandCount,
-		size_t lshRowCount,
-		unsigned int seed,
-		CellId,
-		CellId) const;
+        size_t lshBandCount,
+        size_t lshRowCount,
+        unsigned int seed,
+        CellId,
+        CellId) const;
 
     // Write a csv file containing, for every pair of cells,
     // the exact similarity and the similarity computed using LSH.
     void writeLshSimilarityComparisonSlow(
-		size_t lshBandCount,
-		size_t lshRowCount,
-		unsigned int seed
-		) const;
+        size_t lshBandCount,
+        size_t lshRowCount,
+        unsigned int seed
+        ) const;
     void writeLshSimilarityComparison(
-		size_t lshBandCount,
-		size_t lshRowCount,
-		unsigned int seed
-		) const;
+        size_t lshBandCount,
+        size_t lshRowCount,
+        unsigned int seed
+        ) const;
 
 
 
@@ -690,10 +689,10 @@ public:
     // Create a new cell set by downsampling an existing cell set
     // Return true if successful, false if the input cell set does not exist.
     bool downsampleCellSet(
-    	const string& inputCellSetName,
-		const string& newCellSetName,
-		double probability,
-		int seed);
+        const string& inputCellSetName,
+        const string& newCellSetName,
+        double probability,
+        int seed);
 
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
