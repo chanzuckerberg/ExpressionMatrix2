@@ -14,6 +14,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrixHttpServer.cpp \
 ../src/ExpressionMatrixHttpServerCells.cpp \
 ../src/ExpressionMatrixHttpServerGenes.cpp \
+../src/ExpressionMatrixHttpServerGraphs.cpp \
 ../src/ExpressionMatrixLsh.cpp \
 ../src/GeneSet.cpp \
 ../src/HttpServer.cpp \
@@ -38,6 +39,7 @@ OBJS += \
 ./src/ExpressionMatrixHttpServer.o \
 ./src/ExpressionMatrixHttpServerCells.o \
 ./src/ExpressionMatrixHttpServerGenes.o \
+./src/ExpressionMatrixHttpServerGraphs.o \
 ./src/ExpressionMatrixLsh.o \
 ./src/GeneSet.o \
 ./src/HttpServer.o \
@@ -62,6 +64,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrixHttpServer.d \
 ./src/ExpressionMatrixHttpServerCells.d \
 ./src/ExpressionMatrixHttpServerGenes.d \
+./src/ExpressionMatrixHttpServerGraphs.d \
 ./src/ExpressionMatrixLsh.d \
 ./src/GeneSet.d \
 ./src/HttpServer.d \
