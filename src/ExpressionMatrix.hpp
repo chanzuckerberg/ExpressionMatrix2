@@ -259,7 +259,7 @@ public:
 
     // Compute a sorted histogram of a given meta data field.
     void histogramMetaData(
-        const CellSets::CellSet& cellSet,
+        const CellSet& cellSet,
         StringId metaDataNameId,
         vector< pair<string, size_t> >& sortedHistogram) const;
 
@@ -517,12 +517,12 @@ private:
     // using the specified normalization method.
     void computeGeneInformationContent(
         const GeneSet&,
-        const CellSets::CellSet&,
+        const CellSet&,
         NormalizationMethod,
         vector<float>& geneInformationContent) const;
 
     // Same, for a single gene.
-    float computeGeneInformationContent(GeneId, const CellSets::CellSet&, NormalizationMethod) const;
+    float computeGeneInformationContent(GeneId, const CellSet&, NormalizationMethod) const;
 
 
 

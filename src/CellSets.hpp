@@ -13,6 +13,7 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         class CellSets;
+        using CellSet = MemoryMapped::Vector<CellId>;
     }
 }
 
@@ -56,7 +57,6 @@ public:
     }
 
     // The currently defined cell sets.
-    typedef MemoryMapped::Vector<CellId> CellSet;
     map<string, boost::shared_ptr<CellSet> > cellSets;
 
     // The name of the directory where files for these CellSets are.

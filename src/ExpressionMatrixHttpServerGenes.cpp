@@ -445,7 +445,7 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
         html << "<p>Invalid cell set name " << cellSetName;
         return;
     }
-    const CellSets::CellSet& cellSet = *(itCellSet->second);
+    const CellSet& cellSet = *(itCellSet->second);
 
     // Write a title.
     html << "<h1>Creation of gene set " << newGeneSetName;
@@ -693,7 +693,7 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
         html << "<p>Invalid cell set name " << cellSetName;
         return;
     }
-    const CellSets::CellSet& cellSet = *(itCellSet->second);
+    const CellSet& cellSet = *(itCellSet->second);
 
 
     html <<

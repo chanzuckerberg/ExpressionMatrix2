@@ -1034,7 +1034,7 @@ void ExpressionMatrix::computeAverageExpression(
 
 // Compute a sorted histogram of a given meta data field.
 void ExpressionMatrix::histogramMetaData(
-    const CellSets::CellSet& cellSet,
+    const CellSet& cellSet,
     StringId metaDataNameId,
     vector< pair<string, size_t> >& sortedHistogram) const
 {
@@ -1515,9 +1515,9 @@ bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSepar
 
 
 bool ExpressionMatrix::createCellSetDifference(
-	const string& inputSetName0,
-	const string& inputSetName1,
-	const string& outputSetName)
+    const string& inputSetName0,
+    const string& inputSetName1,
+    const string& outputSetName)
 {
     // See if a cell set with the name of the output cell set already exists.
     if(cellSets.exists(outputSetName)) {
@@ -1533,22 +1533,22 @@ bool ExpressionMatrix::createCellSetDifference(
         cout << "Cell set " << inputSetName0 << " does not exists." << endl;
     	return false;
     }
-    const CellSets::CellSet& inputSet0 = *(it0->second);
+    const CellSet& inputSet0 = *(it0->second);
     const auto it1 = cellSets.cellSets.find(inputSetName1);
     if(it1 == cellSets.cellSets.end()) {
         cout << "Cell set " << inputSetName1 << " does not exists." << endl;
     	return false;
     }
-    const CellSets::CellSet& inputSet1 = *(it1->second);
+    const CellSet& inputSet1 = *(it1->second);
 
 
 
     // Compute the difference.
     vector<CellId> outputSet;
-	std::set_difference(
-		inputSet0.begin(), inputSet0.end(),
-		inputSet1.begin(), inputSet1.end(),
-		back_inserter(outputSet));
+    std::set_difference(
+        inputSet0.begin(), inputSet0.end(),
+        inputSet1.begin(), inputSet1.end(),
+        back_inserter(outputSet));
 
 
 
@@ -1561,39 +1561,36 @@ bool ExpressionMatrix::createCellSetDifference(
 
 // Create a new cell set by downsampling an existing cell set.
 bool ExpressionMatrix::downsampleCellSet(
-	const string& inputCellSetName,
-	const string& outputCellSetName,
-	double probability,
-	int seed)
+    const string& inputCellSetName,
+    const string& outputCellSetName,
+    double probability,
+    int seed)
 {
 
-	// Locate the input cell set.
-	const auto it = cellSets.cellSets.find(inputCellSetName);
-	if(it == cellSets.cellSets.end()) {
-		return false;
-	}
-    const CellSets::CellSet& inputCellSet = *(it->second);
+    // Locate the input cell set.
+    const auto it = cellSets.cellSets.find(inputCellSetName);
+    if(it == cellSets.cellSets.end()) {
+        return false;
+    }
+    const CellSet& inputCellSet = *(it->second);
 
     // Create the new cell set.
     vector<CellId> outputCellSet;
 
-	// Prepare to generate uniformly distributed numbers between 0 and 1.
-	using RandomSource = boost::mt19937;
-	using UniformDistribution = boost::uniform_01<>;
-	RandomSource randomSource(seed);
-	UniformDistribution uniformDistribution;
-	boost::variate_generator<RandomSource, UniformDistribution> uniformGenerator(randomSource, uniformDistribution);
-
+    // Prepare to generate uniformly distributed numbers between 0 and 1.
+    using RandomSource = boost::mt19937;
+    using UniformDistribution = boost::uniform_01<>;
+    RandomSource randomSource(seed);
+    UniformDistribution uniformDistribution;
+    boost::variate_generator<RandomSource, UniformDistribution> uniformGenerator(randomSource, uniformDistribution);
 
     // Loop over all cells in the input cell set.
     // Add each one of them to the output cell set with the specified probability.
-    for(const CellId cellId: inputCellSet) {
-    	if(uniformGenerator() < probability) {
-    		outputCellSet.push_back(cellId);
-    	}
+    for(const CellId cellId : inputCellSet) {
+        if(uniformGenerator() < probability) {
+            outputCellSet.push_back(cellId);
+        }
     }
-
-
 
     // Store the new cell set.
     cellSets.addCellSet(outputCellSetName, outputCellSet);
@@ -1637,14 +1634,14 @@ void ExpressionMatrix::createCellSimilarityGraph(
     // Create the GraphInformation object that will be stored with the graph.
     GraphInformation graphInformation;
     graphInformation.cellSetName = cellSetName;
-	graphInformation.similarPairsName = similarPairsName;
-	graphInformation.similarityThreshold = similarityThreshold;
-	graphInformation.maxConnectivity = maxConnectivity;
+    graphInformation.similarPairsName = similarPairsName;
+    graphInformation.similarityThreshold = similarityThreshold;
+    graphInformation.maxConnectivity = maxConnectivity;
 
-	// Remove isolated vertices.
-	graphInformation.isolatedVertexCount = graph->removeIsolatedVertices();
-	graphInformation.vertexCount = num_vertices(*graph);
-	graphInformation.edgeCount = num_edges(*graph);
+    // Remove isolated vertices.
+    graphInformation.isolatedVertexCount = graph->removeIsolatedVertices();
+    graphInformation.vertexCount = num_vertices(*graph);
+    graphInformation.edgeCount = num_edges(*graph);
 
     // Store it.
     graphs.insert(make_pair(graphName, make_pair(graphInformation, graph)));
@@ -1684,71 +1681,72 @@ void ExpressionMatrix::storeClusterId(
 // memory proportional to the product of the number of cells
 // times the number of genes.
 void ExpressionMatrix::computeGeneInformationContent(
-	const GeneSet& geneSet,
-	const CellSets::CellSet& cellSet,
-	NormalizationMethod normalizationMethod,
-	vector<float>& geneInformationContent) const
-{
-	geneInformationContent.reserve(geneSet.size());
-	geneInformationContent.clear();
-	for(const GeneId geneId: geneSet) {
-		if(geneId>0 && (geneId%1000)==0) {
-			cout << geneId << endl;
-		}
-		geneInformationContent.push_back(computeGeneInformationContent(geneId, cellSet, normalizationMethod));
-	}
+    const GeneSet& geneSet,
+    const CellSet& cellSet,
+    NormalizationMethod normalizationMethod,
+    vector<float>& geneInformationContent) const
+    {
+    geneInformationContent.reserve(geneSet.size());
+    geneInformationContent.clear();
+    for(const GeneId geneId : geneSet) {
+        if(geneId > 0 && (geneId % 1000) == 0) {
+            cout << geneId << endl;
+        }
+        geneInformationContent.push_back(computeGeneInformationContent(geneId, cellSet, normalizationMethod));
+    }
 
 }
 
 
+
 float ExpressionMatrix::computeGeneInformationContent(
-	GeneId geneId,
-	const CellSets::CellSet& cellSet,
-	NormalizationMethod normalizationMethod) const
+    GeneId geneId,
+    const CellSet& cellSet,
+    NormalizationMethod normalizationMethod) const
 {
 
-	// Create a vector of expression counts for this gene and for all cells in the cell set,
-	// using the requested normalization.
-	// Note that we use the normalization defined using all genes.
-	vector<float> count;
-	count.reserve(cellSet.size());
-	for(const CellId cellId: cellSet) {
-		const Cell& cell = cells[cellId];
-		float c = getExpressionCount(cellId, geneId);
-		switch(normalizationMethod) {
-		case NormalizationMethod::L1:
-			c *= float(cell.norm1Inverse);
-			break;
-		case NormalizationMethod::L2:
-			c *= float(cell.norm2Inverse);
-			break;
-		default:
-			break;
-		}
-		count.push_back(c);
-	}
+    // Create a vector of expression counts for this gene and for all cells in the cell set,
+    // using the requested normalization.
+    // Note that we use the normalization defined using all genes.
+    vector<float> count;
+    count.reserve(cellSet.size());
+    for(const CellId cellId : cellSet) {
+        const Cell& cell = cells[cellId];
+        float c = getExpressionCount(cellId, geneId);
+        switch(normalizationMethod) {
+        case NormalizationMethod::L1:
+            c *= float(cell.norm1Inverse);
+            break;
+        case NormalizationMethod::L2:
+            c *= float(cell.norm2Inverse);
+            break;
+        default:
+            break;
+        }
+        count.push_back(c);
+    }
 
 
 
 	// Compute the sum, using double precision.
-	double sum = 0.;
-	for(const float c: count) {
-		sum += double(c);
-	}
+    double sum = 0.;
+    for(const float c : count) {
+        sum += double(c);
+    }
 
-	// Compute the information content.
-	double informationContent = log(double(cellSet.size())); // Equally distributed.
-	const double inverseSum = 1./sum;	// No problem with division by zero - never used if sum is zero
-	for(const float c: count) {
-		if(c > 0.) {
-			const double p = c * inverseSum;
-			informationContent += p*log(p);
-		}
-	}
+    // Compute the information content.
+    double informationContent = log(double(cellSet.size())); // Equally distributed.
+    const double inverseSum = 1. / sum;	// No problem with division by zero - never used if sum is zero
+    for(const float c : count) {
+        if(c > 0.) {
+            const double p = c * inverseSum;
+            informationContent += p * log(p);
+        }
+    }
 
 
-	// Convert to bits.
-	informationContent /= log(2.);
+    // Convert to bits.
+    informationContent /= log(2.);
 
-	return float(informationContent);
+    return float(informationContent);
 }
