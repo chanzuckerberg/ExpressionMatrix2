@@ -12,6 +12,7 @@
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
 #include <cstring>
+#include "algorithm"
 #include "cstddef.hpp"
 #include "iostream.hpp"
 #include "stdexcept.hpp"
@@ -66,11 +67,7 @@ public:
     // Create a new mapped vector with n objects.
     // The last argument specifies the required capacity, which must be at least n.
     // Actual capacity will be a bit larger due to rounding up to the next page boundary.
-    void createNew(const string& name, size_t n, size_t requiredCapacity);
-
-    // Alternative version of createNew in which the required capacity is not specified.
-    // It is made equal to n.
-    void createNew(const string& name, size_t n=0ULL);
+    void createNew(const string& name, size_t n=0, size_t requiredCapacity=0);
 
     // Open a previously created vector with read-only or read-write access.
     void accessExisting(const string& name, bool readWriteAccess);
@@ -386,13 +383,17 @@ template<class T> inline size_t ChanZuckerberg::ExpressionMatrix2::MemoryMapped:
 // Create a new mapped vector with n objects.
 // The last argument specifies the required capacity, which must be at least n.
 // Actual capacity will be a bit larger due to rounding up to the next page boundary.
-template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::createNew(const string& name, size_t n, size_t requiredCapacity)
+template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::createNew(
+    const string& name,
+    size_t n,
+    size_t requiredCapacity)
 {
     try {
         // If already open, should have called close first.
         CZI_ASSERT(!isOpen);
 
         // Create the header.
+        requiredCapacity = std::max(requiredCapacity, n);
         const Header headerOnStack(n, requiredCapacity);
         const size_t fileSize = headerOnStack.fileSize;
 
@@ -435,11 +436,6 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
 
 }
 
-// Alternative version of createNew in which the required capacity is not specified.
-template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::createNew(const string& name, size_t n)
-{
-    createNew(name, n, n);
-}
 
 
 // Open a previously created vector with read-only or read-write access.
