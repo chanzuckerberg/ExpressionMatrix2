@@ -5,6 +5,7 @@
 
 // CZI.
 #include "CZI_ASSERT.hpp"
+#include "touchMemory.hpp"
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
@@ -17,7 +18,7 @@
 #include "iostream.hpp"
 #include "stdexcept.hpp"
 #include "string.hpp"
-#include "touchMemory.hpp"
+#include "vector.hpp"
 
 // Linux.
 #include <fcntl.h>
@@ -31,6 +32,7 @@ namespace ChanZuckerberg {
         namespace MemoryMapped {
             template<class T> class Vector;
         }
+        inline void testMemoryMappedVector();
     }
 }
 
@@ -65,8 +67,12 @@ public:
     Vector& operator=(const Vector&) = delete;
 
     // Create a new mapped vector with n objects.
-    // The last argument specifies the required capacity, which must be at least n.
+    // The last argument specifies the required capacity.
     // Actual capacity will be a bit larger due to rounding up to the next page boundary.
+    // The vector is stored in a memory mapped file with the specified name.
+    // However, if the specified name is a directory, the memory mapped
+    // filed is created with a temporary name and immediately unlinked,
+    // which will result in the file being removed when the vector is no longer in use.
     void createNew(const string& name, size_t n=0, size_t requiredCapacity=0);
 
     // Open a previously created vector with read-only or read-write access.
@@ -198,6 +204,8 @@ private:
 
     // Open the given file name as new (create if not existing, truncate if existing)
     // and with write access.
+    // If the specified name is a directory, the memory mapped
+    // filed is created with a temporary name and immediately unlinked,
     // Return the file descriptor.
     static int openNew(const string& name);
 
@@ -317,19 +325,54 @@ template<class T> inline ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector
 {
 }
 
+
+
 // Open the given file name as new (create if not existing, truncate if existing)
 // and with write access.
+// If the specified name is a directory, the memory mapped
+// filed is created with a temporary name and immediately unlinked,
 // Return the file descriptor.
 template<class T> inline int ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::openNew(const string& name)
 {
-    const int fileDescriptor = ::open(
-            name.c_str(),
-            O_CREAT | O_TRUNC | O_RDWR,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if(fileDescriptor == -1) {
-        throw runtime_error("Error opening " + name);
+    if(boost::filesystem::is_directory(name)) {
+
+        // The specified name is a directory.
+        // Create and open a temporary file in thatg directory,
+        // them immediately unlink it.
+
+        // Create the template for the file name required by the call to mkstemp.
+        string fileNameTemplateString = name + "/XXXXXX";
+
+        // Store it in a memory area that can be modified by mkstemp.
+        vector<char> fileNameTemplate(fileNameTemplateString.size() + 1);
+        copy(fileNameTemplateString.begin(), fileNameTemplateString.end(), fileNameTemplate.begin());
+        fileNameTemplate.back() = 0;
+        char* fileNameTemplateAddress = &fileNameTemplate.front();
+
+        // Create and open it.
+        const int fileDescriptor = ::mkstemp(fileNameTemplateAddress);
+        if(fileDescriptor == -1) {
+            throw runtime_error("Error creating temporary file in " + name);
+        }
+        if(unlink(fileNameTemplateAddress) == -1) {
+            cout << "Unable to unlink temporary file " << fileNameTemplateAddress;
+            cout << ". Temporary file will not be removed automatically." << endl;
+        }
+        return fileDescriptor;
+
+    } else {
+
+        // The specified name is not a directory.
+        // Open or create a file with this name.
+        const int fileDescriptor = ::open(
+                name.c_str(),
+                O_CREAT | O_TRUNC | O_RDWR,
+                S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        if(fileDescriptor == -1) {
+            throw runtime_error("Error opening " + name);
+        }
+        return fileDescriptor;
     }
-    return fileDescriptor;
 }
 
 // Open the given existing file.
@@ -381,8 +424,12 @@ template<class T> inline size_t ChanZuckerberg::ExpressionMatrix2::MemoryMapped:
 
 
 // Create a new mapped vector with n objects.
-// The last argument specifies the required capacity, which must be at least n.
+// The last argument specifies the required capacity.
 // Actual capacity will be a bit larger due to rounding up to the next page boundary.
+// The vector is stored in a memory mapped file with the specified name.
+// However, if the specified name is a directory, the memory mapped
+// filed is created with a temporary name and immediately unlinked,
+// which will result in the file being removed when the vector is no longer in use.
 template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::createNew(
     const string& name,
     size_t n,
@@ -660,12 +707,25 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
     fileName = name;
 }
 
+
+
 // Make a copy of the Vector.
 template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::makeCopy(
-	Vector<T>& copy, const string& newName) const
+    Vector<T>& copy, const string& newName) const
+    {
+    copy.createNew(newName, size());
+    std::copy(begin(), end(), copy.begin());
+}
+
+
+
+inline void ChanZuckerberg::ExpressionMatrix2::testMemoryMappedVector()
 {
-	copy.createNew(newName, size());
-	std::copy(begin(), end(), copy.begin());
+    // Test creation of a temporary vector.
+    MemoryMapped::Vector<int> x;
+    x.createNew("./", 5);
+    x[4] = 18;
+    CZI_ASSERT(x[4] == 18);
 }
 
 

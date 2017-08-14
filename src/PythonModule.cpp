@@ -1,6 +1,7 @@
 
 // CZI.
 #include "ExpressionMatrix.hpp"
+#include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -83,6 +84,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 #endif
 
     // Expose some other functions to Python.
+    def("testMemoryMappedVector", testMemoryMappedVector);
     def("testMemoryMappedVectorOfLists", testMemoryMappedVectorOfLists);
     def("testMemoryMappedStringTable", testMemoryMappedStringTable);
 }
