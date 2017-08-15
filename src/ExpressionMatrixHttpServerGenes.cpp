@@ -473,11 +473,11 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
 
     // Create the new gene set.
     GeneSet& newGeneSet = geneSets[newGeneSetName];
-    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName);
-    for(size_t i=0; i!=geneSet.size(); i++) {
-        if(informationContent[i] > threshold) {
-            const GeneId geneId = geneSet[i];
-            newGeneSet.addGene(geneId);
+    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName, geneCount());
+    for(GeneId localGeneId=0; localGeneId!=geneSet.size(); localGeneId++) {
+        if(informationContent[localGeneId] > threshold) {
+            const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+            newGeneSet.addGene(globalGeneId);
         }
     }
     html << "<p>Gene set " << newGeneSetName << " created. It has " << newGeneSet.size() << " genes.";
@@ -726,15 +726,15 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
         html << "<th>Gene information content in bits computed using " << normalizationMethodToLongString(normalizationMethod);
     }
     html << "</thead><tbody>";
-    for(size_t i=0; i<geneSet.size(); i++) {
-        const GeneId geneId = geneSet[i];
-        CZI_ASSERT(geneId < geneCount());
-        const string geneName = geneNames[geneId];
+    for(GeneId localGeneId=0; localGeneId<geneSet.size(); localGeneId++) {
+        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+        CZI_ASSERT(globalGeneId < geneCount());
+        const string geneName = geneNames[globalGeneId];
         html <<  "<tr><td class=centered style='width:160px;'><a href='gene?geneId=" << urlEncode(geneName) << "'>" << geneName << "</a>";
         html <<
-            "<td class=centered style='width:160px;'>" << informationContent0[i] <<
-            "<td class=centered style='width:160px;'>" << informationContent1[i] <<
-            "<td class=centered style='width:160px;'>" << informationContent2[i];
+            "<td class=centered style='width:160px;'>" << informationContent0[localGeneId] <<
+            "<td class=centered style='width:160px;'>" << informationContent1[localGeneId] <<
+            "<td class=centered style='width:160px;'>" << informationContent2[localGeneId];
     }
     html.precision(oldPrecision);
 

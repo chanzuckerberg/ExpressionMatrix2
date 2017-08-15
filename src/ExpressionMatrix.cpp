@@ -62,7 +62,7 @@ ExpressionMatrix::ExpressionMatrix(
     cellSets.addCellSet("AllCells", emptyCellSet);
 
     // Initialize the gene sets.
-    geneSets["AllGenes"].createNew(directoryName + "/GeneSet-AllGenes");
+    geneSets["AllGenes"].createNew(directoryName + "/GeneSet-AllGenes", geneCount());
 
     // Sanity checks.
     CZI_ASSERT(cellNames.size() == cells.size());
@@ -96,18 +96,18 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
 
 
     // Access the gene sets.
-	using boost::filesystem::directory_iterator;
-	boost::regex regex(directoryName + "/GeneSet-(.*)-Genes");
-	for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
-		const string fileName = it->path().string();
-		boost::smatch regexMatchResults;
-		if(!boost::regex_match(fileName, regexMatchResults, regex)) {
-			continue;
-		}
-		CZI_ASSERT(regexMatchResults.size() == 2);
-		const string& geneSetName = regexMatchResults[1];
-		geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
-	}
+    using boost::filesystem::directory_iterator;
+    boost::regex regex(directoryName + "/GeneSet-(.*)-GlobalIds");
+    for(auto it = directory_iterator(directoryName); it != directory_iterator(); ++it) {
+        const string fileName = it->path().string();
+        boost::smatch regexMatchResults;
+        if(!boost::regex_match(fileName, regexMatchResults, regex)) {
+            continue;
+        }
+        CZI_ASSERT(regexMatchResults.size() == 2);
+        const string& geneSetName = regexMatchResults[1];
+        geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
+    }
 
 
 
@@ -1203,26 +1203,25 @@ double
 // Create a new gene set consisting of genes whose name matches a given regular expression.
 bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const string& regexString)
 {
-	// Check if a gene set with this name already exists.
-	if(geneSets.find(geneSetName) != geneSets.end()) {
-		return false;
-	}
+    // Check if a gene set with this name already exists.
+    if(geneSets.find(geneSetName) != geneSets.end()) {
+        return false;
+    }
 
-	// Create the regular expression we are going to match.
+    // Create the regular expression we are going to match.
     const boost::regex regex(regexString);
 
-	// Create the new gene set.
-	GeneSet& geneSet = geneSets[geneSetName];
-	geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
-	for(GeneId geneId=0; geneId!=geneCount(); geneId++) {
-		const string geneName = geneNames[geneId];
-		if(boost::regex_match(geneName, regex)) {
-			geneSet.addGene(geneId);
-		}
-	}
+    // Create the new gene set.
+    GeneSet& geneSet = geneSets[geneSetName];
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName, geneCount());
+    for(GeneId geneId = 0; geneId != geneCount(); geneId++) {
+        const string geneName = geneNames[geneId];
+        if(boost::regex_match(geneName, regex)) {
+            geneSet.addGene(geneId);
+        }
+    }
 
-
-	return true;
+    return true;
 }
 
 
@@ -1243,7 +1242,7 @@ bool ExpressionMatrix::createGeneSetFromGeneNames(
 
     // Create the new gene set.
     GeneSet& geneSet = geneSets[geneSetName];
-    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName, geneCount());
     ignoredCount = 0;
     emptyCount = 0;
     for(const string& geneName: geneNamesVector) {
@@ -1325,7 +1324,7 @@ bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
 
     // Store this gene set.
     GeneSet& outputGeneSet = geneSets[outputSetName];
-    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName, geneCount());
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }
@@ -1378,7 +1377,7 @@ bool ExpressionMatrix::createGeneSetDifference(
 
     // Store this cell set.
     GeneSet& outputGeneSet = geneSets[outputSetName];
-    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName, geneCount());
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }

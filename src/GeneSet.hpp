@@ -19,65 +19,84 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::GeneSet {
 public:
 
-	void createNew(const string& name);
-	void accessExisting(const string& name);
+    void createNew(const string& name, GeneId globalGeneCount);
+    void accessExisting(const string& name);
 
-	// Add a gene to the set.
-	// The caller is responsible to make sure that a
-	// gene is not added more than once.
-	void addGene(GeneId);
+    // Add a gene to the set.
+    // The caller is responsible to make sure that a
+    // gene is not added more than once.
+    void addGene(GeneId);
 
-	// Return true if a given GeneId belongs to the set, false otherwise.
-	bool contains(GeneId);
+    // Return true if a given GeneId belongs to the set, false otherwise.
+    bool contains(GeneId);
 
-	// Get a reference to the vector of gene ids for the genes in this set.
-	// When this function returns, the vector is guaranteed to be sorted by id.
-	const MemoryMapped::Vector<GeneId>& genes();
+    // Get a reference to the vector of gene ids for the genes in this set.
+    // When this function returns, the vector is guaranteed to be sorted by id.
+    const MemoryMapped::Vector<GeneId>& genes();
 
-	// Return the number of genes in the set.
-	size_t size() const
-	{
-		return geneVector.size();
-	}
+    // Return the number of genes in the set.
+    size_t size() const
+    {
+        return globalGeneIdVector.size();
+    }
 
 
-	const GeneId* begin() const
-	{
-		return geneVector.begin();
-	}
+    const GeneId* begin() const
+    {
+        return globalGeneIdVector.begin();
+    }
 
-	const GeneId* end() const
-	{
-		return geneVector.end();
-	}
+    const GeneId* end() const
+    {
+        return globalGeneIdVector.end();
+    }
 
-	GeneId operator[](size_t i) const
-	{
-		return geneVector[i];
-	}
+    // Return the global gene id corresponding to a given local GeneId.
+    GeneId getGlobalGeneId(GeneId localGeneId) const
+    {
+        CZI_ASSERT(localGeneId < size());
+        return globalGeneIdVector[localGeneId];
+    }
 
-	void remove()
-	{
-		geneVector.remove();
-		isGeneInSet.remove();
-	}
+    // Return the local gene id corresponding to a given global GeneId,
+    // or invalidGeneId of the specified global GeneId is not in this GeneSet.
+    GeneId getLocalGeneId(GeneId globalGeneId) const
+    {
+        if(globalGeneId < localGeneIdVector.size()) {
+            return localGeneIdVector[globalGeneId];
+        } else {
+            return invalidGeneId;
+        }
+    }
 
-	void getSortedGenes(vector<GeneId>&);
+    void remove()
+    {
+        globalGeneIdVector.remove();
+        localGeneIdVector.remove();
+    }
+
+    void getSortedGenes(vector<GeneId>&);
 
 private:
 
-	// The ids of the genes in this set.
-	MemoryMapped::Vector<GeneId> geneVector;
+    // The global GeneId's of the genes in this set.
+    // Indexed by the local GeneId.
+    MemoryMapped::Vector<GeneId> globalGeneIdVector;
 
-	// Flag that tells us whether the genes vector is currently sorted by GeneId.
-	bool isSorted = false;
+    // Flag that tells us whether the genes vector is currently sorted by GeneId.
+    bool isSorted = false;
 
-	// Sort the genes vector and set the isSorted flag.
-	void sort();
+    // Sort the genes vector and set the isSorted flag.
+    void sort();
 
-	// Vector that stores true fore each gene in the gene set
-	// and false otherwise. Indexed by the GeneId.
-	MemoryMapped::Vector<bool> isGeneInSet;
+    // Vector indexed by the global GeneId that contains
+    // the local GeneId for each gene in the gene set,
+    // or invalidGeneId if that global gene id is not in the set.
+    // Note that this needs to be recomputed when the GeneSet
+    // gets sorted.
+    MemoryMapped::Vector<GeneId> localGeneIdVector;
+
+
 };
 
 

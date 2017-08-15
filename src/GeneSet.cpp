@@ -6,52 +6,40 @@ using namespace ExpressionMatrix2;
 
 
 
-void GeneSet::createNew(const string& name)
+void GeneSet::createNew(const string& name, GeneId globalGeneCount)
 {
-	geneVector.createNew(name + "-Genes", 0);
-	isGeneInSet.createNew(name + "-Flags", 0);
+    globalGeneIdVector.createNew(name + "-GlobalIds", 0);
+    localGeneIdVector.createNew(name + "-LocalIds", globalGeneCount);
+    fill(localGeneIdVector.begin(), localGeneIdVector.end(), invalidGeneId);
 }
 
 
 
 void GeneSet::accessExisting(const string& name)
 {
-	geneVector.accessExistingReadWrite(name + "-Genes");
-	isGeneInSet.accessExistingReadWrite(name + "-Flags");
-	sort();
+    globalGeneIdVector.accessExistingReadWrite(name + "-GlobalIds");
+    localGeneIdVector.accessExistingReadWrite(name + "-LocalIds");
+    sort();
 }
 
 
 
 // Add a gene to the set.
-// We lazily add it to the end of the gene vector,
+// We lazily add it to the end of the globalGeneId gene vector,
 // postponing the sorting of the vector.
 void GeneSet::addGene(GeneId geneId)
 {
-	// Update the gene vector and its sorted flag.
-	geneVector.push_back(geneId);
-	isSorted = false;
-
-	// Update the isGeneInSet vector of boolean flags.
-	if(geneId >= isGeneInSet.size()) {
-		const size_t oldSize = isGeneInSet.size();
-		isGeneInSet.resize(geneId+1);
-		const size_t newSize = isGeneInSet.size();
-		fill(isGeneInSet.begin()+oldSize, isGeneInSet.begin()+newSize, false);
-	}
-	isGeneInSet[geneId] = true;
+    localGeneIdVector[geneId] = GeneId(globalGeneIdVector.size());
+    globalGeneIdVector.push_back(geneId);
+    isSorted = false;
 }
 
 
 
-// Return true if a given GeneId belongs to the set, false otherwise.
-bool GeneSet::contains(GeneId geneId)
+// Return true if a given global GeneId belongs to the set, false otherwise.
+bool GeneSet::contains(GeneId globalGeneId)
 {
-	if(geneId < isGeneInSet.size()) {
-		return isGeneInSet[geneId];
-	} else {
-		return false;
-	}
+    return getLocalGeneId(globalGeneId) != invalidGeneId;
 }
 
 
@@ -60,9 +48,8 @@ bool GeneSet::contains(GeneId geneId)
 // When this function returns, the vector is guaranteed to be sorted by id.
 const MemoryMapped::Vector<GeneId>& GeneSet::genes()
 {
-	sort();
-	return geneVector;
-
+    sort();
+    return globalGeneIdVector;
 }
 
 
@@ -70,10 +57,17 @@ const MemoryMapped::Vector<GeneId>& GeneSet::genes()
 // Sort the genes vector and set the isSorted flag, if necessary.
 void GeneSet::sort()
 {
-	if(!isSorted) {
-		std::sort(geneVector.begin(), geneVector.end());
-		isSorted = true;
-	}
+    if(!isSorted) {
+        std::sort(globalGeneIdVector.begin(), globalGeneIdVector.end());
+        isSorted = true;
+
+        // Update the localGeneId vector to reflect the new order.
+        fill(localGeneIdVector.begin(), localGeneIdVector.end(), invalidGeneId);
+        for(GeneId localGeneId=0; localGeneId!=globalGeneIdVector.size(); localGeneId++) {
+            const GeneId globalGeneId = globalGeneIdVector[localGeneId];
+            localGeneIdVector[globalGeneId] = localGeneId;
+        }
+    }
 }
 
 
@@ -83,6 +77,6 @@ void GeneSet::getSortedGenes(vector<GeneId>& sortedGenes)
 {
     sort();
     sortedGenes.clear();
-    sortedGenes.resize(geneVector.size());
-    copy(geneVector.begin(), geneVector.end(), sortedGenes.begin());
+    sortedGenes.resize(globalGeneIdVector.size());
+    copy(globalGeneIdVector.begin(), globalGeneIdVector.end(), sortedGenes.begin());
 }

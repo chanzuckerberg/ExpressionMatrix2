@@ -16,6 +16,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrixHttpServerGenes.cpp \
 ../src/ExpressionMatrixHttpServerGraphs.cpp \
 ../src/ExpressionMatrixLsh.cpp \
+../src/ExpressionMatrixSubset.cpp \
 ../src/GeneSet.cpp \
 ../src/HttpServer.cpp \
 ../src/MemoryMappedStringTable.cpp \
@@ -41,6 +42,7 @@ OBJS += \
 ./src/ExpressionMatrixHttpServerGenes.o \
 ./src/ExpressionMatrixHttpServerGraphs.o \
 ./src/ExpressionMatrixLsh.o \
+./src/ExpressionMatrixSubset.o \
 ./src/GeneSet.o \
 ./src/HttpServer.o \
 ./src/MemoryMappedStringTable.o \
@@ -66,6 +68,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrixHttpServerGenes.d \
 ./src/ExpressionMatrixHttpServerGraphs.d \
 ./src/ExpressionMatrixLsh.d \
+./src/ExpressionMatrixSubset.d \
 ./src/GeneSet.d \
 ./src/HttpServer.d \
 ./src/MemoryMappedStringTable.d \

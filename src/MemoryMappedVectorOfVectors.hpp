@@ -28,10 +28,23 @@ public:
 
     void createNew(const string& name)
     {
-        toc.createNew(name + ".toc");
+        // If the specified name is a directory, use it as is
+        // for the names of the toc and data files.
+        // This will result in the toc and data files  to be
+        // temporary files in that directory.
+        string tocName = name;
+        string dataName = name;
+        if(!boost::filesystem::is_directory(name)) {
+            tocName += ".toc";
+            dataName += ".data";
+        }
+
+        toc.createNew(tocName);
         toc.push_back(0);
-        data.createNew(name + ".data");
+        data.createNew(dataName);
     }
+
+
 
     void accessExisting(const string& name, bool readWriteAccess)
     {
