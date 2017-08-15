@@ -22,17 +22,22 @@ ExpressionMatrixSubset::ExpressionMatrixSubset(
     cellExpressionCounts.createNew(directoryName);
 
     // Loop over cells in the subset.
-#if 0
     for(CellId localCellId=0; localCellId!=cellSet.size(); localCellId++) {
         const CellId globalCellId = cellSet[localCellId];
+        cellExpressionCounts.appendVector();
+
         // Loop over all expression counts for this cell.
         for(const auto& p: globalExpressionCounts[globalCellId]) {
             const GeneId globalGeneId = p.first;
+            const GeneId localGeneId = geneSet.getLocalGeneId(globalGeneId);
+            if(localGeneId == invalidGeneId) {
+                continue;   // This gene is not in the gene set
+            }
             const float count = p.second;
-            CZI_ASSERT(0);
+            cellExpressionCounts.append(make_pair(localGeneId, count));
         }
     }
-#endif
+
 
 }
 
