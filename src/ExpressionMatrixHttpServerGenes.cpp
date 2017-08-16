@@ -473,7 +473,7 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
 
     // Create the new gene set.
     GeneSet& newGeneSet = geneSets[newGeneSetName];
-    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName, geneCount());
+    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName);
     for(GeneId localGeneId=0; localGeneId!=geneSet.size(); localGeneId++) {
         if(informationContent[localGeneId] > threshold) {
             const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);

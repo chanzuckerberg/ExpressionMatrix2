@@ -62,7 +62,7 @@ ExpressionMatrix::ExpressionMatrix(
     cellSets.addCellSet("AllCells", emptyCellSet);
 
     // Initialize the gene sets.
-    geneSets["AllGenes"].createNew(directoryName + "/GeneSet-AllGenes", geneCount());
+    geneSets["AllGenes"].createNew(directoryName + "/GeneSet-AllGenes");
 
     // Sanity checks.
     CZI_ASSERT(cellNames.size() == cells.size());
@@ -106,7 +106,11 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
         }
         CZI_ASSERT(regexMatchResults.size() == 2);
         const string& geneSetName = regexMatchResults[1];
+        cout << "Reading gene set"  << geneSetName << endl;
         geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
+    }
+    if(geneSets.find("AllGenes") == geneSets.end()) {
+        throw runtime_error("Gene set \"AllGenes\" is missing.");
     }
 
 
@@ -129,13 +133,15 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
 // Returns true if the gene was added, false if it was already present.
 bool ExpressionMatrix::addGene(const string& geneName)
 {
+    CZI_ASSERT(geneSets.find("AllGenes") != geneSets.end());
+
     const StringId stringId = geneNames(geneName);
     if(stringId == geneNames.invalidStringId) {
-		const GeneId geneId = GeneId(geneNames[geneName]);
-		geneSets["AllGenes"].addGene(geneId);
-		return true;
+        const GeneId geneId = GeneId(geneNames[geneName]);
+        geneSets["AllGenes"].addGene(geneId);
+        return true;
     } else {
-    	return false;	// Was already present.
+        return false;	// Was already present.
     }
 }
 
@@ -1213,7 +1219,7 @@ bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const s
 
     // Create the new gene set.
     GeneSet& geneSet = geneSets[geneSetName];
-    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName, geneCount());
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
     for(GeneId geneId = 0; geneId != geneCount(); geneId++) {
         const string geneName = geneNames[geneId];
         if(boost::regex_match(geneName, regex)) {
@@ -1242,7 +1248,7 @@ bool ExpressionMatrix::createGeneSetFromGeneNames(
 
     // Create the new gene set.
     GeneSet& geneSet = geneSets[geneSetName];
-    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName, geneCount());
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
     ignoredCount = 0;
     emptyCount = 0;
     for(const string& geneName: geneNamesVector) {
@@ -1324,7 +1330,7 @@ bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
 
     // Store this gene set.
     GeneSet& outputGeneSet = geneSets[outputSetName];
-    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName, geneCount());
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }
@@ -1377,7 +1383,7 @@ bool ExpressionMatrix::createGeneSetDifference(
 
     // Store this cell set.
     GeneSet& outputGeneSet = geneSets[outputSetName];
-    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName, geneCount());
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputSetName);
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }

@@ -19,7 +19,7 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::GeneSet {
 public:
 
-    void createNew(const string& name, GeneId globalGeneCount);
+    void createNew(const string& name);
     void accessExisting(const string& name);
 
     // Add a gene to the set.

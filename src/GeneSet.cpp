@@ -6,11 +6,10 @@ using namespace ExpressionMatrix2;
 
 
 
-void GeneSet::createNew(const string& name, GeneId globalGeneCount)
+void GeneSet::createNew(const string& name)
 {
     globalGeneIdVector.createNew(name + "-GlobalIds", 0);
-    localGeneIdVector.createNew(name + "-LocalIds", globalGeneCount);
-    fill(localGeneIdVector.begin(), localGeneIdVector.end(), invalidGeneId);
+    localGeneIdVector.createNew(name + "-LocalIds", 0);
 }
 
 
@@ -29,6 +28,11 @@ void GeneSet::accessExisting(const string& name)
 // postponing the sorting of the vector.
 void GeneSet::addGene(GeneId geneId)
 {
+    if(geneId >= localGeneIdVector.size()) {
+        const auto oldSize = localGeneIdVector.size();
+        localGeneIdVector.resize(geneId+1);
+        fill(localGeneIdVector.begin()+oldSize, localGeneIdVector.end(), invalidGeneId);
+    }
     localGeneIdVector[geneId] = GeneId(globalGeneIdVector.size());
     globalGeneIdVector.push_back(geneId);
     isSorted = false;
