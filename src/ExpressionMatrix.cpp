@@ -875,6 +875,21 @@ string ExpressionMatrix::getCellMetaData(CellId cellId, StringId nameId) const
 
 
 
+// Return a vector containing all of the meta data (Name, Value) pairs
+// for a given cell.
+vector< pair<string, string> > ExpressionMatrix::getAllCellMetaData(CellId cellId) const
+{
+    vector< pair<string, string> > allCellMetaData;
+    for(const auto& metaDataPair: cellMetaData[cellId]) {
+        const StringId nameId = metaDataPair.first;
+        const StringId valueId = metaDataPair.second;
+        allCellMetaData.push_back(make_pair(cellMetaDataNames[nameId], cellMetaDataValues[valueId]));
+    }
+    return allCellMetaData;
+}
+
+
+
 // Set a meta data (name, value) pair for a given cell.
 // If the name already exists for that cell, the value is replaced.
 void ExpressionMatrix::setCellMetaData(CellId cellId, const string& name, const string& value)

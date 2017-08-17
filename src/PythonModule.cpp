@@ -66,6 +66,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposeVector<uint32_t>("UintList"); // Used for vector<GeneId> and vector<CellId>
     exposeVector< pair<int, int> >("IntIntPairList");
     exposeVector<string>("StringList");
+    exposeVector< pair<string, string> >("StringPairList");
 
 
 
@@ -92,6 +93,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("addCellsFromBioHub", &ExpressionMatrix::addCellsFromBioHub)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
        .def("getCellMetaData", getCellMetaData)
+       .def("getAllCellMetaData", &ExpressionMatrix::getAllCellMetaData)
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
        .def("createCellSetUsingMetaData", createCellSetUsingMetaData)
