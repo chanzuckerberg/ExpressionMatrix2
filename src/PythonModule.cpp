@@ -8,12 +8,67 @@ using namespace ExpressionMatrix2;
 
 // Boost libraries.
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
+
+
+
+namespace ChanZuckerberg {
+    namespace ExpressionMatrix2 {
+
+        // Function used to expose an std::pair to Python.
+        template<class X, class Y> void exposePair(const string& name)
+        {
+            class_< pair<X, Y> >(name.c_str(), init<>())    // Allow default construction
+                .def(init<X, Y>())                          // Allow construction from an X and Y
+                .def_readwrite("first",  &pair<X, Y>::first)
+                .def_readwrite("second", &pair<X, Y>::second);
+        }
+
+        // Function used to expose an std::vector to Python.
+        template<class T> void exposeVector(const string& name)
+        {
+            class_< vector<T> >(name.c_str())
+                .def(vector_indexing_suite< vector<T> >());
+        }
+    }
+}
+
 
 
 
 BOOST_PYTHON_MODULE(ExpressionMatrix2)
 {
+    // Pair classes. These are instantiations of std::pair exposed to Python.
+    // The two items in the pair can be accessed in Python as p.first and p.second.
+    exposePair<int, int>("IntIntPair");
+    exposePair<string, string>("StringStringPair");
+
+
+    // Container classes. These are standard C++ vectors
+    // exposed to Python using the vector_indexing_suite capability.
+    // They have an API very similar to that of a Python list,
+    // which means, for example, that they can be iterated on using typical
+    // Python patterns. For example, if v is one of these containers,
+    // the following Python code works with the expected semantics:
+    // Iteration:
+    //     for x in v:
+    // Element access:
+    //     x = v[i]
+    //     v[i] = x
+    // Number of elements in the container:
+    //     n = len(v)
+    // Convert to a Python list.
+    //     vList = [x for x in v]
+    // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/v2/indexing.html
+    // for more information.
+    exposeVector<int>("IntList");
+    exposeVector<uint32_t>("UintList"); // Used for vector<GeneId> and vector<CellId>
+    exposeVector< pair<int, int> >("IntIntPairList");
+    exposeVector<string>("StringList");
+
+
+
     // Overloaded functions need special handling.
     // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/tutorial/doc/html/python/functions.html#python.overloading
     CellId (ExpressionMatrix::*addCell)(const string&, size_t)
@@ -25,7 +80,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
 
 
-    // Expose class ExpressionMatrix to Python.
+    // Class ExpressionMatrix.
     class_<ExpressionMatrix, boost::noncopyable>("ExpressionMatrix", init<string, ExpressionMatrixCreationParameters>())
        .def(init<string>())
        .def("geneCount", &ExpressionMatrix::geneCount)
@@ -56,7 +111,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("explore", &ExpressionMatrix::explore)
        ;
 
-    // Expose class ExpressionMatrixCreationParameters to Python.
+    // Class ExpressionMatrixCreationParameters.
     class_<ExpressionMatrixCreationParameters>("ExpressionMatrixCreationParameters", init<>())
         .def_readwrite("geneCapacity", &ExpressionMatrixCreationParameters::geneCapacity)
         .def_readwrite("cellCapacity", &ExpressionMatrixCreationParameters::cellCapacity)
@@ -64,24 +119,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("cellMetaDataValueCapacity", &ExpressionMatrixCreationParameters::cellMetaDataValueCapacity)
         ;
 
-    // Expose class ServerParameters to Python.
+    // Class ServerParameters.
     class_<ServerParameters>("ServerParameters", init<>())
         .def_readwrite("port", &ServerParameters::port)
         .def_readwrite("docDirectory", &ServerParameters::docDirectory)
         ;
 
-#if 0
-    // Expose class ExpressionMatrix::ApproximateCellSimilarity to Python.
-    // An object of this type is returned by function ExpressionMatrix::computeApproximateCellSimilarity.
-    class_<ApproximateCellSimilarity>("ApproximateCellSimilarity", no_init)
-        .def_readwrite("estimate", &ApproximateCellSimilarity::estimate)
-        .def_readwrite("lowerBound1", &ApproximateCellSimilarity::lowerBound1)
-        .def_readwrite("upperBound1", &ApproximateCellSimilarity::upperBound1)
-        .def_readwrite("lowerBound2", &ApproximateCellSimilarity::lowerBound2)
-        .def_readwrite("upperBound2", &ApproximateCellSimilarity::upperBound2)
-        .def_readwrite("upperBound3", &ApproximateCellSimilarity::upperBound3)
-        ;
-#endif
+
 
     // Expose some other functions to Python.
     def("testMemoryMappedVector", testMemoryMappedVector);
