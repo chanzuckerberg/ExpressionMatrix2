@@ -64,23 +64,23 @@ void ExpressionMatrix::analyzeAllPairs() const
 // (typically 10 times faster or better when the number of stored
 // largest expression counts for each cell is 100.
 void ExpressionMatrix::findSimilarPairs0(
-	const string& cellSetName,	// The name of the cell set to be used.
+    const string& cellSetName,	// The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
     size_t k,                   // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold, // The minimum similarity for a pair to be stored.
     bool useExactSimilarity     // Use exact of approximate cell similarity computation.
     )
 {
-	if(cellCount() == 0) {
-		cout << "There are no cells. Skipping findSimilarPairs0." << endl;
-		return;
-	}
+    if(cellCount() == 0) {
+        cout << "There are no cells. Skipping findSimilarPairs0." << endl;
+        return;
+    }
 
     // Create the SimilarPairs object where we will store the pairs.
-	const auto& it = cellSets.cellSets.find(cellSetName);
-	if(it == cellSets.cellSets.end()) {
-		throw runtime_error("Cell set " + cellSetName + " does not exist.");
-	}
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, *(it->second));
 
     // Loop over all pairs.
