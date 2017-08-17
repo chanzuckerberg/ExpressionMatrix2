@@ -75,8 +75,8 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         = &ExpressionMatrix::addCell;
     bool (ExpressionMatrix::*createCellSetUsingMetaData)(const string&, const string&, const string&)
         = &ExpressionMatrix::createCellSetUsingMetaData;
-    string (ExpressionMatrix::*getMetaData)(CellId, const string& name) const
-        = &ExpressionMatrix::getMetaData;
+    string (ExpressionMatrix::*getCellMetaData)(CellId, const string& name) const
+        = &ExpressionMatrix::getCellMetaData;
 
 
 
@@ -91,7 +91,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("addCellsFromHdf5", &ExpressionMatrix::addCellsFromHdf5)
        .def("addCellsFromBioHub", &ExpressionMatrix::addCellsFromBioHub)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
-       .def("getMetaData", getMetaData)
+       .def("getCellMetaData", getCellMetaData)
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
        .def("createCellSetUsingMetaData", createCellSetUsingMetaData)

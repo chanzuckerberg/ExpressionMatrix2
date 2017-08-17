@@ -841,7 +841,7 @@ Thinner edge
             map<string, int> frequencyTable;
             BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
                 const CellSimilarityGraphVertex& vertex = graph[v];
-                const string metaDataValue = getMetaData(vertex.cellId, metaDataName);
+                const string metaDataValue = getCellMetaData(vertex.cellId, metaDataName);
                 const auto it = frequencyTable.find(metaDataValue);
                 if(it == frequencyTable.end()) {
                     frequencyTable.insert(make_pair(metaDataValue, 1));
@@ -864,7 +864,7 @@ Thinner edge
             // Assign the vertices to groups..
             BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
                 CellSimilarityGraphVertex& vertex = graph[v];
-                const string metaData = getMetaData(vertex.cellId, metaDataName);
+                const string metaData = getCellMetaData(vertex.cellId, metaDataName);
                 vertex.group = groupMap[metaData];
             }
 
@@ -912,7 +912,7 @@ Thinner edge
             BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
                 CellSimilarityGraphVertex& vertex = graph[v];
                 vertex.group = 0;
-                vertex.color = getMetaData(vertex.cellId, metaDataName);
+                vertex.color = getCellMetaData(vertex.cellId, metaDataName);
             }
         }
 
@@ -927,7 +927,7 @@ Thinner edge
                 vertex.group = 0;
                 vertex.value = std::numeric_limits<double>::max();
                 try {
-                    vertex.value = lexical_cast<double>(getMetaData(vertex.cellId, metaDataName));
+                    vertex.value = lexical_cast<double>(getCellMetaData(vertex.cellId, metaDataName));
                 } catch(bad_lexical_cast) {
                     // If the meta data cannot be interpreted as a number, the value is left at
                     // the ":invalid" value set above, and the vertex will be colored black.

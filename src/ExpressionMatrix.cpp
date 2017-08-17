@@ -844,7 +844,7 @@ GeneId ExpressionMatrix::geneIdFromString(const string& s)
 
 // Return the value of a specified meta data field for a given cell.
 // Returns an empty string if the cell does not have the specified meta data field.
-string ExpressionMatrix::getMetaData(CellId cellId, const string& name) const
+string ExpressionMatrix::getCellMetaData(CellId cellId, const string& name) const
 {
     // Find the string id of the name.
     // If it does not exist, return an empty string.
@@ -852,9 +852,9 @@ string ExpressionMatrix::getMetaData(CellId cellId, const string& name) const
     if(nameId == cellMetaDataNames.invalidStringId) {
         return "";
     }
-    return getMetaData(cellId, nameId);
+    return getCellMetaData(cellId, nameId);
 }
-string ExpressionMatrix::getMetaData(CellId cellId, StringId nameId) const
+string ExpressionMatrix::getCellMetaData(CellId cellId, StringId nameId) const
 {
 
     // Scan the name/value pairs for this cell, looking for nameId.
@@ -877,18 +877,18 @@ string ExpressionMatrix::getMetaData(CellId cellId, StringId nameId) const
 
 // Set a meta data (name, value) pair for a given cell.
 // If the name already exists for that cell, the value is replaced.
-void ExpressionMatrix::setMetaData(CellId cellId, const string& name, const string& value)
+void ExpressionMatrix::setCellMetaData(CellId cellId, const string& name, const string& value)
 {
     const StringId nameId = cellMetaDataNames[name];
     const StringId valueId = cellMetaDataValues[value];
-    setMetaData(cellId, nameId, valueId);
+    setCellMetaData(cellId, nameId, valueId);
 }
-void ExpressionMatrix::setMetaData(CellId cellId, StringId nameId, const string& value)
+void ExpressionMatrix::setCellMetaData(CellId cellId, StringId nameId, const string& value)
 {
     const StringId valueId = cellMetaDataValues[value];
-    setMetaData(cellId, nameId, valueId);
+    setCellMetaData(cellId, nameId, valueId);
 }
-void ExpressionMatrix::setMetaData(CellId cellId, StringId nameId, StringId valueId)
+void ExpressionMatrix::setCellMetaData(CellId cellId, StringId nameId, StringId valueId)
 {
 
     // Scan the existing meta data for this cell, looking for this name.
@@ -1037,7 +1037,7 @@ void ExpressionMatrix::computeAverageExpression(
 
 
 
-// Compute a sorted histogram of a given meta data field.
+// Compute a sorted histogram of a given cell meta data field.
 void ExpressionMatrix::histogramMetaData(
     const CellSet& cellSet,
     StringId metaDataNameId,
@@ -1046,7 +1046,7 @@ void ExpressionMatrix::histogramMetaData(
     // Create the histogram.
     map<string, size_t> histogram;
     for(const CellId cellId: cellSet) {
-        const string metaDataValue = getMetaData(cellId, metaDataNameId);
+        const string metaDataValue = getCellMetaData(cellId, metaDataNameId);
         const auto it = histogram.find(metaDataValue);
         if(it == histogram.end()) {
             histogram.insert(make_pair(metaDataValue, 1));
@@ -1673,7 +1673,7 @@ void ExpressionMatrix::storeClusterId(
 
         // Store the cluster id as cell meta data.
         // If the name already exists for this cell, the value is replaced.
-        setMetaData(cellId, metaDataNameStringId, lexical_cast<string>(clusterId));
+        setCellMetaData(cellId, metaDataNameStringId, lexical_cast<string>(clusterId));
     }
 }
 

@@ -298,35 +298,34 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
 
 
 
-	// Process each row.
-	vector<string> metaDataValues;
-	while(true) {
+    // Process each row.
+    vector<string> metaDataValues;
+    while(true) {
 
-		getline(cellMetaDataFile, line);
-		if(!cellMetaDataFile) {
-			break;
-		}
-		tokenize(",", line, metaDataValues, true);
+        getline(cellMetaDataFile, line);
+        if(!cellMetaDataFile) {
+            break;
+        }
+        tokenize(",", line, metaDataValues, true);
 
-		if(metaDataValues.size() != metaDataNames.size()) {
-			throw runtime_error("Unexpected number of meta data values in " + cellMetaDataFileName);
-		}
+        if(metaDataValues.size() != metaDataNames.size()) {
+            throw runtime_error("Unexpected number of meta data values in " + cellMetaDataFileName);
+        }
 
-		// Locate the cell.
-		const string& cellName = metaDataValues.front();
-		const StringId cellNameStringId = cellNames(cellName);
-		if(cellNameStringId == cellNames.invalidStringId) {
-			throw runtime_error("Attempt to add meta data for undefined cell " + cellName);
-		}
-		const CellId cellId = CellId(cellNameStringId);
-		CZI_ASSERT(cellId < cellCount());
+        // Locate the cell.
+        const string& cellName = metaDataValues.front();
+        const StringId cellNameStringId = cellNames(cellName);
+        if(cellNameStringId == cellNames.invalidStringId) {
+            throw runtime_error("Attempt to add meta data for undefined cell " + cellName);
+        }
+        const CellId cellId = CellId(cellNameStringId);
+        CZI_ASSERT(cellId < cellCount());
 
-
-		for(size_t i=1; i<metaDataNames.size(); i++) {
-			if(metaDataNames[i].size() > 0) {
-			setMetaData(cellId, metaDataNames[i], metaDataValues[i]);
-			}
-		}
-	}
+        for(size_t i = 1; i < metaDataNames.size(); i++) {
+            if(metaDataNames[i].size() > 0) {
+                setCellMetaData(cellId, metaDataNames[i], metaDataValues[i]);
+            }
+        }
+    }
 
 }

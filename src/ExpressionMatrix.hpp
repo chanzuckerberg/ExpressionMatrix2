@@ -248,14 +248,14 @@ public:
 
     // Return the value of a specified meta data field for a given cell.
     // Returns an empty string if the cell does not have the specified meta data field.
-    string getMetaData(CellId, const string& name) const;
-    string getMetaData(CellId, StringId) const;
+    string getCellMetaData(CellId, const string& name) const;
+    string getCellMetaData(CellId, StringId) const;
 
     // Set a meta data (name, value) pair for a given cell.
     // If the name already exists for that cell, the value is replaced.
-    void setMetaData(CellId, const string& name, const string& value);
-    void setMetaData(CellId, StringId nameId, const string& value);
-    void setMetaData(CellId, StringId nameId, StringId valueId);
+    void setCellMetaData(CellId, const string& name, const string& value);
+    void setCellMetaData(CellId, StringId nameId, const string& value);
+    void setCellMetaData(CellId, StringId nameId, StringId valueId);
 
     // Compute a sorted histogram of a given meta data field.
     void histogramMetaData(

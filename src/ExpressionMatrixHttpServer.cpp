@@ -891,8 +891,8 @@ void ExpressionMatrix::metaDataContingencyTable(
 
     // Fill in the contingency table.
     for(const CellId cellId: cellSet) {
-        const string metaDataValue0 = getMetaData(cellId, metaDataNameId0);
-        const string metaDataValue1 = getMetaData(cellId, metaDataNameId1);
+        const string metaDataValue0 = getCellMetaData(cellId, metaDataNameId0);
+        const string metaDataValue1 = getCellMetaData(cellId, metaDataNameId1);
         const size_t i0 = map0[metaDataValue0];
         const size_t i1 = map1[metaDataValue1];
         CZI_ASSERT(i0 < n0);

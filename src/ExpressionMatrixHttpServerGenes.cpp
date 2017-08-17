@@ -216,7 +216,7 @@ void ExpressionMatrix::exploreGene(
 
         // Write the requested meta data for this cell.
         for(const StringId metaDataNameStringId: metaDataToDisplayStringIds) {
-            html << "<td class=centered>" << getMetaData(data.cellId, metaDataNameStringId);
+            html << "<td class=centered>" << getCellMetaData(data.cellId, metaDataNameStringId);
         }
     }
 
