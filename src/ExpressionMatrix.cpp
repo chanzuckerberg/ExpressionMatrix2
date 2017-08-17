@@ -106,7 +106,6 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
         }
         CZI_ASSERT(regexMatchResults.size() == 2);
         const string& geneSetName = regexMatchResults[1];
-        cout << "Reading gene set"  << geneSetName << endl;
         geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
     }
     if(geneSets.find("AllGenes") == geneSets.end()) {
