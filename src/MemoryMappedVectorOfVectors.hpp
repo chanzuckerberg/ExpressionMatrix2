@@ -61,6 +61,12 @@ public:
         accessExisting(name, true);
     }
 
+    void remove()
+    {
+        toc.remove();
+        data.remove();
+    }
+
     size_t size() const
     {
         return toc.size() - 1;

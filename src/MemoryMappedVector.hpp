@@ -9,6 +9,7 @@
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
+#include "boost_lexical_cast.hpp"
 #include <boost/filesystem/operations.hpp>
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
@@ -70,9 +71,6 @@ public:
     // The last argument specifies the required capacity.
     // Actual capacity will be a bit larger due to rounding up to the next page boundary.
     // The vector is stored in a memory mapped file with the specified name.
-    // However, if the specified name is a directory, the memory mapped
-    // filed is created with a temporary name and immediately unlinked,
-    // which will result in the file being removed when the vector is no longer in use.
     void createNew(const string& name, size_t n=0, size_t requiredCapacity=0);
 
     // Open a previously created vector with read-only or read-write access.
@@ -187,9 +185,10 @@ private:
     // The data immediately follow the header.
     T* data;
 
+public:
+
     // Flags that indicate if the mapped file is open, and if so,
     // whether it is open for read-only or read-write.
-public:
     bool isOpen;
     bool isOpenWithWriteAccess;
 
@@ -204,8 +203,6 @@ private:
 
     // Open the given file name as new (create if not existing, truncate if existing)
     // and with write access.
-    // If the specified name is a directory, the memory mapped
-    // filed is created with a temporary name and immediately unlinked,
     // Return the file descriptor.
     static int openNew(const string& name);
 
@@ -329,50 +326,21 @@ template<class T> inline ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector
 
 // Open the given file name as new (create if not existing, truncate if existing)
 // and with write access.
-// If the specified name is a directory, the memory mapped
-// filed is created with a temporary name and immediately unlinked,
 // Return the file descriptor.
 template<class T> inline int ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::openNew(const string& name)
 {
-    if(boost::filesystem::is_directory(name)) {
 
-        // The specified name is a directory.
-        // Create and open a temporary file in thatg directory,
-        // them immediately unlink it.
-
-        // Create the template for the file name required by the call to mkstemp.
-        string fileNameTemplateString = name + "/XXXXXX";
-
-        // Store it in a memory area that can be modified by mkstemp.
-        vector<char> fileNameTemplate(fileNameTemplateString.size() + 1);
-        copy(fileNameTemplateString.begin(), fileNameTemplateString.end(), fileNameTemplate.begin());
-        fileNameTemplate.back() = 0;
-        char* fileNameTemplateAddress = &fileNameTemplate.front();
-
-        // Create and open it.
-        const int fileDescriptor = ::mkstemp(fileNameTemplateAddress);
-        if(fileDescriptor == -1) {
-            throw runtime_error("Error creating temporary file in " + name);
-        }
-        if(unlink(fileNameTemplateAddress) == -1) {
-            cout << "Unable to unlink temporary file " << fileNameTemplateAddress;
-            cout << ". Temporary file will not be removed automatically." << endl;
-        }
-        return fileDescriptor;
-
-    } else {
-
-        // The specified name is not a directory.
-        // Open or create a file with this name.
-        const int fileDescriptor = ::open(
-                name.c_str(),
-                O_CREAT | O_TRUNC | O_RDWR,
-                S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        if(fileDescriptor == -1) {
-            throw runtime_error("Error opening " + name);
-        }
-        return fileDescriptor;
+    // The specified name is not a directory.
+    // Open or create a file with this name.
+    const int fileDescriptor = ::open(
+            name.c_str(),
+            O_CREAT | O_TRUNC | O_RDWR,
+            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(fileDescriptor == -1) {
+        throw runtime_error("Error opening " + name);
     }
+
+    return fileDescriptor;
 }
 
 // Open the given existing file.
@@ -383,7 +351,8 @@ template<class T> inline int ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Ve
         name.c_str(),
         readWriteAccess ? O_RDWR : O_RDONLY);
     if(fileDescriptor == -1) {
-        throw runtime_error("Error during open.");
+        throw runtime_error("Error " + lexical_cast<string>(errno)
+            + " opening MemoryMapped::Vector " + name + ": " + string(strerror(errno)));
     }
     return fileDescriptor;
 }
@@ -427,9 +396,6 @@ template<class T> inline size_t ChanZuckerberg::ExpressionMatrix2::MemoryMapped:
 // The last argument specifies the required capacity.
 // Actual capacity will be a bit larger due to rounding up to the next page boundary.
 // The vector is stored in a memory mapped file with the specified name.
-// However, if the specified name is a directory, the memory mapped
-// filed is created with a temporary name and immediately unlinked,
-// which will result in the file being removed when the vector is no longer in use.
 template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::createNew(
     const string& name,
     size_t n,
@@ -577,10 +543,10 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
 // Close it and remove thge supporting file.
 template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::remove()
 {
-	const string savedFileName = fileName;
+    const string savedFileName = fileName;
     close();	// This forgets the fileName.
     if(!boost::filesystem::remove(savedFileName)) {
-    	throw runtime_error("Error removing " + savedFileName);
+        throw runtime_error("Error removing " + savedFileName);
     }
 }
 

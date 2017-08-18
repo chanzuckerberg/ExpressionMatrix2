@@ -8,6 +8,7 @@
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
+#include "boost_lexical_cast.hpp"
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
 #include <cstring>
@@ -216,7 +217,8 @@ template<class T> inline int ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Ob
         name.c_str(),
         readWriteAccess ? O_RDWR : O_RDONLY);
     if(fileDescriptor == -1) {
-        throw runtime_error("Error during open.");
+        throw runtime_error("Error " + lexical_cast<string>(errno)
+            + " opening MemoryMapped::Object " + name + ": " + string(strerror(errno)));
     }
     return fileDescriptor;
 }

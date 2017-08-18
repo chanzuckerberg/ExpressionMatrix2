@@ -1118,6 +1118,19 @@ double ExpressionMatrix::computeCellSimilarity(CellId cellId0, CellId cellId1) c
             (n*cell0.sum2 - cell0.sum1*cell0.sum1) *
             (n*cell1.sum2 - cell1.sum1*cell1.sum1)
             );
+
+#if 0
+    cout << "ExpressionMatrix::computeCellSimilarity" << endl;
+    cout << "n " << n << endl;
+    cout << "scalarProduct " << scalarProduct << endl;
+    cout << "cell0.sum1 " << cell0.sum1 << endl;
+    cout << "cell1.sum1 " << cell1.sum1 << endl;
+    cout << "cell0.sum2 " << cell0.sum2 << endl;
+    cout << "cell1.sum2 " << cell1.sum2 << endl;
+    cout << "numerator " << numerator << endl;
+    cout << "denominator " << denominator << endl;
+#endif
+
     return numerator / denominator;
 }
 

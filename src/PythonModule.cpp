@@ -106,10 +106,12 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("writeLshSimilarityComparisonSlow", &ExpressionMatrix::writeLshSimilarityComparisonSlow)
        .def("analyzeAllPairs", &ExpressionMatrix::analyzeAllPairs)
        .def("findSimilarPairs0", &ExpressionMatrix::findSimilarPairs0)
+       .def("findSimilarPairs0WithGeneSet", &ExpressionMatrix::findSimilarPairs0WithGeneSet)
        .def("findSimilarPairs1", &ExpressionMatrix::findSimilarPairs1)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
        .def("createCellSimilarityGraph", &ExpressionMatrix::createCellSimilarityGraph)
+       .def("testExpressionMatrixSubset", &ExpressionMatrix::testExpressionMatrixSubset)
        .def("explore", &ExpressionMatrix::explore)
        ;
 

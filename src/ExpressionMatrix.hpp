@@ -320,8 +320,8 @@ public:
     // Version of findSimilarPairs0 that uses a gene set to find pairs of similar cells.
     // Contrary to findSimilarPairs0, this only supports the exact mode.
     void findSimilarPairs0WithGeneSet(
-        const string& cellSetName,  // The name of the cell set to be used.
         const string& geneSetName,  // The name of the gene set to be used.
+        const string& cellSetName,  // The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold
@@ -379,6 +379,9 @@ public:
         double similarityThreshold,         // The minimum similarity to create an edge.
         size_t k                           // The maximum number of neighbors (k of the k-NN graph).
      );
+
+    // Unit test for class ExpressionMatrixSubset.
+    void testExpressionMatrixSubset(CellId, CellId) const;
 
 
 private:

@@ -29,15 +29,16 @@ class ChanZuckerberg::ExpressionMatrix2::ExpressionMatrixSubset {
 public:
 
     // To create the ExpressionMatrixSubset we need to specify
-    // the name of the directory that will contain the temporary files,
+    // the base name to be used for the supporting files files,
     // plus the GeneSet and CellSet to be used
     // and the expression counts for the global expression matrix.
     using CellExpressionCounts = MemoryMapped::VectorOfVectors<pair<GeneId, float>, uint64_t>;
     ExpressionMatrixSubset(
-        const string& directoryName,
+        const string& name,
         const GeneSet& geneSet,
         const CellSet& cellSet,
         const CellExpressionCounts& globalExpressionCounts);
+    ~ExpressionMatrixSubset();
 
     // The set of genes used by this ExpressionMatrixSubset.
     // Indexed by the local GeneId, contains the global GeneId
@@ -62,6 +63,28 @@ public:
     // This is similar to the cellExpressionCounts of class ExpressionMatrix
     // except that it uses local GeneId's and CellId's instead of global ones.
     CellExpressionCounts cellExpressionCounts;
+
+    // Compute the similarity between two cells, identified by their ids
+    // local to our cell set, and using the stored expression counts
+    // (which reflect only genes in our gene set).
+    // This is similar to ExpressionMatrix:;computeCellSimilarity,
+    // but it used the expression counts stored in the ExpressionMatrixSubset
+    // instead of the global expression counts stored by class ExpressionMatrix.
+    double computeCellSimilarity(CellId localCellId0, CellId localCellId1) const;
+
+    // Close and remove the supporting files.
+    void remove();
+
+private:
+
+    // Sums and sums of squares of the expression counts for all cells.
+    class Sum {
+    public:
+        double sum1 = 0.;
+        double sum2 = 0.;
+    };
+    vector<Sum> sums;
+    void computeSums();
 };
 
 #endif
