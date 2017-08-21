@@ -84,36 +84,59 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     // Class ExpressionMatrix.
     class_<ExpressionMatrix, boost::noncopyable>("ExpressionMatrix", init<string, ExpressionMatrixCreationParameters>())
        .def(init<string>())
+
+       // Get the total number of genes or cells currently in the system.
        .def("geneCount", &ExpressionMatrix::geneCount)
        .def("cellCount", &ExpressionMatrix::cellCount)
+
+       // Add a gene.
        .def("addGene", &ExpressionMatrix::addGene)
+
+       // Various ways to add cells.
        .def("addCell", addCell)
        .def("addCells", &ExpressionMatrix::addCells)
        .def("addCellsFromHdf5", &ExpressionMatrix::addCellsFromHdf5)
        .def("addCellsFromBioHub", &ExpressionMatrix::addCellsFromBioHub)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
+
+       // Get cell meta data.
        .def("getCellMetaData", getCellMetaData)
        .def("getAllCellMetaData", &ExpressionMatrix::getAllCellMetaData)
+
+       // Gene sets.
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
+
+       // Cell sets.
        .def("createCellSetUsingMetaData", createCellSetUsingMetaData)
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
+
+       // Compute cell similarity.
        .def("computeCellSimilarity", &ExpressionMatrix::computeCellSimilarity)
        .def("computeApproximateCellSimilarity", &ExpressionMatrix::computeApproximateCellSimilarity)
        .def("computeApproximateLshCellSimilarity", &ExpressionMatrix::computeApproximateLshCellSimilarity)
        .def("writeLshSimilarityComparison", &ExpressionMatrix::writeLshSimilarityComparison)
        .def("writeLshSimilarityComparisonSlow", &ExpressionMatrix::writeLshSimilarityComparisonSlow)
        .def("analyzeAllPairs", &ExpressionMatrix::analyzeAllPairs)
+
+       // Find similar pairs of cells.
        .def("findSimilarPairs0", &ExpressionMatrix::findSimilarPairs0)
-       .def("findSimilarPairs0WithGeneSet", &ExpressionMatrix::findSimilarPairs0WithGeneSet)
        .def("findSimilarPairs1", &ExpressionMatrix::findSimilarPairs1)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
+
+       // Cell similarity graph.
        .def("createCellSimilarityGraph", &ExpressionMatrix::createCellSimilarityGraph)
-       .def("testExpressionMatrixSubset", &ExpressionMatrix::testExpressionMatrixSubset)
+
+       // Run the http server.
        .def("explore", &ExpressionMatrix::explore)
+
+       // Functions used only for testing or debugging.
+       .def("testExpressionMatrixSubset", &ExpressionMatrix::testExpressionMatrixSubset)
        ;
+
+
 
     // Class ExpressionMatrixCreationParameters.
     class_<ExpressionMatrixCreationParameters>("ExpressionMatrixCreationParameters", init<>())
@@ -123,6 +146,8 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("cellMetaDataValueCapacity", &ExpressionMatrixCreationParameters::cellMetaDataValueCapacity)
         ;
 
+
+
     // Class ServerParameters.
     class_<ServerParameters>("ServerParameters", init<>())
         .def_readwrite("port", &ServerParameters::port)
@@ -131,7 +156,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
 
 
-    // Expose some other functions to Python.
+    // Some non-member functions used only for testing or debugging.
     def("testMemoryMappedVector", testMemoryMappedVector);
     def("testMemoryMappedVectorOfLists", testMemoryMappedVectorOfLists);
     def("testMemoryMappedStringTable", testMemoryMappedStringTable);

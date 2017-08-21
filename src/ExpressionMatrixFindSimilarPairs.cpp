@@ -64,7 +64,9 @@ void ExpressionMatrix::analyzeAllPairs() const
 // is usually much faster than the exact mode of operation
 // (typically 10 times faster or better when the number of stored
 // largest expression counts for each cell is 100.
-void ExpressionMatrix::findSimilarPairs0(
+// This is the old version that does not take a
+// gene set as input and instead uses all genes. It is not exposed to Python.
+void ExpressionMatrix::findSimilarPairs0Old(
     const string& cellSetName,	// The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
     size_t k,                   // The maximum number of similar pairs to be stored for each cell.
@@ -114,9 +116,10 @@ void ExpressionMatrix::findSimilarPairs0(
 
 
 
-// Version of findSimilarPairs0 that uses a gene set to find pairs of similar cells.
-// Contrary to findSimilarPairs0, this only supports the exact mode.
-void ExpressionMatrix::findSimilarPairs0WithGeneSet(
+// Find similar cell pairs by looping over all pairs,
+// taking into account only genes in the specified gene set.
+// This is O(N**2) slow because it loops over cell pairs.
+void ExpressionMatrix::findSimilarPairs0(
     const string& geneSetName,      // The name of the gene set to be used.
     const string& cellSetName,      // The name of the cell set to be used.
     const string& similarPairsName, // The name of the SimilarPairs object to be created.

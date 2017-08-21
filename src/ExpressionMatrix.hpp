@@ -292,34 +292,20 @@ public:
 
 
 
-    // Find similar cell pairs by looping over all pairs.
-    // This can use an exact or approximate mode of operation, depending
-    // on the value of the last argument.
-    // In the exact mode of operation, all gene expression counts for both cells
-    // (stored in cellExpressionCounts) are taken into account.
-    // In the approximate mode of operation, only the largest gene expression counts for both cells
-    // (stored in largeCellExpressionCounts) are taken into account.
-    // The number of largest gene expression counts to be stored for each cell
-    // was specified when each cell was added, as an argument to addCell or addCells.
-    // Both the exact an the approximate mode of operation are O(N**2) slow
-    // because they loop over cell pairs. However the approximate mode of operation
-    // is usually much faster than the exact mode of operation
-    // (typically 10 times faster or better when the number of stored
-    // largest expression counts for each cell is 100.
-    // However, findSimilarPairs1 delivers similar or better accuracy
-    // at much higher speed, so the approximate mode of operation of findSimilarPairs0
-    // is not very useful and will be phased out.
-    void findSimilarPairs0(
+    // Find similar cell pairs by looping over all pairs,
+    // taking into account only genes in the specified gene set.
+    // This is O(N**2) slow because it loops over cell pairs.
+    // The first version (findSimilarPairs0Old) is the old version that does not take a
+    // gene set as input and instead uses all genes, and also supports
+    // an approximate mode of operation. It is not exposed to Python.
+    void findSimilarPairs0Old(
         const string& cellSetName,  // The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold, // The minimum similarity for a pair to be stored.
         bool useExactSimilarity     // Use exact of approximate cell similarity computation.
         );
-
-    // Version of findSimilarPairs0 that uses a gene set to find pairs of similar cells.
-    // Contrary to findSimilarPairs0, this only supports the exact mode.
-    void findSimilarPairs0WithGeneSet(
+    void findSimilarPairs0(
         const string& geneSetName,  // The name of the gene set to be used.
         const string& cellSetName,  // The name of the cell set to be used.
         const string& name,         // The name of the SimilarPairs object to be created.
