@@ -16,16 +16,13 @@ parameters.cellCapacity = 1<<16                 # Maximum number of cells.
 parameters.cellMetaDataNameCapacity = 1<<12     # Maximum number of distinct cell meta data name strings.
 parameters.cellMetaDataValueCapacity = 1<<20    # Maximum number of distinct cell meta data value strings.
 
-# The maximum number of genes to be used for approximate computations of cell similarities.
-maxTermCountForApproximateSimilarityComputation = 100
-
 
 
 # Create the expression matrix and add the cells.
 # This creates directory "data" to contain the binary data for this expression matrix.
 # Later, we can access the binary data using a different ExpressinMatrix constructor (see runServer.py)
 e = ExpressionMatrix2.ExpressionMatrix('data', parameters)
-e.addCells('ExpressionMatrix.csv', ',', 'MetaData.csv', ',', maxTermCountForApproximateSimilarityComputation)
+e.addCells('ExpressionMatrix.csv', ',', 'MetaData.csv', ',')
 
 
 

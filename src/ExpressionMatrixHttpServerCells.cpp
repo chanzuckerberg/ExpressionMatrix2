@@ -232,7 +232,6 @@ void ExpressionMatrix::compareTwoCells(
     // Write a table of similarities between these two cells.
     html << "<table>";
     html << "<tr><th class=left>Exact similarity<td>" << computeCellSimilarity(cellIds[0], cellIds[1]);
-    html << "<tr><th class=left>Approximate similarity<td>" << computeApproximateCellSimilarity(cellIds[0], cellIds[1]);
     html << "</table>";
 
 

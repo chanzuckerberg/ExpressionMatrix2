@@ -72,7 +72,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
     // Overloaded functions need special handling.
     // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/tutorial/doc/html/python/functions.html#python.overloading
-    CellId (ExpressionMatrix::*addCell)(const string&, size_t)
+    CellId (ExpressionMatrix::*addCell)(const string&)
         = &ExpressionMatrix::addCell;
     bool (ExpressionMatrix::*createCellSetUsingMetaData)(const string&, const string&, const string&)
         = &ExpressionMatrix::createCellSetUsingMetaData;
@@ -122,11 +122,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
        // Compute cell similarity.
        .def("computeCellSimilarity", &ExpressionMatrix::computeCellSimilarity)
-       .def("computeApproximateCellSimilarity", &ExpressionMatrix::computeApproximateCellSimilarity)
        .def("computeApproximateLshCellSimilarity", &ExpressionMatrix::computeApproximateLshCellSimilarity)
        .def("writeLshSimilarityComparison", &ExpressionMatrix::writeLshSimilarityComparison)
        .def("writeLshSimilarityComparisonSlow", &ExpressionMatrix::writeLshSimilarityComparisonSlow)
-       .def("analyzeAllPairs", &ExpressionMatrix::analyzeAllPairs)
 
        // Find similar pairs of cells.
        .def("findSimilarPairs0", &ExpressionMatrix::findSimilarPairs0)

@@ -111,19 +111,16 @@ public:
     // It also changes the expression counts - it sorts them by decreasing count.
     CellId addCell(
         vector< pair<string, string> >& metaData,
-        vector< pair<string, float> >& expressionCounts,
-        size_t maxTermCountForApproximateSimilarityComputation
+        vector< pair<string, float> >& expressionCounts
         );
 
     // Version of addCell that takes JSON as input.
     // The expected JSON can be constructed using Python code modeled from the following:
     // import json
-    // cell = {'metaData': {'cellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
-    // expressionMatrix.addCell(json.dumps(jSonString), maxTermCountForApproximateSimilarityComputation)
-    // Note the cellName metaData entry is required.
-    CellId addCell(
-        const string&,
-        size_t maxTermCountForApproximateSimilarityComputation);
+    // cell = {'metaData': {'CellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
+    // expressionMatrix.addCell(json.dumps(jSonString))
+    // Note that the cellName metaData entry is required.
+    CellId addCell(const string& jsonString);
 
 
 
@@ -168,8 +165,7 @@ public:
         const string& expressionCountsFileName,
         const string& expressionCountsFileSeparators,
         const string& metaDataFileName,
-        const string& metaDataFileSeparators,
-        size_t maxTermCountForApproximateSimilarityComputation
+        const string& metaDataFileSeparators
         );
 
 
@@ -205,10 +201,7 @@ public:
 	Data set shape is also not used.
 
 	*******************************************************************************/
-    void addCellsFromHdf5(
-        const string& fileName,
-        size_t maxTermCountForApproximateSimilarityComputation
-        );
+    void addCellsFromHdf5(const string& fileName);
 
 
 
@@ -216,11 +209,10 @@ public:
     // See the beginning of ExpressionMatrixBioHub.cpp for a detailed description
     // of the expected formats.
     void addCellsFromBioHub(
-        const string& expressionCountsFileName,	// The name of the csv file containing expression counts.
-        size_t initialMetaDataCount,// The number of initial columns containing meta data.
-        size_t finalMetaDataCount,// The number of final columns containing meta data.
-        const string& plateMetaDataFileName,// The name of the file containing per-plate meta data.
-        size_t maxTermCountForApproximateSimilarityComputation
+        const string& expressionCountsFileName, // The name of the csv file containing expression counts.
+        size_t initialMetaDataCount,            // The number of initial columns containing meta data.
+        size_t finalMetaDataCount,              // The number of final columns containing meta data.
+        const string& plateMetaDataFileName     // The name of the file containing per-plate meta data.
         );
     void getPlateMetaDataFromBioHub(
         const string& plateName,
@@ -271,13 +263,6 @@ public:
     // The similarity is the correlation coefficient of their
     // expression counts.
     double computeCellSimilarity(CellId, CellId) const;
-
-    // Approximate but fast computation of the similarity between two cells.
-    double computeApproximateCellSimilarity(CellId, CellId) const;
-
-    // Compute a histogram of the difference between approximate and exact similarity,
-    // looping over all pairs. This is O(N**2) slow.
-    void analyzeAllPairs() const;
 
     // Compute the average expression vector for a given set of cells.
     // The last parameter controls the normalization used for the expression counts
@@ -331,16 +316,6 @@ public:
     // Find similar cell pairs by looping over all pairs,
     // taking into account only genes in the specified gene set.
     // This is O(N**2) slow because it loops over cell pairs.
-    // The first version (findSimilarPairs0Old) is the old version that does not take a
-    // gene set as input and instead uses all genes, and also supports
-    // an approximate mode of operation. It is not exposed to Python.
-    void findSimilarPairs0Old(
-        const string& cellSetName,  // The name of the cell set to be used.
-        const string& name,         // The name of the SimilarPairs object to be created.
-        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold, // The minimum similarity for a pair to be stored.
-        bool useExactSimilarity     // Use exact of approximate cell similarity computation.
-        );
     void findSimilarPairs0(
         const string& geneSetName,  // The name of the gene set to be used.
         const string& cellSetName,  // The name of the cell set to be used.
@@ -454,15 +429,7 @@ private:
     // This does a binary search in the cellExpressionCounts for the given cell.
     float getExpressionCount(CellId, GeneId) const;
 
-    // We also separately store the largest expression counts for each cell.
-    // This is organized in the same way as cellExpressionCounts above.
-    // This is used for fast, approximate computations of cell similarities.
-    // The threshold for storing an expression count is different for each cell.
-    // For each cell, we store in the Cell object the number of expression
-    // counts neglected and the value of the largest expression count neglected.
-    // With these we compute error bounds for approximate similarity
-    // computations.
-    MemoryMapped::VectorOfVectors<pair<GeneId, float>, uint64_t> largeCellExpressionCounts;
+
 
     // Functions used to implement HttpServer functionality.
 public:

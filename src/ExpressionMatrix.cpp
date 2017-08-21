@@ -54,7 +54,6 @@ ExpressionMatrix::ExpressionMatrix(
     cellMetaDataValues.createNew(directoryName + "/" + "CellMetaDataValues", parameters.cellMetaDataValueCapacity);
     cellMetaDataNamesUsageCount.createNew(directoryName + "/" + "CellMetaDataNamesUsageCount");
     cellExpressionCounts.createNew(directoryName + "/" + "CellExpressionCounts");
-    largeCellExpressionCounts.createNew(directoryName + "/" + "LargeCellExpressionCounts");
 
     // Initialize the CellSets.
     cellSets.createNew(directoryName);
@@ -90,7 +89,6 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
     cellMetaDataValues.accessExistingReadWrite(directoryName + "/" + "CellMetaDataValues");
     cellMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNamesUsageCount");
     cellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "CellExpressionCounts");
-    largeCellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "LargeCellExpressionCounts");
     cellSets.accessExisting(directoryName);
 
 
@@ -156,8 +154,7 @@ bool ExpressionMatrix::addGene(const string& geneName)
 // It also changes the expression counts - it sorts them by decreasing count.
 CellId ExpressionMatrix::addCell(
     vector< pair<string, string> >& metaData,
-    vector< pair<string, float> >& expressionCounts,
-    size_t maxTermCountForApproximateSimilarityComputation)
+    vector< pair<string, float> >& expressionCounts)
 {
     // Check that we don't overflow the CellId type.
     CZI_ASSERT(CellId(cells.size()) < std::numeric_limits<CellId>::max());
@@ -240,110 +237,17 @@ CellId ExpressionMatrix::addCell(
 
 
     // Verify that all the gene ids in the expression counts we just stored are distinct.
-    for(size_t i=1; i<storedExpressionCounts.size(); i++) {
-    	if(storedExpressionCounts[i-1].first == storedExpressionCounts[i].first) {
-    		const string duplicateGeneName = geneNames[storedExpressionCounts[i].first];
-    		throw runtime_error("Duplicate expression count for cell " + cellName + " gene " + duplicateGeneName);
-    	}
+    for(size_t i = 1; i < storedExpressionCounts.size(); i++) {
+        if(storedExpressionCounts[i - 1].first == storedExpressionCounts[i].first) {
+            const string duplicateGeneName = geneNames[storedExpressionCounts[i].first];
+            throw runtime_error("Duplicate expression count for cell " + cellName + " gene " + duplicateGeneName);
+        }
     }
 
     // We need to sort the input expression counts by decreasing count.
     sort(expressionCounts.begin(), expressionCounts.end(),
         OrderPairsBySecondGreaterThenByFirstLess< pair<string, float> >());
 
-    // Store the maxTermCountForApproximateSimilarityComputation largest expression counts
-    // for use by computeApproximateCellSimilarity.
-    const size_t numberToKeep = min(expressionCounts.size(), maxTermCountForApproximateSimilarityComputation);
-    largeCellExpressionCounts.appendVector();
-    for(size_t i=0; i<numberToKeep; i++) {
-        const pair<string, float>& p = expressionCounts[i];
-        const StringId geneId = geneNames[p.first];
-        const float value = p.second;
-        largeCellExpressionCounts.append(make_pair(geneId, value));
-    }
-
-    // Sort the large expression counts we just stored by GeneId.
-    const auto storedLargeExpressionCounts = largeCellExpressionCounts[cellExpressionCounts.size()-1];
-    sort(storedLargeExpressionCounts.begin(), storedLargeExpressionCounts.end());
-
-    // Store cell.sum1LargeExpressionCounts and cell.sum2LargeExpressionCounts
-    // for use by computeApproximateCellSimilarity.
-    cell.sum1LargeExpressionCounts = 0.;
-    cell.sum2LargeExpressionCounts = 0.;
-    for(const auto& p: storedLargeExpressionCounts) {
-        const double& count = p.second;
-        cell.sum1LargeExpressionCounts += count;
-        cell.sum2LargeExpressionCounts += count*count;
-    }
-
-
-#if 0
-
-    // Additional code used to compute bounds on approximate cell similarity.
-    // None of the bounds turned out to be sufficiently tight, so we are not using these.
-
-    cell.largeExpressionCountsNorm2 = sqrt(cell.sum2LargeExpressionCounts);
-    double sum2SmallExpressionCount = 0.;
-    for(size_t i=numberToKeep; i<expressionCounts.size(); i++) {
-        const auto& p = expressionCounts[i];
-        const double& count = p.second;
-        sum2SmallExpressionCount += count*count;
-    }
-    cell.smallExpressionCountsNorm2 = sqrt(sum2SmallExpressionCount);
-
-    // L2 norms of U and delta U (see "Fast computation of cell similarity",
-    // by Paolo Carnevali, dated 5/9/2017).
-    const double n = geneCount();
-    const double mX = cell.sum1 / n;
-    const double sigmaX = sqrt(cell.sum2/n - mX*mX);
-    const double zeroX = -mX/sigmaX;    // The X corresponding to a zero x.
-    const double mU = cell.sum1LargeExpressionCounts / n;
-    const double sigmaU = sqrt(cell.sum2LargeExpressionCounts/n - mU*mU);
-    const double zeroU = -mU/sigmaU;    // The U corresponding to a zero u.
-    cell.norm2U = (n-storedLargeExpressionCounts.size()) * zeroU*zeroU;    // Contribution of u's which are zero.
-    for(const auto& p: storedLargeExpressionCounts) {
-        const double& count = p.second;
-        const double U = (count-mU) / sigmaU;
-        cell.norm2U += U*U;
-    }
-    cell.norm2U = sqrt(cell.norm2U);
-    cell.norm2DeltaU = (n-storedExpressionCounts.size()) * (zeroU-zeroX)*(zeroU-zeroX);    // Contribution of terms in which both x and u are zero.
-    // Add the contribution of terms where x and u are not zero, and equal.
-    for(const auto& p: storedLargeExpressionCounts) {
-        const double& count = p.second;
-        const double X = (count-mX) / sigmaX;
-        const double U = (count-mU) / sigmaU;
-        const double deltaU = X - U;
-        cell.norm2DeltaU += deltaU * deltaU;
-    }
-    // Add the contribution of terms where u is zero but x is not zero.
-    for(size_t i=numberToKeep; i<expressionCounts.size(); i++) {
-        const auto& p = expressionCounts[i];
-        const double& x = p.second;
-        const double X = (x-mX) / sigmaX;
-        const double U = zeroU;
-        const double deltaU = X - U;
-        cell.norm2DeltaU += deltaU * deltaU;
-    }
-    cell.norm2DeltaU = sqrt(cell.norm2DeltaU);
-
-
-    cell.largestCount = 0.;
-    if(!expressionCounts.empty()) {
-        cell.largestCount = expressionCounts.front().second;
-    }
-    cell.largestSmallCount = 0.;
-    if(numberToKeep < expressionCounts.size()) {
-        cell.largestSmallCount = expressionCounts[numberToKeep].second;
-    }
-    cell.sum1SmallCounts = 0.;
-    for(size_t i=numberToKeep; i<expressionCounts.size(); i++) {
-        const auto& p = expressionCounts[i];
-        const double& count = p.second;
-        cell.sum1SmallCounts += count;
-    }
-
-#endif
 
     // Add this cell to the AllCells set.
     cellSets.cellSets["AllCells"]->push_back(CellId(cells.size()));
@@ -358,7 +262,6 @@ CellId ExpressionMatrix::addCell(
     CZI_ASSERT(cellNames.size() == cells.size());
     CZI_ASSERT(cellMetaData.size() == cells.size());
     CZI_ASSERT(cellExpressionCounts.size() == cells.size());
-    CZI_ASSERT(largeCellExpressionCounts.size() == cells.size());
     CZI_ASSERT(cellSets.cellSets["AllCells"]->size() == cells.size());
 
     // Done.
@@ -374,10 +277,7 @@ CellId ExpressionMatrix::addCell(
 // jSonString = json.dumps(cell)
 // expressionMatrix.addCell(json.dumps(jSonString))
 // Note the CellName metaData entry is required.
-CellId ExpressionMatrix::addCell(
-    const string& jsonString,
-    size_t maxTermCountForApproximateSimilarityComputation
-    )
+CellId ExpressionMatrix::addCell(const string& jsonString)
 {
 
     try {
@@ -408,7 +308,7 @@ CellId ExpressionMatrix::addCell(
         }
 
         // Call the lower level version of addCell.
-        return addCell(metaData, expressionCounts, maxTermCountForApproximateSimilarityComputation);
+        return addCell(metaData, expressionCounts);
 
     } catch(...) {
 
@@ -429,8 +329,7 @@ void ExpressionMatrix::addCells(
     const string& expressionCountsFileName,
     const string& expressionCountsFileSeparators,
     const string& cellMetaDataFileName,
-    const string& cellMetaDataFileSeparators,
-    size_t maxTermCountForApproximateSimilarityComputation
+    const string& cellMetaDataFileSeparators
     )
 {
 	// Tokenize the cell meta data file and the expression counts file and verify
@@ -569,234 +468,13 @@ void ExpressionMatrix::addCells(
 
 		// Now we can add this cell.
 		++addedCellCount;
-		addCell(thisCellMetaData, thisCellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
+		addCell(thisCellMetaData, thisCellExpressionCounts);
 	}
 
 	cout << timestamp << "Added " << addedCellCount << " cells that appear in both the cell meta data file and the expression counts file." << endl;
 	cout << "There are " << cellCount() << " cells and " << geneCount() << " genes." << endl;
 
 }
-
-
-
-#if 0
-// Add cells from data in files with fields separated by commas or by other separators.
-// See ExpressionMatrix.hpp for usage information.
-// This is the old version that requires the expression count file and the meta data file
-// to have exactly the same cells, in the same order.
-void ExpressionMatrix::addCells(
-    const string& expressionCountsFileName,
-    const string& expressionCountsFileSeparators,
-    const string& metaDataFileName,
-    const string& metaDataFileSeparators,
-    size_t maxTermCountForApproximateSimilarityComputation
-    )
-{
-
-    // Variables used to hold a line of an input file, and its tokenized version
-    string line;
-    vector<string> tokens;
-
-    // Open the expression count file.
-    ifstream expressionCountsFile(expressionCountsFileName);
-    if(!expressionCountsFile) {
-        throw runtime_error("Error opening the expression count file " + expressionCountsFileName);
-    }
-
-    // Get the cell names from the first row of the expression count file.
-    getline(expressionCountsFile, line);
-    if(!expressionCountsFile) {
-        throw runtime_error("Error reading the first line of the expression count file.");
-    }
-    if(line.empty()) {
-        throw runtime_error("The first line of the expression count file is empty.");
-    }
-    tokenize(expressionCountsFileSeparators, line, tokens);
-    if(tokens.size() < 2) {
-        throw runtime_error("The first line of the expression count file does not contain the specified separator.");
-    }
-    vector<string> cellNames(tokens.begin()+1, tokens.end());
-
-
-
-    // Get the gene names and the expression counts from the rest of the
-    // expression count file.
-    vector<string> geneNames;
-    vector< vector<float> > counts; // Here, one vector for each gene.
-    while(true) {
-        if(!counts.empty() && ((counts.size()%1000)==0)) {
-            cout << timestamp << "Read expression counts for " << counts.size() << " genes." << endl;
-        }
-        getline(expressionCountsFile, line);
-        if(!expressionCountsFile) {
-            break;
-        }
-        tokenize(expressionCountsFileSeparators, line, tokens);
-        if(tokens.size() != cellNames.size()+1) {
-            cout << "Unexpected number of tokens in expression counts line." << endl;
-            cout << "Expected " << cellNames.size()+1 << " tokens." << endl;
-            cout << "Found " << tokens.size() << " tokens." << endl;
-            cout << "Offending line:" << endl;
-            cout << line << endl;
-            cout << "Unexpected number of tokens in expression counts line." << endl;
-            cout << "Expected " << cellNames.size()+1 << " tokens." << endl;
-            cout << "Found " << tokens.size() << " tokens." << endl;
-            if(tokens.size() == cellNames.size()+2) {
-            	cout << "It is possible that the header line of the expression file "
-            		"is missing the first (ignored) token above the column containing gene names." << endl;
-            }
-            throw runtime_error("Unexpected number of tokens in expression counts line.");
-        }
-        const string& geneName = tokens.front();
-        geneNames.push_back(geneName);
-        addGene(geneName);
-        counts.resize(counts.size()+1, vector<float>(cellNames.size()));
-        try {
-            for(size_t i=0; i<cellNames.size(); i++) {
-                counts.back()[i] = lexical_cast<float>(tokens[i+1]);
-            }
-        } catch(bad_lexical_cast) {
-            cout << "Error extracting expression counts from expression count line:" << endl;
-            cout << line << endl;
-            throw runtime_error("Error extracting expression counts from expression count line.");
-        }
-    }
-
-
-
-    // Vectors to contain meta data names (the same for all cells)
-    // and values (different from each cell).
-    // Initialize them with just the cell names.
-    vector<string> metaDataNames;
-    vector< vector<string> > metaDataValues(cellNames.size());
-    metaDataNames.push_back("CellName");
-    for(CellId cellId=0; cellId<cellNames.size(); cellId++) {
-        metaDataValues[cellId].push_back(cellNames[cellId]);
-    }
-
-
-
-    // If an input meta data file was specified, read cell meta data from it.
-    if(!metaDataFileName.empty()) {
-
-        // Open the meta data file.
-        ifstream metaDataFile(metaDataFileName);
-        if(!metaDataFile) {
-            throw runtime_error("Error opening cell meta data file " + metaDataFileName);
-        }
-
-        // Read the meta data names, which are the same for all cells,
-        // from the first line of the meta data file.
-        getline(metaDataFile, line);
-        if(!metaDataFile) {
-            throw runtime_error("Error reading first row of meta data file.");
-        }
-        tokenize(metaDataFileSeparators, line, tokens);
-        if(tokens.size() < 2) {
-            throw runtime_error("Unexpected format of first line of meta data file. It is possible that the incorrect separator was specified.");
-        }
-        metaDataNames.insert(metaDataNames.end(), tokens.begin()+1, tokens.end());
-
-        // Verify that there are no duplications in the meta data names.
-        for(size_t i=1; i<metaDataNames.size(); i++) {
-            const string& iName = metaDataNames[i];
-            for(size_t j=0; j<i; j++) {
-                if(metaDataNames[j] == iName) {
-                    throw runtime_error("Duplicate meta data name " + iName);
-                }
-            }
-        }
-
-        // Read cell meta data from the rest of the cell meta data file.
-        for(CellId cellId=0; cellId<cellNames.size(); cellId++) {
-            getline(metaDataFile, line);
-            if(!metaDataFile) {
-                throw runtime_error("Error reading meta data file line for cell " + cellNames[cellId]);
-            }
-            tokenize(metaDataFileSeparators, line, tokens);
-            if(tokens.size() != metaDataNames.size()) { // metaDataNames also contains CellName.
-                cout << "Unexpected number of tokens in meta data file line:" << endl;
-                cout << line << endl;
-                cout << "Expected " << metaDataNames.size() << " tokens ";
-                cout << " for " << metaDataNames.size()-1 << " meta data items, but got ";
-                cout << tokens.size()  << " tokens." << endl;
-                cout << "Meta data names:" << endl;
-                for(size_t i=1; i<metaDataNames.size(); i++) {
-                    cout << i << " " << metaDataNames[i] << endl;
-                }
-                cout << "Unexpected number of tokens in meta data file line:" << endl;
-                cout << line << endl;
-                // Write this portion of the message again, for better visibility.
-                cout << "Expected " << metaDataNames.size() << " tokens ";
-                cout << " for " << metaDataNames.size()-1 << " meta data items, but got ";
-                cout << tokens.size()  << " tokens." << endl;
-                if(tokens.size() == metaDataNames.size()+1) {
-                	cout << "It is possible that the meta data file is missing "
-                		"the first (ignored) field of the first line (the field above the cell name)." << endl;
-                }
-                throw runtime_error("Unexpected number of tokens in meta data file line.");
-            }
-            if(tokens.front() != cellNames[cellId]) {
-                cout << "Expected the following cell name in line of cell data file: " << cellNames[cellId];
-                cout << " but found " << tokens.front() << "." << endl;
-                cout << " Offending line is:" << endl;
-                cout << line << endl;
-                throw runtime_error("Unexpected cell name in meta data file.");
-            }
-            metaDataValues[cellId].insert(metaDataValues[cellId].end(), tokens.begin()+1, tokens.end());
-        }
-    }
-
-
-    // Count the number of genes that have zero counts for all cells.
-    GeneId zeroCount = 0;
-    for(GeneId geneId=0; geneId<geneNames.size(); geneId++) {
-        bool foundNonZero = false;
-        for(CellId cellId=0; cellId!=cellNames.size(); cellId++) {
-            if(counts[geneId][cellId] != 0) {
-                foundNonZero = true;
-                break;
-            }
-        }
-        if(!foundNonZero) {
-            ++zeroCount;
-        }
-    }
-    cout << "Found " << zeroCount << " genes with zero counts for all cells." << endl;
-
-
-
-    // Now we have all the information we need to add the cells one by one.
-    vector< pair<string, string> > thisCellMetaData;
-    vector< pair<string, float> > thisCellExpressionCounts;
-    for(CellId cellId=0; cellId!=cellNames.size(); cellId++) {
-
-        // Fill in the meta data.
-        CZI_ASSERT(metaDataValues[cellId].size() == metaDataNames.size());
-        for(size_t i=0; i<metaDataNames.size(); i++) {
-            thisCellMetaData.push_back(make_pair(metaDataNames[i], metaDataValues[cellId][i]));
-        }
-
-        // Fill in the expression counts.
-        for(GeneId geneId=0; geneId<geneNames.size(); geneId++) {
-            const float thisCount = counts[geneId][cellId];
-            if(thisCount != 0.) {
-                thisCellExpressionCounts.push_back(make_pair(geneNames[geneId], thisCount));
-            }
-        }
-
-        addCell(thisCellMetaData, thisCellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
-        thisCellMetaData.clear();
-        thisCellExpressionCounts.clear();
-    }
-
-
-    cout << "The expression matrix has " << geneCount();
-    cout << " genes and " << cellCount() << " cells." << endl;
-    cout << "The total number of expression counts is " << cellExpressionCounts.totalSize() << endl;
-    cout << "The total number of large expression counts is " << largeCellExpressionCounts.totalSize() << endl;
-}
-#endif
 
 
 
@@ -1132,103 +810,6 @@ double ExpressionMatrix::computeCellSimilarity(CellId cellId0, CellId cellId1) c
 #endif
 
     return numerator / denominator;
-}
-
-
-
-// Approximate but fast computation of the similarity between two cells.
-double
-    ExpressionMatrix::computeApproximateCellSimilarity(CellId cellId0, CellId cellId1) const
-{
-    // The lower bound is computed just like the exact similarity, but we only use the
-    // largeCellExpressionCounts instead of the cellExpressionCounts.
-
-    // Compute the scalar product of the large expression counts for the two cells.
-    typedef pair<GeneId, float>const* Iterator;
-    const Iterator begin0 = largeCellExpressionCounts.begin(cellId0);
-    const Iterator end0 = largeCellExpressionCounts.end(cellId0);
-    const Iterator begin1 = largeCellExpressionCounts.begin(cellId1);
-    const Iterator end1 = largeCellExpressionCounts.end(cellId1);
-    Iterator it0 = begin0;
-    Iterator it1 = begin1;
-    double scalarProduct = 0.;
-    while((it0 != end0) && (it1 != end1)) {
-        const GeneId geneId0 = it0->first;
-        const GeneId geneId1 = it1->first;
-
-        if(geneId0 < geneId1) {
-            ++it0;
-        } else if(geneId1 < geneId0) {
-            ++it1;
-        } else {
-            scalarProduct += it0->second * it1->second;
-            ++it0;
-            ++it1;
-        }
-    }
-
-
-    // Compute the correlation coefficient.
-    // See, for example, https://en.wikipedia.org/wiki/Correlation_and_dependence
-    const double n = geneCount();
-    const Cell& cell0 = cells[cellId0];
-    const Cell& cell1 = cells[cellId1];
-    const double numerator = n*scalarProduct - cell0.sum1LargeExpressionCounts*cell1.sum1LargeExpressionCounts;
-    const double denominator = sqrt(
-            (n*cell0.sum2LargeExpressionCounts - cell0.sum1LargeExpressionCounts*cell0.sum1LargeExpressionCounts) *
-            (n*cell1.sum2LargeExpressionCounts - cell1.sum1LargeExpressionCounts*cell1.sum1LargeExpressionCounts)
-            );
-    return numerator / denominator;
-
-
-#if 0
-    // Additional code used to compute bounds on approximate cell similarity.
-    // None of the bounds turned out to be sufficiently tight, so we are not using these.
-
-    // The lower bound is computed using the exact expression, replacing the scalar product
-    // of all terms with the scalar product of the large terms.
-    // The upper bound is computed in the same way, using the upper bound for the scalar product.
-    {
-        const double numerator = n*scalarProduct - cell0.sum1*cell1.sum1;
-        const double denominator = sqrt(
-                (n*cell0.sum2 - cell0.sum1*cell0.sum1) *
-                (n*cell1.sum2 - cell1.sum1*cell1.sum1)
-                );
-        approximateCellSimilarity.lowerBound1 = numerator / denominator;
-        const double scalarProductErrorBound =
-            cell0.largeExpressionCountsNorm2 * cell1.smallExpressionCountsNorm2 +
-            cell1.largeExpressionCountsNorm2 * cell0.smallExpressionCountsNorm2 +
-            cell0.smallExpressionCountsNorm2 * cell0.smallExpressionCountsNorm2;
-        approximateCellSimilarity.upperBound1 = (numerator + n*scalarProductErrorBound) / denominator;
-    }
-
-
-    const double errorEstimate = (cell0.norm2U*cell1.norm2DeltaU + cell1.norm2U*cell0.norm2DeltaU + cell0.norm2DeltaU*cell1.norm2DeltaU) / n;
-    approximateCellSimilarity.lowerBound2 = approximateCellSimilarity.estimate - errorEstimate;
-    approximateCellSimilarity.upperBound2 = approximateCellSimilarity.estimate + errorEstimate;
-
-    cout << "Cell0: " << cell0.norm2U << " " << cell0.norm2DeltaU << endl;
-    cout << "Cell1: " << cell1.norm2U << " " << cell1.norm2DeltaU << endl;
-
-
-    // Upper bound on page 3 of
-    // "Fast computation of cell similarity", by Paolo Carnevali, dated 5/8/2017.
-    {
-        const double numerator = n*scalarProduct - cell0.sum1*cell1.sum1;
-        const double denominator = sqrt(
-            (n*cell0.sum2 - cell0.sum1*cell0.sum1) *
-            (n*cell1.sum2 - cell1.sum1*cell1.sum1)
-            );
-        const double scalarProductErrorBound =
-            cell0.largestCount * cell1.sum1SmallCounts +
-            cell1.largestCount * cell0.sum1SmallCounts +
-            min(cell0.largestSmallCount * cell1.sum1SmallCounts, cell1.largestSmallCount * cell0.sum1SmallCounts);
-        approximateCellSimilarity.upperBound3 = (numerator + n*scalarProductErrorBound) / denominator;
-    }
-
-
-    return approximateCellSimilarity;
-#endif
 }
 
 

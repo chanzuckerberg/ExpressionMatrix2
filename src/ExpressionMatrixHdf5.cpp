@@ -41,9 +41,7 @@ Data set shape is also not used.
 
 *******************************************************************************/
 
-void ExpressionMatrix::addCellsFromHdf5(
-    const string& fileName,
-    size_t maxTermCountForApproximateSimilarityComputation)
+void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
 {
 
     try {
@@ -160,7 +158,7 @@ void ExpressionMatrix::addCellsFromHdf5(
                 expressionCounts.push_back(make_pair(hdf5GeneNames[hdf5GeneIndex], float(data[j])));
             }
             try {
-                addCell(metaData, expressionCounts, maxTermCountForApproximateSimilarityComputation);
+                addCell(metaData, expressionCounts);
             } catch (...) {
                 cout << "Error occurred adding cell " << i << " ";
                 cout << hdf5CellNames[i] << " from HDF5 file " << fileName << endl;

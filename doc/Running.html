@@ -57,10 +57,10 @@ When using the http server, the Summary page shows details of the capacity and a
 Before a graph can be created in the http server, it is necessary to compute at least a set of pairs of similar cells. This is done in run.py with a call to findSimilarPairs0, which uses the following parameters:
 
 <ul>
+<li>The names of the gene set and cell sets to be used for the computation.
 <li>The name to be given to the set of similar pairs being computed. This name can then be specified to the http server when creating a cell similarity graph.
 <li>The maximum number of similar cells that will be stored for each cell.
 <li>The similarity threshold for a pair of similar pairs to be stored.
-<li> A Boolean flag that is True if an exact computation of cell similarities is desired, False for an approximate computation. In the latter case, computations of cell similarities are performed using only the top genes for each cell, in number maxTermCountForApproximateSimilarityComputation specified as the last argument to addCells.
 </ul>
 
 <p>

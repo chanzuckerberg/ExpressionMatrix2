@@ -48,8 +48,7 @@ void ExpressionMatrix::addCellsFromBioHub(
 	const string& expressionCountsFileName,	// The name of the csv file containing expression counts.
 	size_t initialMetaDataCount,			// The number of initial columns containing meta data.
 	size_t finalMetaDataCount,				// The number of final columns containing meta data.
-	const string& plateMetaDataFileName,	// The name of the file containing per-plate meta data.
-	size_t maxTermCountForApproximateSimilarityComputation
+	const string& plateMetaDataFileName 	// The name of the file containing per-plate meta data.
 	)
 {
 
@@ -198,7 +197,7 @@ void ExpressionMatrix::addCellsFromBioHub(
 
 
 		// Add the cell.
-		addCell(cellMetaData, cellExpressionCounts, maxTermCountForApproximateSimilarityComputation);
+		addCell(cellMetaData, cellExpressionCounts);
 		++newCellCount;
 	}
 	cout << "Read expression counts for " << newCellCount << " cells." << endl;
