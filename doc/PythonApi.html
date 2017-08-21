@@ -233,13 +233,12 @@ The next sections describe the currently supported methods of finsding sets os s
 Function <code>findSimilarPairs0</code> loops over pairs of cells, and explicitly computes the similarity of the two cells in each pair, defined as the <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression counts of the two cells. It is called as follows:
 
 <pre>
-e.findSimilarPairs0(name, k, similarityThreshold, exactFlag)
+e.findSimilarPairs0(geneSetName, cellSetName, similarPairsName, k, similarityThreshold)
 </pre>
 
-<p>
-The first three parameters were described above. The last parameter is a Boolean flag. If <code>True</code>, the computation is exact and takes into account all of the non-zero expression counts for the two cells. If <code>False</code>, the computation is done approximately and taking only into account, for each cell, a subset of <code>maxTermCountForApproximateSimilarityComputation</code> genes with the highest expression counts for each of the two cells. The value of <code>maxTermCountForApproximateSimilarityComputation</code> was specified for each cell when the cell was added to the expression matrix.
+<p> The first three parameters specify the set of genes to be used in the computation, the set of cells for which the computation is to be performed, and the name of the object containing the similar pairs that will be created. The remaining two parameters were described above.
 
-<p>Usually, <code>maxTermCountForApproximateSimilarityComputation=100</code> results in an approximate computation that is much faster than exact computation while giving similar similarity values for most pairs of cells. However, whether exact or approximate computation is used, the time to perform the computation is proportional to the number of cell pairs and therefore grows with the square of the number of cells. Typically, exact computation becomes prohibitive when the number of cells is in the several thousands, and approximate computation when the number of cells is in the tens of thousands.
+<p>Keep in mind that the time to perform the computation is proportional to the number of cell pairs and therefore grows with the square of the number of cells. Typically, this computation becomes prohibitive when the number of cells is in the several thousands.
 
 
 
@@ -254,11 +253,11 @@ Function <code>findSimilarPairs1</code> loops over pairs of cells, and approxima
 <pre>
 seed = 231
 lshCount = 1024
-e.findSimilarPairs1(name, k, similarityThreshold, lshCount, seed)
+e.findSimilarPairs1(cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
 </pre>
 
 <p>
-The first three parameters were described above. Until complete documentation is available, the above parameter values for the last two parameters should be used. This is much faster than even approximate computation using <code>findSimilarPairs0</code> described above, however it still grows with the square of the number of cells. It typically becomes computationally prohibitive when the number of cells is in the hundreds of thousands. With the parameter values above, it computes similarity values that typically have a standard deviation 0.03 through 0.05 from the exact value.
+The first two parameters specify the set of cells for which the computation is to be performed, and the name of the object containing the similar pairs that will be created. The next two parameters were described above. Until complete documentation is available, the above parameter values for the last two parameters should be used. This is much faster than even approximate computation using <code>findSimilarPairs0</code> described above, however it still grows with the square of the number of cells. It typically becomes computationally prohibitive when the number of cells is in the hundreds of thousands. With the parameter values above, it computes similarity values that typically have a standard deviation 0.03 through 0.05 from the exact value.
 
 <p>
 Note that, for this function to perform at high speed, use of the POPCOUNT instruction must be enabled. For the Ubuntu build under Eclipse, this is done using compiler option <code>-msse4.2</code>. Equivalent means would have to be used by a port to a different platform to ensure high performance of function <code>findSimilarPairs1</code>.
