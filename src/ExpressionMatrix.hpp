@@ -292,6 +292,42 @@ public:
 
 
 
+    // Gene set creation and manipulation.
+
+    // Create a gene set using an information content criterion.
+    // All genes with information content greater than the specified value
+    // are added to the set.
+    // Information content is measured in bits. The specified input
+    // gene set and cell set are used to compute information content
+    // with the specified normalization method.
+    void createGeneSetUsingInformationContent(
+        const string& existingGeneSetName,
+        const string& cellSetName,
+        NormalizationMethod normalizationMethod,
+        double geneInformationContentThreshold,
+        const string& newGeneSetName);
+    void createGeneSetUsingInformationContent(
+        const GeneSet& existingGeneSet,
+        const CellSet& cellSet,
+        NormalizationMethod normalizationMethod,
+        double geneInformationContentThreshold,
+        GeneSet& newGeneSet) const;
+
+    // Create a new gene set as the intersection or union of two or more existing gene sets.
+    // The input gene sets are specified comma separated in the first argument.
+    // Return true if successful, false if one of the input gene sets does not exist
+    // or the output gene set already exists.
+    bool createGeneSetIntersection(const string& inputSets, const string& outputSet);
+    bool createGeneSetUnion(const string& inputSets, const string& outputSet);
+    bool createGeneSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
+
+    // Create a new gene set as the difference between two existing gene sets.
+    // Return true if successful, false if one of the input gene sets does not exist
+    // or the output gene set already exists.
+    bool createGeneSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
+
+
+
     // Find similar cell pairs by looping over all pairs,
     // taking into account only genes in the specified gene set.
     // This is O(N**2) slow because it loops over cell pairs.
@@ -654,19 +690,6 @@ public:
         const vector<string>& geneNames,
         int& ignoredCount,
         int& emptyCount);
-
-    // Create a new gene set as the intersection or union of two or more existing gene sets.
-    // The input gene sets are specified comma separated in the first argument.
-    // Return true if successful, false if one of the input gene sets does not exist
-    // or the output gene set already exists.
-    bool createGeneSetIntersection(const string& inputSets, const string& outputSet);
-    bool createGeneSetUnion(const string& inputSets, const string& outputSet);
-    bool createGeneSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
-
-    // Create a new gene set as the difference between two existing gene sets.
-    // Return true if successful, false if one of the input gene sets does not exist
-    // or the output gene set already exists.
-    bool createGeneSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field matches

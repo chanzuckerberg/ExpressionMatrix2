@@ -36,9 +36,9 @@ namespace ChanZuckerberg {
 
 
 
-
 BOOST_PYTHON_MODULE(ExpressionMatrix2)
 {
+
     // Pair classes. These are instantiations of std::pair exposed to Python.
     // The two items in the pair can be accessed in Python as p.first and p.second.
     exposePair<int, int>("IntIntPair");
@@ -78,6 +78,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         = &ExpressionMatrix::createCellSetUsingMetaData;
     string (ExpressionMatrix::*getCellMetaData)(CellId, const string& name) const
         = &ExpressionMatrix::getCellMetaData;
+    void (ExpressionMatrix::*createGeneSetUsingInformationContent) (
+        const string& existingGeneSetName,
+        const string& cellSetName,
+        NormalizationMethod normalizationMethod,
+        double geneInformationContentThreshold,
+        const string& newGeneSetName)
+        = &ExpressionMatrix::createGeneSetUsingInformationContent;
 
 
 
@@ -104,6 +111,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("getAllCellMetaData", &ExpressionMatrix::getAllCellMetaData)
 
        // Gene sets.
+       .def("createGeneSetUsingInformationContent", createGeneSetUsingInformationContent)
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
 
@@ -153,6 +161,17 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("port", &ServerParameters::port)
         .def_readwrite("docDirectory", &ServerParameters::docDirectory)
         ;
+
+
+
+    // Enum class NormalizationMethod.
+    enum_<NormalizationMethod>("NormalizationMethod")
+      .value(normalizationMethodToShortString(NormalizationMethod::None).c_str(),       NormalizationMethod::None)
+      .value(normalizationMethodToShortString(NormalizationMethod::L1).c_str(),         NormalizationMethod::L1)
+      .value(normalizationMethodToShortString(NormalizationMethod::L2).c_str(),         NormalizationMethod::L2)
+      .value(normalizationMethodToShortString(NormalizationMethod::Invalid).c_str(),    NormalizationMethod::Invalid)
+      .export_values()
+      ;
 
 
 

@@ -1721,9 +1721,6 @@ void ExpressionMatrix::computeGeneInformationContent(
     geneInformationContent.reserve(geneSet.size());
     geneInformationContent.clear();
     for(const GeneId geneId : geneSet) {
-        if(geneId > 0 && (geneId % 1000) == 0) {
-            cout << geneId << endl;
-        }
         geneInformationContent.push_back(computeGeneInformationContent(geneId, cellSet, normalizationMethod));
     }
 
@@ -1782,3 +1779,68 @@ float ExpressionMatrix::computeGeneInformationContent(
 
     return float(informationContent);
 }
+
+
+
+void ExpressionMatrix::createGeneSetUsingInformationContent(
+    const string& existingGeneSetName,
+    const string& cellSetName,
+    NormalizationMethod normalizationMethod,
+    double geneInformationContentThreshold,
+    const string& newGeneSetName)
+{
+    // Locate the existing gene set.
+    const auto itExistingGeneSet = geneSets.find(existingGeneSetName);
+    if(itExistingGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + existingGeneSetName + " does not exist.");
+    }
+    const GeneSet& existingGeneSet = itExistingGeneSet->second;
+
+    // Locate the cell set.
+    const auto itCellSet = cellSets.cellSets.find(cellSetName);
+    if(itCellSet == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const CellSet& cellSet = *(itCellSet->second);
+
+    // Verify that the new gene set does not already exist.
+    if(geneSets.find(newGeneSetName) != geneSets.end()) {
+        throw runtime_error("Gene set " + newGeneSetName + " already exists.");
+    }
+
+    // Create the new gene set.
+    GeneSet& newGeneSet = geneSets[newGeneSetName];
+    newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName);
+    createGeneSetUsingInformationContent(
+        existingGeneSet,
+        cellSet,
+        normalizationMethod,
+        geneInformationContentThreshold,
+        newGeneSet);
+}
+
+
+
+void ExpressionMatrix::createGeneSetUsingInformationContent(
+    const GeneSet& existingGeneSet,
+    const CellSet& cellSet,
+    NormalizationMethod normalizationMethod,
+    double geneInformationContentThreshold,
+    GeneSet& newGeneSet) const
+{
+    // Check that we are starting with an empty set.
+    CZI_ASSERT(newGeneSet.size() == 0);
+
+    // Compute gene information content using the requested normalization method.
+    vector<float> informationContent;
+    computeGeneInformationContent(existingGeneSet, cellSet, normalizationMethod, informationContent);
+
+    // Add to the new gene set the genes that have sufficient information.
+    for(GeneId localGeneId=0; localGeneId!=existingGeneSet.size(); localGeneId++) {
+        if(informationContent[localGeneId] > geneInformationContentThreshold) {
+            const GeneId globalGeneId = existingGeneSet.getGlobalGeneId(localGeneId);
+            newGeneSet.addGene(globalGeneId);
+        }
+    }
+}
+

@@ -422,6 +422,7 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
     // Get the threshold on gene information content.
     // This is the minimum gene information content required for a gene to be included
     // in the gene set being created.
+    // Gene information is in bits.
     float threshold = 2;
     getParameterValue(request, "threshold", threshold);
 
