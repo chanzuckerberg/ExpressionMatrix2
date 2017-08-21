@@ -35,15 +35,15 @@ ExpressionMatrix::ExpressionMatrix(
     directoryName(directoryName)
 {
     // If directory already exists, don't do anything.
-	// This ensures that we don't delete or overwrite anything,
-	// and that the directory does not contain stale data.
+    // This ensures that we don't delete or overwrite anything,
+    // and that the directory does not contain stale data.
     if(boost::filesystem::exists(directoryName)) {
-    	throw runtime_error("Directory "  + directoryName + " already exists.");
+        throw runtime_error("Directory " + directoryName + " already exists.");
     }
 
     // Create the directory. This guarantees that we start with an empty directory.
     if(!boost::filesystem::create_directory(directoryName)) {
-    	throw runtime_error("Unable to create directory "  + directoryName);
+        throw runtime_error("Unable to create directory " + directoryName);
     }
 
     geneNames.createNew(directoryName + "/" + "GeneNames", parameters.geneCapacity);
@@ -138,7 +138,7 @@ bool ExpressionMatrix::addGene(const string& geneName)
         geneSets["AllGenes"].addGene(geneId);
         return true;
     } else {
-        return false;	// Was already present.
+        return false;   // Was already present.
     }
 }
 
@@ -170,10 +170,10 @@ CellId ExpressionMatrix::addCell(
         }
     }
     if(!cellNameWasFound) {
-    	cout << "CellName is missing from the following cell meta data:" << endl;
-    	for(const auto& p: metaData) {
-    		cout << p.first << " " << p.second << endl;
-    	}
+        cout << "CellName is missing from the following cell meta data:" << endl;
+        for(const auto& p : metaData) {
+            cout << p.first << " " << p.second << endl;
+        }
         throw std::runtime_error("CellName missing from cell meta data.");
     }
     CZI_ASSERT(metaData.front().first == "CellName");
@@ -332,147 +332,152 @@ void ExpressionMatrix::addCells(
     const string& cellMetaDataFileSeparators
     )
 {
-	// Tokenize the cell meta data file and the expression counts file and verify
-	// that all lines have the same number of tokens (which cannot be zero), with the possible exception
-	// of line one which could have one less token than all other lines.
-	vector< vector<string> > cellMetaDataFileLines, expressionCountsFileLines;
-	cout << timestamp << "Reading cell meta data file " << cellMetaDataFileName << "." << endl;
-	tokenizeFileAndCheck(cellMetaDataFileName, cellMetaDataFileSeparators, cellMetaDataFileLines);
-	cout << timestamp << "Reading expression counts file " << expressionCountsFileName << "." << endl;
-	tokenizeFileAndCheck(expressionCountsFileName, expressionCountsFileSeparators, expressionCountsFileLines);
+    // Tokenize the cell meta data file and the expression counts file and verify
+    // that all lines have the same number of tokens (which cannot be zero), with the possible exception
+    // of line one which could have one less token than all other lines.
+    vector<vector<string> > cellMetaDataFileLines, expressionCountsFileLines;
+    cout << timestamp << "Reading cell meta data file " << cellMetaDataFileName << "." << endl;
+    tokenizeFileAndCheck(cellMetaDataFileName, cellMetaDataFileSeparators, cellMetaDataFileLines);
+    cout << timestamp << "Reading expression counts file " << expressionCountsFileName << "." << endl;
+    tokenizeFileAndCheck(expressionCountsFileName, expressionCountsFileSeparators, expressionCountsFileLines);
 
 
 
-	// Get the meta data field names from the header of the cell meta data file.
-	// We have to account for the fact that the header line might or might not contain an
-	// initial field, which if present is ignored.
-	vector<string> metaDataFieldNames;
-	{
-		size_t skip = 1;
-		if(cellMetaDataFileLines[0].size() != cellMetaDataFileLines[1].size()) {
-			CZI_ASSERT(cellMetaDataFileLines[0].size() == cellMetaDataFileLines[1].size()-1); // This was checked by tokenizeFileAndCheck.
-			skip = 0;
-		}
-		copy(cellMetaDataFileLines[0].begin()+skip, cellMetaDataFileLines[0].end(), back_inserter(metaDataFieldNames));
-	}
+    // Get the meta data field names from the header of the cell meta data file.
+    // We have to account for the fact that the header line might or might not contain an
+    // initial field, which if present is ignored.
+    vector<string> metaDataFieldNames;
+    {
+        size_t skip = 1;
+        if(cellMetaDataFileLines[0].size() != cellMetaDataFileLines[1].size()) {
+            CZI_ASSERT(cellMetaDataFileLines[0].size() == cellMetaDataFileLines[1].size() - 1); // This was checked by tokenizeFileAndCheck.
+            skip = 0;
+        }
+        copy(cellMetaDataFileLines[0].begin() + skip, cellMetaDataFileLines[0].end(),
+            back_inserter(metaDataFieldNames));
+    }
 
 
 
-	// Check that there are no duplications in the meta data field names.
-	{
-		set<string> metaDataFieldNamesSet;
-		for(const string& metaDataFieldName: metaDataFieldNames) {
-			if(metaDataFieldNamesSet.find(metaDataFieldName) != metaDataFieldNamesSet.end()) {
-				throw runtime_error("Duplicate meta data field " + metaDataFieldName);
-			}
-			metaDataFieldNamesSet.insert(metaDataFieldName);
-		}
-	}
+    // Check that there are no duplications in the meta data field names.
+    {
+        set<string> metaDataFieldNamesSet;
+        for(const string& metaDataFieldName : metaDataFieldNames) {
+            if(metaDataFieldNamesSet.find(metaDataFieldName) != metaDataFieldNamesSet.end()) {
+                throw runtime_error("Duplicate meta data field " + metaDataFieldName);
+            }
+            metaDataFieldNamesSet.insert(metaDataFieldName);
+        }
+    }
 
 
 
-	// Get the cell names from the header of the expression count file, and create a
-	// corresponding index map.
-	// We have to account for the fact that the header line might or might not contain an
-	// initial field, which if present is ignored.
-	// Note that not all of these cells will make it into the system:
-	// the ones that have no entry in the meta data file will be skipped.
-	vector<string> expressionFileCellNames;
-	{
-		size_t skip = 1;
-		if(expressionCountsFileLines[0].size() != expressionCountsFileLines[1].size()) {
-			CZI_ASSERT(expressionCountsFileLines[0].size() == expressionCountsFileLines[1].size()-1); // This was checked by tokenizeFileAndCheck.
-			skip = 0;
-		}
-		copy(expressionCountsFileLines[0].begin()+skip, expressionCountsFileLines[0].end(), back_inserter(expressionFileCellNames));
-	}
-	map<string, CellId> expressionFileCellNamesMap;
-	for(size_t i=0; i<expressionFileCellNames.size(); i++) {
-		const string& cellName = expressionFileCellNames[i];
-		if(expressionFileCellNamesMap.find(cellName) != expressionFileCellNamesMap.end()) {
-			throw runtime_error("Cell " + cellName + " has more than one column in the expression counts file.");
-		}
-		expressionFileCellNamesMap.insert(make_pair(cellName, i));
-	}
+    // Get the cell names from the header of the expression count file, and create a
+    // corresponding index map.
+    // We have to account for the fact that the header line might or might not contain an
+    // initial field, which if present is ignored.
+    // Note that not all of these cells will make it into the system:
+    // the ones that have no entry in the meta data file will be skipped.
+    vector<string> expressionFileCellNames;
+    {
+        size_t skip = 1;
+        if(expressionCountsFileLines[0].size() != expressionCountsFileLines[1].size()) {
+            CZI_ASSERT(expressionCountsFileLines[0].size() == expressionCountsFileLines[1].size() - 1); // This was checked by tokenizeFileAndCheck.
+            skip = 0;
+        }
+        copy(expressionCountsFileLines[0].begin() + skip, expressionCountsFileLines[0].end(),
+            back_inserter(expressionFileCellNames));
+    }
+    map<string, CellId> expressionFileCellNamesMap;
+    for(size_t i = 0; i < expressionFileCellNames.size(); i++) {
+        const string& cellName = expressionFileCellNames[i];
+        if(expressionFileCellNamesMap.find(cellName) != expressionFileCellNamesMap.end()) {
+            throw runtime_error("Cell " + cellName + " has more than one column in the expression counts file.");
+        }
+        expressionFileCellNamesMap.insert(make_pair(cellName, i));
+    }
 
 
 
-	// Summarize the number of cells, genes, and meta data names seen in each file.
-	cout << "Cell meta data file " << cellMetaDataFileName << " contains data for ";
-	cout << cellMetaDataFileLines.size()-1 << " cells and " << metaDataFieldNames.size() << " meta data names." << endl;
-	cout << "Expression counts file " << expressionCountsFileName << " contains data for ";
-	cout << expressionFileCellNames.size() << " cells and " << expressionCountsFileLines.size()-1 << " genes." << endl;
+    // Summarize the number of cells, genes, and meta data names seen in each file.
+    cout << "Cell meta data file " << cellMetaDataFileName << " contains data for ";
+    cout << cellMetaDataFileLines.size() - 1 << " cells and ";
+    cout << metaDataFieldNames.size() << " meta data names." << endl;
+    cout << "Expression counts file " << expressionCountsFileName << " contains data for ";
+    cout << expressionFileCellNames.size() << " cells and " << expressionCountsFileLines.size() - 1 << " genes."
+        << endl;
+
+    // Add the genes.
+    // We want to add them independently of the cells, so they all get added, even the ones
+    // for which all cells have zero count.
+    CZI_ASSERT(expressionCountsFileLines.size() > 0);   // This was checked by tokenizeFileAndCheck.
+    for(size_t i = 1; i < expressionCountsFileLines.size(); i++) {
+        const vector<string>& line = expressionCountsFileLines[i];
+        CZI_ASSERT(line.size() > 0);    // This was checked by tokenizeFileAndCheck.
+        addGene(line.front());
+    }
 
 
-	// Add the genes.
-	// We want to add them independently of the cells, so they all get added, even the ones
-	// for which all cells have zero count.
-	CZI_ASSERT(expressionCountsFileLines.size() > 0); 	// This was checked by tokenizeFileAndCheck.
-	for(size_t i=1; i<expressionCountsFileLines.size(); i++) {
-		const vector<string>& line = expressionCountsFileLines[i];
-		CZI_ASSERT(line.size() > 0); 	// This was checked by tokenizeFileAndCheck.
-		addGene(line.front());
-	}
 
+    // Loop over cells in the cell meta data file, but only add the ones that also appear
+    // in the expression counts file.
+    cout << timestamp << "Storing expression counts and cell meta data." << endl;
+    CZI_ASSERT(cellMetaDataFileLines.size() > 1);   // This was checked by tokenizeFileAndCheck.
+    CellId addedCellCount = 0;
+    for(size_t cellMetaDataFileLine = 1; cellMetaDataFileLine < cellMetaDataFileLines.size(); cellMetaDataFileLine++) {
+        if((cellMetaDataFileLine % 1000) == 0) {
+            cout << timestamp << "Working on cell meta data file line " << cellMetaDataFileLine + 1 << " of "
+                << cellMetaDataFileLines.size() << endl;
+        }
+        const vector<string>& metaDataLine = cellMetaDataFileLines[cellMetaDataFileLine];
+        CZI_ASSERT(metaDataLine.size() > 1);    // This was checked by tokenizeFileAndCheck.
+        const string& cellName = metaDataLine.front();
 
+        // See if this cell appears in the expression counts file.
+        // If not, skip this cell.
+        const auto it = expressionFileCellNamesMap.find(cellName);
+        if(it == expressionFileCellNamesMap.end()) {
+            continue;   // It's not in the expression counts file. Skip it.
+        }
 
-	// Loop over cells in the cell meta data file, but only add the ones that also appear
-	// in the expression counts file.
-	cout << timestamp << "Storing expression counts and cell meta data." << endl;
-	CZI_ASSERT(cellMetaDataFileLines.size() > 1);	// This was checked by tokenizeFileAndCheck.
-	CellId addedCellCount = 0;
-	for(size_t cellMetaDataFileLine=1; cellMetaDataFileLine<cellMetaDataFileLines.size(); cellMetaDataFileLine++) {
-		if((cellMetaDataFileLine%1000) == 0) {
-			cout << timestamp << "Working on cell meta data file line " << cellMetaDataFileLine+1 << " of " << cellMetaDataFileLines.size() << endl;
-		}
-		const vector<string>& metaDataLine = cellMetaDataFileLines[cellMetaDataFileLine];
-		CZI_ASSERT(metaDataLine.size() > 1);	// This was checked by tokenizeFileAndCheck.
-		const string& cellName = metaDataLine.front();
+        // Find the column in the expression counts file that contains data for this cell.
+        const size_t expressionFileColumn = it->second + 1;
 
-		// See if this cell appears in the expression counts file.
-		// If not, skip this cell.
-		const auto it = expressionFileCellNamesMap.find(cellName);
-		if(it == expressionFileCellNamesMap.end()) {
-			continue;	// It's not in the expression counts file. Skip it.
-		}
+        // Gather the meta data for this cell.
+        CZI_ASSERT(metaDataLine.size() == metaDataFieldNames.size() + 1); // This was checked by tokenizeFileAndCheck.
+        vector<pair<string, string> > thisCellMetaData;
+        thisCellMetaData.push_back(make_pair("CellName", cellName));
+        for(size_t i = 0; i < metaDataFieldNames.size(); i++) {
+            thisCellMetaData.push_back(make_pair(metaDataFieldNames[i], metaDataLine[i + 1]));
+        }
 
-		// Find the column in the expression counts file that contains data for this cell.
-		const size_t expressionFileColumn = it->second + 1;
+        // Gather the expression counts for this cell.
+        vector<pair<string, float> > thisCellExpressionCounts;
+        for(size_t i = 1; i < expressionCountsFileLines.size(); i++) {
+            const vector<string>& line = expressionCountsFileLines[i];
+            CZI_ASSERT(line.size() > 0);    // This was checked by tokenizeFileAndCheck.
+            const string& geneName = line.front();
+            const string& expressionCountString = line[expressionFileColumn];
+            float expressionCount;
+            try {
+                expressionCount = lexical_cast<float>(expressionCountString);
+            } catch (boost::bad_lexical_cast) {
+                throw runtime_error("Invalid expression count " + expressionCountString +
+                    " for cell " + cellName + " gene " + geneName);
+            }
+            if(expressionCount != 0.) {
+                thisCellExpressionCounts.push_back(make_pair(geneName, expressionCount));
+            }
+        }
 
-		// Gather the meta data for this cell.
-		CZI_ASSERT(metaDataLine.size() == metaDataFieldNames.size() + 1); // This was checked by tokenizeFileAndCheck.
-	    vector< pair<string, string> > thisCellMetaData;
-	    thisCellMetaData.push_back(make_pair("CellName", cellName));
-	    for(size_t i=0; i<metaDataFieldNames.size(); i++) {
-	    	thisCellMetaData.push_back(make_pair(metaDataFieldNames[i], metaDataLine[i+1]));
-	    }
+        // Now we can add this cell.
+        ++addedCellCount;
+        addCell(thisCellMetaData, thisCellExpressionCounts);
+    }
 
-	    // Gather the expression counts for this cell.
-	    vector< pair<string, float> > thisCellExpressionCounts;
-		for(size_t i=1; i<expressionCountsFileLines.size(); i++) {
-			const vector<string>& line = expressionCountsFileLines[i];
-			CZI_ASSERT(line.size() > 0); 	// This was checked by tokenizeFileAndCheck.
-			const string& geneName = line.front();
-			const string& expressionCountString = line[expressionFileColumn];
-			float expressionCount;
-			try {
-				expressionCount = lexical_cast<float>(expressionCountString);
-			} catch(boost::bad_lexical_cast) {
-				throw runtime_error("Invalid expression count " + expressionCountString +
-					" for cell " + cellName + " gene " + geneName);
-			}
-			if(expressionCount != 0.) {
-				thisCellExpressionCounts.push_back(make_pair(geneName, expressionCount));
-			}
-		}
-
-		// Now we can add this cell.
-		++addedCellCount;
-		addCell(thisCellMetaData, thisCellExpressionCounts);
-	}
-
-	cout << timestamp << "Added " << addedCellCount << " cells that appear in both the cell meta data file and the expression counts file." << endl;
-	cout << "There are " << cellCount() << " cells and " << geneCount() << " genes." << endl;
+    cout << timestamp << "Added " << addedCellCount;
+    cout << " cells that appear in both the cell meta data file and the expression counts file." << endl;
+    cout << "There are " << cellCount() << " cells and " << geneCount() << " genes." << endl;
 
 }
 
@@ -648,83 +653,84 @@ float ExpressionMatrix::getExpressionCount(CellId cellId, GeneId geneId) const
 // 1: L1 normalization (fractional read counts).
 // 2: L2 normalization.
 void ExpressionMatrix::computeAverageExpression(
-	const vector<CellId> cellIds,
-	vector<double>& averageExpression,
-	NormalizationMethod normalizationMethod) const
-{
-	// Initialize the average expression to zero.
-	averageExpression.resize(geneCount());
-	fill(averageExpression.begin(), averageExpression.end(), 0.);
+    const vector<CellId> cellIds,
+    vector<double>& averageExpression,
+    NormalizationMethod normalizationMethod) const
+    {
+    // Initialize the average expression to zero.
+    averageExpression.resize(geneCount());
+    fill(averageExpression.begin(), averageExpression.end(), 0.);
 
 
 
-	// Accumulate the contribution of all the cells.
-	for(const CellId cellId: cellIds) {
+    // Accumulate the contribution of all the cells.
+    for(const CellId cellId : cellIds) {
 
-		// Compute the normalization factor for this cell.
-		const Cell& cell = cells[cellId];
-		double factor;
-		switch(normalizationMethod) {
-		case NormalizationMethod::None:
-			factor = 1.;
-			break;
-		case NormalizationMethod::L1:
-			factor = cell.norm1Inverse;
-			break;
-		case NormalizationMethod::L2:
-			factor = cell.norm2Inverse;
-			break;
-		default:
-			CZI_ASSERT(0);
-		}
-
-
-		// Add all of the expression counts for this cell.
-		for(const auto& p: cellExpressionCounts[cellId]) {
-			const GeneId geneId = p.first;
-			float count = p.second;
-			const double normalizedCount = factor * double(count);
-			averageExpression[geneId] += normalizedCount;
-		}
-	}
+        // Compute the normalization factor for this cell.
+        const Cell& cell = cells[cellId];
+        double factor;
+        switch(normalizationMethod) {
+        case NormalizationMethod::None:
+            factor = 1.;
+            break;
+        case NormalizationMethod::L1:
+            factor = cell.norm1Inverse;
+            break;
+        case NormalizationMethod::L2:
+            factor = cell.norm2Inverse;
+            break;
+        default:
+            CZI_ASSERT(0);
+        }
 
 
-
-	// Divide by the number of cells.
-	const double factor = 1./double(cellIds.size());
-	for(double& a: averageExpression) {
-		a *= factor;
-	}
+        // Add all of the expression counts for this cell.
+        for(const auto& p : cellExpressionCounts[cellId]) {
+            const GeneId geneId = p.first;
+            float count = p.second;
+            const double normalizedCount = factor * double(count);
+            averageExpression[geneId] += normalizedCount;
+        }
+    }
 
 
 
-	// Normalize as requested.
-	switch(normalizationMethod) {
-	case NormalizationMethod::None:
-		break;
-	case NormalizationMethod::L1:
-	{
-		const double factor = 1. / std::accumulate(averageExpression.begin(), averageExpression.end(), 0.);
-		for(double& a: averageExpression) {
-			a *= factor;
-		}
-		break;
-	}
-	case NormalizationMethod::L2:
-	{
-		double sum = 0.;
-		for(const double& a: averageExpression) {
-			sum += a*a;;
-		}
-		const double factor = 1./sqrt(sum);
-		for(double& a: averageExpression) {
-			a *= factor;
-		}
-		break;
-	}
-	default:
-		CZI_ASSERT(0);
-	}
+    // Divide by the number of cells.
+    const double factor = 1. / double(cellIds.size());
+    for(double& a : averageExpression) {
+        a *= factor;
+    }
+
+
+
+    // Normalize as requested.
+    switch(normalizationMethod) {
+    case NormalizationMethod::None:
+        break;
+    case NormalizationMethod::L1:
+        {
+        const double factor = 1. / std::accumulate(averageExpression.begin(), averageExpression.end(), 0.);
+        for(double& a : averageExpression) {
+            a *= factor;
+        }
+        break;
+    }
+    case NormalizationMethod::L2:
+        {
+        double sum = 0.;
+        for(const double& a : averageExpression) {
+            sum += a * a;
+            ;
+        }
+        const double factor = 1. / sqrt(sum);
+        for(double& a : averageExpression) {
+            a *= factor;
+        }
+        break;
+    }
+    default:
+        CZI_ASSERT(0);
+    }
 
 }
 
@@ -887,9 +893,9 @@ bool ExpressionMatrix::createGeneSetUnion(const string& inputSetsNames, const st
     return createGeneSetIntersectionOrUnion(inputSetsNames, outputSetName, true);
 }
 bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
-	const string& commaSeparatedInputSetsNames,
-	const string& outputSetName,
-	bool doUnion)
+    const string& commaSeparatedInputSetsNames,
+    const string& outputSetName,
+    bool doUnion)
 {
     // See if a gene set with the name of the output gene set already exists.
     if(geneSets.find(outputSetName) != geneSets.end()) {
@@ -1144,13 +1150,13 @@ bool ExpressionMatrix::createCellSetDifference(
     const auto it0 = cellSets.cellSets.find(inputSetName0);
     if(it0 == cellSets.cellSets.end()) {
         cout << "Cell set " << inputSetName0 << " does not exists." << endl;
-    	return false;
+        return false;
     }
     const CellSet& inputSet0 = *(it0->second);
     const auto it1 = cellSets.cellSets.find(inputSetName1);
     if(it1 == cellSets.cellSets.end()) {
         cout << "Cell set " << inputSetName1 << " does not exists." << endl;
-    	return false;
+        return false;
     }
     const CellSet& inputSet1 = *(it1->second);
 
@@ -1338,7 +1344,7 @@ float ExpressionMatrix::computeGeneInformationContent(
 
 
 
-	// Compute the sum, using double precision.
+    // Compute the sum, using double precision.
     double sum = 0.;
     for(const float c : count) {
         sum += double(c);
@@ -1346,7 +1352,7 @@ float ExpressionMatrix::computeGeneInformationContent(
 
     // Compute the information content.
     double informationContent = log(double(cellSet.size())); // Equally distributed.
-    const double inverseSum = 1. / sum;	// No problem with division by zero - never used if sum is zero
+    const double inverseSum = 1. / sum; // No problem with division by zero - never used if sum is zero
     for(const float c : count) {
         if(c > 0.) {
             const double p = c * inverseSum;
