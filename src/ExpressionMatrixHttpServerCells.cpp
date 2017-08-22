@@ -85,12 +85,28 @@ void ExpressionMatrix::exploreCell(
     const bool cellIdIsPresent = getParameterValue(request, "cellId", cellIdString);
     const CellId cellId = cellIdFromString(cellIdString);
 
-    // Write the form to get the cell id.
+    // Get the name of the gene set for which we want to write expression counts.
+    string geneSetName = "AllGenes";
+    getParameterValue(request, "geneSetName", geneSetName);
+
+    // Locate the gene set.
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        html << "<p>Gene set " << geneSetName << " does not exist.";
+        return;
+    }
+    const auto& geneSet = it->second;
+
+    // Write the form to get the cell id and the gene set.
     html <<
         "<form>"
-        "Specify a cell using a case-sensitive name or a numeric cell id between 0 and " << cellCount()-1 <<
-        " included:<br><input type=text name=cellId autofocus>"
-        "</form>";
+        "<br><input type=text name=cellId autofocus>"
+        " Specify a cell using a case-sensitive name or a numeric cell id between 0 and " << cellCount()-1 <<
+        " included.<br>";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html <<
+        " Specify a gene set to display expression counts for this cell."
+        "<br><input type=submit value=Display></form>";
 
     // If there is no cell id, do nothing.
     if(!cellIdIsPresent) {
@@ -98,7 +114,7 @@ void ExpressionMatrix::exploreCell(
     }
 
     // Access the cell.
-    if(cellId==invalidCellId) {
+    if(cellId==invalidCellId || cellId>cellCount()) {
         html << "<p>Invalid cell id";
         return;
     }
@@ -116,7 +132,7 @@ void ExpressionMatrix::exploreCell(
         html << "<tr><td>" << cellMetaDataNames[p.first] << "<td>" << cellMetaDataValues[p.second];
     }
     html << "<tr><td>Cell id<td>" << cellId;
-    html << "<tr><td>Number of genes with non-zero expression counts<td>" <<
+    html << "<tr><td>Total number of genes with non-zero expression counts<td>" <<
         cellExpressionCounts.size(cellId);
     html << "<tr><td>Sum of expression counts<td>" << cell.sum1;
     html << "</table>";
@@ -141,27 +157,81 @@ void ExpressionMatrix::exploreCell(
 
 
     // Write a table of the expression counts for this cell.
-    html << "<h2>Gene expression counts for this cell</h2>";
+    html << "<h2>Expression counts for this cell for gene set " << geneSetName << "</h2>";
     html <<
         "<p><strong>The following table of expression counts for this cell is sortable.</strong> Click on a header to sort by that header. "
         "Click again to reverse the sorting order."
         "<p><table id=countTable class=tablesorter><thead><tr><th>Gene<br>name<th>Raw<br>count"
         "<th>L1-normalized<br>count<br>(sum is 1)"
         "<th>L2-normalized<br>count<br>(sum<br>of<br>squares is 1)</thead><tbody>";
-    for(const auto& p: expressionCounts) {
-        const GeneId geneId = p.first;
-        CZI_ASSERT(geneId < geneCount());
-        const string geneName = geneNames[geneId];
-        const float count = p.second;
-        html <<  "<tr><td class=centered><a href=gene?geneId=" << urlEncode(geneName) << ">" << geneName << "</a>";
-        html <<
-            "<td class=centered>" << count;
-        const auto oldPrecision = html.precision(3);
-        html <<
-            "<td class=centered>" << count * cell.norm1Inverse <<
-            "<td class=centered>" << count * cell.norm2Inverse;
-        html.precision(oldPrecision);
+
+
+
+    if(geneSetName == "AllGenes") {
+
+        // This is the old code that uses the global cell expression counts
+        // stored in class ExpressionMatrix.
+        for(const auto& p: expressionCounts) {
+            const GeneId geneId = p.first;
+            CZI_ASSERT(geneId < geneCount());
+            const string geneName = geneNames[geneId];
+            const float count = p.second;
+            html <<  "<tr><td class=centered><a href=gene?geneId=" << urlEncode(geneName) << ">" << geneName << "</a>";
+            html <<
+                "<td class=centered>" << count;
+            const auto oldPrecision = html.precision(3);
+            html <<
+                "<td class=centered>" << count * cell.norm1Inverse <<
+                "<td class=centered>" << count * cell.norm2Inverse;
+            html.precision(oldPrecision);
+        }
+    } else {
+
+
+
+        // This is the new code that uses computeExpressionVector to compute
+        // the cell expression vector for this gene set.
+
+        // Compute an unnormalized expression vector for this cell and gene set.
+        vector< pair<GeneId, float> > expressionVector0;
+        computeExpressionVector(cellId, geneSet, NormalizationMethod::None, expressionVector0);
+
+        // Sort in decreasing order.
+        sort(
+            expressionVector0.begin(),
+            expressionVector0.end(),
+            OrderPairsBySecondGreaterThenByFirstLess< pair<GeneId, float> >());
+
+        // Compute normalization factors.
+        double sum1 = 0.;
+        double sum2 = 0.;
+        for(const auto& p: expressionVector0) {
+            const double count = double(p.second);
+            sum1 += count;
+            sum2 += count*count;
+        }
+        const float factor1 = float(1./sum1);
+        const float factor2 = float(1./sqrt(sum2));
+
+        // Write it out.
+        for(const auto& p: expressionVector0) {
+            const GeneId localGeneId = p.first;
+            const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+            CZI_ASSERT(globalGeneId < geneCount());
+            const string geneName = geneNames[globalGeneId];
+            const float count = p.second;
+            html <<  "<tr><td class=centered><a href=gene?geneId=" << urlEncode(geneName) << ">" << geneName << "</a>";
+            html <<
+                "<td class=centered>" << count;
+            const auto oldPrecision = html.precision(3);
+            html <<
+                "<td class=centered>" << count * factor1 <<
+                "<td class=centered>" << count * factor2;
+            html.precision(oldPrecision);
+        }
     }
+
+
 
     // Finish the table and make it sortable.
     html <<

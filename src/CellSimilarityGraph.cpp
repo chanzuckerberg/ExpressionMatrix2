@@ -339,7 +339,8 @@ void CellSimilarityGraph::writeSvg(
     double viewBoxHalfSize,
     double vertexRadius,
     double edgeThickness,
-    const map<int, string>& groupColors
+    const map<int, string>& groupColors,
+    const string& geneSetName   // Used for the cell URL
     ) const
 {
 
@@ -456,7 +457,7 @@ void CellSimilarityGraph::writeSvg(
                 const double x = vertex.position[0];
                 const double y = vertex.position[1];
                 s <<
-                    "<a xlink:href='cell?cellId=" << vertex.cellId << "'>"
+                    "<a xlink:href='cell?cellId=" << vertex.cellId << "&geneSetName=" << geneSetName << "'>"
                     "<circle cx='" << x << "' cy='" << y << "' r='" << vertexRadius << "' stroke=none>"
                     "<title>Cell " << vertex.cellId << "</title></circle>"
                     "</a>"

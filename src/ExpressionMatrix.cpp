@@ -757,13 +757,13 @@ void ExpressionMatrix::computeExpressionVector(
         for(const auto& p: expressionVector) {
             sum += p.second;
         }
-        factor = 1./sum;
+        factor = float(1./sum);
         break;
     case NormalizationMethod::L2:
         for(const auto& p: expressionVector) {
             sum += p.second * p.second;
         }
-        factor = 1./sqrt(sum);
+        factor = float(1./sqrt(sum));
         break;
     default:
         CZI_ASSERT(0);

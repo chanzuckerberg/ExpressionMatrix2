@@ -149,7 +149,8 @@ public:
 	    double viewBoxHalfSize,
 	    double vertexRadius,
 	    double edgeThickness,
-	    const map<int, string>& groupColors
+	    const map<int, string>& groupColors,
+	    const string& geneSetName   // Used for the cell URL
 	    ) const;
 
 	class Writer {

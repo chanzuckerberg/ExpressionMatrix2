@@ -366,7 +366,10 @@ void ExpressionMatrix::exploreGraph(
         html << "<p>Graph " << graphName << " does not exists.";
         return;
     }
-    const GraphInformation& graphInfo = it->second.first;
+    const GraphInformation& graphInformation = it->second.first;
+    const string& similarPairsName = graphInformation.similarPairsName;
+    vector<string> geneSetNames = geneSetNamesFromSimilarPairsName(similarPairsName);
+    const string geneSetName = geneSetNames.empty() ? "" : geneSetNames.front();
     CellSimilarityGraph& graph = *(it->second.second);
 
     // Write the title.
@@ -387,17 +390,18 @@ void ExpressionMatrix::exploreGraph(
     // Div to contain the table and the form for coloring.
     html << "<div>";
 
-    // Write a table with the graph creation parameters.
+    // Write a table with the graph creation parameters and other information.
     html << "<div style='float:left;margin:10px'>";
     html << "<table>";
-    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << urlEncode(graphInfo.cellSetName);
-    html << "'>" << graphInfo.cellSetName << "</a>";
-    html << "<tr><td>Similar pairs name<td>" << graphInfo.similarPairsName;
-    html << "<tr><td>Similarity threshold<td class=centered>" << graphInfo.similarityThreshold;
-    html << "<tr><td>Maximum connectivity<td class=centered>" << graphInfo.maxConnectivity;
+    html << "<tr><td>Cell set name<td><a href='cellSet?cellSetName=" << urlEncode(graphInformation.cellSetName);
+    html << "'>" << graphInformation.cellSetName << "</a>";
+    html << "<tr><td>Similar pairs name<td>" << graphInformation.similarPairsName;
+    html << "<tr><td>Gene set name<td>" << geneSetName;
+    html << "<tr><td>Similarity threshold<td class=centered>" << graphInformation.similarityThreshold;
+    html << "<tr><td>Maximum connectivity<td class=centered>" << graphInformation.maxConnectivity;
     html << "<tr><td>Number of vertices (cells)<td class=centered>" << boost::num_vertices(graph);
     html << "<tr><td>Number of edges<td class=centered>" << boost::num_edges(graph);
-    html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>" << graphInfo.isolatedVertexCount;
+    html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>" << graphInformation.isolatedVertexCount;
     html << "</table>";
     html << "</div>";
 
@@ -1021,7 +1025,7 @@ Thinner edge
 
     // Write the graph as an svg object.
     html << "<div style='float:left;margin:10px''>";
-    graph.writeSvg(html, hideEdges=="on", svgSizePixels, xViewBoxCenter, yViewBoxCenter, viewBoxHalfSize, vertexRadius, edgeThickness, colorMap);
+    graph.writeSvg(html, hideEdges=="on", svgSizePixels, xViewBoxCenter, yViewBoxCenter, viewBoxHalfSize, vertexRadius, edgeThickness, colorMap, geneSetName);
     html << "</div>";
 
 
