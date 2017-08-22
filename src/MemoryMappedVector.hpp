@@ -108,6 +108,14 @@ public:
     // Make a copy of the Vector.
     void makeCopy(Vector<T>& copy, const string& newName) const;
 
+    // Comparison operator.
+    bool operator==(const Vector<T>& that) const
+    {
+        return
+            size() == that.size() &&
+            std::equal(begin(), end(), that.begin());
+    }
+
 private:
 
     // A mapped file is always allocated with size equal to a multiple of page size.

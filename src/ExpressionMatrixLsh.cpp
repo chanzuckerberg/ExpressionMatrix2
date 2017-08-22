@@ -526,6 +526,14 @@ void ExpressionMatrix::findSimilarPairs1(
 	// Sanity check.
 	CZI_ASSERT(similarityThreshold <= 1.);
 
+    // For now this uses the AllGenes gene set.
+    const string geneSetName = "AllGenes";
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+
 	// Locate the cell set.
 	const auto& it = cellSets.cellSets.find(cellSetName);
 	if(it == cellSets.cellSets.end()) {
@@ -552,7 +560,7 @@ void ExpressionMatrix::findSimilarPairs1(
 	// writeLshSignatureStatistics(lshCount, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellSet);
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, geneSet, cellSet);
 
     // Compute the angle threshold (in radians) corresponding to this similarity threshold.
     const double angleThreshold = std::acos(similarityThreshold);
@@ -625,7 +633,15 @@ void ExpressionMatrix::findSimilarPairs2(
 	// Sanity check.
 	CZI_ASSERT(similarityThreshold <= 1.);
 
-	// Locate the cell set.
+    // For now this uses the AllGenes gene set.
+    const string geneSetName = "AllGenes";
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+
+    // Locate the cell set.
 	const auto& it = cellSets.cellSets.find(cellSetName);
 	if(it == cellSets.cellSets.end()) {
 		throw runtime_error("Cell set " + cellSetName + " does not exist.");
@@ -664,7 +680,7 @@ void ExpressionMatrix::findSimilarPairs2(
 	computeCellLshSignatures(lshVectors, cellSet, signatures);
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, cellSet);
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, k, geneSet, cellSet);
 
     // Vector of vectors used to contain the cells assigned to each bucket.
     const uint64_t bucketCount = nextPowerOfTwoGreaterThanOrEqual(uint64_t(double(cellCount()) / loadFactor));

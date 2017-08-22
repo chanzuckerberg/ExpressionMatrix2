@@ -1,6 +1,8 @@
 #ifndef CZI_EXPRESSION_MATRIX2_SIMILAR_PAIRS_HPP
 #define CZI_EXPRESSION_MATRIX2_SIMILAR_PAIRS_HPP
 
+#include "CellSets.hpp"
+#include "GeneSet.hpp"
 #include "Ids.hpp"
 #include "MemoryAsContainer.hpp"
 #include "MemoryMappedObject.hpp"
@@ -23,10 +25,9 @@ namespace ChanZuckerberg {
 // (cellId1, cellId0) is not guaranteed to also be a stored pair.
 
 // IMPORTANT WARNING ABOUT CELL IDS:
-// Note that all cell ids used and stored by this class are not true cell ids
-// for the Expressionmatrix object. They are just indexes in the cell set
-// vector used by the SimilarPairs object. The true CellId is the
-// element of the cell set vector at that position.
+// Note that all cell ids used and stored by this class are not global cell ids
+// as seen by the ExpressionMatrix object. They are local cell ids to the cell set
+// vector used by the SimilarPairs object.
 
 // Only cell pairs where both cells are in the specified cell set are stored.
 
@@ -37,7 +38,8 @@ public:
     SimilarPairs(
         const string& name,
         size_t k,
-        const MemoryMapped::Vector<CellId>& cellSet);
+        const GeneSet& geneSet,
+        const CellSet& cellSet);
 
     // Access an existing SimilarPairs object.
     SimilarPairs(const string& name);
@@ -125,7 +127,12 @@ public:
 
     CellId cellCount() const
     {
-    	return CellId(cellSet.size());
+        return CellId(cellSet.size());
+    }
+
+    const GeneSet& getGeneSet() const
+    {
+        return geneSet;
     }
 
 private:
@@ -148,6 +155,7 @@ private:
 
     // Small size information about this table of similar pairs is stored
     // in a memory mapped object.
+
     class Info {
     public:
         // The maximum number of similar cells stored for each cell.
@@ -158,11 +166,12 @@ private:
     };
     MemoryMapped::Object<Info> info;
 
-    // The cell set used by this SimilarPairs object.
-    // This is a copy of the cell set passed to the constructor
+    // The gene set and cell set used by this SimilarPairs object.
+    // Tese are copies of the gene set and cell set passed to the constructor
     // when the SimilarPairs object was created.
-    // This copy is owned by the SimilarPairs object.
-    MemoryMapped::Vector<CellId> cellSet;
+    // These copies are owned by the SimilarPairs object.
+    GeneSet geneSet;
+    CellSet cellSet;
 
     // Add a pair (low level version).
     void add(CellId, Pair);

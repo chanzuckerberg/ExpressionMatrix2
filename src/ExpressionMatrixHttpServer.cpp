@@ -2,6 +2,7 @@
 #include "CellSimilarityGraph.hpp"
 #include "ClusterGraph.hpp"
 #include "randIndex.hpp"
+#include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -527,7 +528,9 @@ void ExpressionMatrix::cluster(
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
     }
-    // const GraphCreationParameters& graphCreationParameters = it->second.first;
+    const GraphInformation& graphInformation = it->second.first;
+    const string& similarPairsName = graphInformation.similarPairsName;
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
     CellSimilarityGraph& graph = *(it->second.second);
 
     // Write the title.
@@ -556,7 +559,11 @@ void ExpressionMatrix::cluster(
     BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
         ClusterGraphVertex& vertex = clusterGraph[v];
         const NormalizationMethod normalizationMethod = NormalizationMethod::L2;    // Use L2 normalization. We might need to make this configurable.
-        computeAverageExpression(vertex.cells, vertex.averageGeneExpression, normalizationMethod);
+        computeAverageExpression(
+            similarPairs.getGeneSet(),
+            vertex.cells,
+            vertex.averageGeneExpression,
+            normalizationMethod);
     }
 
     // Store in each edge the similarity of the two clusters, computed using the clusters

@@ -1,6 +1,7 @@
 #include "ExpressionMatrix.hpp"
 #include "CellSimilarityGraph.hpp"
 #include "orderPairs.hpp"
+#include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 #include "tokenize.hpp"
 using namespace ChanZuckerberg;
@@ -646,50 +647,38 @@ float ExpressionMatrix::getExpressionCount(CellId cellId, GeneId geneId) const
 
 
 
-// Compute the average expression vector for a given set of cells.
+// Compute the average expression vector for a given gene set
+// and for a given vector of cells (which is not the same type as a CellSet).
 // The last parameter controls the normalization used for the expression counts
 // for averaging:
 // 0: no normalization (raw read counts).
 // 1: L1 normalization (fractional read counts).
 // 2: L2 normalization.
 void ExpressionMatrix::computeAverageExpression(
+    const GeneSet& geneSet,
     const vector<CellId> cellIds,
     vector<double>& averageExpression,
     NormalizationMethod normalizationMethod) const
     {
+
+    // Vector to contain the normalized expression vector for a single cell.
+    vector< pair<GeneId, float> > cellExpressionVector;
+
     // Initialize the average expression to zero.
-    averageExpression.resize(geneCount());
+    averageExpression.resize(geneSet.size());
     fill(averageExpression.begin(), averageExpression.end(), 0.);
-
-
 
     // Accumulate the contribution of all the cells.
     for(const CellId cellId : cellIds) {
 
-        // Compute the normalization factor for this cell.
-        const Cell& cell = cells[cellId];
-        double factor;
-        switch(normalizationMethod) {
-        case NormalizationMethod::None:
-            factor = 1.;
-            break;
-        case NormalizationMethod::L1:
-            factor = cell.norm1Inverse;
-            break;
-        case NormalizationMethod::L2:
-            factor = cell.norm2Inverse;
-            break;
-        default:
-            CZI_ASSERT(0);
-        }
-
+        // Compute the normalized expression vector for this cell.
+        computeExpressionVector(cellId, geneSet, normalizationMethod, cellExpressionVector);
 
         // Add all of the expression counts for this cell.
-        for(const auto& p : cellExpressionCounts[cellId]) {
-            const GeneId geneId = p.first;
-            float count = p.second;
-            const double normalizedCount = factor * double(count);
-            averageExpression[geneId] += normalizedCount;
+        for(const auto& p : cellExpressionVector) {
+            const GeneId localGeneId = p.first;
+            const float normalizedCount = p.second;
+            averageExpression[localGeneId] += normalizedCount;
         }
     }
 
@@ -731,7 +720,57 @@ void ExpressionMatrix::computeAverageExpression(
     default:
         CZI_ASSERT(0);
     }
+}
 
+
+
+// Compute the expression vector for a cell and a given GeneSet,
+// normalizing it as requested.
+// The expression vector contains pairs(local gene id, count).
+// The local gene id is an index in the GeneSet.
+void ExpressionMatrix::computeExpressionVector(
+    CellId cellId,
+    const GeneSet& geneSet,
+    NormalizationMethod normalizationMethod,
+    vector< pair<GeneId, float> >& expressionVector // The computed expression vector.
+    ) const
+{
+    // Copy the expression vector for the cell into the vector passed as an argument.
+    expressionVector.clear();
+    for(const auto& p: cellExpressionCounts[cellId]) {
+        const GeneId globalGeneId = p.first;
+        const GeneId localGeneId = geneSet.getLocalGeneId(globalGeneId);
+        if(localGeneId != invalidGeneId) {
+            expressionVector.push_back(make_pair(localGeneId, p.second));
+        }
+    }
+
+
+
+    // Normalize it as requested.
+    float factor;
+    double sum = 0.;
+    switch(normalizationMethod) {
+    case NormalizationMethod::None:
+        return;
+    case NormalizationMethod::L1:
+        for(const auto& p: expressionVector) {
+            sum += p.second;
+        }
+        factor = 1./sum;
+        break;
+    case NormalizationMethod::L2:
+        for(const auto& p: expressionVector) {
+            sum += p.second * p.second;
+        }
+        factor = 1./sqrt(sum);
+        break;
+    default:
+        CZI_ASSERT(0);
+    }
+    for(auto& p: expressionVector) {
+        p.second *= factor;
+    }
 }
 
 
@@ -1002,6 +1041,32 @@ bool ExpressionMatrix::createGeneSetDifference(
         outputGeneSet.addGene(geneId);
     }
     return true;
+}
+
+
+
+// Returns the names of the gene sets in the geneSets map that are identical
+// to the gene set of a SimilarPairs object with the given name.
+// Note that there could be zero, one, or multiple gene sets
+// that satisfy this condition.
+vector<string> ExpressionMatrix::geneSetNamesFromSimilarPairsName(const string& similarPairsName) const
+{
+    // Open the existing SimilarPairs object.
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+
+    // Start with no gene sets.
+    vector<string> geneSetNames;
+
+    // Loop over our map of gene sets.
+    for(auto it=geneSets.begin(); it!=geneSets.end(); ++it) {
+        if(it->second == similarPairs.getGeneSet()) {
+            geneSetNames.push_back(it->first);
+        }
+
+    }
+
+    // Return the names we found.
+    return geneSetNames;
 }
 
 

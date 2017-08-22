@@ -271,6 +271,7 @@ public:
     // 1: L1 normalization (fractional read counts).
     // 2: L2 normalization.
     void computeAverageExpression(
+        const GeneSet& geneSet,
         const vector<CellId> cells,
         vector<double>& averageExpression,
         NormalizationMethod normalizationMethod) const;
@@ -429,6 +430,17 @@ private:
     // This does a binary search in the cellExpressionCounts for the given cell.
     float getExpressionCount(CellId, GeneId) const;
 
+    // Compute the expression vector for a cell and a given GeneSet,
+    // normalizing it as requested.
+    // The expression vector contains pairs(local gene id, count).
+    // The local gene id is an index in the GeneSet.
+    void computeExpressionVector(
+        CellId,
+        const GeneSet&,
+        NormalizationMethod,
+        vector< pair<GeneId, float> >& expressionVector // The computed expression vector.
+        ) const;
+
 
 
     // Functions used to implement HttpServer functionality.
@@ -518,9 +530,18 @@ private:
     // Functionality to define and maintain cell sets.
     CellSets cellSets;
 
+
+
     // Gene sets, keyed by gene set name.
     // This always contains gene set AllGenes.
     map<string, GeneSet> geneSets;
+
+    // Returns the names of the gene sets in the geneSets map that are identical
+    // to the gene set of a SimilarPairs object with the given name.
+    // Note that there could be zero, one, or multiple gene sets
+    // that satisfy this condition.
+    vector<string> geneSetNamesFromSimilarPairsName(const string& similarPairsName) const;
+
 
     // Compute gene information content in bits for a given gene set and cell set,
     // using the specified normalization method.

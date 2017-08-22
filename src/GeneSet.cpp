@@ -23,6 +23,16 @@ void GeneSet::accessExisting(const string& name)
 
 
 
+// Make a copy of this gene set.
+void GeneSet::makeCopy(GeneSet& copy, const string& newName) const
+{
+    globalGeneIdVector.makeCopy(copy.globalGeneIdVector, newName + "-GlobalIds");
+    localGeneIdVector.makeCopy(copy.localGeneIdVector, newName + "-LocalIds");
+    copy.sort();
+}
+
+
+
 // Add a gene to the set.
 // We lazily add it to the end of the globalGeneId gene vector,
 // postponing the sorting of the vector.
@@ -84,3 +94,14 @@ void GeneSet::getSortedGenes(vector<GeneId>& sortedGenes)
     sortedGenes.resize(globalGeneIdVector.size());
     copy(globalGeneIdVector.begin(), globalGeneIdVector.end(), sortedGenes.begin());
 }
+
+
+// The comparison operator requires the two gene sets being compared
+// to be sorted. It will assert if this is not the case.
+bool GeneSet::operator==(const GeneSet& that) const
+{
+    CZI_ASSERT(isSorted);
+    CZI_ASSERT(that.isSorted);
+    return globalGeneIdVector == that.globalGeneIdVector;
+}
+

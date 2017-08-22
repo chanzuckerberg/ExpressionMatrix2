@@ -40,7 +40,7 @@ void ExpressionMatrix::findSimilarPairs0(
     }
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, cellSet);
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
 
     // Create the expression matrix subset for this gene set and cell set.
     const string expressionMatrixSubsetName = directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;

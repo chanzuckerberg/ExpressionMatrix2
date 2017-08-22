@@ -10,9 +10,10 @@ using namespace ExpressionMatrix2;
 SimilarPairs::SimilarPairs(
     const string& name,
     size_t k,
-	const MemoryMapped::Vector<CellId>& cellSetArgument)
+    const GeneSet& geneSetArgument,
+    const CellSet& cellSetArgument)
 {
-	const CellId cellCount = CellId(cellSetArgument.size());
+    const CellId cellCount = CellId(cellSetArgument.size());
 
     info.createNew(name + "-Info");
     info->k = k;
@@ -29,7 +30,8 @@ SimilarPairs::SimilarPairs(
     fill(lowestStoredSimilarityInfo.begin(), lowestStoredSimilarityInfo.end(),
         make_pair(std::numeric_limits<uint32_t>::max(), std::numeric_limits<CellSimilarity>::max()));
 
-    // Create a copy of the cell set, owned by the SimilarPairs object.
+    // Make copies of the gene set and cell set. The copies are owned by the SimilarPairs object.
+    geneSetArgument.makeCopy(geneSet, name + "-GeneSet");
     cellSetArgument.makeCopy(cellSet, name + "-CellSet");
 
 }
@@ -43,6 +45,7 @@ SimilarPairs::SimilarPairs(const string& name)
     similarPairs.accessExistingReadOnly(name + "-Pairs");
     usedCount.accessExistingReadOnly(name + "-UsedCounts");
     lowestStoredSimilarityInfo.accessExistingReadOnly(name + "-LowestStoredSimilarityInfo");
+    geneSet.accessExisting(name + "-GeneSet");
     cellSet.accessExistingReadOnly(name + "-CellSet");
 }
 

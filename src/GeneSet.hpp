@@ -19,8 +19,14 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::GeneSet {
 public:
 
+    // Create a new GeneSet.
     void createNew(const string& name);
+
+    // Access a previously created GeneSet.
     void accessExisting(const string& name);
+
+    // Make a copy of this gene set.
+    void makeCopy(GeneSet& copy, const string& newName) const;
 
     // Add a gene to the set.
     // The caller is responsible to make sure that a
@@ -76,6 +82,10 @@ public:
     }
 
     void getSortedGenes(vector<GeneId>&);
+
+    // The comparison operator requires the two gene sets being compared
+    // to be sorted. It will assert if this is not the case.
+    bool operator==(const GeneSet&) const;
 
 private:
 
