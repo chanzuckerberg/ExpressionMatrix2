@@ -531,6 +531,7 @@ void ExpressionMatrix::cluster(
     const GraphInformation& graphInformation = it->second.first;
     const string& similarPairsName = graphInformation.similarPairsName;
     const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const GeneSet& geneSet = similarPairs.getGeneSet();
     CellSimilarityGraph& graph = *(it->second.second);
 
     // Write the title.
@@ -560,7 +561,7 @@ void ExpressionMatrix::cluster(
         ClusterGraphVertex& vertex = clusterGraph[v];
         const NormalizationMethod normalizationMethod = NormalizationMethod::L2;    // Use L2 normalization. We might need to make this configurable.
         computeAverageExpression(
-            similarPairs.getGeneSet(),
+            geneSet,
             vertex.cells,
             vertex.averageGeneExpression,
             normalizationMethod);
@@ -616,13 +617,71 @@ void ExpressionMatrix::cluster(
 
     // Copy the output svg file to html.
     html <<
+        "<h2 id=clusterGraph>Cluster graph</h2>"
         "<p>The cluster graph is shown below. Each vertex represents a cluster. "
-        "The most expressed genes for each cluster are listed.<br>";
+        "The most expressed genes in each cluster are listed. "
+        "See the table below for details of average gene expression for each cluster.<br>";
 
     html << ifstream("ClusterGraph.dot.svg").rdbuf();
 
-    // Add a button to continue.
-    html << "<p><form action=graphs><input type=submit autofocus value=Continue></form>";
+
+
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
+
+
+
+    // Write a table of average expression for each cluster.
+    vector< pair<size_t, ClusterGraph::vertex_descriptor> > sortedVertices;
+    BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
+        const ClusterGraphVertex& vertex = clusterGraph[v];
+        sortedVertices.push_back(make_pair(vertex.cells.size(), v));
+    }
+    sort(sortedVertices.begin(), sortedVertices.end(),
+        std::greater< pair<size_t, ClusterGraph::vertex_descriptor> >());
+    html <<
+        "<h2>Average expression in each cluster</h2>"
+        "<p>The table contains L2-normalized average expression for each cluster."
+        "<p><strong>The table is sortable.</strong> Click on a header to sort by that header. "
+        "Click again to reverse the sorting order."
+        "<script>"
+        "function selectTable() {"
+        "    element = document.getElementById(\"averageExpressionTable\");"
+        "    selection = window.getSelection();"
+        "    range = document.createRange();"
+        "    range.selectNodeContents(element);"
+        "    selection.removeAllRanges();"
+        "    selection.addRange(range);"
+        "}"
+        "</script>"
+        "<p><button onclick='selectTable();'>"
+        "Click here to select the entire table.</button>"
+        "<p><table id=averageExpressionTable class=tablesorter><thead><tr><th>Gene";
+    for(const auto& p: sortedVertices) {
+        const ClusterGraph::vertex_descriptor v = p.second;
+        const ClusterGraphVertex& vertex = clusterGraph[v];
+        html << "<th class=centered>Cluster<br>" << vertex.clusterId << "<br>(" << vertex.cells.size() << " cells)";
+    }
+    html << "</thead><tbody>";
+    for(GeneId localGeneId=0; localGeneId<geneSet.size(); localGeneId++) {
+        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+        html << "<tr><td class=left>" << geneNames[globalGeneId];
+        for(const auto& p: sortedVertices) {
+            const ClusterGraph::vertex_descriptor v = p.second;
+            const ClusterGraphVertex& vertex = clusterGraph[v];
+            html << "<td class=centered>" << vertex.averageGeneExpression[localGeneId];
+        }
+    }
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#averageExpressionTable').tablesorter();"
+        "window.location='#clusterGraph'});"
+        "</script>"
+        ;
+
+
 }
 
 
