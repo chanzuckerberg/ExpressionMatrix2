@@ -579,7 +579,7 @@ void ExpressionMatrix::cluster(
     clusterGraph.makeKnn(maxConnectivity);
 
     // Write out the cluster graph in graphviz format.
-    clusterGraph.write("ClusterGraph.dot", geneNames);
+    clusterGraph.write("ClusterGraph.dot", similarPairs.getGeneSet(), geneNames);
 
 
 

@@ -6,6 +6,7 @@
 #include "CellSimilarityGraph.hpp"
 #include "CZI_ASSERT.hpp"
 #include "deduplicate.hpp"
+#include "GeneSet.hpp"
 #include "MemoryMappedStringTable.hpp"
 #include "orderPairs.hpp"
 #include "regressionCoefficient.hpp"
@@ -190,23 +191,26 @@ void ClusterGraph::makeKnn(size_t k)
 
 
 // Write the graph in Graphviz format.
-void ClusterGraph::write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(const string& fileName, const GeneSet& geneSet, const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
     ofstream outputFileStream(fileName);
     if(!outputFileStream) {
         throw runtime_error("Error opening " + fileName);
     }
-    write(outputFileStream, geneNames);
+    write(outputFileStream, geneSet, geneNames);
 }
-void ClusterGraph::write(ostream& s, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(ostream& s, const GeneSet& geneSet, const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
-    Writer writer(*this, geneNames);
+    Writer writer(*this, geneSet, geneNames);
     boost::write_graphviz(s, *this, writer, writer, writer,
         boost::get(&ClusterGraphVertex::clusterId, *this));
 }
 
-ClusterGraph::Writer::Writer(const ClusterGraph& graph, const MemoryMapped::StringTable<GeneId>& geneNames) :
-    graph(graph), geneNames(geneNames)
+ClusterGraph::Writer::Writer(
+    const ClusterGraph& graph,
+    const GeneSet& geneSet,
+    const MemoryMapped::StringTable<GeneId>& geneNames) :
+    graph(graph), geneSet(geneSet), geneNames(geneNames)
 {
 }
 
@@ -249,7 +253,9 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
         if(p.second < 0.2) {
             break;
         }
-        s << "<tr><td align='left'>" << geneNames[p.first] << "</td><td align='right'> " << p.second << "</td></tr>";
+        const GeneId localGeneId = p.first;
+        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+        s << "<tr><td align='left'>" << geneNames[globalGeneId] << "</td><td align='right'> " << p.second << "</td></tr>";
     }
     s << "</table>";
     s << ">";
@@ -265,7 +271,9 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
         if(p.second < 0.2) {
             break;
         }
-        s << geneNames[p.first] << " " << p.second << "\\n";
+        const GeneId localGeneId = p.first;
+        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+        s << geneNames[globalGeneId] << " " << p.second << "\\n";
     }
     s << "\"";
     s.precision(oldPrecision);

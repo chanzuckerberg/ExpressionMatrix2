@@ -28,6 +28,7 @@ namespace ChanZuckerberg {
 			>;
 
         class CellSimilarityGraph;
+        class GeneSet;
 
         namespace MemoryMapped {
         	template<class StringId> class StringTable;
@@ -84,18 +85,19 @@ public:
 	void makeKnn(size_t k);
 
 	// Write in Graphviz format.
-    void write(ostream&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
-    void write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    void write(ostream&, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    void write(const string& fileName, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
 
 private:
 
     class Writer {
     public:
-        Writer(const ClusterGraph&, const MemoryMapped::StringTable<GeneId>& geneNames);
+        Writer(const ClusterGraph&, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames);
         void operator()(ostream&) const;
         void operator()(ostream&, vertex_descriptor) const;
         void operator()(ostream&, edge_descriptor) const;
         const ClusterGraph& graph;
+        const GeneSet& geneSet;
         const MemoryMapped::StringTable<GeneId>& geneNames;
     private:
         // Compute font size for a vertex  given number of cells.
