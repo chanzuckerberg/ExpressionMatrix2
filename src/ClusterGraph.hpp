@@ -50,7 +50,8 @@ public:
 	vector<CellId> cells;
 
 	// The average gene expression for these cells.
-	// This is a vector of size geneCount();
+	// This is a vector of size equal to the number of genes
+	// in the gene set used to create the cell similarity graph.
 	vector<double> averageGeneExpression;
 };
 
