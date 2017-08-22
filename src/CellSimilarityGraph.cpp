@@ -590,9 +590,9 @@ void CellSimilarityGraph::labelPropagationClustering(
 
 
     if(stableIterationCount == stableIterationCountThreshold) {
-        out << "Terminating because the specified number stable iterations was achieved." << endl;
+        out << "<br>Terminating because the specified number stable iterations was achieved." << endl;
     } else {
-        out << "Terminating because the maximum number of iterations was reached." << endl;
+        out << "<br>Terminating because the maximum number of iterations was reached." << endl;
     }
 
 
