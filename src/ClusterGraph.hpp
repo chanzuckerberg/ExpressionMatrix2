@@ -12,7 +12,7 @@
 
 
 namespace ChanZuckerberg {
-	namespace ExpressionMatrix2 {
+    namespace ExpressionMatrix2 {
 
         class ClusterGraph;
         class ClusterGraphVertex;
@@ -20,20 +20,20 @@ namespace ChanZuckerberg {
 
         // The base class for class ClusterGraph.
         using ClusterGraphBaseClass = boost::adjacency_list<
-            boost::setS,	// No parallel edges
+            boost::setS,    // No parallel edges
             boost::listS,
             boost::undirectedS,
-			ClusterGraphVertex,
-			ClusterGraphEdge
-			>;
+            ClusterGraphVertex,
+            ClusterGraphEdge
+            >;
 
         class CellSimilarityGraph;
         class GeneSet;
 
         namespace MemoryMapped {
-        	template<class StringId> class StringTable;
+            template<class StringId> class StringTable;
         }
-	}
+    }
 }
 
 

@@ -54,16 +54,16 @@ CellSimilarityGraph::CellSimilarityGraph(
     vector< pair<vertex_descriptor, float > > pairs;
     for(const CellId cellId0: cellSet) {
 
-    	// Find the local cell id (in the cell set of the SimilarPairs object)
-    	// corresponding to this global cell id.
-    	// If the cell set of the SimilarPairs object does not contain this cell,
-    	// this is an invalid cell id and in that case we skip this cell.
-    	const CellId localCellId0 = similarPairs.getLocalCellId(cellId0);
-    	if(localCellId0 == invalidCellId) {
-    		continue;
-    	}
+        // Find the local cell id (in the cell set of the SimilarPairs object)
+        // corresponding to this global cell id.
+        // If the cell set of the SimilarPairs object does not contain this cell,
+        // this is an invalid cell id and in that case we skip this cell.
+        const CellId localCellId0 = similarPairs.getLocalCellId(cellId0);
+        if(localCellId0 == invalidCellId) {
+            continue;
+        }
 
-    	// Locate the corresponding vertex.
+        // Locate the corresponding vertex.
         const vertex_descriptor v0 = vertexTable[cellId0];
 
         // Find the best up to k pairs such that the other vertex
@@ -111,18 +111,18 @@ CellSimilarityGraph::CellSimilarityGraph(
 
 // Write the graph in Graphviz format.
 void CellSimilarityGraph::write(const string& fileName) const
-{
-	ofstream outputFileStream(fileName);
-	if(!outputFileStream) {
-		throw runtime_error("Error opening " + fileName);
-	}
-	write(outputFileStream);
+    {
+    ofstream outputFileStream(fileName);
+    if(!outputFileStream) {
+        throw runtime_error("Error opening " + fileName);
+    }
+    write(outputFileStream);
 }
 void CellSimilarityGraph::write(ostream& s) const
-{
-	Writer writer(*this);
-	boost::write_graphviz(s, graph(), writer, writer, writer,
-	    boost::get(&CellSimilarityGraphVertex::cellId, graph()));
+    {
+    Writer writer(*this);
+    boost::write_graphviz(s, graph(), writer, writer, writer,
+        boost::get(&CellSimilarityGraphVertex::cellId, graph()));
 }
 
 CellSimilarityGraph::Writer::Writer(const Graph& graph) :
@@ -143,16 +143,16 @@ void CellSimilarityGraph::Writer::operator()(std::ostream& s) const
 void CellSimilarityGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) const
 {
     // Get the vertex.
-	const CellSimilarityGraphVertex& vertex = graph[v];
+    const CellSimilarityGraphVertex& vertex = graph[v];
 
-	// Begin vertex attributes.
-	s << "[";
+    // Begin vertex attributes.
+    s << "[";
 
-	// Add a tooltip that shows the cell id.
-	s << "tooltip=" << vertex.cellId;
+    // Add a tooltip that shows the cell id.
+    s << "tooltip=" << vertex.cellId;
 
-	// End vertex attributes.
-	s << "]";
+    // End vertex attributes.
+    s << "]";
 }
 
 
@@ -182,40 +182,40 @@ void CellSimilarityGraph::Writer::operator()(std::ostream& s, edge_descriptor e)
 // of the two vertices.
 void CellSimilarityGraph::keepBestEdgesOnly(std::size_t n)
 {
-	// Loop over all vertices.
-	set<edge_descriptor> edgesToBeKept;
-	BGL_FORALL_VERTICES(v, graph(), Graph) {
+    // Loop over all vertices.
+    set<edge_descriptor> edgesToBeKept;
+    BGL_FORALL_VERTICES(v, graph(), Graph) {
 
-		// Find the edges of this vertex, each with their similarity.
-		vector<pair<double, edge_descriptor>> vEdges;
-		BGL_FORALL_OUTEDGES(v, e, graph(), Graph) {
-			vEdges.push_back(make_pair(graph()[e].similarity, e));
-		}
+        // Find the edges of this vertex, each with their similarity.
+        vector<pair<double, edge_descriptor>> vEdges;
+        BGL_FORALL_OUTEDGES(v, e, graph(), Graph) {
+            vEdges.push_back(make_pair(graph()[e].similarity, e));
+        }
 
-		// Only keep the best n.
-		if(vEdges.size()>n) {
-			sort(vEdges.begin(), vEdges.end(), std::greater<pair<double, edge_descriptor>>());
-			vEdges.resize(n);
-		}
+        // Only keep the best n.
+        if(vEdges.size()>n) {
+            sort(vEdges.begin(), vEdges.end(), std::greater<pair<double, edge_descriptor>>());
+            vEdges.resize(n);
+        }
 
-		// Add the edges to be kept to the set.
-		for(const auto& p: vEdges) {
-			edgesToBeKept.insert(p.second);
-		}
-	}
+        // Add the edges to be kept to the set.
+        for(const auto& p: vEdges) {
+            edgesToBeKept.insert(p.second);
+        }
+    }
 
-	// Find the edges to be removed.
-	vector<edge_descriptor> edgesToBeRemoved;
-	BGL_FORALL_EDGES(e, graph(), Graph) {
-		if(edgesToBeKept.find(e) == edgesToBeKept.end()) {
-			edgesToBeRemoved.push_back(e);
-		}
-	}
+    // Find the edges to be removed.
+    vector<edge_descriptor> edgesToBeRemoved;
+    BGL_FORALL_EDGES(e, graph(), Graph) {
+        if(edgesToBeKept.find(e) == edgesToBeKept.end()) {
+            edgesToBeRemoved.push_back(e);
+        }
+    }
 
-	// Remove them.
-	for(const edge_descriptor e: edgesToBeRemoved) {
-		boost::remove_edge(e, graph());
-	}
+    // Remove them.
+    for(const edge_descriptor e: edgesToBeRemoved) {
+        boost::remove_edge(e, graph());
+    }
 }
 #endif
 
@@ -332,7 +332,7 @@ void CellSimilarityGraph::computeCoordinateRange(
 // with its own color.
 void CellSimilarityGraph::writeSvg(
     ostream& s,
-	bool hideEdges,
+    bool hideEdges,
     double svgSizePixels,
     double xViewBoxCenter,
     double yViewBoxCenter,
@@ -360,32 +360,32 @@ void CellSimilarityGraph::writeSvg(
     // Draw the edges first.
     // This makes it easier to see the vertices and their tooltips.
     if(!hideEdges) {
-		s << "<g id=edges>";
-		BGL_FORALL_EDGES(e, graph(), Graph) {
-			const vertex_descriptor v1 = source(e, graph());
-			const vertex_descriptor v2 = target(e, graph());
+        s << "<g id=edges>";
+        BGL_FORALL_EDGES(e, graph(), Graph){
+            const vertex_descriptor v1 = source(e, graph());
+            const vertex_descriptor v2 = target(e, graph());
 
-			const CellSimilarityGraphVertex& vertex1 = graph()[v1];
-			const CellSimilarityGraphVertex& vertex2 = graph()[v2];
+            const CellSimilarityGraphVertex& vertex1 = graph()[v1];
+            const CellSimilarityGraphVertex& vertex2 = graph()[v2];
 
-			const double x1 = vertex1.position[0];
-			const double y1 = vertex1.position[1];
-			const double x2 = vertex2.position[0];
-			const double y2 = vertex2.position[1];
+            const double x1 = vertex1.position[0];
+            const double y1 = vertex1.position[1];
+            const double x2 = vertex2.position[0];
+            const double y2 = vertex2.position[1];
 
-			s << "<line x1='" << x1 << "' y1='" << y1 << "'";
-			s << " x2='" << x2 << "' y2='" << y2 << "'";
+            s << "<line x1='" << x1 << "' y1='" << y1 << "'";
+            s << " x2='" << x2 << "' y2='" << y2 << "'";
 
-			s << " style='stroke:";
-			const string& color = graph()[e].color;
-			if(color.empty()) {
-				s << "black";
-			} else {
-				s << color;
-			}
-			s << ";stroke-width:" << edgeThickness << "' />";
-		}
-		s << "</g>";
+            s << " style='stroke:";
+            const string& color = graph()[e].color;
+            if(color.empty()) {
+                s << "black";
+            } else {
+                s << color;
+            }
+            s << ";stroke-width:" << edgeThickness << "' />";
+        }
+        s << "</g>";
     }
 
 
@@ -497,11 +497,11 @@ void CellSimilarityGraph::labelPropagationClustering(
 
     // Vector with all the vertices in the graph, in the same order as in the vertex table.
     vector<vertex_descriptor> allVertices;
-    for(const auto& p: vertexTable) {
-    	const vertex_descriptor v = p.second;
-    	if(v != null_vertex()) {
-    		allVertices.push_back(p.second);
-    	}
+    for(const auto& p : vertexTable) {
+        const vertex_descriptor v = p.second;
+        if(v != null_vertex()) {
+            allVertices.push_back(p.second);
+        }
     }
 
 

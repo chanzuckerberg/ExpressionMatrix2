@@ -69,7 +69,7 @@ public:
     size_t maxConnectivity;
     size_t vertexCount;
     size_t edgeCount;
-    size_t isolatedVertexCount;		// The number of isolated vertices that were removed.
+    size_t isolatedVertexCount;     // The number of isolated vertices that were removed.
     GraphInformation() {}
 };
 
@@ -78,8 +78,8 @@ public:
 // Class used to specify parameters when starting the http server.
 class ChanZuckerberg::ExpressionMatrix2::ServerParameters {
 public:
-	uint16_t port = 17100;	// The port number to listen to.
-	string docDirectory;	// The directory containing the documentation (optional).
+    uint16_t port = 17100;  // The port number to listen to.
+    string docDirectory;    // The directory containing the documentation (optional).
 };
 
 
@@ -170,37 +170,37 @@ public:
 
 
 
-	/*******************************************************************************
+    /*******************************************************************************
 
-	Add cells from an hdf5 file in the format typically created by the 10X Genomics
-	pipeline.
+     Add cells from an hdf5 file in the format typically created by the 10X Genomics
+     pipeline.
 
-	See here for an example of a typical hdf5 file that we want to process:
-	http://cf.10xgenomics.com/samples/cell-exp/1.3.0/t_3k_4k_aggregate/t_3k_4k_aggregate_filtered_gene_bc_matrices_h5.h5
+     See here for an example of a typical hdf5 file that we want to process:
+     http://cf.10xgenomics.com/samples/cell-exp/1.3.0/t_3k_4k_aggregate/t_3k_4k_aggregate_filtered_gene_bc_matrices_h5.h5
 
-	You can use command hdf5ls (from package hdf5-tools) to list the contents of the file:
+     You can use command hdf5ls (from package hdf5-tools) to list the contents of the file:
 
-	h5ls -r t_3k_4k_aggregate_filtered_gene_bc_matrices_h5.h5
-	/                        Group
-	/GRCh38                  Group
-	/GRCh38/barcodes         Dataset {8083}
-	/GRCh38/data             Dataset {8863417/Inf}
-	/GRCh38/gene_names       Dataset {33694}
-	/GRCh38/genes            Dataset {33694}
-	/GRCh38/indices          Dataset {8863417/Inf}
-	/GRCh38/indptr           Dataset {8084/8192}
-	/GRCh38/shape            Dataset {2/16384}
+     h5ls -r t_3k_4k_aggregate_filtered_gene_bc_matrices_h5.h5
+     /                        Group
+     /GRCh38                  Group
+     /GRCh38/barcodes         Dataset {8083}
+     /GRCh38/data             Dataset {8863417/Inf}
+     /GRCh38/gene_names       Dataset {33694}
+     /GRCh38/genes            Dataset {33694}
+     /GRCh38/indices          Dataset {8863417/Inf}
+     /GRCh38/indptr           Dataset {8084/8192}
+     /GRCh38/shape            Dataset {2/16384}
 
-	Data sets data, indices, and indptr contain the expression matrix in sparse format, by cell.
+     Data sets data, indices, and indptr contain the expression matrix in sparse format, by cell.
 
-	The gene names are in data set gene_names. Data set genes is not used. It contains alternative
-	gene ids.
+     The gene names are in data set gene_names. Data set genes is not used. It contains alternative
+     gene ids.
 
-	Cell names (or rather the corresponding barcodes) are in data set barcodes.
+     Cell names (or rather the corresponding barcodes) are in data set barcodes.
 
-	Data set shape is also not used.
+     Data set shape is also not used.
 
-	*******************************************************************************/
+     *******************************************************************************/
     void addCellsFromHdf5(const string& fileName);
 
 
