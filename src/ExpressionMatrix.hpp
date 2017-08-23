@@ -340,7 +340,16 @@ public:
     // The standard deviation decreases as the similarity increases. It becomes
     // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
     // of the standard deviation at similarity 0.
+    void findSimilarPairs1Old(
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& name,             // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
     void findSimilarPairs1(
+        const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
         const string& name,             // The name of the SimilarPairs object to be created.
         size_t k,                       // The maximum number of similar pairs to be stored for each cell.
