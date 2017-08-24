@@ -23,7 +23,7 @@
 
 #include "ExpressionMatrix.hpp"
 #include "BitSet.hpp"
-#include "lapack.hpp"
+#include "ExpressionMatrixSubset.hpp"
 #include "nextPowerOfTwo.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -46,11 +46,12 @@ using namespace ExpressionMatrix2;
 // Marsaglia, G. "Choosing a Point from the Surface of a Sphere." Ann. Math. Stat. 43, 645-646, 1972.
 // See http://mathworld.wolfram.com/HyperspherePointPicking.html
 void ExpressionMatrix::generateLshVectors(
+    GeneId geneCount,
     size_t lshBandCount,
     size_t lshRowCount,
     unsigned int seed,
     vector<vector<vector<double> > >& lshVectors    // Indexed by [band][row][geneId]
-    ) const
+    )
 {
     // Prepare to generate normally vector distributed components.
     using RandomSource = boost::mt19937;
@@ -60,14 +61,14 @@ void ExpressionMatrix::generateLshVectors(
     boost::variate_generator<RandomSource, NormalDistribution> normalGenerator(randomSource, normalDistribution);
 
     // Allocate space for the LSH vectors.
-    lshVectors.resize(lshBandCount, vector<vector<double> >(lshRowCount, vector<double>(geneCount())));
+    lshVectors.resize(lshBandCount, vector<vector<double> >(lshRowCount, vector<double>(geneCount)));
 
 
 
     // Triple loop over bands, rows, components (genes).
     for(size_t band = 0; band < lshBandCount; band++) {
         for(size_t row = 0; row < lshRowCount; row++) {
-            for(GeneId geneId = 0; geneId < geneCount(); geneId++) {
+            for(GeneId geneId = 0; geneId < geneCount; geneId++) {
                 lshVectors[band][row][geneId] = normalGenerator();
             }
 
@@ -89,7 +90,8 @@ void ExpressionMatrix::generateLshVectors(
 // Approximate computation of the similarity between two cells using
 // Locality Sensitive Hashing (LSH).
 // Not to be used for code where performance is important,
-// because it recompiutes the LSH vector every time.
+// because it recomputes the LSH vector every time.
+// Note that this uses all genes.
 double ExpressionMatrix::computeApproximateLshCellSimilarity(
     size_t lshBandCount,
     size_t lshRowCount,
@@ -100,7 +102,7 @@ double ExpressionMatrix::computeApproximateLshCellSimilarity(
 
     // Generate LSH vectors.
     vector<vector<vector<double> > > lshVectors;
-    generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+    generateLshVectors(geneCount(), lshBandCount, lshRowCount, seed, lshVectors);
 
     // Compute scalar products of each LSH vector with the expression counts of each cell.
     vector<double> scalarProducts0, scalarProducts1;
@@ -218,6 +220,7 @@ double ExpressionMatrix::computeExpressionCountScalarProduct(CellId cellId, cons
 
 // Write a csv file containing, for every pair of cells,
 // the exact similarity and the similarity computed using LSH.
+// This uses all genes.
 void ExpressionMatrix::writeLshSimilarityComparisonSlow(
     size_t lshBandCount,
     size_t lshRowCount,
@@ -226,7 +229,7 @@ void ExpressionMatrix::writeLshSimilarityComparisonSlow(
 {
     // Generate LSH vectors.
     vector<vector<vector<double> > > lshVectors;
-    generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+    generateLshVectors(geneCount(), lshBandCount, lshRowCount, seed, lshVectors);
 
     // Open the csv file
     ofstream csvOut("LshSimilarityComparison.csv");
@@ -252,6 +255,10 @@ void ExpressionMatrix::writeLshSimilarityComparisonSlow(
         }
     }
 }
+
+
+
+// This uses all genes.
 void ExpressionMatrix::writeLshSimilarityComparison(
     size_t lshBandCount,
     size_t lshRowCount,
@@ -261,7 +268,7 @@ void ExpressionMatrix::writeLshSimilarityComparison(
     // Generate LSH vectors.
     vector<vector<vector<double> > > lshVectors;
     cout << timestamp << "Generating the LSH vectors." << endl;
-    generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+    generateLshVectors(geneCount(), lshBandCount, lshRowCount, seed, lshVectors);
 
     // Orthogonalize the LSH vectors.
     // This did not seem to give any benefit, so I turned it off to eliminate the
@@ -323,6 +330,14 @@ void ExpressionMatrix::computeCellLshSignatures(
     const size_t lshRowCount = lshVectors.front().size();
     const size_t bitCount = lshBandCount * lshRowCount;
 
+    // Check that all lsh vectors have the same length.
+    // This is the number of genes we are using to compute cell signtures.
+    const GeneId geneCount = GeneId(lshVectors.front().front().size());
+    for(const auto& v: lshVectors) {
+        CZI_ASSERT(v.size() == geneCount);
+    }
+    CZI_ASSERT(geneCount == this->geneCount());
+
     // Compute the sum of the components of each lsh vector.
     // It is needed below to compute the contribution of the
     // expression counts that are zero.
@@ -333,7 +348,7 @@ void ExpressionMatrix::computeCellLshSignatures(
         CZI_ASSERT(bandVectors.size() == lshRowCount);  // All bands must have the same number of rows.
         for(size_t row = 0; row < lshRowCount; row++, index++) {
             const auto& rowVector = bandVectors[row];
-            CZI_ASSERT(rowVector.size() == geneCount());
+            CZI_ASSERT(rowVector.size() == geneCount);
             lshVectorsSums[index] = std::accumulate(rowVector.begin(), rowVector.end(), 0.);
         }
     }
@@ -353,8 +368,8 @@ void ExpressionMatrix::computeCellLshSignatures(
 
         // Compute the mean and standard deviation for this cell.
         const Cell& cell = cells[cellId];
-        const double mean = cell.sum1 / double(geneCount());
-        const double sigmaInverse = 1. / sqrt(cell.sum2 / geneCount() - mean * mean);
+        const double mean = cell.sum1 / double(geneCount);
+        const double sigmaInverse = 1. / sqrt(cell.sum2 / geneCount - mean * mean);
 
         // Initialize the scalar products to what they would be if all counts were zero.
         const double zeroContribution = -mean * sigmaInverse;
@@ -391,8 +406,8 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 
 
-
 // Same as above, but only for a set of cells given in a vector of cell ids (cell set).
+// This still uses all the genes.
 void ExpressionMatrix::computeCellLshSignatures(
     const vector<vector<vector<double> > >& lshVectors,
     const MemoryMapped::Vector<CellId>& cellSet,
@@ -407,6 +422,16 @@ void ExpressionMatrix::computeCellLshSignatures(
     const size_t lshRowCount = lshVectors.front().size();
     const size_t bitCount = lshBandCount * lshRowCount;
 
+    // Check that all lsh vectors have the same length.
+    // This is the number of genes we are using to compute cell signtures.
+    const GeneId geneCount = GeneId(lshVectors.front().front().size());
+    for(const auto& x: lshVectors) {
+        for(const auto& y: x) {
+        CZI_ASSERT(y.size() == geneCount);
+        }
+    }
+    CZI_ASSERT(geneCount == this->geneCount());
+
     // Compute the sum of the components of each lsh vector.
     // It is needed below to compute the contribution of the
     // expression counts that are zero.
@@ -417,7 +442,7 @@ void ExpressionMatrix::computeCellLshSignatures(
         CZI_ASSERT(bandVectors.size() == lshRowCount);  // All bands must have the same number of rows.
         for(size_t row = 0; row < lshRowCount; row++, index++) {
             const auto& rowVector = bandVectors[row];
-            CZI_ASSERT(rowVector.size() == geneCount());
+            CZI_ASSERT(rowVector.size() == geneCount);
             lshVectorsSums[index] = std::accumulate(rowVector.begin(), rowVector.end(), 0.);
         }
     }
@@ -438,8 +463,8 @@ void ExpressionMatrix::computeCellLshSignatures(
         // Compute the mean and standard deviation for this cell.
         const CellId globalCellId = cellSet[localCellId];
         const Cell& cell = cells[globalCellId];
-        const double mean = cell.sum1 / double(geneCount());
-        const double sigmaInverse = 1. / sqrt(cell.sum2 / geneCount() - mean * mean);
+        const double mean = cell.sum1 / double(geneCount);
+        const double sigmaInverse = 1. / sqrt(cell.sum2 / geneCount - mean * mean);
 
         // Initialize the scalar products to what they would be if all counts were zero.
         const double zeroContribution = -mean * sigmaInverse;
@@ -476,6 +501,106 @@ void ExpressionMatrix::computeCellLshSignatures(
 
 
 
+// Same as above, but using a subset of gene and cells.
+void ExpressionMatrix::computeCellLshSignatures(
+    const ExpressionMatrixSubset& expressionMatrixSubset,
+    const vector<vector<vector<double> > >& lshVectors,
+    vector<BitSet>& signatures
+    )
+{
+    // Sanity check on the LSH vectors.
+    CZI_ASSERT(!lshVectors.empty());
+    const size_t lshBandCount = lshVectors.size();          // The number of LSH "bands".
+    CZI_ASSERT(!lshVectors.front().empty());
+    const size_t lshRowCount = lshVectors.front().size();   // The number of LSH "rows" in each band.
+    const GeneId geneCount = expressionMatrixSubset.geneCount();
+    for(const auto& band: lshVectors) {
+        CZI_ASSERT(band.size() == lshRowCount);
+        for(const auto& lshVector: band) {
+            CZI_ASSERT(lshVector.size() == geneCount);
+        }
+    }
+
+    // The number of bits in each signature vector equals the
+    // total number of LSH vectors, that is, the total number
+    // of rows in all bands.
+    const size_t bitCount = lshBandCount * lshRowCount;
+
+    // Compute the sum of the components of each lsh vector.
+    // It is needed below to compute the contribution of the
+    // expression counts that are zero.
+    vector<double> lshVectorsSums(bitCount);
+    size_t index = 0;
+    for(size_t band = 0; band < lshBandCount; band++) {
+        const auto& bandVectors = lshVectors[band];
+        CZI_ASSERT(bandVectors.size() == lshRowCount);  // All bands must have the same number of rows.
+        for(size_t row = 0; row < lshRowCount; row++, index++) {
+            const auto& rowVector = bandVectors[row];
+            CZI_ASSERT(rowVector.size() == geneCount);
+            lshVectorsSums[index] = std::accumulate(rowVector.begin(), rowVector.end(), 0.);
+        }
+    }
+
+    // Initialize the signatures to all zero bits.
+    signatures.resize(expressionMatrixSubset.cellCount(), BitSet(bitCount));
+
+    // Vector to hold the scalar products of the normalized expression vector of a cell
+    // with each of the LSH vectors.
+    vector<double> scalarProducts(bitCount);
+
+
+
+    // Loop over all cells in our expressionmatrix subset..
+    for(CellId localCellId = 0; localCellId < expressionMatrixSubset.cellCount(); localCellId++) {
+        if((localCellId > 0) && ((localCellId % 100) == 0)) {
+            cout << timestamp << "Working on cell " << localCellId;
+            cout << " of " << expressionMatrixSubset.cellCount() << endl;
+        }
+
+        // The global CellId should not be needed because both the ExpressionMatrixSubset
+        // and the signatures object are indexed by the localCellId.
+        // const CellId globalCellId = expressionMatrix.cellSet[localCellId];
+
+        // Compute the mean and standard deviation for this cell.
+        const ExpressionMatrixSubset::Sum& sum = expressionMatrixSubset.sums[localCellId];
+        const double mean = sum.sum1 / double(geneCount);
+        const double sigmaInverse = 1. / sqrt(sum.sum2 / geneCount - mean * mean);
+
+        // Initialize the scalar products to what they would be if all counts were zero.
+        const double zeroContribution = -mean * sigmaInverse;
+        for(size_t index = 0; index < bitCount; index++) {
+            scalarProducts[index] = lshVectorsSums[index] * zeroContribution;
+        }
+
+        // Add the contributions of the non-zero expression counts for this cell.
+        for(const auto& p : expressionMatrixSubset.cellExpressionCounts[localCellId]) {
+            const GeneId localGeneId = p.first;
+            const float& count = p.second;
+            const double scaledCount = sigmaInverse * double(count);
+
+            // Accumulate into the scalar products.
+            size_t index = 0;
+            for(size_t band = 0; band < lshBandCount; band++) {
+                const auto& bandVectors = lshVectors[band];
+                for(size_t row = 0; row < lshRowCount; row++, index++) {
+                    CZI_ASSERT(index < scalarProducts.size());
+                    scalarProducts[index] += scaledCount * bandVectors[row][localGeneId];
+                }
+            }
+        }
+
+        // Set to 1 the signature bits corresponding to positive scalar products.
+        auto& cellSignature = signatures[localCellId];
+        for(size_t index = 0; index < bitCount; index++) {
+            if(scalarProducts[index] > 0) {
+                cellSignature.set(index);
+            }
+        }
+    }
+}
+
+
+
 // Write to a csv file statistics of the cell LSH signatures..
 void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const
 {
@@ -484,7 +609,7 @@ void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector
 
     for(size_t i = 0; i < bitCount; i++) {
 
-        // Count the numebr of cells that have this bit set.
+        // Count the number of cells that have this bit set.
         size_t setCount = 0;
         for(CellId cellId = 0; cellId < cellCount(); cellId++) {
             if(signatures[cellId].get(i)) {
@@ -515,6 +640,8 @@ void ExpressionMatrix::writeLshSignatureStatistics(size_t bitCount, const vector
 // The standard deviation decreases as the similarity increases. It becomes
 // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
 // of the standard deviation at similarity 0.
+// THIS IS THE OLD VERSION THAT USES ALL THE GENES.
+// THE NEW VERSION BELOW ONLY TAKES INTO ACOUNT GENES IN A SPECIFIED GENE SET.
 void ExpressionMatrix::findSimilarPairs1Old(
     const string& cellSetName,  // The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
@@ -550,7 +677,7 @@ void ExpressionMatrix::findSimilarPairs1Old(
     const size_t lshBandCount = lshCount;
     const size_t lshRowCount = 1;
     vector<vector<vector<double> > > lshVectors;
-    generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+    generateLshVectors(geneCount(), lshBandCount, lshRowCount, seed, lshVectors);
 
     // Compute the LSH signatures of all cells.
     cout << timestamp << "Computing LSH signatures for all cells." << endl;
@@ -568,7 +695,7 @@ void ExpressionMatrix::findSimilarPairs1Old(
 
     // Compute the corresponding threshold on the number of mismatching
     // signature bits.
-    const size_t mismatchCountThreshold = size_t(double(lshCount) * angleThreshold / boost::math::double_constants::pi);
+    const size_t mismatchCountThreshold = min(lshCount, size_t(double(lshCount) * angleThreshold / boost::math::double_constants::pi));
 
     // Compute the similarity (cosine of the angle) corresponding to every number of mismatching bits
     // up to the threshold.
@@ -619,17 +746,130 @@ void ExpressionMatrix::findSimilarPairs1Old(
 
 
 
+// Find similar cell pairs by looping over all pairs
+// and using an LSH approximation to compute the similarity between two cells.
+// See the beginning of ExpressionMatrixLsh.cpp for more information.
+// Like findSimilarPairs0, this is also O(N**2) slow. However
+// the coefficient of the N**2 term is much lower (around 15 ns/pair when nothing gets stored), at a cost of
+// additional O(N) work (typically 30 ms per cell for lshCount=1024).
+// As a result, this can be much faster for large numbers of cells.
+// The error of the approximation is controlled by lshCount.
+// The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
+// or about 0.05 for lshCount=1024.
+// The standard deviation decreases as the similarity increases. It becomes
+// zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
+// of the standard deviation at similarity 0.
 void ExpressionMatrix::findSimilarPairs1(
     const string& geneSetName,      // The name of the gene set to be used.
     const string& cellSetName,      // The name of the cell set to be used.
-    const string& name,             // The name of the SimilarPairs object to be created.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
     size_t k,                       // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold,     // The minimum similarity for a pair to be stored.
     size_t lshCount,                // The number of LSH vectors to use.
     unsigned int seed               // The seed used to generate the LSH vectors.
     )
 {
-    CZI_ASSERT(0);
+    // Sanity check.
+    CZI_ASSERT(similarityThreshold <= 1.);
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Generate LSH vectors.
+    const size_t lshBandCount = lshCount;
+    const size_t lshRowCount = 1;
+    vector<vector<vector<double> > > lshVectors;
+    generateLshVectors(geneSet.size(), lshBandCount, lshRowCount, seed, lshVectors);
+
+    // Compute the LSH signatures of all cells.
+    cout << timestamp << "Computing LSH signatures for all cells." << endl;
+    vector<BitSet> signatures;
+    computeCellLshSignatures(expressionMatrixSubset, lshVectors, signatures);
+
+    // Compute the angle threshold (in radians) corresponding to this similarity threshold.
+    const double angleThreshold = std::acos(similarityThreshold);
+
+    // Compute the threshold on the number of mismatching
+    // signature bits.
+    size_t mismatchCountThreshold = lshCount;
+    if(similarityThreshold > -1.) {
+        mismatchCountThreshold = size_t(double(lshCount) * angleThreshold / boost::math::double_constants::pi);
+    }
+
+    // Compute the similarity (cosine of the angle) corresponding to every number of mismatching bits
+    // up to the threshold.
+    cout << "***1 " << mismatchCountThreshold << endl;
+    vector<double> similarityTable(mismatchCountThreshold + 1);
+    cout << "***2" << endl;
+    for(size_t mismatchingBitCount = 0;
+        mismatchingBitCount <= mismatchCountThreshold; mismatchingBitCount++) {
+        const double angle = double(mismatchingBitCount) *
+            boost::math::double_constants::pi / double(lshCount);
+        CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+        similarityTable[mismatchingBitCount] = std::cos(angle);
+    }
+
+    // Create the SimilarPairs object where we will store the pairs.
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    cout << "***3" << endl;
+
+
+
+    // Loop over all pairs. This is much faster than findSimilarPairs0
+    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
+    // still scales like the square of the number of cells in the cell set.
+    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
+        if(localCellId0>0 && ((localCellId0%10000) == 0)) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
+        }
+        const BitSet& signature0 = signatures[localCellId0];
+        for(CellId localCellId1=localCellId0+1; localCellId1!=cellCount; localCellId1++) {
+            const BitSet& signature1 = signatures[localCellId1];
+
+            // Count the number of bits where the signatures of these two cells disagree.
+            size_t mismatchingBitCount = countMismatches(signature0, signature1);
+
+            // If the similarity is sufficient, pass it to the SimilarPairs container,
+            // which will make the decision whether to store it, depending on the
+            // number of pairs already stored for cellId0 and cellId1.
+            if(mismatchingBitCount <= mismatchCountThreshold) {
+                CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+                similarPairs.add(localCellId0, localCellId1, similarityTable[mismatchingBitCount]);
+            }
+        }
+    }
+
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    cout << timestamp << "Sorting pairs." << endl;
+    similarPairs.sort();
+    cout << timestamp << "Done sorting pairs." << endl;
 }
 
 
@@ -637,6 +877,8 @@ void ExpressionMatrix::findSimilarPairs1(
 // Find similar cell pairs using LSH, without looping over all pairs.
 // See the beginning of ExpressionMatrixLsh.cpp for more information.
 // This implementation requires lshRowCount to be a power of 2 not greater than 64.
+// Currently this uses all genes. Support for specifying a GeneSet
+// will be added soon.
 void ExpressionMatrix::findSimilarPairs2(
     const string& cellSetName,  // The name of the cell set to be used.
     const string& name,         // The name of the SimilarPairs object to be created.
@@ -692,7 +934,7 @@ void ExpressionMatrix::findSimilarPairs2(
 
     // Generate LSH vectors.
     vector<vector<vector<double> > > lshVectors;
-    generateLshVectors(lshBandCount, lshRowCount, seed, lshVectors);
+    generateLshVectors(geneCount(), lshBandCount, lshRowCount, seed, lshVectors);
 
     // Compute the LSH signatures of all cells.
     cout << timestamp << "Computing LSH signatures for all cells." << endl;
@@ -881,4 +1123,104 @@ void ExpressionMatrix::orthogonalizeLshVectors(
     }
 }
 #endif
+
+
+
+// Analyze the quality of a set of similar pairs.
+void ExpressionMatrix::analyzeSimilarPairs(
+    const string& similarPairsName,
+    double csvDownsample) const
+{
+    // Open the SimilarPairs object we want to analyze.
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const GeneSet& geneSet = similarPairs.getGeneSet();
+    const CellSet& cellSet = similarPairs.getCellSet();
+    const CellId cellCount = CellId(cellSet.size());
+
+    // Create the expression matrix subset to be used
+    // for exact similarity computations.
+    const string expressionMatrixSubsetName = directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Open the output csv file.
+    ofstream csvOut(similarPairsName + "-analysis.csv");
+    csvOut << "GlobalCellId0,GlobalCellId1,ExactSimilarity,StoredSimilarity\n";
+
+    // Statistics for bins of exact similarity values.
+    const size_t binCount = 200;
+    const double binWidth = 2. / binCount;
+    vector<size_t> sum0(binCount, 0);
+    vector<double> sum1(binCount, 0.);
+    vector<double> sum2(binCount, 0.);
+
+
+    // Random number generator used for downsampling
+    using RandomSource = boost::mt19937;
+    using UniformDistribution = boost::uniform_01<>;
+    const int seed = 231;
+    RandomSource randomSource(seed);
+    UniformDistribution uniformDistribution;
+    boost::variate_generator<RandomSource, UniformDistribution>
+        uniformGenerator(randomSource, uniformDistribution);
+
+    // Loop over all values stored in the SimilarPairs object.
+    size_t pairCount = 0;
+    size_t csvPairCount = 0;
+    for(CellId localCellId0=0; localCellId0<cellCount; localCellId0++) {
+        if((localCellId0 % 100)==0) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellCount << endl;
+        }
+        const CellId globalCellId0 = cellSet[localCellId0];
+        for(const auto& p: similarPairs[localCellId0]) {
+            ++pairCount;
+            const CellId localCellId1 = p.first;
+            const CellId globalCellId1 = cellSet[localCellId1];
+            const float& storedSimilarity = p.second;
+            const double exactSimilarity = expressionMatrixSubset.
+                computeCellSimilarity(localCellId0, localCellId1);
+
+            // Update statistics.
+            const double delta = storedSimilarity - exactSimilarity;
+            const size_t bin = size_t(floor((exactSimilarity+1.) / binWidth));
+            CZI_ASSERT(bin < binCount);
+            ++(sum0[bin]);
+            sum1[bin] += delta;
+            sum2[bin] += delta*delta;
+
+            // Write to csv output (with downsampling).
+            if(uniformGenerator() < csvDownsample) {
+                ++csvPairCount;
+                csvOut << globalCellId0 << ",";
+                csvOut << globalCellId1 << ",";
+                csvOut << exactSimilarity << ",";
+                csvOut << storedSimilarity << "\n";
+            }
+        }
+    }
+
+   cout << "Total number of ordered cell pairs: " << size_t(cellCount) * size_t(cellCount-1) << endl;
+   cout << "Number of cell pairs with a stored similarity value: "<< pairCount << endl;
+   cout << "Number of cell pairs written to csv file: " << csvPairCount << endl;
+
+
+   // Compute average and standard deviation of the error for each bin.
+   ofstream statsOut(similarPairsName + "-analysis-statistics.csv");
+   statsOut << "Similarity,Bias,Rms\n";
+   for(size_t bin=0; bin<binCount; bin++) {
+       if(sum0[bin] < 2) {
+           continue;
+       }
+       const double similarity = (double(bin) + 0.5) * binWidth - 1.;
+       const double s0 = double(sum0[bin]);
+       const double s1 = sum1[bin];
+       const double s2 = sum2[bin];
+       const double average = s1 / s0;
+       const double sigma = sqrt(s2 / s0); // Sigma around 0.
+       statsOut << similarity << ",";
+       statsOut << average << ",";
+       statsOut << sigma << "\n";
+   }
+
+}
 

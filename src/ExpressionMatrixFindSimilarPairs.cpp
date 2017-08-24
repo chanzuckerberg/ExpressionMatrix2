@@ -20,23 +20,27 @@ void ExpressionMatrix::findSimilarPairs0(
     double similarityThreshold
     )
 {
-    // Locate the gene set.
+    // Sanity check.
+    CZI_ASSERT(similarityThreshold <= 1.);
+
+    // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
     if(itGeneSet == geneSets.end()) {
         throw runtime_error("Gene set " + geneSetName + " does not exist.");
     }
     const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
 
-    // Locate the cell set.
-    const auto itCellSet = cellSets.cellSets.find(cellSetName);
-    if(itCellSet == cellSets.cellSets.end()) {
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
         throw runtime_error("Cell set " + cellSetName + " does not exist.");
     }
-    const CellSet& cellSet = *(itCellSet->second);
-
-    if(cellCount() == 0) {
-        cout << "There are no cells. Skipping findSimilarPairs0." << endl;
-        return;
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    if(cellSet.size() == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
     }
 
     // Create the SimilarPairs object where we will store the pairs.
@@ -74,7 +78,7 @@ void ExpressionMatrix::findSimilarPairs0(
 
 
 
-// Dump cell to csv file a set of similar cell pairs.
+// Dump to csv file a set of similar cell pairs.
 void ExpressionMatrix::writeSimilarPairs(const string& name) const
 {
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name);

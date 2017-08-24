@@ -134,6 +134,10 @@ public:
     {
         return geneSet;
     }
+    const CellSet& getCellSet() const
+    {
+        return cellSet;
+    }
 
 private:
 

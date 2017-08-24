@@ -41,9 +41,9 @@ public:
     const MemoryMapped::Vector<GeneId>& genes();
 
     // Return the number of genes in the set.
-    size_t size() const
+    GeneId size() const
     {
-        return globalGeneIdVector.size();
+        return GeneId(globalGeneIdVector.size());
     }
 
 

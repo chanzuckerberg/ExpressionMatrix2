@@ -31,6 +31,7 @@ namespace ChanZuckerberg {
         class CellSimilarityGraph;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
+        class ExpressionMatrixSubset;
         class GraphInformation;
         class ServerParameters;
 
@@ -377,6 +378,11 @@ public:
     // Dump cell to csv file a set of similar cell pairs.
     void writeSimilarPairs(const string& name) const;
 
+    // Analyze the quality of a set of similar pairs.
+    void analyzeSimilarPairs(
+        const string& name,
+        double csvDownsample) const;
+
     // Create a new graph.
     // Graphs are not persistent (they are stored in memory only).
     void createCellSimilarityGraph(
@@ -581,12 +587,13 @@ private:
     // Each of these vectors defines an hyperplane orthogonal to it.
     // As described in section 3.7.2 of the book referenced above,
     // each hyperplane provides a function of a locality-sensitive function.
-    void generateLshVectors(
+    static void generateLshVectors(
+        GeneId geneCount,
         size_t lshBandCount,
         size_t lshRowCount,
         unsigned int seed,
         vector<vector<vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
-        ) const;
+        );
 
 
 #if 0
@@ -642,6 +649,13 @@ private:
         const MemoryMapped::Vector<CellId>& cellSet,
         vector<BitSet>& signatures
         ) const;
+
+    // Same as above, but using a subset of gene and cells.
+    static void computeCellLshSignatures(
+        const ExpressionMatrixSubset&,
+        const vector<vector<vector<double> > >& lshVectors,
+        vector<BitSet>& signatures
+        );
 
     // Write to a csv file statistics of the LSH signatures.
     void writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const;

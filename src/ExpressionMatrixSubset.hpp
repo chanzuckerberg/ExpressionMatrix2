@@ -46,6 +46,10 @@ public:
     // Stored in order of increasing GeneId, so the mapping
     // from local GeneId to global GeneId is strictly increasing.
     const GeneSet& geneSet;
+    GeneId geneCount() const
+    {
+        return geneSet.size();
+    }
 
     // The set of cells used by this ExpressionMatrixSubset.
     // Indexed by the local CellId, contains the global CellId
@@ -53,6 +57,10 @@ public:
     // Stored in order of increasing CellId, so the mapping
     // from local CellId to global CellId is strictly increasing.
     const CellSet& cellSet;
+    CellId cellCount() const
+    {
+        return CellId(cellSet.size());
+    }
 
     // The expression counts for each cell. Stored in sparse format,
     // each with the local GeneId it corresponds to.
@@ -75,8 +83,6 @@ public:
     // Close and remove the supporting files.
     void remove();
 
-private:
-
     // Sums and sums of squares of the expression counts for all cells.
     class Sum {
     public:
@@ -84,6 +90,8 @@ private:
         double sum2 = 0.;
     };
     vector<Sum> sums;
+
+private:
     void computeSums();
 };
 
