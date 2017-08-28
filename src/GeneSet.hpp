@@ -87,6 +87,22 @@ public:
     // to be sorted. It will assert if this is not the case.
     bool operator==(const GeneSet&) const;
 
+    // Sort the genes vector and set the isSorted flag.
+    void sort();
+
+    // Assert that the gene set is sorted.
+    void assertIsSorted() const
+    {
+        CZI_ASSERT(isSorted);
+    }
+
+    // Set the isSorted flag without checking that the ste is sorted.
+    // The caller is responsible for guaranteeing that the set is sorted.
+    void forceSorted()
+    {
+        isSorted = true;
+    }
+
 private:
 
     // The global GeneId's of the genes in this set.
@@ -95,9 +111,6 @@ private:
 
     // Flag that tells us whether the genes vector is currently sorted by GeneId.
     bool isSorted = false;
-
-    // Sort the genes vector and set the isSorted flag.
-    void sort();
 
     // Vector indexed by the global GeneId that contains
     // the local GeneId for each gene in the gene set,

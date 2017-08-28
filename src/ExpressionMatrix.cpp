@@ -137,6 +137,7 @@ bool ExpressionMatrix::addGene(const string& geneName)
     if(stringId == geneNames.invalidStringId) {
         const GeneId geneId = GeneId(geneNames[geneName]);
         geneSets["AllGenes"].addGene(geneId);
+        geneSets["AllGenes"].forceSorted(); // We guarantee that it remains sorted.
         return true;
     } else {
         return false;   // Was already present.
@@ -879,7 +880,7 @@ bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const s
             geneSet.addGene(geneId);
         }
     }
-
+    geneSet.sort();
     return true;
 }
 
@@ -916,7 +917,7 @@ bool ExpressionMatrix::createGeneSetFromGeneNames(
             geneSet.addGene(GeneId(stringId));
         }
     }
-
+    geneSet.sort();
 
     return true;
 }
@@ -959,6 +960,7 @@ bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
     for(size_t i=0; i<inputSetsNames.size(); i++) {
         const string& inputSetName = inputSetsNames[i];
         vector<GeneId> inputSetGenes;
+        geneSets[inputSetName].assertIsSorted();
         geneSets[inputSetName].getSortedGenes(inputSetGenes);
         if(i == 0) {
             outputSetGenes = inputSetGenes;
@@ -987,7 +989,7 @@ bool ExpressionMatrix::createGeneSetIntersectionOrUnion(
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }
-
+    outputGeneSet.sort();
     return true;
 }
 
@@ -1013,12 +1015,14 @@ bool ExpressionMatrix::createGeneSetDifference(
         return false;
     }
     GeneSet& inputSet0 = it0->second;
+    inputSet0.assertIsSorted();
     const auto it1 = geneSets.find(inputSetName1);
     if(it1 == geneSets.end()) {
         cout << "Gene set " << inputSetName1 << " does not exists." << endl;
         return false;
     }
     GeneSet& inputSet1 = it1->second;
+    inputSet1.assertIsSorted();
 
 
     // Compute the difference.
@@ -1040,6 +1044,7 @@ bool ExpressionMatrix::createGeneSetDifference(
     for(const GeneId geneId: outputSetGenes) {
         outputGeneSet.addGene(geneId);
     }
+    outputGeneSet.sort();
     return true;
 }
 

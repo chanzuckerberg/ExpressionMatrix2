@@ -433,6 +433,7 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
         return;
     }
     const GeneSet& geneSet = itGeneSet->second;
+    geneSet.assertIsSorted();
 
     // Verify that the new gene set does not already exist.
     if(geneSets.find(newGeneSetName) != geneSets.end()) {
@@ -481,6 +482,7 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
             newGeneSet.addGene(globalGeneId);
         }
     }
+    newGeneSet.sort();
     html << "<p>Gene set " << newGeneSetName << " created. It has " << newGeneSet.size() << " genes.";
 
 
