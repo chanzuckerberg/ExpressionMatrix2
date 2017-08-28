@@ -30,7 +30,7 @@ void ExpressionMatrix::findSimilarPairs0(
     }
     const GeneSet& geneSet = itGeneSet->second;
     if(geneSet.size() == 0) {
-        throw runtime_error("Cell set " + cellSetName + " is empty.");
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
     }
 
     // Locate the cell set and verify that it is not empty.

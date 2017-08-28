@@ -219,10 +219,16 @@ CellId ExpressionMatrix::addCell(
     cell.sum2 = 0.;
     cellExpressionCounts.appendVector();
     for(const auto& p: expressionCounts) {
-        const StringId geneId = geneNames[p.first];
+        const string& geneName = p.first;
+        addGene(geneName);
+        const StringId geneId = geneNames(geneName);
+        CZI_ASSERT(geneId != geneNames.invalidStringId);
         const float value = p.second;
-        if(value < 0) {
+        if(value < 0.) {
             throw runtime_error("Negative expression count encountered.");
+        }
+        if(value == 0.) {
+            continue;
         }
         cell.sum1 += value;
         cell.sum2 += value*value;
