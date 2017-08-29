@@ -11,41 +11,66 @@
 <h1>Building from source</h1>
 
 <p>
-You will need to build the code from source if you want to do one of the following:
+The ExpressionMatrix2 code currently supports the following platforms:
 
 <ul>
+<li>Ubuntu 16.0, for use with Python 3.5.
+<li>CentOs 7, for use with Python 2.7 (beginning with Release 0.2.0).
+</ul>
 
-<li>
-Run the code on a platform for which a pre-built shared library is not available. Currently, we only provide a pre-built library for Ubuntu 16.04. This will also work on other distributions using similar versions of the Linux kernel, such as Linux Mint 18. However it will not work on other Linux distributions, or on other operating systems such as Windows or MacOS.
+<p>
+To run in one of the above platforms, you can use one of the ExpressionMatrix2 releases 
+from GitHub. However,you will need to build the code from source if you want to do one of the following:
 
+<ul>
 <li>
 Modify the code, for example to add functionality, fix bugs, or port it to other systems.
-
 <li>
 Debug the code.
-
+<li>
+Run the code on an unsupported platform. 
 </ul>
 
-<p>
-The code requires the following software packages to be available:
-<ul>
-<li>The gcc compiler. This is installed by default on most Linux distributions. Significant code changes may be required to port the code to systems other than Linux systems.
-<li>The Boost libraries. Boost version 1.58 is used for Ubuntu (package libbost-all-dev), but the code should not be strictly dependend on a specific version of the Boost libraries.
-<li>Python3 (on ubuntu 16.04, package python3-all-dev). The code can also be built for Python2 by making appropriate changes in the include files and libraries used in the build process.
-<li>Graphviz (on ubuntu 16.04, package graphviz).
-<li>Libraries and development files needed to read HDF5 files (on ubuntu-16.04, packages libhdf5-10, libhdf5-cpp-11, and libhdf5-dev).
-</ul>
-The means by which you can obtain and install these packages is dependent on the system you want to run the build the on. The package names given above allow you to download these packages, for ubuntu 16.04, from the standard ubuntu repositories.
+
+
+<h2>Building on a supported platform</h2>
 
 <p>
-Once you have a local copy of the repository, you have two choices to build from source:
+The table below describes the prerequisites necessary to build from source on 
+the supported platforms.
+
+<table>
+<tr><th class=left>Operating system<td class=centered>Ubuntu 16.04<td class=centered>CentOS 7
+<tr><th class=left>Python version<td class=centered>3.5<td class=centered>2.7
+<tr><th class=left>Name of Eclipse configurations<td class=centered>Release-ubuntu16-python3,<br>Debug-ubuntu16-python3<td class=centered>Release-centos7-python2
+<tr><th class=left>Boost libraries version<td class=centered>1.58.0<td class=centered>1.53.0
+<tr><th class=left>Boost libraries package<br>required to build<br>(and sufficient to run)<td class=centered>libboost-all-dev<td class=centered>boost-devel-1.53.0
+<tr><th class=left>Boost libraries package<br>required to run<td class=centered>libboost-all-dev<td class=centered>boost-1.53.0
+<tr><th class=left>Python package<br>required to build<br>(and sufficient to run)<td class=centered>python3-all-dev<td class=centered>python-devel-2.7.5-48
+<tr><th class=left>Python package<br>required to run<td class=centered>python3<td class=centered>python-devel-2.7.5-48
+<tr><th class=left>HDF5 packages<br>required to build<br>(and sufficient to run)<td class=centered>libhdf5-10-dev, libhdf5-cpp-dev<td class=centered>hdf5-devel-1.8.12-8
+<tr><th class=left>HDF5 packages<br>required to run<td class=centered>libhdf5-10-dev, libhdf5-cpp-11<td class=centered>hdf5-1.8.12-8
+</table>
+
+
+<p>
+Once the prerequisites listed above have been installed and you have a local copy of the repository, you have two choices to build from source:
 
 <ul>
 <li>
-Use the Eclipse C++ IDE. Eclipse project files .project and .cproject are provided in the top directory of the repository. After opening the project files in Eclipse, you can use Eclipse commands to build the Release or Debug version of the code.
+Use the Eclipse C++ IDE. Eclipse project files .project and .cproject are provided in the top directory of the repository. 
+After opening the project files in Eclipse, you can use Eclipse commands to build the Eclipse configuration, listed in the table above, that corresponds to your platform.
 
 <li>
-Use the makefiles provided in the Release and Debug directories of the repository. Just cd to one of these directory, then run command "make all" to obtain a copy of ExpressionMatrix.so that reflects al the latest changes in the source code.
+Use a <code>make</code> command in the directory with name equal to the name of the Eclipse configuration, 
+listed in the table above, that corresponds to your platform.
+</ul>
+
+In both cases, a successful build will create shared library <code>ExpressionMatrix.so</code> 
+that can be directly imported by Python code.
+
+
+
  
 
 
