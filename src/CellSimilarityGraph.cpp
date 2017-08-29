@@ -176,50 +176,6 @@ void CellSimilarityGraph::Writer::operator()(std::ostream& s, edge_descriptor e)
 
 
 
-#if 0
-
-// Only keep an edge if it is one of the best n edges for either
-// of the two vertices.
-void CellSimilarityGraph::keepBestEdgesOnly(std::size_t n)
-{
-    // Loop over all vertices.
-    set<edge_descriptor> edgesToBeKept;
-    BGL_FORALL_VERTICES(v, graph(), Graph) {
-
-        // Find the edges of this vertex, each with their similarity.
-        vector<pair<double, edge_descriptor>> vEdges;
-        BGL_FORALL_OUTEDGES(v, e, graph(), Graph) {
-            vEdges.push_back(make_pair(graph()[e].similarity, e));
-        }
-
-        // Only keep the best n.
-        if(vEdges.size()>n) {
-            sort(vEdges.begin(), vEdges.end(), std::greater<pair<double, edge_descriptor>>());
-            vEdges.resize(n);
-        }
-
-        // Add the edges to be kept to the set.
-        for(const auto& p: vEdges) {
-            edgesToBeKept.insert(p.second);
-        }
-    }
-
-    // Find the edges to be removed.
-    vector<edge_descriptor> edgesToBeRemoved;
-    BGL_FORALL_EDGES(e, graph(), Graph) {
-        if(edgesToBeKept.find(e) == edgesToBeKept.end()) {
-            edgesToBeRemoved.push_back(e);
-        }
-    }
-
-    // Remove them.
-    for(const edge_descriptor e: edgesToBeRemoved) {
-        boost::remove_edge(e, graph());
-    }
-}
-#endif
-
-
 // Remove isolated vertices and returns\ the number of vertices that were removed
 size_t CellSimilarityGraph::removeIsolatedVertices()
 {
@@ -238,7 +194,6 @@ size_t CellSimilarityGraph::removeIsolatedVertices()
 
     return verticesToBeRemoved.size();
 }
-
 
 
 
