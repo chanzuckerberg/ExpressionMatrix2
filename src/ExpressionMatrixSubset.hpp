@@ -75,7 +75,7 @@ public:
     // Compute the similarity between two cells, identified by their ids
     // local to our cell set, and using the stored expression counts
     // (which reflect only genes in our gene set).
-    // This is similar to ExpressionMatrix:;computeCellSimilarity,
+    // This is similar to ExpressionMatrix::computeCellSimilarity,
     // but it used the expression counts stored in the ExpressionMatrixSubset
     // instead of the global expression counts stored by class ExpressionMatrix.
     double computeCellSimilarity(CellId localCellId0, CellId localCellId1) const;

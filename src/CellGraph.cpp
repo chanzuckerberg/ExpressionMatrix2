@@ -1,5 +1,5 @@
 // CZI.
-#include "CellSimilarityGraph.hpp"
+#include "CellGraph.hpp"
 #include "color.hpp"
 #include "CZI_ASSERT.hpp"
 #include "deduplicate.hpp"
@@ -29,7 +29,7 @@ using boost::algorithm::is_any_of;
 
 
 
-CellSimilarityGraph::CellSimilarityGraph(
+CellGraph::CellGraph(
     const MemoryMapped::Vector<CellId>& cellSet, // The cell set to be used.
     const string& similarPairsName,              // The name of the SimilarPairs object to be used to create the graph.
     double similarityThreshold,                  // The minimum similarity to create an edge.
@@ -43,7 +43,7 @@ CellSimilarityGraph::CellSimilarityGraph(
 
     // Create a vertex for each cell in the cell set.
     for(const CellId cellId: cellSet) {
-        const vertex_descriptor v = boost::add_vertex(CellSimilarityGraphVertex(cellId), graph());
+        const vertex_descriptor v = boost::add_vertex(CellGraphVertex(cellId), graph());
         vertexTable.insert(make_pair(cellId, v));
     }
 
@@ -98,7 +98,7 @@ CellSimilarityGraph::CellSimilarityGraph(
             if(edgeExists) {
                 continue;
             }
-            boost::add_edge(v0, v1, CellSimilarityGraphEdge(p.second), graph());
+            boost::add_edge(v0, v1, CellGraphEdge(p.second), graph());
         }
     }
 
@@ -110,7 +110,7 @@ CellSimilarityGraph::CellSimilarityGraph(
 
 
 // Write the graph in Graphviz format.
-void CellSimilarityGraph::write(const string& fileName) const
+void CellGraph::write(const string& fileName) const
     {
     ofstream outputFileStream(fileName);
     if(!outputFileStream) {
@@ -118,32 +118,32 @@ void CellSimilarityGraph::write(const string& fileName) const
     }
     write(outputFileStream);
 }
-void CellSimilarityGraph::write(ostream& s) const
+void CellGraph::write(ostream& s) const
     {
     Writer writer(*this);
     boost::write_graphviz(s, graph(), writer, writer, writer,
-        boost::get(&CellSimilarityGraphVertex::cellId, graph()));
+        boost::get(&CellGraphVertex::cellId, graph()));
 }
 
-CellSimilarityGraph::Writer::Writer(const Graph& graph) :
+CellGraph::Writer::Writer(const Graph& graph) :
     graph(graph)
 {
 }
 
 
 
-void CellSimilarityGraph::Writer::operator()(std::ostream& s) const
+void CellGraph::Writer::operator()(std::ostream& s) const
 {
     s << "tooltip=\"\";";
     s << "node [shape=point];";
 }
 
 
-// Write out a vertex of the cell similarity graph.
-void CellSimilarityGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) const
+// Write out a vertex of the cell graph.
+void CellGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) const
 {
     // Get the vertex.
-    const CellSimilarityGraphVertex& vertex = graph[v];
+    const CellGraphVertex& vertex = graph[v];
 
     // Begin vertex attributes.
     s << "[";
@@ -157,10 +157,10 @@ void CellSimilarityGraph::Writer::operator()(std::ostream& s, vertex_descriptor 
 
 
 
-void CellSimilarityGraph::Writer::operator()(std::ostream& s, edge_descriptor e) const
+void CellGraph::Writer::operator()(std::ostream& s, edge_descriptor e) const
 {
     // Get the edge.
-    const CellSimilarityGraphEdge& edge = graph[e];
+    const CellGraphEdge& edge = graph[e];
 
     // Begin edge attributes.
     s << "[";
@@ -177,7 +177,7 @@ void CellSimilarityGraph::Writer::operator()(std::ostream& s, edge_descriptor e)
 
 
 // Remove isolated vertices and returns\ the number of vertices that were removed
-size_t CellSimilarityGraph::removeIsolatedVertices()
+size_t CellGraph::removeIsolatedVertices()
 {
     vector<vertex_descriptor> verticesToBeRemoved;
     BGL_FORALL_VERTICES(v, graph(), Graph) {
@@ -187,7 +187,7 @@ size_t CellSimilarityGraph::removeIsolatedVertices()
     }
 
     for(const vertex_descriptor v: verticesToBeRemoved) {
-        const CellSimilarityGraphVertex& vertex = graph()[v];
+        const CellGraphVertex& vertex = graph()[v];
         vertexTable[vertex.cellId] = null_vertex();
         boost::remove_vertex(v, graph());
     }
@@ -198,7 +198,7 @@ size_t CellSimilarityGraph::removeIsolatedVertices()
 
 
 // Use Graphviz to compute the graph layout and store it in the vertex positions.
-void CellSimilarityGraph::computeLayout()
+void CellGraph::computeLayout()
 {
     // Write the graph in Graphviz format.
     write("Graph.dot");
@@ -239,7 +239,7 @@ void CellSimilarityGraph::computeLayout()
             const CellId cellId = lexical_cast<CellId>(tokens[1]);
             const vertex_descriptor v = vertexTable[cellId];
             CZI_ASSERT(v != null_vertex());
-            CellSimilarityGraphVertex& vertex = graph()[v];
+            CellGraphVertex& vertex = graph()[v];
             vertex.position[0] = lexical_cast<double>(tokens[2]);
             vertex.position[1] = lexical_cast<double>(tokens[3]);
         } catch(std::exception& e) {
@@ -254,7 +254,7 @@ void CellSimilarityGraph::computeLayout()
 
 
 // Compute minimum and maximum coordinates of all the vertices.
-void CellSimilarityGraph::computeCoordinateRange(
+void CellGraph::computeCoordinateRange(
     double& xMin,
     double& xMax,
     double& yMin,
@@ -265,7 +265,7 @@ void CellSimilarityGraph::computeCoordinateRange(
     yMin = std::numeric_limits<double>::max();
     yMax = std::numeric_limits<double>::min();
     BGL_FORALL_VERTICES(v, graph(), Graph) {
-        const CellSimilarityGraphVertex& vertex = graph()[v];
+        const CellGraphVertex& vertex = graph()[v];
         const double x = vertex.position[0];
         const double y = vertex.position[1];
         xMin = min(xMin, x);
@@ -285,7 +285,7 @@ void CellSimilarityGraph::computeCoordinateRange(
 // The last argument specifies the color assigned to each vertex group.
 // If empty, vertex groups are not used, and each vertex is drawn
 // with its own color.
-void CellSimilarityGraph::writeSvg(
+void CellGraph::writeSvg(
     ostream& s,
     bool hideEdges,
     double svgSizePixels,
@@ -320,8 +320,8 @@ void CellSimilarityGraph::writeSvg(
             const vertex_descriptor v1 = source(e, graph());
             const vertex_descriptor v2 = target(e, graph());
 
-            const CellSimilarityGraphVertex& vertex1 = graph()[v1];
-            const CellSimilarityGraphVertex& vertex2 = graph()[v2];
+            const CellGraphVertex& vertex1 = graph()[v1];
+            const CellGraphVertex& vertex2 = graph()[v2];
 
             const double x1 = vertex1.position[0];
             const double y1 = vertex1.position[1];
@@ -352,7 +352,7 @@ void CellSimilarityGraph::writeSvg(
     if(groupColors.empty()) {
         s << "<g id=vertices><g>";
         BGL_FORALL_VERTICES(v, graph(), Graph) {
-            const CellSimilarityGraphVertex& vertex = graph()[v];
+            const CellGraphVertex& vertex = graph()[v];
             const double x = vertex.position[0];
             const double y = vertex.position[1];
             s <<
@@ -379,7 +379,7 @@ void CellSimilarityGraph::writeSvg(
         // Find the vertices in each group.
         vector< vector<vertex_descriptor> > groups;
         BGL_FORALL_VERTICES(v, graph(), Graph) {
-            const CellSimilarityGraphVertex& vertex = graph()[v];
+            const CellGraphVertex& vertex = graph()[v];
             const size_t group = vertex.group;
             if(groups.size() <= group) {
                 groups.resize(group+1);
@@ -407,7 +407,7 @@ void CellSimilarityGraph::writeSvg(
 
             // Loop over all vertices of this group.
             for(const vertex_descriptor v: group) {
-                const CellSimilarityGraphVertex& vertex = graph()[v];
+                const CellGraphVertex& vertex = graph()[v];
 
                 const double x = vertex.position[0];
                 const double y = vertex.position[1];
@@ -429,7 +429,7 @@ void CellSimilarityGraph::writeSvg(
 
 // Clustering using the label propagation algorithm.
 // The cluster each vertex is assigned to is stored in the clusterId data member of the vertex.
-void CellSimilarityGraph::labelPropagationClustering(
+void CellGraph::labelPropagationClustering(
     ostream& out,
     size_t seed,                            // Seed for random number generator.
     size_t stableIterationCountThreshold,   // Stop after this many iterations without changes.
@@ -442,8 +442,8 @@ void CellSimilarityGraph::labelPropagationClustering(
     out << "Maximum number of iterations is " << maxIterationCount << "." << endl;
 
     // Set the cluster of each vertex equal to its cell id.
-    BGL_FORALL_VERTICES(v, graph(), CellSimilarityGraph) {
-        CellSimilarityGraphVertex& vertex = graph()[v];
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
+        CellGraphVertex& vertex = graph()[v];
         vertex.clusterId = vertex.cellId;
     }
 
@@ -479,8 +479,8 @@ void CellSimilarityGraph::labelPropagationClustering(
 
         // Process the vertices in the order determined by the random shuffle.
         for(const vertex_descriptor v0: shuffledVertices) {
-            CZI_ASSERT(v0 != CellSimilarityGraph::null_vertex());
-            CellSimilarityGraphVertex& vertex0 = graph()[v0];
+            CZI_ASSERT(v0 != CellGraph::null_vertex());
+            CellGraphVertex& vertex0 = graph()[v0];
             const size_t clusterId0 = vertex0.clusterId;
 
             // Map to contain the clusters of the neighbors of this vertex, each with its total weight.
@@ -488,7 +488,7 @@ void CellSimilarityGraph::labelPropagationClustering(
             map<uint32_t, double> clusterMap;
 
             // Loop over the edges of this vertex.
-            BGL_FORALL_OUTEDGES(v0, e, graph(), CellSimilarityGraph) {
+            BGL_FORALL_OUTEDGES(v0, e, graph(), CellGraph) {
                 const vertex_descriptor v1 = target(e, graph());
                 const double weight = graph()[e].similarity;
                 const uint32_t clusterId1 = graph()[v1].clusterId;
@@ -555,7 +555,7 @@ void CellSimilarityGraph::labelPropagationClustering(
 
     // Compute the size of each cluster.
     map<uint32_t, size_t> clusterSize;    // Key=clusterId, Value=cluster size
-    BGL_FORALL_VERTICES(v, graph(), CellSimilarityGraph) {
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
         const uint32_t clusterId = graph()[v].clusterId;
         const auto it = clusterSize.find(clusterId);
         if(it == clusterSize.end()) {
@@ -586,8 +586,8 @@ void CellSimilarityGraph::labelPropagationClustering(
     }
 
     // Update the vertices to reflect the new cluster numbering.
-    BGL_FORALL_VERTICES(v, graph(), CellSimilarityGraph) {
-        CellSimilarityGraphVertex& vertex = graph()[v];
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
+        CellGraphVertex& vertex = graph()[v];
         vertex.clusterId = clusterMap[vertex.clusterId];
     }
 
@@ -605,14 +605,14 @@ void CellSimilarityGraph::labelPropagationClustering(
 // This processes the groups in increasing order beginning at group 0,
 // so it is best if the group numbers are all contiguous, starting at zero,
 // and in decreasing size of group.
-void CellSimilarityGraph::assignColorsToGroups(vector<uint32_t>& colorTable)
+void CellGraph::assignColorsToGroups(vector<uint32_t>& colorTable)
 {
     // Start with no colors assigned.
     colorTable.clear();
 
     // Find the vertices of each group.
     vector< vector<vertex_descriptor> > groupVertices;
-    BGL_FORALL_VERTICES(v, graph(), CellSimilarityGraph) {
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
         const uint32_t groupId = graph()[v].group;
         if(groupVertices.size() <= groupId) {
             groupVertices.resize(groupId + 1);
@@ -626,11 +626,11 @@ void CellSimilarityGraph::assignColorsToGroups(vector<uint32_t>& colorTable)
     // Each vertex corresponds ot a group.
     typedef boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS> GroupGraph;
     GroupGraph groupGraph(groupCount);
-    BGL_FORALL_EDGES(e, graph(), CellSimilarityGraph) {
+    BGL_FORALL_EDGES(e, graph(), CellGraph) {
         const vertex_descriptor v0 = source(e, graph());
         const vertex_descriptor v1 = target(e, graph());
-        const CellSimilarityGraphVertex& vertex0 = graph()[v0];
-        const CellSimilarityGraphVertex& vertex1 = graph()[v1];
+        const CellGraphVertex& vertex0 = graph()[v0];
+        const CellGraphVertex& vertex1 = graph()[v1];
         const uint32_t group0 = vertex0.group;
         const uint32_t group1 = vertex1.group;
         if(group0 != group1) {

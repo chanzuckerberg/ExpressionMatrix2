@@ -28,7 +28,7 @@ namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
         class BitSet;
-        class CellSimilarityGraph;
+        class CellGraph;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
         class ExpressionMatrixSubset;
@@ -61,7 +61,7 @@ public:
 
 
 
-// Class used to store information about a cell similarity graph.
+// Class used to store information about a cell graph.
 class ChanZuckerberg::ExpressionMatrix2::GraphInformation {
 public:
     string cellSetName;
@@ -383,9 +383,9 @@ public:
         const string& name,
         double csvDownsample) const;
 
-    // Create a new graph.
+    // Create a new cell graph.
     // Graphs are not persistent (they are stored in memory only).
-    void createCellSimilarityGraph(
+    void createCellGraph(
         const string& graphName,            // The name of the graph to be created. This is used as a key in the graph map.
         const string& cellSetName,          // The cell set to be used.
         const string& similarPairsName,     // The name of the SimilarPairs object to be used to create the graph.
@@ -736,10 +736,10 @@ public:
 
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
-    map<string, pair<GraphInformation, boost::shared_ptr<CellSimilarityGraph> > > graphs;
+    map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > graphs;
 
     // Store the cluster ids in a graph in a meta data field.
-    void storeClusterId(const string& metaDataName, const CellSimilarityGraph&);
+    void storeClusterId(const string& metaDataName, const CellGraph&);
 
 
 };

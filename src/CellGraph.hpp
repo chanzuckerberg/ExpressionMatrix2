@@ -1,11 +1,11 @@
-// The cell similarity graph is a graph in which each vertex
+// The cell graph is a graph in which each vertex
 // corresponds to a cell.
 // An undirected edge is created between two vertices
 // if the there is good similarity between the
 // expression vectors of the corresponding cells.
 
-#ifndef CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_HPP
-#define CZI_EXPRESSION_MATRIX2_CELL_SIMILARITY_GRAPH_HPP
+#ifndef CZI_EXPRESSION_MATRIX2_CELL_GRAPH_HPP
+#define CZI_EXPRESSION_MATRIX2_CELL_GRAPH_HPP
 
 #include "Ids.hpp"
 
@@ -22,17 +22,17 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
-        class CellSimilarityGraph;
-        class CellSimilarityGraphVertex;
-        class CellSimilarityGraphEdge;
+        class CellGraph;
+        class CellGraphVertex;
+        class CellGraphEdge;
 
-        // The base class for classa CellSimilarityGraph.
+        // The base class for class CellGraph.
         typedef boost::adjacency_list<
             boost::listS,
             boost::listS,
             boost::undirectedS,
-            CellSimilarityGraphVertex,
-            CellSimilarityGraphEdge> CellSimilarityGraphBaseClass;
+            CellGraphVertex,
+            CellGraphEdge> CellGraphBaseClass;
 
         namespace MemoryMapped {
             template<class T> class Vector;
@@ -42,14 +42,14 @@ namespace ChanZuckerberg {
 
 
 
-// A vertex of the cell similarity graph.
-class ChanZuckerberg::ExpressionMatrix2::CellSimilarityGraphVertex {
+// A vertex of the cell graph.
+class ChanZuckerberg::ExpressionMatrix2::CellGraphVertex {
 public:
     CellId cellId = invalidCellId;
-    CellSimilarityGraphVertex()
+    CellGraphVertex()
     {
     }
-    CellSimilarityGraphVertex(CellId cellId) :
+    CellGraphVertex(CellId cellId) :
         cellId(cellId)
     {
     }
@@ -63,16 +63,16 @@ public:
 
 
 
-// An edge of the cell similarity graph.
-class ChanZuckerberg::ExpressionMatrix2::CellSimilarityGraphEdge {
+// An edge of the cell graph.
+class ChanZuckerberg::ExpressionMatrix2::CellGraphEdge {
 public:
     float similarity = -1.;
 
-    CellSimilarityGraphEdge()
+    CellGraphEdge()
     {
     }
 
-    CellSimilarityGraphEdge(float similarity) :
+    CellGraphEdge(float similarity) :
         similarity(similarity)
     {
     }
@@ -82,10 +82,13 @@ public:
 
 
 
-class ChanZuckerberg::ExpressionMatrix2::CellSimilarityGraph : public CellSimilarityGraphBaseClass {
+class ChanZuckerberg::ExpressionMatrix2::CellGraph : public CellGraphBaseClass {
 public:
-    using CellSimilarityGraphBaseClass::CellSimilarityGraphBaseClass;
-    typedef CellSimilarityGraph Graph;
+
+    // Use the constructors of the base class.
+    using CellGraphBaseClass::CellGraphBaseClass;
+
+    typedef CellGraph Graph;
     Graph& graph()
     {
         return *this;
@@ -95,7 +98,7 @@ public:
         return *this;
     }
 
-    CellSimilarityGraph(
+    CellGraph(
         const MemoryMapped::Vector<CellId>& cellSet, // The cell set to be used.
         const string& similarPairsName,           // The name of the SimilarPairs object to be used to create the graph.
         double similarityThreshold,                  // The minimum similarity to create an edge.

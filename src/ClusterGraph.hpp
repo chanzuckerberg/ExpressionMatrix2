@@ -1,7 +1,7 @@
 #ifndef CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_HPP
 #define CZI_EXPRESSION_MATRIX2_CLUSTER_GRAPH_HPP
 
-// In the cluster graph, each vertex represents a cluster of the cell similarity graph.
+// In the cluster graph, each vertex represents a cluster of the cell graph.
 
 #include "Ids.hpp"
 #include <boost/graph/adjacency_list.hpp>
@@ -27,7 +27,7 @@ namespace ChanZuckerberg {
             ClusterGraphEdge
             >;
 
-        class CellSimilarityGraph;
+        class CellGraph;
         class GeneSet;
 
         namespace MemoryMapped {
@@ -42,7 +42,7 @@ class ChanZuckerberg::ExpressionMatrix2::ClusterGraphVertex {
 public:
 
 	// The clusterId of the cluster represented by this vertex.
-	// This is the same as the clusterId for all the CellSimilarityGraph
+	// This is the same as the clusterId for all the CellGraph
 	// vertices that correspond to this ClusterGraphVertex.
 	uint32_t clusterId;
 
@@ -51,7 +51,7 @@ public:
 
 	// The average gene expression for these cells.
 	// This is a vector of size equal to the number of genes
-	// in the gene set used to create the cell similarity graph.
+	// in the gene set used to create the cell graph.
 	vector<double> averageGeneExpression;
 };
 
@@ -67,9 +67,9 @@ public:
 class ChanZuckerberg::ExpressionMatrix2::ClusterGraph : public ClusterGraphBaseClass {
 public:
 
-	// Create the ClusterGraph from the CellSimilarityGraph.
-	// This uses the clusterId stored in each CellSimilarityGraphVertex.
-	ClusterGraph(const CellSimilarityGraph&);
+	// Create the ClusterGraph from the CellGraph.
+	// This uses the clusterId stored in each CellGraphVertex.
+	ClusterGraph(const CellGraph&);
 
 	// Store in each edge the similarity of the two clusters, computed using the clusters
 	// average expression stored in each vertex.

@@ -1,9 +1,9 @@
-// In the cluster graph, each vertex represents a cluster of the cell similarity graph.
+// In the cluster graph, each vertex represents a cluster of the cell graph.
 
 
 
 #include "ClusterGraph.hpp"
-#include "CellSimilarityGraph.hpp"
+#include "CellGraph.hpp"
 #include "CZI_ASSERT.hpp"
 #include "deduplicate.hpp"
 #include "GeneSet.hpp"
@@ -24,15 +24,15 @@ using namespace ExpressionMatrix2;
 
 
 
-// Create the ClusterGraph from the CellSimilarityGraph.
-// This uses the clusterId stored in each CellSimilarityGraphVertex.
-ClusterGraph::ClusterGraph(const CellSimilarityGraph& cellSimilarityGraph)
+// Create the ClusterGraph from the CellGraph.
+// This uses the clusterId stored in each CellGraphVertex.
+ClusterGraph::ClusterGraph(const CellGraph& cellGraph)
 {
 
     // Construct the vertices of the ClusterGraph.
     map<uint32_t, vertex_descriptor> vertexMap;    // Maps clusterId to vertex_descriptor.
-    BGL_FORALL_VERTICES(cv, cellSimilarityGraph, CellSimilarityGraph){
-        const CellSimilarityGraphVertex& cVertex = cellSimilarityGraph[cv];
+    BGL_FORALL_VERTICES(cv, cellGraph, CellGraph){
+        const CellGraphVertex& cVertex = cellGraph[cv];
         const uint32_t clusterId = cVertex.clusterId;
 
         // Look for a vertex for this cluster.
@@ -57,14 +57,14 @@ ClusterGraph::ClusterGraph(const CellSimilarityGraph& cellSimilarityGraph)
     }
 
 
-    // Create the edges by looping over all edges of the CellSimilarityGraph.
-    BGL_FORALL_EDGES(ce, cellSimilarityGraph, CellSimilarityGraph){
+    // Create the edges by looping over all edges of the CellGraph.
+    BGL_FORALL_EDGES(ce, cellGraph, CellGraph){
 
-        // Find the CellSimilarityGraph vertices of this edge.
-        const CellSimilarityGraph::vertex_descriptor cv0 = source(ce, cellSimilarityGraph);
-        const CellSimilarityGraph::vertex_descriptor cv1 = target(ce, cellSimilarityGraph);
-        const CellSimilarityGraphVertex& cVertex0 = cellSimilarityGraph[cv0];
-        const CellSimilarityGraphVertex& cVertex1 = cellSimilarityGraph[cv1];
+        // Find the vertices of this edge.
+        const CellGraph::vertex_descriptor cv0 = source(ce, cellGraph);
+        const CellGraph::vertex_descriptor cv1 = target(ce, cellGraph);
+        const CellGraphVertex& cVertex0 = cellGraph[cv0];
+        const CellGraphVertex& cVertex1 = cellGraph[cv1];
 
         // Find the corresponding vertices in the ClusterGraph.
         const auto it0 = vertexMap.find(cVertex0.clusterId);

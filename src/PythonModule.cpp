@@ -133,8 +133,8 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
 
-       // Cell similarity graph.
-       .def("createCellSimilarityGraph", &ExpressionMatrix::createCellSimilarityGraph)
+       // Cell graph.
+       .def("createCellGraph", &ExpressionMatrix::createCellGraph)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)

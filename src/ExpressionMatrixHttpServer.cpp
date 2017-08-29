@@ -1,5 +1,5 @@
+#include "CellGraph.hpp"
 #include "ExpressionMatrix.hpp"
-#include "CellSimilarityGraph.hpp"
 #include "ClusterGraph.hpp"
 #include "randIndex.hpp"
 #include "SimilarPairs.hpp"
@@ -521,7 +521,7 @@ void ExpressionMatrix::cluster(
     getParameterValue(request, "timeout", timeout);
 
 
-    // Find the cell similarity graph.
+    // Find the cell graph.
     const auto it = graphs.find(graphName);
     if(it == graphs.end()) {
         html << "<p>Graph " << graphName << " does not exists.";
@@ -532,7 +532,7 @@ void ExpressionMatrix::cluster(
     const string& similarPairsName = graphInformation.similarPairsName;
     const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
     const GeneSet& geneSet = similarPairs.getGeneSet();
-    CellSimilarityGraph& graph = *(it->second.second);
+    CellGraph& graph = *(it->second.second);
 
     // Write the title.
     html << "<h1>Clustering on graph " << graphName << "</h1>";
@@ -736,8 +736,8 @@ void ExpressionMatrix::createNewGraph(
 
     // Create the graph.
     html << "<div style='font-family:courier'>";
-    html << timestamp << "Graph creation begins.";
-    createCellSimilarityGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
+    html << timestamp << "Cell graph creation begins.";
+    createCellGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
     const GraphInformation& graphInfo = graphs[graphName].first;
     html <<
         "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<

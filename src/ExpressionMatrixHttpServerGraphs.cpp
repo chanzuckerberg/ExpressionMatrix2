@@ -2,7 +2,7 @@
 // of class ExpressionMatrix related to cell similarity graphs.
 
 #include "ExpressionMatrix.hpp"
-#include "CellSimilarityGraph.hpp"
+#include "CellGraph.hpp"
 #include "color.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
@@ -36,7 +36,7 @@ void ExpressionMatrix::exploreGraphs(
     for(const auto& p: graphs) {
         const string& graphName = p.first;
         const GraphInformation& info = p.second.first;
-        // const CellSimilarityGraph& graph = *(p.second.second);
+        // const CellGraph& graph = *(p.second.second);
         html << "<tr><td><a href='graph?graphName=" << urlEncode(graphName);
         if(info.edgeCount>50000) {
             // The graph has lots of edges. Don't display them initially.
@@ -131,17 +131,17 @@ void ExpressionMatrix::compareGraphs(
     const auto graphPointer1 = it1->second.second;
     CZI_ASSERT(graphPointer0);
     CZI_ASSERT(graphPointer1);
-    const CellSimilarityGraph& graph0 = *graphPointer0;
-    const CellSimilarityGraph& graph1 = *graphPointer1;
+    const CellGraph& graph0 = *graphPointer0;
+    const CellGraph& graph1 = *graphPointer1;
 
 
 
     // Find the common vertices (vertices that correspond to the same cell).
     vector<CellId> cells0, cells1;
-    BGL_FORALL_VERTICES(v, graph0, CellSimilarityGraph) {
+    BGL_FORALL_VERTICES(v, graph0, CellGraph) {
         cells0.push_back(graph0[v].cellId);
     }
-    BGL_FORALL_VERTICES(v, graph1, CellSimilarityGraph) {
+    BGL_FORALL_VERTICES(v, graph1, CellGraph) {
         cells1.push_back(graph1[v].cellId);
     }
     sort(cells0.begin(), cells0.end());
@@ -154,9 +154,9 @@ void ExpressionMatrix::compareGraphs(
     // Maps of the edges. Keyed by pair(CellId, CellId), with the lowest numbered cell first.
     // Values: similarities.
     map< pair<CellId, CellId>, float> edgeMap0, edgeMap1;
-    BGL_FORALL_EDGES(e, graph0, CellSimilarityGraph) {
-        const CellSimilarityGraph::vertex_descriptor vA = source(e, graph0);
-        const CellSimilarityGraph::vertex_descriptor vB = target(e, graph0);
+    BGL_FORALL_EDGES(e, graph0, CellGraph) {
+        const CellGraph::vertex_descriptor vA = source(e, graph0);
+        const CellGraph::vertex_descriptor vB = target(e, graph0);
         CellId cellIdA = graph0[vA].cellId;
         CellId cellIdB = graph0[vB].cellId;
         CZI_ASSERT(cellIdA != cellIdB);
@@ -166,9 +166,9 @@ void ExpressionMatrix::compareGraphs(
         CZI_ASSERT(cellIdA < cellIdB);
         edgeMap0.insert(make_pair( make_pair(cellIdA, cellIdB), graph0[e].similarity));
     }
-    BGL_FORALL_EDGES(e, graph1, CellSimilarityGraph) {
-        const CellSimilarityGraph::vertex_descriptor vA = source(e, graph1);
-        const CellSimilarityGraph::vertex_descriptor vB = target(e, graph1);
+    BGL_FORALL_EDGES(e, graph1, CellGraph) {
+        const CellGraph::vertex_descriptor vA = source(e, graph1);
+        const CellGraph::vertex_descriptor vB = target(e, graph1);
         CellId cellIdA = graph1[vA].cellId;
         CellId cellIdB = graph1[vB].cellId;
         CZI_ASSERT(cellIdA != cellIdB);
@@ -370,7 +370,7 @@ void ExpressionMatrix::exploreGraph(
     const string& similarPairsName = graphInformation.similarPairsName;
     vector<string> geneSetNames = geneSetNamesFromSimilarPairsName(similarPairsName);
     const string geneSetName = geneSetNames.empty() ? "" : geneSetNames.front();
-    CellSimilarityGraph& graph = *(it->second.second);
+    CellGraph& graph = *(it->second.second);
 
     // Write the title.
     html << "<h1>Graph " << graphName << "</h1>";
@@ -794,8 +794,8 @@ Thinner edge
         colorByNumber = true;
 
         // Set the value field for all the vertices.
-        BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-            CellSimilarityGraphVertex& vertex = graph[v];
+        BGL_FORALL_VERTICES(v, graph, CellGraph) {
+            CellGraphVertex& vertex = graph[v];
             const double rawCount = getExpressionCount(vertex.cellId, geneId);
             if(normalizationMethod == NormalizationMethod::None) {
                 vertex.value = rawCount;
@@ -821,8 +821,8 @@ Thinner edge
             return;
         }
         colorByNumber = true;
-        BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-            CellSimilarityGraphVertex& vertex = graph[v];
+        BGL_FORALL_VERTICES(v, graph, CellGraph) {
+            CellGraphVertex& vertex = graph[v];
             vertex.value = computeCellSimilarity(cellIdForColoringBySimilarity, vertex.cellId);
         }
     }
@@ -843,8 +843,8 @@ Thinner edge
             // We need to assign groups based on the of values of the specified meta data field.
             // Find the frequency of each of them.
             map<string, int> frequencyTable;
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                const CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                const CellGraphVertex& vertex = graph[v];
                 const string metaDataValue = getCellMetaData(vertex.cellId, metaDataName);
                 const auto it = frequencyTable.find(metaDataValue);
                 if(it == frequencyTable.end()) {
@@ -866,8 +866,8 @@ Thinner edge
             }
 
             // Assign the vertices to groups..
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                CellGraphVertex& vertex = graph[v];
                 const string metaData = getCellMetaData(vertex.cellId, metaDataName);
                 vertex.group = groupMap[metaData];
             }
@@ -913,8 +913,8 @@ Thinner edge
         else if(metaDataMeaning == "color") {
 
             // The meta data field is interpreted directly as an html color.
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                CellGraphVertex& vertex = graph[v];
                 vertex.group = 0;
                 vertex.color = getCellMetaData(vertex.cellId, metaDataName);
             }
@@ -926,8 +926,8 @@ Thinner edge
         // We store in each vertex the meta data value that will determine the vertex color.
         else if(metaDataMeaning == "number") {
             colorByNumber = true;
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                CellGraphVertex& vertex = graph[v];
                 vertex.group = 0;
                 vertex.value = std::numeric_limits<double>::max();
                 try {
@@ -944,8 +944,8 @@ Thinner edge
 
         // Otherwise, don't color the vertices.
         else {
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                CellGraphVertex& vertex = graph[v];
                 vertex.color.clear();
                 vertex.group = 0;
             }
@@ -954,7 +954,7 @@ Thinner edge
 
 
         // Don't color the edges.
-        BGL_FORALL_EDGES(e, graph, CellSimilarityGraph) {
+        BGL_FORALL_EDGES(e, graph, CellGraph) {
             graph[e].color.clear();
         }
 
@@ -965,12 +965,12 @@ Thinner edge
     // Otherwise, all vertices and edges are colored black.
     else {
 
-        BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-            CellSimilarityGraphVertex& vertex = graph[v];
+        BGL_FORALL_VERTICES(v, graph, CellGraph) {
+            CellGraphVertex& vertex = graph[v];
             vertex.color.clear();
             vertex.group = 0;
         }
-        BGL_FORALL_EDGES(e, graph, CellSimilarityGraph) {
+        BGL_FORALL_EDGES(e, graph, CellGraph) {
             graph[e].color.clear();
         }
     }
@@ -983,7 +983,7 @@ Thinner edge
     if(colorByNumber) {
 
         // Compute the minimum and maximum values.
-        BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
+        BGL_FORALL_VERTICES(v, graph, CellGraph) {
             const double value = graph[v].value;
             if(value == std::numeric_limits<double>::max()) {
                 continue;
@@ -1001,13 +1001,13 @@ Thinner edge
 
         // Now compute the colors.
         if(minValue==maxValue || maxValue==std::numeric_limits<double>::lowest()) {
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
                 graph[v].color = "black";
             }
         } else {
             const double scalingFactor = 1./(maxColorValue - minColorValue);
-            BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-                CellSimilarityGraphVertex& vertex = graph[v];
+            BGL_FORALL_VERTICES(v, graph, CellGraph) {
+                CellGraphVertex& vertex = graph[v];
                 const double value = vertex.value;
                 if(value == std::numeric_limits<double>::max()) {
                     continue;

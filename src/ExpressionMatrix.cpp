@@ -1,5 +1,5 @@
 #include "ExpressionMatrix.hpp"
-#include "CellSimilarityGraph.hpp"
+#include "CellGraph.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -1297,7 +1297,7 @@ bool ExpressionMatrix::downsampleCellSet(
 
 // Create a new graph.
 // Graphs are not persistent (they are stored in memory only).
-void ExpressionMatrix::createCellSimilarityGraph(
+void ExpressionMatrix::createCellGraph(
     const string& graphName,            // The name of the graph to be created. This is used as a key in the graph map.
     const string& cellSetName,          // The cell set to be used.
     const string& similarPairsName,     // The name of the SimilarPairs object to be used to create the graph.
@@ -1318,8 +1318,8 @@ void ExpressionMatrix::createCellSimilarityGraph(
     const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
 
     // Create the graph.
-    typedef boost::shared_ptr<CellSimilarityGraph> GraphSharedPointer;
-    const GraphSharedPointer graph = GraphSharedPointer(new CellSimilarityGraph(
+    typedef boost::shared_ptr<CellGraph> GraphSharedPointer;
+    const GraphSharedPointer graph = GraphSharedPointer(new CellGraph(
         cellSet,
         directoryName + "/SimilarPairs-" + similarPairsName,
         similarityThreshold,
@@ -1348,15 +1348,15 @@ void ExpressionMatrix::createCellSimilarityGraph(
 // Store the cluster ids in a graph in a meta data field.
 void ExpressionMatrix::storeClusterId(
     const string& metaDataName,
-    const CellSimilarityGraph& graph)
+    const CellGraph& graph)
 {
     // Find the string id corresponding to the specified meta data name.
     // This adds it to the table if not already present.
     const StringId metaDataNameStringId = cellMetaDataNames[metaDataName];
 
     // Loop over all vertices in the graph.
-    BGL_FORALL_VERTICES(v, graph, CellSimilarityGraph) {
-        const CellSimilarityGraphVertex& vertex = graph[v];
+    BGL_FORALL_VERTICES(v, graph, CellGraph) {
+        const CellGraphVertex& vertex = graph[v];
 
         // Extract the cell id and the cluster id.
         const CellId cellId = vertex.cellId;

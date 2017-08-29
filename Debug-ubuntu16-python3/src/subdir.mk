@@ -4,8 +4,8 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/CellGraph.cpp \
 ../src/CellSets.cpp \
-../src/CellSimilarityGraph.cpp \
 ../src/ClusterGraph.cpp \
 ../src/ExpressionMatrix.cpp \
 ../src/ExpressionMatrixBioHub.cpp \
@@ -30,8 +30,8 @@ CPP_SRCS += \
 ../src/touchMemory.cpp 
 
 OBJS += \
+./src/CellGraph.o \
 ./src/CellSets.o \
-./src/CellSimilarityGraph.o \
 ./src/ClusterGraph.o \
 ./src/ExpressionMatrix.o \
 ./src/ExpressionMatrixBioHub.o \
@@ -56,8 +56,8 @@ OBJS += \
 ./src/touchMemory.o 
 
 CPP_DEPS += \
+./src/CellGraph.d \
 ./src/CellSets.d \
-./src/CellSimilarityGraph.d \
 ./src/ClusterGraph.d \
 ./src/ExpressionMatrix.d \
 ./src/ExpressionMatrixBioHub.d \
