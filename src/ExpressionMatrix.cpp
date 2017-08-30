@@ -1345,6 +1345,49 @@ void ExpressionMatrix::createCellGraph(
 
 
 
+// Compute the layout (vertex positions) for the graph with a given name.
+void ExpressionMatrix::computeCellGraphLayout(const string& graphName)
+{
+    // Locate the graph.
+    const auto it = graphs.find(graphName);
+    if(it == graphs.end()) {
+        throw runtime_error("Graph " + graphName + " does not exist.");
+    }
+    CellGraph& cellGraph = *(it->second.second);
+
+    if(!cellGraph.layoutWasComputed) {
+        cellGraph.computeLayout();
+        cellGraph.layoutWasComputed = true;
+    }
+
+}
+
+
+
+// Return vertex information for the graph with a given name.
+vector<CellGraphVertexInfo> ExpressionMatrix::getCellGraphVertices(const string& graphName) const
+{
+    // Locate the graph.
+    const auto it = graphs.find(graphName);
+    if(it == graphs.end()) {
+        throw runtime_error("Graph " + graphName + " does not exist.");
+    }
+    const CellGraph& cellGraph = *(it->second.second);
+
+    if(!cellGraph.layoutWasComputed) {
+        throw runtime_error("Layout for graph " + graphName + " is not available.");
+    }
+
+    // Fill the return vector by looping over all vertices.
+    vector<CellGraphVertexInfo> vertexInfos;
+    BGL_FORALL_VERTICES(v, cellGraph, CellGraph) {
+        vertexInfos.push_back(cellGraph[v]);
+    }
+    return vertexInfos;
+}
+
+
+
 // Store the cluster ids in a graph in a meta data field.
 void ExpressionMatrix::storeClusterId(
     const string& metaDataName,

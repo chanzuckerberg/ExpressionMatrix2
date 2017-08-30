@@ -45,6 +45,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposePair<string, string>("StringStringPair");
 
 
+
     // Container classes. These are standard C++ vectors
     // exposed to Python using the vector_indexing_suite capability.
     // They have an API very similar to that of a Python list,
@@ -62,11 +63,14 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     //     vList = [x for x in v]
     // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/v2/indexing.html
     // for more information.
+    // Because of the similarity with Python lists, we use Python names
+    // that end with "List" even though these types map to C++ std::vector.
     exposeVector<int>("IntList");
     exposeVector<uint32_t>("UintList"); // Used for vector<GeneId> and vector<CellId>
     exposeVector< pair<int, int> >("IntIntPairList");
     exposeVector<string>("StringList");
     exposeVector< pair<string, string> >("StringPairList");
+    exposeVector<CellGraphVertexInfo>("CellGraphVertexInfoList");
 
 
 
@@ -133,8 +137,10 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
 
-       // Cell graph.
+       // Cell graphs.
        .def("createCellGraph", &ExpressionMatrix::createCellGraph)
+       .def("computeCellGraphLayout", &ExpressionMatrix::computeCellGraphLayout)
+       .def("getCellGraphVertices", &ExpressionMatrix::getCellGraphVertices)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)
@@ -161,6 +167,12 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("docDirectory", &ServerParameters::docDirectory)
         ;
 
+    // Class CellGraphVertexInfo.
+    class_<CellGraphVertexInfo>("CellGraphVertexInfo", init<>())
+        .def_readonly("cellId", &CellGraphVertexInfo::cellId)
+        .def("x", &CellGraphVertexInfo::x)
+        .def("y", &CellGraphVertexInfo::y)
+        ;
 
 
     // Enum class NormalizationMethod.

@@ -24,6 +24,7 @@ namespace ChanZuckerberg {
 
         class CellGraph;
         class CellGraphVertex;
+        class CellGraphVertexInfo;
         class CellGraphEdge;
 
         // The base class for class CellGraph.
@@ -43,18 +44,42 @@ namespace ChanZuckerberg {
 
 
 // A vertex of the cell graph.
-class ChanZuckerberg::ExpressionMatrix2::CellGraphVertex {
+// The base class CellGraphVertexInfo is used to communicate with Python.
+class ChanZuckerberg::ExpressionMatrix2::CellGraphVertexInfo {
 public:
     CellId cellId = invalidCellId;
-    CellGraphVertex()
+    array<double, 2> position;
+    double x() const
+    {
+        return position[0];
+    }
+    double y() const
+    {
+        return position[1];
+    }
+    CellGraphVertexInfo()
     {
     }
-    CellGraphVertex(CellId cellId) :
+    CellGraphVertexInfo(const CellGraphVertexInfo& that) :
+        cellId(that.cellId), position(that.position)
+    {
+    }
+    CellGraphVertexInfo(CellId cellId) :
         cellId(cellId)
     {
     }
+    bool operator==(const CellGraphVertexInfo& that)
+    {
+        return cellId==that.cellId && position==that.position;
+    }
+};
+class ChanZuckerberg::ExpressionMatrix2::CellGraphVertex : public CellGraphVertexInfo {
+public:
 
-    array<double, 2> position;
+    // Use the base class constructors.
+    using CellGraphVertexInfo::CellGraphVertexInfo;
+
+    // Additional fields not needed in Python.
     uint32_t group = 0;
     uint32_t clusterId = 0;
     string color;

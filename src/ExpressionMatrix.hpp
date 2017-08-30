@@ -5,6 +5,7 @@
 
 // CZI.
 #include "Cell.hpp"
+#include "CellGraph.hpp"
 #include "CellSets.hpp"
 #include "GeneSet.hpp"
 #include "HttpServer.hpp"
@@ -737,6 +738,12 @@ public:
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
     map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > graphs;
+
+    // Compute the layout (vertex positions) for the graph with a given name.
+    void computeCellGraphLayout(const string& graphName);
+
+    // Return vertex information for the graph with a given name.
+    vector<CellGraphVertexInfo> getCellGraphVertices(const string& graphName) const;
 
     // Store the cluster ids in a graph in a meta data field.
     void storeClusterId(const string& metaDataName, const CellGraph&);
