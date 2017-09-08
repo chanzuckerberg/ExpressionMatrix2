@@ -533,6 +533,7 @@ private:
         }
     };
 
+public:
     // Return a cell id given a string.
     // The string can be a cell name or a CellId (an integer).
     // Returns invalidCellId if the cell was not found.
@@ -543,8 +544,15 @@ private:
     // Returns invalidGeneId if the gene was not found.
     GeneId geneIdFromString(const string& s);
 
+private:
     // Functionality to define and maintain cell sets.
     CellSets cellSets;
+
+public:
+
+    // Get a copy of the cell set with a given name, for use in the Python API.
+    // Returns an empty cell set if a cel set with the specified name does not exist.
+    vector<CellId> getCellSet(const string& cellSetName) const;
 
 
 

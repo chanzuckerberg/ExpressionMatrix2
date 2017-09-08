@@ -683,6 +683,22 @@ void ExpressionMatrix::exploreCellSet(
 
 
 
+// Get a copy of the cell set with a given name, for use in the Python API.
+// Returns an empty cell set if a cel set with the specified name does not exist.
+vector<CellId> ExpressionMatrix::getCellSet(const string& cellSetName) const
+{
+    vector<CellId> cells;
+    const auto it = cellSets.cellSets.find(cellSetName);
+    if(it != cellSets.cellSets.end()) {
+        const CellSet& cellSet = *(it->second);
+        cells.resize(cellSet.size());
+        copy(cellSet.begin(), cellSet.end(), cells.begin());
+    }
+    return cells;
+}
+
+
+
 void ExpressionMatrix::createCellSetUsingMetaData(const vector<string>& request, ostream& html)
 {
     string cellSetName;

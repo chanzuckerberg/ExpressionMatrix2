@@ -113,6 +113,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        // Get cell meta data.
        .def("getCellMetaData", getCellMetaData)
        .def("getAllCellMetaData", &ExpressionMatrix::getAllCellMetaData)
+       .def("cellIdFromString", &ExpressionMatrix::cellIdFromString)
 
        // Gene sets.
        .def("createGeneSetUsingInformationContent", createGeneSetUsingInformationContent)
@@ -123,6 +124,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("createCellSetUsingMetaData", createCellSetUsingMetaData)
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
+       .def("getCellSet", &ExpressionMatrix::getCellSet)
 
        // Compute cell similarity.
        .def("computeCellSimilarity", &ExpressionMatrix::computeCellSimilarity)
