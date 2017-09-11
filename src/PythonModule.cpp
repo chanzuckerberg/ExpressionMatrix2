@@ -74,6 +74,11 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
 
 
+    // Constants for an invalid gene id or cell id.
+    scope().attr("invalidGeneId") = invalidGeneId;
+    scope().attr("invalidCellId") = invalidCellId;
+
+
     // Overloaded functions need special handling.
     // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/tutorial/doc/html/python/functions.html#python.overloading
     CellId (ExpressionMatrix::*addCell)(const string&)
@@ -185,8 +190,6 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
       .value(normalizationMethodToShortString(NormalizationMethod::Invalid).c_str(),    NormalizationMethod::Invalid)
       .export_values()
       ;
-
-
 
     // Some non-member functions used only for testing or debugging.
     def("testMemoryMappedVector", testMemoryMappedVector);
