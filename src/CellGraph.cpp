@@ -205,7 +205,7 @@ void CellGraph::computeLayout()
 
     // Run sfdp with output in Graphviz plain format.
     // See http://www.graphviz.org/content/output-formats#dplain
-    const int systemReturnCode = ::system("sfdpxyz -O -Tplain -Goverlap=true -Gsmoothing=triangle Graph.dot");
+    const int systemReturnCode = ::system("sfdp -O -Tplain -Goverlap=true -Gsmoothing=triangle Graph.dot");
     const int sfdpReturnCode = WEXITSTATUS(systemReturnCode);   // Man page for system is not super clear on this.
     if(sfdpReturnCode!=0 && sfdpReturnCode!=1) {    // Sfdp returns 1 if build without triangulation library.
         throw runtime_error("Error " +
