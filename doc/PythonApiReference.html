@@ -6,7 +6,7 @@
 <link rel=stylesheet href=style.css />
 <link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
 <style>
-h4 {
+h3 {
     display: inline;
 }
 </style>
@@ -22,7 +22,16 @@ provided by <code>ExpressionMatrix2.so</code>. All names documented below
 are in the namespace of the <code>Expression2</code> module
 and become available after the module is imported.
 
+<br><br><h2>Error handling</h2>
+Most errors are reported by raising a Python <code>Exception</code> 
+containing an explanatory message. 
 
+<br><br><h2>Threading considerations</h2>
+The underlying C++ code is currently written as single-threaded and
+therefore it uses data structures that don't support concurrent execution.
+If the calling Python code is multithreaded, it should use a mutex 
+to serialize calls into each <code>ExpressionMatrix</code> object.
+However, concurrent calls to separate <code>ExpressionMatrix</code> objects are permitted.
 
 <br><br><h2>Pair classes</h2>
 A pair class has two data members named <code>first</code> and <code>second</code>.
@@ -30,8 +39,8 @@ The name of each pair class ends with <code>Pair</code> and reflects the types o
 
 <br><br><table style='margin:auto'>
 <tr><th>Pair class name<th>Type of <code>first</code><th>Type of <code>second</code>
-<tr><td><code>IntIntPair</code><td><code>Integer</code><td><code>Integer</code>
-<tr><td><code>StringStringPair</code><td><code>String</code><td><code>String</code>
+<tr><td id=IntIntPair><code>IntIntPair</code><td><code>Integer</code><td><code>Integer</code>
+<tr><td id=StringStringPair><code>StringStringPair</code><td><code>String</code><td><code>String</code>
 </table>
 
 
@@ -53,64 +62,355 @@ of the data it contains.
 
 <br><br><table style='margin:auto'>
 <tr><th>Container class name<th>Type of contained elements
-<tr><td><code>IntList</code><td><code>Integer</code>
-<tr><td><code>UintList</code><td><code>Integer</code>
-<tr><td><code>StringList</code><td><code>String</code>
-<tr><td><code>StringPairList</code><td><code>StringPair</code>
-<tr><td><code>CellGraphVertexInfoList</code><td><code>CellGraphVertexInfo</code>
+<tr><td id=IntList><code>IntList</code><td><code>Integer</code>
+<tr><td id=UintList><code>UintList</code><td><code>Integer</code>
+<tr><td id=StringList><code>StringList</code><td><code>String</code>
+<tr><td id=StringPairList><code>StringPairList</code><td><code><a href=#StringStringPair>StringStringPair</a></code>
+<tr><td id=CellGraphVertexInfoList><code>CellGraphVertexInfoList</code><td><code><a href=#CellGraphVertexInfo>CellGraphVertexInfo</a></code>
 </table>
 
 
 
-<br><br><h2>Class <code>ExpressionMatrix</code></h2>
+<br><br><h2 id=CellGraphVertexInfo>Class <code>CellGraphVertexInfo</code></h2>
+<p>This class is used to give the Python code access
+to information about the vertices of a cell similarity graph.
 
-<br><code>ExpressionMatrix(directoryName, ExpressionMatrixCreationParameters)</code>
-<br><code>ExpressionMatrix(directoryName)</code>
+<p>
+<code><b>CellGraphVertexInfo</b>()
+</code>
+<br>Return value: <code>CellGraphVertexInfo</code>.
+<br>This constructor creates an unitialized <code>CellGraphVertexInfo</code> object.
 
-<br><code>ExpressionMatrix.geneCount()</code>
-<br><code>ExpressionMatrix.cellCount()</code>
+<p>
+<code>CellGraphVertexInfo.<b>cellId</b>
+</code>
+<br>Type: <code>integer</code>
+<br>This data member contains the cell id of the cell corresponding to the vertex.
 
-<br><code>ExpressionMatrix.addGene()</code>
+<p>
+<code>CellGraphVertexInfo.<b>x</b>()
+</code>
+<br>Return value: <code>float</code>
+<br>Returns the x coordinate of the vertex in the two-dimensional layout of
+the graph the vertex belongs to.
 
-<br><code>ExpressionMatrix.addCell</code>
-<br><code>ExpressionMatrix.addCells</code>
-<br><code>ExpressionMatrix.addCellsFromHdf5</code>
-<br><code>ExpressionMatrix.addCellsFromBioHub</code>
-<br><code>ExpressionMatrix.addCellMetaData</code>
-
-<br><code>ExpressionMatrix.getCellMetaData</code>
-<br><code>ExpressionMatrix.getAllCellMetaData</code>
-<br><code>ExpressionMatrix.cellIdFromString</code>
-
-<br><code>ExpressionMatrix.createGeneSetUsingInformationContent</code>
+<p>
+<code>CellGraphVertexInfo.<b>y</b>()
+</code>
+<br>Return value: <code>float</code>
+<br>Returns the y coordinate of the vertex in the two-dimensional layout of
+the graph the vertex belongs to.
 
 
-<br><code>ExpressionMatrix.createGeneSetIntersection</code>
-<br><code>ExpressionMatrix.createGeneSetUnion</code>
 
-<br><code>ExpressionMatrix.createCellSetUsingMetaData</code>
-<br><code>ExpressionMatrix.createCellSetIntersection</code>
-<br><code>ExpressionMatrix.createCellSetUnion</code>
-<br><code>ExpressionMatrix.getCellSet</code>
+<br><br><h2 id=ExpressionMatrix>Class <code>ExpressionMatrix</code></h2>
 
-<br><code>ExpressionMatrix.computeCellSimilarity</code>
-<br><code>ExpressionMatrix.computeApproximateLshCellSimilarity</code>
-<br><code>ExpressionMatrix.writeLshSimilarityComparison</code>
-<br><code>ExpressionMatrix.writeLshSimilarityComparisonSlow</code>
-<br><code>ExpressionMatrix.analyzeSimilarPairs</code>
+<h3>Constructors</h3>
 
-<br><code>ExpressionMatrix.findSimilarPairs0</code>
-<br><code>ExpressionMatrix.findSimilarPairs1</code>
-<br><code>ExpressionMatrix.findSimilarPairs2</code>
-<br><code>ExpressionMatrix.writeSimilarPairs</code>
+<p>
+<code><b>ExpressionMatrix</b>(directoryName, expressionMatrixCreationParameters)
+<br>directoryName : string
+<br>expressionMatrixCreationParameters: <a href=#ExpressionMatrixCreationParameters>ExpressionMatrixCreationParameters</a>
+</code>
+<br>Return value: <code>ExpressionMatrix</code>.
+<br>This constructor creates a new (empty) <code>ExpressionMatrix</code> object in the specified directory.
+The directory must not exists. 
 
-<br><code>ExpressionMatrix.createCellGraph</code>
-<br><code>ExpressionMatrix.computeCellGraphLayout</code>
-<br><code>ExpressionMatrix.getCellGraphVertices</code>
+<p>
+<code><b>ExpressionMatrix</b>(directoryName)
+<br>directoryName : string
+</code>
+<br>Return value: <code>ExpressionMatrix</code>.
+<br>This constructor can be used to access an existing <code>ExpressionMatrix</code> 
+object in the specified directory.
+The directory must exist. 
 
-<br><code>ExpressionMatrix.explore</code>
 
-<br><code>ExpressionMatrix.testExpressionMatrixSubset</code>
+
+<h3>Sizes</h3>
+
+<p>
+<code>ExpressionMatrix.<b>geneCount</b>()
+</code>
+<br>Return value: the number of genes currently defined (<code>integer</code>).
+
+<p>
+<code>ExpressionMatrix.<b>cellCount</b>()
+</code>
+<br>Return value: the number of cells currently defined (<code>integer</code>).
+
+
+<h3>Genes</h3>
+
+<p>
+<code>ExpressionMatrix.<b>addGene</b>(geneName)
+<br>geneName: string
+</code>
+<br>Return value: <code>integer</code>
+<br>Adds a gene with the specified name. 
+Returns <code>True</code> if the gene was added
+and <code>False</code> if the gene already existed.
+
+
+
+<h3>Cells</h3>
+
+<p>
+<code>ExpressionMatrix.<b>addCell</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>addCells</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>addCellsFromHdf5</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>addCellsFromBioHub</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>addCellMetaData</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>getCellMetaData</b>(cellId, metaDataName)
+<br>cellId: integer
+<br>metaDataName: string
+</code>
+<br>Return value: <code>string</code>
+<br>Returns the value of the specified meta data field for the given cell.
+Returns an empty string if the cell does not have that meta data field.
+The only meta data field that all cells are guaranteed to have is <code>CellName</code>.
+
+
+<p>
+<code>ExpressionMatrix.<b>getAllCellMetaData</b>(cellId)
+<br>cellId: integer
+</code>
+<br>Return value: <code><a href=#stringPairList>stringPairList</a></code>
+<br>Returns all meta data pairs (name, value) for a given cell.
+
+<p>
+<code>ExpressionMatrix.<b>cellIdFromString</b>(cellId)
+<br>cellId: integer
+</code>
+<br>Return value: <code>integer</code>
+<br>Returns the cell id corresponding to a given <code>CellName</code>.
+
+
+
+<h3>Gene sets</h3>
+
+<p>
+<code>ExpressionMatrix.<b>createGeneSetUsingInformationContent</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>createGeneSetIntersection</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>createGeneSetUnion</b>()
+</code>
+<br>Return value:
+
+
+
+<h3>Cell sets</h3>
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetIntersection</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetUnion</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>getCellSet</b>(cellSetName)
+<br>cellSetName: string
+</code>
+<br>Return value: <a href=#UintList>UintList</a>
+<br>Returns the cell ids of the cells in the cell set with the
+specified name. If the cell set does not exists,
+returns an ampty container.
+
+
+
+<h3>Cell similarity</h3>
+
+<p>
+<code>ExpressionMatrix.<b>computeCellSimilarity</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>computeApproximateLshCellSimilarity</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>writeLshSimilarityComparison</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>writeLshSimilarityComparisonSlow</b>()
+</code>
+<br>Return value:
+
+
+
+<h3>Pairs of similar cells</h3>
+
+<p>
+<code>ExpressionMatrix.<b>findSimilarPairs0</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>findSimilarPairs1</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>findSimilarPairs2</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>writeSimilarPairs</b>()
+</code>
+<br>Return value:
+
+<p>
+<code>ExpressionMatrix.<b>analyzeSimilarPairs</b>()
+</code>
+<br>Return value:
+
+
+
+<h3>Cell graphs</h3>
+
+<p>
+<code id=createCellGraph>ExpressionMatrix.<b>createCellGraph</b>(cellGraphName, cellSetName, similarPairsName, similarityThreshold, k)
+<br>cellGraphName: string
+<br>cellSetName: string
+<br>similarPairsName: string
+<br>similarityThreshold: float
+<br>k: integer
+</code>
+<br>Return value: <code>None</code>
+<br>Create a new cell similarity graph with name given as the first argument.
+The remaining arguments specify the parameters to be used to construct the
+graph. <code>similarityThreshold</code> is the minimum cell similarity 
+required for an edge to be created. <code>k</code> controls the maximum
+connectivity of the graph.
+
+
+<p>
+<code id=computeCellGraphLayout>ExpressionMatrix.<b>computeCellGraphLayout</b>(cellGraphName)
+<br>graphName: string
+</code>
+<br>Return value: <code>None</code>
+<br>Computes the two-dimensional layout for the graph with the given name.
+The graph must have been previously created with a call to 
+<code><a href=#createCellGraph>createCellGraph</a></code>.
+This function must be called once before the first call to 
+<code>getCellGraphVertices</code> for the graph.
+
+<p>
+<code>ExpressionMatrix.<b>getCellGraphVertices</b>(cellGraphName)
+<br>cellGraphName: string
+</code>
+<br>Return value: <code><a href=#CellGraphVertexInfoList>CellGraphVertexInfoList</a></code>
+<br>Returns information about the vertices of the cell graph with the given name.
+The graph must have been previously created with a call to
+<code><a href=#createCellGraph>createCellGraph</a></code>
+and its two-dimensional layout must have been computed with a call to 
+<code><a href=#computeCellGraphLayout>computeCellGraphLayout</a></code>.
+
+
+
+
+<h3>Miscellaneous</h3>
+
+<p>
+<code>ExpressionMatrix.<b>explore</b>(cellGraphName)
+</code>
+<br>Return value: 
+
+<p>
+<code>ExpressionMatrix.<b>testExpressionMatrixSubset</b>()
+</code>
+<br>Return value:
+
+
+
+<br><br><h2 id=ExpressionMatrixCreationParameters>Class <code>ExpressionMatrixCreationParameters</code></h2>
+
+<p>
+<code><b>ExpressionMatrixCreationParameters</b>()
+</code>
+<br>Return value: <code>ExpressionMatrixCreationParameters</code>.
+<br>This constructor creates a <code>ExpressionMatrixCreationParameters</code> object 
+filled in with default values.
+
+<p>
+<code>ExpressionMatrixCreationParameters.<b>geneCapacity</b></code>
+<br>Type: <code>integer</code>.
+<br>This data members controls the size of the hash table used to hold genes.
+For performance, the number of genes should not go above half of the value
+specified here. Rehashing is currently not supported, so this
+size cannot be changed after creation. 
+
+<p>
+<code>ExpressionMatrixCreationParameters.<b>cellCapacity</b></code>
+<br>Type: <code>integer</code>.
+<br>This data members controls the size of the hash table used to hold cells.
+For performance, the number of cells should not go above half of the value
+specified here. Rehashing is currently not supported, so this
+size cannot be changed after creation. 
+
+<p>
+<code>ExpressionMatrixCreationParameters.<b>cellMetaDataNameCapacity</b></code>
+<br>Type: <code>integer</code>.
+<br>This data members controls the size of the hash table used to hold
+cell meta data names.
+For performance, the number of distinct cell meta data names
+should not go above half of the value
+specified here. Rehashing is currently not supported, so this
+size cannot be changed after creation. 
+
+<p>
+<code>ExpressionMatrixCreationParameters.<b>cellMetaDataValueCapacity</b></code>
+<br>Type: <code>integer</code>.
+<br>This data members controls the size of the hash table used to hold
+cell meta data values.
+For performance, the number of distinct cell meta data values 
+should not go above half of the value
+specified here. Rehashing is currently not supported, so this
+size cannot be changed after creation. 
+
+
+
 
 
 </body>

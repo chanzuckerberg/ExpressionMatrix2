@@ -131,13 +131,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("computeApproximateLshCellSimilarity", &ExpressionMatrix::computeApproximateLshCellSimilarity)
        .def("writeLshSimilarityComparison", &ExpressionMatrix::writeLshSimilarityComparison)
        .def("writeLshSimilarityComparisonSlow", &ExpressionMatrix::writeLshSimilarityComparisonSlow)
-       .def("analyzeSimilarPairs", &ExpressionMatrix::analyzeSimilarPairs)
 
        // Find similar pairs of cells.
        .def("findSimilarPairs0", &ExpressionMatrix::findSimilarPairs0)
        .def("findSimilarPairs1", &ExpressionMatrix::findSimilarPairs1)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
+       .def("analyzeSimilarPairs", &ExpressionMatrix::analyzeSimilarPairs)
 
        // Cell graphs.
        .def("createCellGraph", &ExpressionMatrix::createCellGraph)
