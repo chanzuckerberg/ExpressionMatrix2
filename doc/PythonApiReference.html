@@ -207,11 +207,13 @@ The only meta data field that all cells are guaranteed to have is <code>CellName
 <br>Returns all meta data pairs (name, value) for a given cell.
 
 <p>
-<code>ExpressionMatrix.<b>cellIdFromString</b>(cellId)
-<br>cellId: integer
+<code>ExpressionMatrix.<b>cellIdFromString</b>(cellName)
+<br>cellName: string
 </code>
 <br>Return value: <code>integer</code>
-<br>Returns the cell id corresponding to a given <code>CellName</code>.
+<br>Returns the cell id corresponding to a given <code>CellName</code>,
+or <code>invalidCellId</code> if no cell with the given <code>CellName</code>
+exists.
 
 
 
