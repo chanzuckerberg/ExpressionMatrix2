@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+<style>
+h4 {
+    display: inline;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Reference information for the Python API</h1>
+
+This document contains reference information on the Python API
+provided by <code>ExpressionMatrix2.so</code>. All names documented below
+are in the namespace of the <code>Expression2</code> module
+and become available after the module is imported.
+
+
+
+<br><br><h2>Pair classes</h2>
+A pair class has two data members named <code>first</code> and <code>second</code>.
+The name of each pair class ends with <code>Pair</code> and reflects the types of the two data members.
+
+<br><br><table style='margin:auto'>
+<tr><th>Pair class name<th>Type of <code>first</code><th>Type of <code>second</code>
+<tr><td><code>IntIntPair</code><td><code>Integer</code><td><code>Integer</code>
+<tr><td><code>StringStringPair</code><td><code>String</code><td><code>String</code>
+</table>
+
+
+
+<br><br><h2>Container classes</h2>
+A container class behaves similarly to a Python list
+where all elements are of the same type:
+<ul>
+<li>Brackets can be used to access container elements 
+in exactly the same way as for Python lists.
+<li>Function <code>len</code> can be called for a container and returns
+the number of elements in it.
+<li>The pattern <code>for x in v</code> can be used to iterate
+over elements of a container.
+</ul>
+
+The name of each container class ends with <code>List</code> and reflects the type
+of the data it contains.
+
+<br><br><table style='margin:auto'>
+<tr><th>Container class name<th>Type of contained elements
+<tr><td><code>IntList</code><td><code>Integer</code>
+<tr><td><code>UintList</code><td><code>Integer</code>
+<tr><td><code>StringList</code><td><code>String</code>
+<tr><td><code>StringPairList</code><td><code>StringPair</code>
+<tr><td><code>CellGraphVertexInfoList</code><td><code>CellGraphVertexInfo</code>
+</table>
+
+
+
+<br><br><h2>Class <code>ExpressionMatrix</code></h2>
+
+<br><code>ExpressionMatrix(directoryName, ExpressionMatrixCreationParameters)</code>
+<br><code>ExpressionMatrix(directoryName)</code>
+
+<br><code>ExpressionMatrix.geneCount()</code>
+<br><code>ExpressionMatrix.cellCount()</code>
+
+<br><code>ExpressionMatrix.addGene()</code>
+
+<br><code>ExpressionMatrix.addCell</code>
+<br><code>ExpressionMatrix.addCells</code>
+<br><code>ExpressionMatrix.addCellsFromHdf5</code>
+<br><code>ExpressionMatrix.addCellsFromBioHub</code>
+<br><code>ExpressionMatrix.addCellMetaData</code>
+
+<br><code>ExpressionMatrix.getCellMetaData</code>
+<br><code>ExpressionMatrix.getAllCellMetaData</code>
+<br><code>ExpressionMatrix.cellIdFromString</code>
+
+<br><code>ExpressionMatrix.createGeneSetUsingInformationContent</code>
+
+
+<br><code>ExpressionMatrix.createGeneSetIntersection</code>
+<br><code>ExpressionMatrix.createGeneSetUnion</code>
+
+<br><code>ExpressionMatrix.createCellSetUsingMetaData</code>
+<br><code>ExpressionMatrix.createCellSetIntersection</code>
+<br><code>ExpressionMatrix.createCellSetUnion</code>
+<br><code>ExpressionMatrix.getCellSet</code>
+
+<br><code>ExpressionMatrix.computeCellSimilarity</code>
+<br><code>ExpressionMatrix.computeApproximateLshCellSimilarity</code>
+<br><code>ExpressionMatrix.writeLshSimilarityComparison</code>
+<br><code>ExpressionMatrix.writeLshSimilarityComparisonSlow</code>
+<br><code>ExpressionMatrix.analyzeSimilarPairs</code>
+
+<br><code>ExpressionMatrix.findSimilarPairs0</code>
+<br><code>ExpressionMatrix.findSimilarPairs1</code>
+<br><code>ExpressionMatrix.findSimilarPairs2</code>
+<br><code>ExpressionMatrix.writeSimilarPairs</code>
+
+<br><code>ExpressionMatrix.createCellGraph</code>
+<br><code>ExpressionMatrix.computeCellGraphLayout</code>
+<br><code>ExpressionMatrix.getCellGraphVertices</code>
+
+<br><code>ExpressionMatrix.explore</code>
+
+<br><code>ExpressionMatrix.testExpressionMatrixSubset</code>
+
+
+</body>
+</html>
