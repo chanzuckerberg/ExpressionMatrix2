@@ -164,29 +164,58 @@ and <code>False</code> if the gene already existed.
 <h3>Cells</h3>
 
 <p>
-<code>ExpressionMatrix.<b>addCell</b>()
+<code>ExpressionMatrix.<b>addCell</b>(jsonString)
+<br>jsonString: string
 </code>
-<br>Return value:
+<br>Return value: <code>integer</code>
+<br>Adds a cell to the system. The cell expression counts and meta data 
+are given in a JSON string. See 
+<a href=PythonApi.html#addCell>here</a> for information on the expected
+format of the JSON string. Returns the cell id of the cell that
+was just added. Cell ids begin at zero and increment by one each time
+a cell is added.
 
 <p>
-<code>ExpressionMatrix.<b>addCells</b>()
+<code>ExpressionMatrix.<b>addCells</b>(expressionCountsFileName, expressionCountsFileSeparators, metaDataFileName, metaDataFileSeparators)
+<br>expressionCountsFileName: string
+<br>expressionCountsFileSeparators: string
+<br>metaDataFileName: string
+<br>metaDataFileSeparators: string
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Adds cells to the system, reading expression counts and cell meta data
+from files. See
+<a href=PythonApi.html#addCells>here</a> for more information.
+
 
 <p>
-<code>ExpressionMatrix.<b>addCellsFromHdf5</b>()
+<code>ExpressionMatrix.<b>addCellsFromHdf5</b>(fileName)
+<br>fileName: string
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Adds cells to the system, reading expression counts from a file
+in HDF5 format as created by the 10X Genomics pipeline. See
+<a href=PythonApi.html#addCellsFromHdf5>here</a> for more information.
 
 <p>
-<code>ExpressionMatrix.<b>addCellsFromBioHub</b>()
+<code>ExpressionMatrix.<b>addCellsFromBioHub</b>(expressionCountsFileName, initialMetaDataCount, finalMetaDataCount, plateMetaDataFileName)
+<br>expressionCountsFileName: string
+<br>initialMetaDataCount: integer
+<br>finalMetaDataCount: integer
+<br>plateMetaDataFileName: string
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Add to the system cells created by the BioHub pipeline.
+See <a href=PythonApi.html#addCellsFromBioHub>here</a> for more information.
 
 <p>
-<code>ExpressionMatrix.<b>addCellMetaData</b>()
+<code>ExpressionMatrix.<b>addCellMetaData</b>(fileName)
+<br>fileName: string
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Add cell meta data reading it from a csv file. Each line of the file contains cell meta data values
+for one cell. Cell meta data names are in the first line. The first column of the file contain cell names.
+All cell names must already be present. 
 
 <p>
 <code>ExpressionMatrix.<b>getCellMetaData</b>(cellId, metaDataName)
@@ -363,7 +392,7 @@ and its two-dimensional layout must have been computed with a call to
 <h3>Miscellaneous</h3>
 
 <p>
-<code>ExpressionMatrix.<b>explore</b>(cellGraphName)
+<code>ExpressionMatrix.<b>explore</b>()
 </code>
 <br>Return value: 
 

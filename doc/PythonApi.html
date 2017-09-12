@@ -58,7 +58,7 @@ e = ExpressionMatrix.ExpressionMatrix('data')
 
 
 
-<h2 id=addCells>Adding cells</h2>
+<h2>Adding cells</h2>
 
 <p>After the expression matrix object is first created, the first thing you will want to do is add cells to it. To provide flexibility in adding cells, three paths to add cells are provided:
 
@@ -72,7 +72,7 @@ e = ExpressionMatrix.ExpressionMatrix('data')
 
 
 
-<h3>Adding cells in comma separated format or similar delimited formats</h3>
+<h3 id=addCells>Adding cells in comma separated format or similar delimited formats</h3>
 
 <p>You can use this path if you have a text file containing a dense representation of the expression matrix. This file can be a standard comma separated file (csv), which follows the following rules:
 
@@ -137,8 +137,40 @@ Note that, when using this format, the expression matrix read on input is repres
 
 
 
+<h3 id=addCellsFromBioHub>Adding cells from files created by the BioHub pipeline</h3>
 
-<h3>Adding cells from expression matrix data in HDF5 format created by the 10x Genomics pipeline</h3>
+<p>
+Function <code>ExpressionMatrix.addCellsFromBioHub</code> can be used to
+add to the system cells created by the NioHub pipeline.
+The BioHub pipeline creates three files for each plate:
+<ul>
+<li>A csv file containing expression counts by cell, with one row per cell
+  and one column per gene plus a header line containing gene names.
+The name of this file is specified as the first parameter to <code>addCellsFromBioHub</code>.
+The first column contains the cell name.
+Additional columns are also allowed before and after the last gene.
+These columns are treated as per-cell meta data.
+The number of these initial and final columns is specified in the second and
+third parameter to <code>addCellsFromBioHub</code>.
+<li>A csv file containing plate meta data. The first row contains plate names.
+The plate name is obtained from the name of the expression counts file
+(it is the portion in the file name that preceded the first period).
+The row in this file corresponding to that plate name is used to assign meta
+data to all the cells.
+<li>A csv file containing cell meta data, with one row for each cell and one
+column for each meta data field. The first column containes the cell name
+(which matches the cell name used in the excpression count file).
+The cells in this file are not required
+to be in the same order as the cells in the expression counts file.
+</ul>
+
+The names of the first two files are passed as arguments to <code>addCellGFromBioHub</code>.
+The additional cell meta data in the third file can then be added using a call
+to <code>addCellMetaData<code>.
+
+
+
+<h3 id=addCellsFromHdf5>Adding cells from expression matrix data in HDF5 format created by the 10x Genomics pipeline</h3>
 
 <p>
 The 10X Genomics RNA pipeline creates expression matrix data in <a href="https://en.wikipedia.org/wiki/Hierarchical_Data_Format">HDF5 format</a>. <a href="https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices">This format</a> is very space efficient because the expression matrix is stored in sparse format (only the non-zero entries are stored), and in addition it is also compressed. It is also memory efficient because the data in the file are stored by cell, not by gene, and as a result it is not necessary to load the entire file in memory for processing.
@@ -180,7 +212,7 @@ The argument specifies the name of the HDF5 file. Note then, when using this for
 
 
 
-<h3>Adding cells in simple JSON format</h3>
+<h3 id=addCell>Adding cells in simple JSON format</h3>
 
 <p>
 If your expression data are in a custom format, you can write Python code to create a simple JSON for each cell you want to add, then call function <code>addCell</code> passing the JSON as the argument. This simple example shows the format of the expected JSON and the Python code required to add the cell to an expression matrix object:
