@@ -25,6 +25,8 @@ and become available after the module is imported.
 <br><br><h2>Error handling</h2>
 Most errors are reported by raising a Python <code>Exception</code> 
 containing an explanatory message. 
+Some functions, as noted below in the documentation for individual functions,
+return <code>True</code> if the operation succeeded, <code>False</code> otherwise.
 
 <br><br><h2>Threading considerations</h2>
 The underlying C++ code is currently written as single-threaded and
@@ -55,6 +57,9 @@ in exactly the same way as for Python lists.
 the number of elements in it.
 <li>The pattern <code>for x in v</code> can be used to iterate
 over elements of a container.
+<li><code>append</code>, <code>insert</code>, and <code>del</code> can be used to add or remove
+elements like for Python lists. However, inserting or removing elements not at the end of
+the container is computationally expensive. 
 </ul>
 
 The name of each container class ends with <code>List</code> and reflects the type
@@ -72,7 +77,7 @@ of the data it contains.
 
 
 <br><br><h2>Constants</h2>
-<p>The <code>ExpressionMatrixModule</code> defines the following constants:
+<p>The <code>ExpressionMatrix2</code> module defines the following constants:
 <ul>
 <li><code id=invalidGeneId><b>invalidGeneId</b></code>: an <code>integer</code> used to indicate a missing/invalid/undefined gene id.
 <li><code id=invalidCellId><b>invalidCellId</b></code>: an <code>integer</code> used to indicate a missing/invalid/undefined cell id.
@@ -82,6 +87,7 @@ of the data it contains.
 <br><br><h2 id=CellGraphVertexInfo>Class <code>CellGraphVertexInfo</code></h2>
 <p>This class is used to give the Python code access
 to information about the vertices of a cell similarity graph.
+An object of this type contains information for a single vertex.
 
 <p>
 <code><b>CellGraphVertexInfo</b>()
@@ -112,6 +118,10 @@ the graph the vertex belongs to.
 
 
 <br><br><h2 id=ExpressionMatrix>Class <code>ExpressionMatrix</code></h2>
+<p>This is the top level class in the <code>ExpressionMatrix2</code> module. 
+Most high level functionality is provided by this class.
+Binary data files for an instance of this class are stored in a single directory on disk.
+They are accessed as memory mapped files.
 
 <h3>Constructors</h3>
 
@@ -248,39 +258,149 @@ exists.
 
 <h3>Gene sets</h3>
 
-<p>
-<code>ExpressionMatrix.<b>createGeneSetUsingInformationContent</b>()
-</code>
-<br>Return value:
+<p>Functionality to create and manipulate gene sets is provided and described in this section.
+A gene set is a subset of all the genes known to the <code>ExpressionMatrix</code> object.
+A gene set named <code>AllGenes</code>, and consisting of all the genes 
+known to the known to the <code>ExpressionMatrix</code> object, is always automatically
+created and maintained (that is, updated if new genes are added).
 
 <p>
-<code>ExpressionMatrix.<b>createGeneSetIntersection</b>()
+<code>ExpressionMatrix.<b>createGeneSetUsingInformationContent</b>(existingGeneSetName, cellSetName, normalizationMethod, geneInformationContentThreshold, newGeneSetName)
+<br>existingGeneSetName: string
+<br>cellSetName: string
+<br>normalizationMethod: <a href=#NormalizationMethod>NormalizationMethod</a>
+<br>geneInformationContentThreshold: float
+<br>newGeneSetName: string
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Creates a new gene set consisting of genes that pass an information content 
+test. The information content, in bits, of each gene in <code>existingGeneSetName</code>
+is computed using <code>cellSetName</code> and 
+the specified <code>NormalizationMethod</code>.
+The new gene set <code>newGeneSetName</code> is created, consisting
+of genes whose computed information content (in bits) exceeds
+the specified <code>geneInformationContentThreshold</code>.
+The information content is roughly related to the variability of the
+expression of that gene in the specified cell set. 
+Genes that are widely expressed have a low information content.
+Genes that are very selectively expressed have a high information content.
+A gene that is equally expressed in all cells has zero information content.
+A gene that is expressed only in one cell has <i>log<sub>2</sub>N</i>
+bits of information content, where <i>N</i> is the number of cells
+in the cell set used to compute information content.
+A <code>geneInformationContentThreshold</code> of 2 bits is often effective
+in filtering out widely expressed genes.
 
 <p>
-<code>ExpressionMatrix.<b>createGeneSetUnion</b>()
+<code>ExpressionMatrix.<b>createGeneSetIntersection</b>(inputGeneSetNames, outputGeneSetName)
+<br>inputGeneSetNames: string
+<br>outputGeneSetName: string
 </code>
-<br>Return value:
+<br>Return value: <code>Boolean</code>
+<br>Creates a new gene set as the intersection of two or more gene sets.
+The names of the input gene sets specified as the first argument
+must be separated by commas.
+Returns <code>False</code> if the operation failed because 
+one of the input gene sets does not exist
+or the output gene set already exists, <code>True</code> otherwise.
+
+<p>
+<code>ExpressionMatrix.<b>createGeneSetUnion</b>(inputGeneSetNames, outputGeneSetName)
+<br>inputGeneSetNames: string
+<br>outputGeneSetName: string
+</code>
+<br>Return value: <code>Boolean</code>
+<br>Creates a new gene set as the union of two or more gene sets.
+The names of the input gene sets specified as the first argument
+must be separated by commas.
+Returns <code>False</code> if the operation failed because 
+one of the input gene sets does not exist
+or the output gene set already exists, <code>True</code> otherwise.
+
+<p>
+<code>ExpressionMatrix.<b>createGeneSetDifference</b>(inputGeneSetName0, inputGeneSetName1, outputGeneSetName)
+<br>inputGeneSetName0: string
+<br>inputGeneSetName1: string
+<br>outputGeneSetName: string
+</code>
+<br>Return value: <code>Boolean</code>
+<br>Creates a new gene set as the difference between two gene sets.
+The newly created gene set consists of all genes that are in 
+<code>inputGeneSetName0</code> but not in <code>inputGeneSetName1</code>.
+Returns <code>False</code> if the operation failed because 
+one of the input gene sets does not exist
+or the output gene set already exists, <code>True</code> otherwise.
 
 
 
 <h3>Cell sets</h3>
 
-<p>
-<code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>()
-</code>
-<br>Return value:
+<p>Functionality to create and manipulate cell sets is provided and described in this section.
+A cell set is a subset of all the cells known to the <code>ExpressionMatrix</code> object.
+A cell set named <code>AllCells</code>, and consisting of all the cells 
+known to the known to the <code>ExpressionMatrix</code> object, is always automatically
+created and maintained (that is, updated if new cells are added).
 
 <p>
-<code>ExpressionMatrix.<b>createCellSetIntersection</b>()
+<code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>(cellSetName, metaDataName, regularExpression)
+<br>cellSetName: string
+<br>metaDataName: string
+<br>regularExpression: string
 </code>
-<br>Return value:
+<br>Return value: <code>Boolean</code> (<code>True</code> if the operation succeeded, <code>False</code> otherwise).
+<br>Creates a new cell set <code>cellSetName</code> consisting of all cells for which the
+specified <code>metaDataName</code> matches the given 
+<code>regularExpression</code>. 
+As a simple application example, suppose all cells contain a meta data name
+<code>Tissue</code> that gives the type of tissue from which the cell was obtained.
+Calling <code>createCellSetUsingMetaData</code> with <code>metaDataName='Tissue'</code>
+and <code>regularExpression='Brain'</code> will create a new cell set consisting of
+the cells for which the value of the <code>Tissue</code> meta data field
+is <code>Brain</code>. More complex regular expressions can be used to
+select values that satisfy a variety of criteria. Functionality
+to specify numeric ranges for meta data fields interpreted as numbers
+is not current available but may become available at a future time.
 
 <p>
-<code>ExpressionMatrix.<b>createCellSetUnion</b>()
+<code>ExpressionMatrix.<b>createCellSetIntersection</b>(inputCellSetNames, outputCellSetName)
+<br>inputCellSetNames: string
+<br>outputCellSetName: string
 </code>
-<br>Return value:
+<br>Return value: <code>Boolean</code>
+<br>Creates a new cell set as the intersection of two or more cell sets.
+The names of the input cell sets specified as the first argument
+must be separated by commas.
+Returns <code>False</code> if the operation failed because 
+one of the input cell sets does not exist
+or the output cell set already exists, <code>True</code> otherwise.
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetUnion</b>(inputCellSetNames, outputCellSetName)
+<br>inputCellSetNames: string
+<br>outputCellSetName: string
+</code>
+<br>Return value: <code>Boolean</code>
+<br>Creates a new cell set as the union of two or more cell sets.
+The names of the input cell sets specified as the first argument
+must be separated by commas.
+Returns <code>False</code> if the operation failed because 
+one of the input cell sets does not exist
+or the output cell set already exists, <code>True</code> otherwise.
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetDifference</b>(inputCellSetName0, inputCellSetName1, outputCellSetName)
+<br>inputCellSetName0: string
+<br>inputCellSetName1: string
+<br>outputCellSetName: string
+</code>
+<br>Return value: <code>Boolean</code>
+<br>Creates a new cell set as the difference between two cell sets.
+The newly created cell set consists of all cells that are in 
+<code>inputCellSetName0</code> but not in <code>inputCellSetName1</code>.
+Returns <code>False</code> if the operation failed because 
+one of the input cell sets does not exist
+or the output cell set already exists, <code>True</code> otherwise.
+
 
 <p>
 <code>ExpressionMatrix.<b>getCellSet</b>(cellSetName)
@@ -296,57 +416,119 @@ returns an ampty container.
 <h3>Cell similarity</h3>
 
 <p>
-<code>ExpressionMatrix.<b>computeCellSimilarity</b>()
+<code>ExpressionMatrix.<b>computeCellSimilarity</b>(cellId0, cellId1)
+<br>cellId0: integer
+<br>cellId1: integer
 </code>
-<br>Return value:
+<br>Return value: <code>float</code>
+<br>Returns the similarity between the expression vectors of two cells,
+specified by their cell ids. The similarity is computed using all
+the genes in the system. It is computed as the 
+<a href='https://en.wikipedia.org/wiki/Pearson_correlation_coefficient'>Pearson correlation coefficient</a>
+of the expression vectors of the two cells. The computed similarity is always between -1 and 1,
+and it is rarely negative.
 
 <p>
 <code>ExpressionMatrix.<b>computeApproximateLshCellSimilarity</b>()
 </code>
-<br>Return value:
+<br>Only intended to be used for testing.
+See the source code in the <code>ExpressionMatrix2/src</code> directory for more information. 
 
 <p>
 <code>ExpressionMatrix.<b>writeLshSimilarityComparison</b>()
 </code>
-<br>Return value:
+<br>Only intended to be used for testing.
+See the source code in the <code>ExpressionMatrix2/src</code> directory for more information. 
 
 <p>
 <code>ExpressionMatrix.<b>writeLshSimilarityComparisonSlow</b>()
 </code>
-<br>Return value:
+<br>Only intended to be used for testing.
+See the source code in the <code>ExpressionMatrix2/src</code> directory for more information. 
 
 
 
 <h3>Pairs of similar cells</h3>
 
 <p>
-<code>ExpressionMatrix.<b>findSimilarPairs0</b>()
+<code id=findSimilarPairs0>ExpressionMatrix.<b>findSimilarPairs0</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold)
+<br>geneSetName: string
+<br>cellSetName: string
+<br>similarPairsName: string
+<br>k: integer
+<br>similarityThreshold: float
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Creates and stores a new object <code>similarPairsName</code> 
+containing pairs of similar cells from <code>cellSetName</code>.
+The computation is done by directly looping over all possible cell pairs
+with both cells in <code>cellSetName</code>
+and performing for each pair an exact computation of the
+cell similarity, taking into account only genes in <code>geneSetName</code>.
+For each cell, only the best (most similar) <code>k</code> or fewer similar cells are stored,
+among those that exceed the specified <code>similarityThreshold</code>.
+This computational cost of this function grows with the square
+of the number of cells in <code>cellSetName</code>. 
+The required computing time will typically be a few minutes for a few thousand cells
+or several hours for a few tens of thousands cells.
+When the number of cells exceeds a few thousands, it is more practical
+to perform an approximate computation using 
+<a href=#findSimilarPairs1>findSimilarPairs1</a>.
 
 <p>
-<code>ExpressionMatrix.<b>findSimilarPairs1</b>()
+<code id=findSimilarPairs1>ExpressionMatrix.<b>findSimilarPairs1</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
+<br>geneSetName: string
+<br>cellSetName: string
+<br>similarPairsName: string
+<br>k: integer
+<br>similarityThreshold: float
+<br>lshCount: integer
+<br>seed: integer
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Like <a href=#findSimilarPairs0>findSimilarPairs0</a>, but uses Locality-Sensitive Hashing (LSH) with <code>lshCount</code>
+LSH hashes to speed up the computation of the similar pairs. 
+Like <a href=#findSimilarPairs0>findSimilarPairs0</a>, this still loops over all possible cell pairs
+with both cells in <code>cellSetName</code>
+and therefore the computational cost still grows asymptotically with the square of the number of cells.
+However the computation is orders of magnitudes faster. 
+The computation is approximate, and the error decreases as <code>lshCount</code> increases.
+For the suggested value <code>lshCount=1024</code>, the standard deviation of 
+the pair similarity computed in this way is 0.05 or less.
+Improved LSH functionality that avoids the loop over cell pairs will be provided
+by <a href=#findSimilarPairs2>findSimilarPairs2</a> but is not yet available.
+More documentation for <code>findSimilarPairs1</code> will become available at a later time. 
+
 
 <p>
-<code>ExpressionMatrix.<b>findSimilarPairs2</b>()
+<code id=findSimilarPairs2>ExpressionMatrix.<b>findSimilarPairs2</b>()
 </code>
-<br>Return value:
+<br>Development of this functionality is in progress.
+It will provide LSH-based computation of similar cell pairs
+without looping over all possible pairs of cells.
 
 <p>
 <code>ExpressionMatrix.<b>writeSimilarPairs</b>()
 </code>
-<br>Return value:
+<br>Only intended to be used for testing.
+See the source code in the <code>ExpressionMatrix2/src</code> directory for more information. 
 
 <p>
 <code>ExpressionMatrix.<b>analyzeSimilarPairs</b>()
 </code>
-<br>Return value:
+<br>Only intended to be used for testing.
+See the source code in the <code>ExpressionMatrix2/src</code> directory for more information. 
 
 
 
 <h3>Cell graphs</h3>
+
+<p>A <em>cell graph</em> or <em>cell similarity graph</em>
+is an undirected graph in which each vertex represents a cell.
+An edge between two vertices is created if the corresponding cells
+have similarity that exceeds a chosen threshold. 
+In areas of high connectivity, only the edges with the highest
+connectivity for each cell are kept.
 
 <p>
 <code id=createCellGraph>ExpressionMatrix.<b>createCellGraph</b>(cellGraphName, cellSetName, similarPairsName, similarityThreshold, k)
@@ -392,18 +574,27 @@ and its two-dimensional layout must have been computed with a call to
 <h3>Miscellaneous</h3>
 
 <p>
-<code>ExpressionMatrix.<b>explore</b>()
+<code>ExpressionMatrix.<b>explore</b>(serverParameters)
+<br>serverParameters: <a href=#ServerParameters>ServerParameters</a>
 </code>
-<br>Return value: 
+<br>Return value: <code>None</code>
+<br>Starts an http server that can be used, in conjunction with a Web browser,
+to interact with the <code>ExpressionMatrix</code> object.
 
 <p>
-<code>ExpressionMatrix.<b>testExpressionMatrixSubset</b>()
+<code>ExpressionMatrix.<b>testExpressionMatrixSubset</b>(cellId0, cellId1)
+<br>cellId0: integer
+<br>cellId1: integer
 </code>
-<br>Return value:
+<br>Return value: <code>None</code>
+<br>Only intended to be used
+to debug or test the <code>ExpressionMatrix2</code> module.
 
 
 
 <br><br><h2 id=ExpressionMatrixCreationParameters>Class <code>ExpressionMatrixCreationParameters</code></h2>
+<p>This class is used to store creation parameters for a new <code>ExpressionMatrix</code>
+object. 
 
 <p>
 <code><b>ExpressionMatrixCreationParameters</b>()
@@ -415,7 +606,7 @@ filled in with default values.
 <p>
 <code>ExpressionMatrixCreationParameters.<b>geneCapacity</b></code>
 <br>Type: <code>integer</code>.
-<br>This data members controls the size of the hash table used to hold genes.
+<br>Controls the size of the hash table used to hold genes.
 For performance, the number of genes should not go above half of the value
 specified here. Rehashing is currently not supported, so this
 size cannot be changed after creation. 
@@ -423,7 +614,7 @@ size cannot be changed after creation.
 <p>
 <code>ExpressionMatrixCreationParameters.<b>cellCapacity</b></code>
 <br>Type: <code>integer</code>.
-<br>This data members controls the size of the hash table used to hold cells.
+<br>Controls the size of the hash table used to hold cells.
 For performance, the number of cells should not go above half of the value
 specified here. Rehashing is currently not supported, so this
 size cannot be changed after creation. 
@@ -431,7 +622,7 @@ size cannot be changed after creation.
 <p>
 <code>ExpressionMatrixCreationParameters.<b>cellMetaDataNameCapacity</b></code>
 <br>Type: <code>integer</code>.
-<br>This data members controls the size of the hash table used to hold
+<br>Controls the size of the hash table used to hold
 cell meta data names.
 For performance, the number of distinct cell meta data names
 should not go above half of the value
@@ -441,7 +632,7 @@ size cannot be changed after creation.
 <p>
 <code>ExpressionMatrixCreationParameters.<b>cellMetaDataValueCapacity</b></code>
 <br>Type: <code>integer</code>.
-<br>This data members controls the size of the hash table used to hold
+<br>Controls the size of the hash table used to hold
 cell meta data values.
 For performance, the number of distinct cell meta data values 
 should not go above half of the value
@@ -449,6 +640,89 @@ specified here. Rehashing is currently not supported, so this
 size cannot be changed after creation. 
 
 
+<br><br><h2 id=NormalizationMethod><code>NormalizationMethod</code></h2>
+<p>This is an enumerated type that defines the normalization method
+to be used for cell expression vectors. 
+
+<p>
+<code>NormalizationMethod.<b>none</b></code>
+<br>This specifies that no normalization should be applied to 
+cell expression vectors. Cell expression vectors are returned or
+used directly as specified when each cell was entered into the system.
+
+<p>
+<code>NormalizationMethod.<b>L1</b></code>
+<br>This requests L1 normalization for 
+cell expression vectors. This means that each cell expression vector
+is scaled in such a way that the sum of its element is 1
+before being returned or used.
+With this normalization, each element of the cell expression vector
+represents the fraction in each gene of the total
+expression count for the cell.
+L1 normalization is sensitive to the gene set in use - that is,
+removing or adding genes changes the values of 
+all entries in the cell expression vector.
+
+<p>
+<code>NormalizationMethod.<b>L2</b></code>
+<br>This requests L2 normalization for 
+cell expression vectors. This means that each cell expression vector
+is scaled in such a way that the sum of the squares of its element is 1
+before being returned or used.
+In other words, expression counts are interpreted as components
+of a vector in Euclidean space, and the returned vector is a unit
+vector in that space.
+L2 normalization is sensitive to the gene set in use - that is,
+removing or adding genes changes the values of 
+all entries in the cell expression vector.
+
+
+
+<br><br><h2 id=ServerParameters>Class <code>ServerParameters</code></h2>
+<p>This class specifies parameters for an http server to be
+started by calling <code>ExpressionMatrix.explore</code>.
+
+<p>
+<code><b>ServerParameters</b>()
+</code>
+<br>Return value: <code>ServerParameters</code>.
+<br>This constructor creates a <code>ServerParameters</code> object 
+filled in with default values.
+
+<p>
+<code>ServerParameters.<b>port</b></code>
+<br>Type: <code>integer</code>.
+<br>The port number on which the server will be listening for connections. 
+Its default value is 17100. On Linux, root access or other
+security privileges are required to be able to listen on a port number less than 1024,
+and many values velow 1024 are used for standard services.
+If port 80 is specified, the user does not need to specify a port number to access the server,
+becausde port 80 is the default port for the HTTP protocol.
+The maximum allowed port number is 65535. 
+
+<p>
+<code>ServerParameters.<b>docDirectory</b></code>
+<br>Type: <code>integer</code>.
+<br>The path to the doc directory containing the documentation 
+to be displayed by the server when the user clicks on the <i>Help</i> button.
+This should point to a local copy of the <code>ExpressionMatrix2/doc</code> 
+in the GitHub repository. If no value is specified (the default),
+the server will still run but the <i>Help</i> button will not be available.
+
+
+
+<br><br><h2>Debugging and testing functions</h2>
+<p>This section lists functions that are only intended to be used
+to debug or test the <code>ExpressionMatrix2</code> module.
+For more information about them, see the source code
+in the <code>ExpressionMatrix2/src</code> directory.
+
+<br>
+<code>
+<br>ExpressionMatrix2.<b>testMemoryMappedVector</b>()
+<br>ExpressionMatrix2.<b>testMemoryMappedVectorOfLists</b>()
+<br>ExpressionMatrix2.<b>testMemoryMappedStringTable</b>()
+</code>
 
 
 

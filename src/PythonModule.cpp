@@ -1,3 +1,8 @@
+// This file uses the Boost Python library to export portions of
+// the C++ API to Python.
+// If something is added or changed here, corresponding documentation
+// changes should also be made in doc/PythonApiReference.html.
+
 
 // CZI.
 #include "ExpressionMatrix.hpp"
@@ -94,6 +99,16 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         double geneInformationContentThreshold,
         const string& newGeneSetName)
         = &ExpressionMatrix::createGeneSetUsingInformationContent;
+    bool (ExpressionMatrix::*createGeneSetDifference) (
+        const string& inputSet0,
+        const string& inputSet1,
+        const string& outputSet0)
+        = &ExpressionMatrix::createGeneSetDifference;
+    bool (ExpressionMatrix::*createCellSetDifference) (
+        const string& inputSet0,
+        const string& inputSet1,
+        const string& outputSet0)
+        = &ExpressionMatrix::createCellSetDifference;
 
 
 
@@ -124,11 +139,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("createGeneSetUsingInformationContent", createGeneSetUsingInformationContent)
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
+       .def("createGeneSetDifference", createGeneSetDifference)
 
        // Cell sets.
        .def("createCellSetUsingMetaData", createCellSetUsingMetaData)
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
+       .def("createCellSetDifference", createCellSetDifference)
        .def("getCellSet", &ExpressionMatrix::getCellSet)
 
        // Compute cell similarity.
