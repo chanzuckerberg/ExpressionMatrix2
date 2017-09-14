@@ -796,7 +796,7 @@ Thinner edge
         // Set the value field for all the vertices.
         BGL_FORALL_VERTICES(v, graph, CellGraph) {
             CellGraphVertex& vertex = graph[v];
-            const double rawCount = getExpressionCount(vertex.cellId, geneId);
+            const double rawCount = getCellExpressionCount(vertex.cellId, geneId);
             if(normalizationMethod == NormalizationMethod::None) {
                 vertex.value = rawCount;
             } else {

@@ -453,7 +453,7 @@ private:
 
     // Return the raw cell count for a given cell and gene.
     // This does a binary search in the cellExpressionCounts for the given cell.
-    float getExpressionCount(CellId, GeneId) const;
+    float getCellExpressionCount(CellId, GeneId) const;
 
     // Compute the expression vector for a cell and a given GeneSet,
     // normalizing it as requested.

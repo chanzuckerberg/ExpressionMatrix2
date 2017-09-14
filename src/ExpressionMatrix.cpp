@@ -661,7 +661,7 @@ void ExpressionMatrix::decrementCellMetaDataNameUsageCount(StringId nameId)
 
 
 // Return the raw expression count for a given CellId and GeneId.
-float ExpressionMatrix::getExpressionCount(CellId cellId, GeneId geneId) const
+float ExpressionMatrix::getCellExpressionCount(CellId cellId, GeneId geneId) const
 {
     CZI_ASSERT(cellId < cellCount());
     CZI_ASSERT(geneId < geneCount());
@@ -1517,7 +1517,7 @@ float ExpressionMatrix::computeGeneInformationContent(
     count.reserve(cellSet.size());
     for(const CellId cellId : cellSet) {
         const Cell& cell = cells[cellId];
-        float c = getExpressionCount(cellId, geneId);
+        float c = getCellExpressionCount(cellId, geneId);
         switch(normalizationMethod) {
         case NormalizationMethod::L1:
             c *= float(cell.norm1Inverse);

@@ -171,7 +171,7 @@ void ExpressionMatrix::exploreGene(
         const Cell& cell = cells[cellId];
         ExploreGeneData data;
         data.cellId = cellId;
-        data.rawCount =  getExpressionCount(cellId, geneId);
+        data.rawCount =  getCellExpressionCount(cellId, geneId);
         if(data.rawCount) {
             data.count1 = float(data.rawCount * cell.norm1Inverse);
             data.count2 = float(data.rawCount * cell.norm2Inverse);
