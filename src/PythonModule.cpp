@@ -51,6 +51,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
 
 
+    // Python aliases for pair classes.
+    scope().attr("IntPair") = scope().attr("IntIntPair");
+    scope().attr("StringPair") = scope().attr("StringStringPair");
+    scope().attr("NameValuePair") = scope().attr("StringStringPair");
+
+
+
     // Container classes. These are standard C++ vectors
     // exposed to Python using the vector_indexing_suite capability.
     // They have an API very similar to that of a Python list,
@@ -74,8 +81,28 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposeVector<uint32_t>("UintList"); // Used for vector<GeneId> and vector<CellId>
     exposeVector< pair<int, int> >("IntIntPairList");
     exposeVector<string>("StringList");
-    exposeVector< pair<string, string> >("StringPairList");
+    exposeVector< pair<string, string> >("StringStringPairList");
+    exposeVector< vector< pair<string, string> > >("StringStringPairListList");
     exposeVector<CellGraphVertexInfo>("CellGraphVertexInfoList");
+
+
+
+    // Python aliases for container types.
+
+    // Python aliases for UintList.
+    scope().attr("GeneIdList") = scope().attr("UintList");
+    scope().attr("CellIdList") = scope().attr("UintList");
+
+    // Python aliases for StringStringPairList.
+    scope().attr("StringPairList") = scope().attr("StringStringPairList");
+    scope().attr("NameValuePairList") = scope().attr("StringStringPairList");
+    scope().attr("CellMetaData") = scope().attr("StringStringPairList");
+
+    // Python aliases for StringStringPairListList.
+    scope().attr("StringPairListList") = scope().attr("StringStringPairListList");
+    scope().attr("NameValuePairListList") = scope().attr("StringStringPairListList");
+    scope().attr("CellMetaDataList") = scope().attr("StringStringPairListList");
+
 
 
 
@@ -90,7 +117,11 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         = &ExpressionMatrix::addCell;
     bool (ExpressionMatrix::*createCellSetUsingMetaData)(const string&, const string&, const string&)
         = &ExpressionMatrix::createCellSetUsingMetaData;
-    string (ExpressionMatrix::*getCellMetaData)(CellId, const string& name) const
+    string (ExpressionMatrix::*getCellMetaDataValue)(CellId, const string& name) const
+        = &ExpressionMatrix::getCellMetaData;
+    vector< pair<string, string> > (ExpressionMatrix::*getCellMetaData)(CellId) const
+        = &ExpressionMatrix::getCellMetaData;
+    vector< vector< pair<string, string> > > (ExpressionMatrix::*getCellsMetaData)(const vector<CellId>&) const
         = &ExpressionMatrix::getCellMetaData;
     void (ExpressionMatrix::*createGeneSetUsingInformationContent) (
         const string& existingGeneSetName,
@@ -131,8 +162,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
 
        // Get cell meta data.
+       .def("getCellMetaDataValue", getCellMetaDataValue)
        .def("getCellMetaData", getCellMetaData)
-       .def("getAllCellMetaData", &ExpressionMatrix::getAllCellMetaData)
+       .def("getCellsMetaData", getCellsMetaData)
        .def("cellIdFromString", &ExpressionMatrix::cellIdFromString)
 
        // Gene sets.

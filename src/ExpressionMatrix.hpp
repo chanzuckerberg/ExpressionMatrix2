@@ -247,7 +247,11 @@ public:
 
     // Return a vector containing all of the meta data (Name, Value) pairs
     // for a given cell.
-    vector< pair<string, string> > getAllCellMetaData(CellId) const;
+    vector< pair<string, string> > getCellMetaData(CellId) const;
+
+    // Return a vector containing vectors with all of the meta data (Name, Value) pairs
+    // for a given set of cells.
+    vector< vector< pair<string, string> > > getCellMetaData(const vector<CellId>&) const;
 
     // Set a meta data (name, value) pair for a given cell.
     // If the name already exists for that cell, the value is replaced.

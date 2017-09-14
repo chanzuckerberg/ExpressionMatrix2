@@ -38,11 +38,20 @@ However, concurrent calls to separate <code>ExpressionMatrix</code> objects are 
 <br><br><h2>Pair classes</h2>
 A pair class has two data members named <code>first</code> and <code>second</code>.
 The name of each pair class ends with <code>Pair</code> and reflects the types of the two data members.
+Some pair classes have additional names that reflect
+specific usages and improve code readability.
+
+
 
 <br><br><table style='margin:auto'>
 <tr><th>Pair class name<th>Type of <code>first</code><th>Type of <code>second</code>
-<tr><td id=IntIntPair><code>IntIntPair</code><td><code>Integer</code><td><code>Integer</code>
-<tr><td id=StringStringPair><code>StringStringPair</code><td><code>String</code><td><code>String</code>
+
+<tr><td id=IntIntPair><code>IntIntPair<br>IntPair</code><td><code>Integer</code><td><code>Integer</code>
+
+<tr><td id=StringStringPair>
+    <code>StringStringPair
+    <br id=StringPair>StringPair
+    <br id=NameValuePair>NameValuePair</code><td><code>String</code><td><code>String</code>
 </table>
 
 
@@ -63,15 +72,48 @@ the container is computationally expensive.
 </ul>
 
 The name of each container class ends with <code>List</code> and reflects the type
-of the data it contains.
+of the data it contains. Some containers have additional names that reflect
+specific usages and improve code readability.
+
+
 
 <br><br><table style='margin:auto'>
-<tr><th>Container class name<th>Type of contained elements
+<tr><th>Names of container type<th>Types of<br>contained elements
+
 <tr><td id=IntList><code>IntList</code><td><code>Integer</code>
-<tr><td id=UintList><code>UintList</code><td><code>Integer</code>
+<tr><td id=UintList>
+    <code>UintList
+    <br id=GeneList>GeneIdList
+    <br id=CellIdList>CellIdList</code>
+<td><code>Non-negative integer</code>
+
 <tr><td id=StringList><code>StringList</code><td><code>String</code>
-<tr><td id=StringStringPairList><code>StringStringPairList</code><td><code><a href=#StringStringPair>StringStringPair</a></code>
-<tr><td id=CellGraphVertexInfoList><code>CellGraphVertexInfoList</code><td><code><a href=#CellGraphVertexInfo>CellGraphVertexInfo</a></code>
+
+<tr><td id=StringStringPairList>
+    <code>StringStringPairList
+    <br id=StringPairList>StringPairList
+    <br id=NameValuePairList>NameValuePairList
+    <br id=CellMetaData>CellMetaData</code>
+<td><code>
+    <a href=#StringStringPair>StringStringPair</a><br>
+    <a href=#StringPair>StringPair</a><br>
+    <a href=#NameValuePair>NameValuePair</a></code>
+
+<tr><td id=StringStringPairListList>
+    <code>StringStringPairListList
+    <br id=StringPairListList>StringPairListList
+    <br id=NameValuePairListList>NameValuePairListList
+    <br id=CellMetaDataList>CellMetaDataList</code>
+<td><code>
+    <a href=#StringStringPairList>StringStringPairList</a><br>
+    <a href=#StringPairList>StringPairList</a><br>
+    <a href=#NameValuePairList>NameValuePairList</a><br>
+    <a href=#CellMetaData>CellMetaData</a></code>
+
+
+<tr><td id=CellGraphVertexInfoList><code>CellGraphVertexInfoList</code>
+<td><code><a href=#CellGraphVertexInfo>CellGraphVertexInfo</a></code>
+
 </table>
 
 
@@ -197,7 +239,6 @@ a cell is added.
 from files. See
 <a href=PythonApi.html#addCells>here</a> for more information.
 
-
 <p>
 <code>ExpressionMatrix.<b>addCellsFromHdf5</b>(fileName)
 <br>fileName: string
@@ -218,6 +259,26 @@ in HDF5 format as created by the 10X Genomics pipeline. See
 <br>Add to the system cells created by the BioHub pipeline.
 See <a href=PythonApi.html#addCellsFromBioHub>here</a> for more information.
 
+
+
+
+
+<p>
+<code>ExpressionMatrix.<b>cellIdFromString</b>(cellName)
+<br>cellName: string
+</code>
+<br>Return value: <code>integer</code>
+<br>Returns the cell id corresponding to a given <code>CellName</code>,
+or <code>invalidCellId</code> if no cell with the given <code>CellName</code>
+exists.
+
+
+
+<h3>Cell meta data</h3>
+<p>Each cell has a set of meta data which consists of (name, value) pairs. 
+Each cell is permitted to have a different set of meta data names
+from all other cells.
+
 <p>
 <code>ExpressionMatrix.<b>addCellMetaData</b>(fileName)
 <br>fileName: string
@@ -228,31 +289,31 @@ for one cell. Cell meta data names are in the first line. The first column of th
 All cell names must already be present. 
 
 <p>
-<code>ExpressionMatrix.<b>getCellMetaData</b>(cellId, metaDataName)
+<code>ExpressionMatrix.<b>getCellMetaDataValue</b>(cellId, metaDataName)
 <br>cellId: integer
 <br>metaDataName: string
 </code>
 <br>Return value: <code>string</code>
-<br>Returns the value of the specified meta data field for the given cell.
-Returns an empty string if the cell does not have that meta data field.
+<br>Returns the value of the specified meta data name for the given cell.
+Returns an empty string if the cell does not have that meta data name.
 The only meta data field that all cells are guaranteed to have is <code>CellName</code>.
 
-
 <p>
-<code>ExpressionMatrix.<b>getAllCellMetaData</b>(cellId)
+<code>ExpressionMatrix.<b>getCellMetaData</b>(cellId)
 <br>cellId: integer
 </code>
-<br>Return value: <code><a href=#StringStringPairList>StringStringPairList</a></code>
+<br>Return value: <code><a href=#CellMetaData>CellMetaData</a></code>
 <br>Returns all meta data pairs (name, value) for a given cell.
 
 <p>
-<code>ExpressionMatrix.<b>cellIdFromString</b>(cellName)
-<br>cellName: string
+<code>ExpressionMatrix.<b>getCellsMetaData</b>(cellIdList)
+<br>cellIdList: <a href=#CellIdList>CellIdList</a>
 </code>
-<br>Return value: <code>integer</code>
-<br>Returns the cell id corresponding to a given <code>CellName</code>,
-or <code>invalidCellId</code> if no cell with the given <code>CellName</code>
-exists.
+<br>Return value: <code><a href=#CellMetaDataList>CellMetaDataList</a></code>
+<br>Returns all meta data pairs (name, value) for a set of cells
+specified by <code>cellIdList</code>. Each element in the returned 
+<code><a href=#CellMetaDataList>CellMetaDataList</a></code>
+corresponds to the cell id at the same position in <code>cellIdList</code>.
 
 
 
