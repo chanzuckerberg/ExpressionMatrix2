@@ -38,7 +38,7 @@ However, concurrent calls to separate <code>ExpressionMatrix</code> objects are 
 <br><br><h2>Pair classes</h2>
 A pair class has two data members named <code>first</code> and <code>second</code>.
 The name of each pair class ends with <code>Pair</code> and reflects the types of the two data members.
-Some pair classes have additional names that reflect
+All pair classes have additional names that reflect
 specific usages and improve code readability.
 
 
@@ -46,7 +46,16 @@ specific usages and improve code readability.
 <br><br><table style='margin:auto'>
 <tr><th>Pair class name<th>Type of <code>first</code><th>Type of <code>second</code>
 
-<tr><td id=IntIntPair><code>IntIntPair<br>IntPair</code><td><code>Integer</code><td><code>Integer</code>
+<tr><td id=IntIntPair>
+    <code>IntIntPair<br id=IntPair>IntPair</code>
+    <td><code>Integer</code><td><code>Integer</code>
+
+<tr><td id=UintUintPair>
+    <code>UintUintPair
+    <br id=UintPair>UintPair
+    <br id=CellIdCellIdPair>CellIdCellIdPair
+    <br id=CellIdPair>CellIdPair</code>
+    <td><code>Non-negative integer</code><td><code>Non-negative integer</code>
 
 <tr><td id=StringStringPair>
     <code>StringStringPair
@@ -72,7 +81,7 @@ the container is computationally expensive.
 </ul>
 
 The name of each container class ends with <code>List</code> and reflects the type
-of the data it contains. Some containers have additional names that reflect
+of the data it contains. Most containers types have additional names that reflect
 specific usages and improve code readability.
 
 
@@ -86,6 +95,17 @@ specific usages and improve code readability.
     <br id=GeneList>GeneIdList
     <br id=CellIdList>CellIdList</code>
 <td><code>Non-negative integer</code>
+
+<tr><td id=UintUintPairList>
+    <code>UintUintPairList
+    <br id=UintPairList>UintPairList
+    <br id=CellIdCellIdPairList>CellIdCellIdPairList
+    <br id=CellIdPairList>CellIdPairList</code>
+<td><code>
+    <a href=#UintUintPair>UintUintPair</a><br>
+    <a href=#UintPair>UintPair</a><br>
+    <a href=#CellIdCellIdPair>CellIdCellIdPair</a><br>
+    <a href=#CellIdPair>CellIdPair</a></code>
 
 <tr><td id=StringList><code>StringList</code><td><code>String</code>
 
@@ -650,6 +670,16 @@ The graph must have been previously created with a call to
 <code><a href=#createCellGraph>createCellGraph</a></code>
 and its two-dimensional layout must have been computed with a call to 
 <code><a href=#computeCellGraphLayout>computeCellGraphLayout</a></code>.
+
+<p>
+<code>ExpressionMatrix.<b>getCellGraphEdges</b>(cellGraphName)
+<br>cellGraphName: string
+</code>
+<br>Return value: <code><a href=#CellIdPairList>CellIdPairList</a></code>
+<br>Returns the cell ids corresponding to the two vertices 
+of each edge of the cell graph with the given name.
+The graph must have been previously created with a call to
+<code><a href=#createCellGraph>createCellGraph</a></code>.
 
 
 

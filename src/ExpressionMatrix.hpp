@@ -768,6 +768,10 @@ public:
     // Return vertex information for the graph with a given name.
     vector<CellGraphVertexInfo> getCellGraphVertices(const string& graphName) const;
 
+    // Return the cell ids of the two vertices corresponding to
+    // each of the edges of the cell graph with given name.
+    vector< pair<CellId, CellId> > getCellGraphEdges(const string& graphName) const;
+
     // Store the cluster ids in a graph in a meta data field.
     void storeClusterId(const string& metaDataName, const CellGraph&);
 

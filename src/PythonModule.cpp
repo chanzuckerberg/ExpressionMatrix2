@@ -47,12 +47,16 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     // Pair classes. These are instantiations of std::pair exposed to Python.
     // The two items in the pair can be accessed in Python as p.first and p.second.
     exposePair<int, int>("IntIntPair");
+    exposePair<uint32_t, uint32_t>("UintUintPair");
     exposePair<string, string>("StringStringPair");
 
 
 
     // Python aliases for pair classes.
     scope().attr("IntPair") = scope().attr("IntIntPair");
+    scope().attr("UintPair") = scope().attr("UintUintPair");
+    scope().attr("CellIdCellIdPair") = scope().attr("UintUintPair");
+    scope().attr("CellIdPair") = scope().attr("UintUintPair");
     scope().attr("StringPair") = scope().attr("StringStringPair");
     scope().attr("NameValuePair") = scope().attr("StringStringPair");
 
@@ -80,6 +84,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposeVector<int>("IntList");
     exposeVector<uint32_t>("UintList"); // Used for vector<GeneId> and vector<CellId>
     exposeVector< pair<int, int> >("IntIntPairList");
+    exposeVector< pair<uint32_t, uint32_t> >("UintUintPairList");
     exposeVector<string>("StringList");
     exposeVector< pair<string, string> >("StringStringPairList");
     exposeVector< vector< pair<string, string> > >("StringStringPairListList");
@@ -92,6 +97,11 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     // Python aliases for UintList.
     scope().attr("GeneIdList") = scope().attr("UintList");
     scope().attr("CellIdList") = scope().attr("UintList");
+
+    // Python aliases for UintUintPairList.
+    scope().attr("UintPairList") = scope().attr("UintUintPairList");
+    scope().attr("CellIdCellIdPairList") = scope().attr("UintUintPairList");
+    scope().attr("CellIdPairList") = scope().attr("UintUintPairList");
 
     // Python aliases for StringStringPairList.
     scope().attr("StringPairList") = scope().attr("StringStringPairList");
@@ -200,6 +210,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("createCellGraph", &ExpressionMatrix::createCellGraph)
        .def("computeCellGraphLayout", &ExpressionMatrix::computeCellGraphLayout)
        .def("getCellGraphVertices", &ExpressionMatrix::getCellGraphVertices)
+       .def("getCellGraphEdges", &ExpressionMatrix::getCellGraphEdges)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)

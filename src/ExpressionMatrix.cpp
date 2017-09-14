@@ -1433,6 +1433,31 @@ vector<CellGraphVertexInfo> ExpressionMatrix::getCellGraphVertices(const string&
 
 
 
+// Return the cell ids of the two vertices corresponding to
+// each of the edges of the cell graph with given name.
+vector< pair<CellId, CellId> > ExpressionMatrix::getCellGraphEdges(const string& graphName) const
+{
+    // Locate the graph.
+    const auto it = graphs.find(graphName);
+    if(it == graphs.end()) {
+        throw runtime_error("Graph " + graphName + " does not exist.");
+    }
+    const CellGraph& cellGraph = *(it->second.second);
+
+    // Loop over graph edges.
+    vector< pair<CellId, CellId> > v;
+    BGL_FORALL_EDGES(e, cellGraph, CellGraph) {
+        const CellGraph::vertex_descriptor v0 = source(e, cellGraph);
+        const CellGraph::vertex_descriptor v1 = target(e, cellGraph);
+        const CellGraphVertex& vertex0 = cellGraph[v0];
+        const CellGraphVertex& vertex1 = cellGraph[v1];
+        v.push_back(make_pair(vertex0.cellId, vertex1.cellId));
+    }
+    return v;
+}
+
+
+
 // Store the cluster ids in a graph in a meta data field.
 void ExpressionMatrix::storeClusterId(
     const string& metaDataName,
