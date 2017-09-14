@@ -411,6 +411,11 @@ private:
     // Given a GeneId (an integer), it can find the gene name.
     // Given the gene name, it can find the corresponding GeneId.
     MemoryMapped::StringTable<GeneId> geneNames;
+public:
+
+    // Return the name of the gene with the given id.
+    string geneName(GeneId) const;
+private:
 
     // Vector containing fixed size information for each cell.
     // Variable size information (meta data and expression counts)

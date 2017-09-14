@@ -512,6 +512,14 @@ CellId ExpressionMatrix::cellIdFromString(const string& s)
 
 
 
+// Return the name of the gene with the given id.
+string ExpressionMatrix::geneName(GeneId geneId) const
+{
+    return geneNames[geneId];
+}
+
+
+
 // Return a gene id given a string.
 // The string can be a gene name or GeneId (a string).
 // Returns imnvalidGeneId if the gene was not found.

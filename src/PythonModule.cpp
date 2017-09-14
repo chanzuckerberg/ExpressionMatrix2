@@ -151,8 +151,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("geneCount", &ExpressionMatrix::geneCount)
        .def("cellCount", &ExpressionMatrix::cellCount)
 
-       // Add a gene.
+       // Genes
        .def("addGene", &ExpressionMatrix::addGene)
+       .def("geneName", &ExpressionMatrix::geneName)
 
        // Various ways to add cells.
        .def("addCell", addCell)
