@@ -403,6 +403,13 @@ known to the known to the <code>ExpressionMatrix</code> object, is always automa
 created and maintained (that is, updated if new cells are added).
 
 <p>
+<code id=getCellSetNames>ExpressionMatrix.<b>getCellSetNames</b>()
+</code>
+<br>Return value: <code><a href=#StringList>StringList</a></code>
+<br>Return a list containing the names of all currently defined 
+cell sets.
+
+<p>
 <code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>(cellSetName, metaDataName, regularExpression)
 <br>cellSetName: string
 <br>metaDataName: string
@@ -590,6 +597,14 @@ An edge between two vertices is created if the corresponding cells
 have similarity that exceeds a chosen threshold. 
 In areas of high connectivity, only the edges with the highest
 connectivity for each cell are kept.
+
+<p>
+<code id=getCellGraphNames>ExpressionMatrix.<b>getCellGraphNames</b>()
+</code>
+<br>Return value: <code><a href=#StringList>StringList</a></code>
+<br>Return a list containing the names of all currently defined 
+cell similarity graphs.
+
 
 <p>
 <code id=createCellGraph>ExpressionMatrix.<b>createCellGraph</b>(cellGraphName, cellSetName, similarPairsName, similarityThreshold, k)

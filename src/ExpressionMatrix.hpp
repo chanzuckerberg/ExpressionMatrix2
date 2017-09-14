@@ -554,6 +554,9 @@ private:
 
 public:
 
+    // Get the names of all currently defined cell sets.
+    vector<string> getCellSetNames() const;
+
     // Get a copy of the cell set with a given name, for use in the Python API.
     // Returns an empty cell set if a cel set with the specified name does not exist.
     vector<CellId> getCellSet(const string& cellSetName) const;
@@ -750,6 +753,9 @@ public:
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
     map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > graphs;
+
+    // Get the names of all currently defined cell similarity graphs.
+    vector<string> getCellGraphNames() const;
 
     // Compute the layout (vertex positions) for the graph with a given name.
     void computeCellGraphLayout(const string& graphName);

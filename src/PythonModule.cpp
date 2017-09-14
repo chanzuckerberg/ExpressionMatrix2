@@ -178,6 +178,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
        .def("createCellSetDifference", createCellSetDifference)
+       .def("getCellSetNames", &ExpressionMatrix::getCellSetNames)
        .def("getCellSet", &ExpressionMatrix::getCellSet)
 
        // Compute cell similarity.
@@ -194,6 +195,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("analyzeSimilarPairs", &ExpressionMatrix::analyzeSimilarPairs)
 
        // Cell graphs.
+       .def("getCellGraphNames", &ExpressionMatrix::getCellGraphNames)
        .def("createCellGraph", &ExpressionMatrix::createCellGraph)
        .def("computeCellGraphLayout", &ExpressionMatrix::computeCellGraphLayout)
        .def("getCellGraphVertices", &ExpressionMatrix::getCellGraphVertices)

@@ -1095,6 +1095,17 @@ vector<string> ExpressionMatrix::geneSetNamesFromSimilarPairsName(const string& 
 }
 
 
+// Get the names of all currently defined cell sets.
+vector<string> ExpressionMatrix::getCellSetNames() const
+{
+    vector<string> names;
+    for(const auto& p: cellSets.cellSets) {
+        names.push_back(p.first);
+    }
+    return names;
+}
+
+
 
 // Create a new cell set that contains cells for which
 // the value of a specified meta data field matches
@@ -1305,6 +1316,18 @@ bool ExpressionMatrix::downsampleCellSet(
     cellSets.addCellSet(outputCellSetName, outputCellSet);
 
     return true;
+}
+
+
+
+// Get the names of all currently defined cell similarity graphs.
+vector<string> ExpressionMatrix::getCellGraphNames() const
+{
+    vector<string> v;
+    for(const auto& p: graphs) {
+        v.push_back(p.first);
+    }
+    return v;
 }
 
 
