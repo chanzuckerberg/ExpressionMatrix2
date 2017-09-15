@@ -453,6 +453,7 @@ private:
 
 
 
+public:
     // Accessors for expression counts, mostly used in Python.
     // The ones that specify a gene id or gene name can be slow,
     // as they require binary searches.
@@ -480,6 +481,8 @@ private:
     // Each position in the returned vector has the counts for
     // the cell at the same position in the input vector.
     vector< vector< pair<GeneId, float> > > getCellsExpressionCounts(const vector<CellId>&) const;
+
+private:
 
 
 

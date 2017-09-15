@@ -61,6 +61,12 @@ specific usages and improve code readability.
     <code>StringStringPair
     <br id=StringPair>StringPair
     <br id=NameValuePair>NameValuePair</code><td><code>String</code><td><code>String</code>
+
+<tr><td id=UintFloatPair>
+    <code>UintFloatPair
+    <br id=GeneIdFloatPair>GeneIdFloatPair
+    <br id=ExpressionCount>ExpressionCount</code><td><code>Non-negative integer</code><td><code>Float</code>
+
 </table>
 
 
@@ -130,6 +136,27 @@ specific usages and improve code readability.
     <a href=#NameValuePairList>NameValuePairList</a><br>
     <a href=#CellMetaData>CellMetaData</a></code>
 
+<tr><td id=FloatList>
+    <code>FloatList
+<td><code>Float
+
+<tr><td id=UintFloatPairList>
+    <code>UintFloatPairList
+    <br id=GeneIdFloatPairList>GeneIdFloatPairList
+    <br id=ExpressionCountList>ExpressionCountList
+<td><code>
+    <a href=#UintFloatPair>UintFloatPair</a><br>
+    <a href=#GeneIdFloatPair>GeneIdFloatPair</a><br>
+    <a href=#ExpressionCount>ExpressionCount</a><br>
+
+<tr><td id=UintFloatPairListList>
+    <code>UintFloatPairListList
+    <br id=GeneIdFloatPairListList>GeneIdFloatPairListList
+    <br id=ExpressionCountListList>ExpressionCountListList
+<td><code>
+    <a href=#UintFloatPairList>UintFloatPairList</a><br>
+    <a href=#GeneIdFloatPairList>GeneIdFloatPairList</a><br>
+    <a href=#ExpressionCountList>ExpressionCountList</a><br>
 
 <tr><td id=CellGraphVertexInfoList><code>CellGraphVertexInfoList</code>
 <td><code><a href=#CellGraphVertexInfo>CellGraphVertexInfo</a></code>
@@ -341,6 +368,67 @@ The only meta data field that all cells are guaranteed to have is <code>CellName
 specified by <code>cellIdList</code>. Each element in the returned 
 <code><a href=#CellMetaDataList>CellMetaDataList</a></code>
 corresponds to the cell id at the same position in <code>cellIdList</code>.
+
+
+<h3>Cell expression counts</h3>
+
+<p>
+<code>ExpressionMatrix.<b>getCellExpressionCount</b>(cellId, geneId)
+<br>cellId: integer
+<br>geneId: integer
+</code>
+<br>Return value: float</code>
+<br>Returns the expression count for a given cell and gene.
+The returned value can be zero.
+This can be slow as it requires a binary search.
+
+<p>
+<code>ExpressionMatrix.<b>getCellExpressionCountFromGeneName</b>(cellId, geneName)
+<br>cellId: integer
+<br>geneName: string
+</code>
+<br>Return value: <code>float</code>
+<br>Returns the expression count for a given cell and gene.
+The returned value can be zero.
+This can be slow as it requires a binary search.
+
+<p>
+<code>ExpressionMatrix.<b>getCellExpressionCounts</b>(cellId)
+<br>cellId: integer
+</code>
+<br>Return value: <code><a href=#ExpressionCountList>ExpressionCountList</a></code>
+<br>Returns the non-zero expression counts for a given cell.
+The returned container contains pairs of gene ids and the
+corresponding expression counts for the given cell.
+
+<p>
+<code>ExpressionMatrix.<b>getCellsExpressionCount</b>(cellIds, geneId)
+<br>cellIds: <a href=#CellIdList>CellIdList</a>
+<br>geneId: integer
+</code>
+<br>Return value: <code><a href=#FloatList>FloatList</a></code>
+<br>Returns the expression counts for a set of cells and for a given gene.
+Some or all of the returned values can be zero.
+This can be slow as it requires a binary search.
+
+<p>
+<code>ExpressionMatrix.<b>getCellsExpressionCountFromGeneName</b>(cellIds, geneName)
+<br>cellIds: <a href=#CellIdList>CellIdList</a>
+<br>geneName: string
+</code>
+<br>Return value: <code><a href=#FloatList>FloatList</a></code>
+<br>Returns the expression counts for a set of cells and for a given gene.
+Some or all of the returned values can be zero.
+This can be slow as it requires a binary search.
+
+<p>
+<code>ExpressionMatrix.<b>getCellsExpressionCounts</b>(cellIds)
+<br>cellIds: <a href=#CellIdList>CellIdList</a>
+</code>
+<br>Return value: <code><a href=#ExpressionCountListList>ExpressionCountListList</a></code>
+<br>Returns the non-zero expression counts for a given set of cells.
+The returned container contains, for each cell, a list of pairs of gene ids and the
+corresponding expression counts.
 
 
 

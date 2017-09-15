@@ -49,6 +49,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposePair<int, int>("IntIntPair");
     exposePair<uint32_t, uint32_t>("UintUintPair");
     exposePair<string, string>("StringStringPair");
+    exposePair<uint32_t, float>("UintFloatPair");
 
 
 
@@ -59,6 +60,8 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     scope().attr("CellIdPair") = scope().attr("UintUintPair");
     scope().attr("StringPair") = scope().attr("StringStringPair");
     scope().attr("NameValuePair") = scope().attr("StringStringPair");
+    scope().attr("GeneIdFloatPair") = scope().attr("UintFloatPair");
+    scope().attr("ExpressionCount") = scope().attr("UintFloatPair");
 
 
 
@@ -88,6 +91,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposeVector<string>("StringList");
     exposeVector< pair<string, string> >("StringStringPairList");
     exposeVector< vector< pair<string, string> > >("StringStringPairListList");
+    exposeVector<float>("FloatList");
+    exposeVector< pair<uint32_t, float> >("UintFloatPairList");
+    exposeVector< vector< pair<uint32_t, float> > >("UintFloatPairListList");
     exposeVector<CellGraphVertexInfo>("CellGraphVertexInfoList");
 
 
@@ -113,6 +119,15 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     scope().attr("NameValuePairListList") = scope().attr("StringStringPairListList");
     scope().attr("CellMetaDataList") = scope().attr("StringStringPairListList");
 
+    // Python aliases for UintFloatPairList.
+    scope().attr("GeneIdFloatPairList") = scope().attr("UintFloatPairList");
+    scope().attr("ExpressionCountList") = scope().attr("UintFloatPairList");
+
+    // Python aliases for UintFloatPairListList.
+    scope().attr("GeneIdFloatPairListList") = scope().attr("UintFloatPairListList");
+    scope().attr("ExpressionCountListList") = scope().attr("UintFloatPairListList");
+
+
 
 
 
@@ -121,35 +136,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     scope().attr("invalidCellId") = invalidCellId;
 
 
-    // Overloaded functions need special handling.
+
+    // In the definitions below, overloaded functions need special handling.
     // See http://www.boost.org/doc/libs/1_58_0/libs/python/doc/tutorial/doc/html/python/functions.html#python.overloading
-    CellId (ExpressionMatrix::*addCell)(const string&)
-        = &ExpressionMatrix::addCell;
-    bool (ExpressionMatrix::*createCellSetUsingMetaData)(const string&, const string&, const string&)
-        = &ExpressionMatrix::createCellSetUsingMetaData;
-    string (ExpressionMatrix::*getCellMetaDataValue)(CellId, const string& name) const
-        = &ExpressionMatrix::getCellMetaData;
-    vector< pair<string, string> > (ExpressionMatrix::*getCellMetaData)(CellId) const
-        = &ExpressionMatrix::getCellMetaData;
-    vector< vector< pair<string, string> > > (ExpressionMatrix::*getCellsMetaData)(const vector<CellId>&) const
-        = &ExpressionMatrix::getCellMetaData;
-    void (ExpressionMatrix::*createGeneSetUsingInformationContent) (
-        const string& existingGeneSetName,
-        const string& cellSetName,
-        NormalizationMethod normalizationMethod,
-        double geneInformationContentThreshold,
-        const string& newGeneSetName)
-        = &ExpressionMatrix::createGeneSetUsingInformationContent;
-    bool (ExpressionMatrix::*createGeneSetDifference) (
-        const string& inputSet0,
-        const string& inputSet1,
-        const string& outputSet0)
-        = &ExpressionMatrix::createGeneSetDifference;
-    bool (ExpressionMatrix::*createCellSetDifference) (
-        const string& inputSet0,
-        const string& inputSet1,
-        const string& outputSet0)
-        = &ExpressionMatrix::createCellSetDifference;
 
 
 
@@ -165,34 +154,153 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("addGene", &ExpressionMatrix::addGene)
        .def("geneName", &ExpressionMatrix::geneName)
 
+
+
        // Various ways to add cells.
-       .def("addCell", addCell)
+       .def
+       (
+           "addCell",
+           (
+               CellId (ExpressionMatrix::*)
+               (const string& jsonString)
+           )
+           &ExpressionMatrix::addCell
+       )
        .def("addCells", &ExpressionMatrix::addCells)
        .def("addCellsFromHdf5", &ExpressionMatrix::addCellsFromHdf5)
        .def("addCellsFromBioHub", &ExpressionMatrix::addCellsFromBioHub)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
 
-       // Get cell meta data.
-       .def("getCellMetaDataValue", getCellMetaDataValue)
-       .def("getCellMetaData", getCellMetaData)
-       .def("getCellsMetaData", getCellsMetaData)
+
+
+       // Accessors for cell meta data.
+       .def
+       (
+           "getCellMetaDataValue",
+           (
+               string (ExpressionMatrix::*)
+               (CellId, const string& name) const
+           )
+           &ExpressionMatrix::getCellMetaData
+       )
+       .def
+       (
+           "getCellMetaData",
+           (
+               vector< pair<string, string> > (ExpressionMatrix::*)
+               (CellId) const
+           )
+           &ExpressionMatrix::getCellMetaData
+       )
+       .def
+       (
+           "getCellsMetaData",
+           (
+               vector< vector< pair<string, string> > > (ExpressionMatrix::*)
+               (const vector<CellId>&) const
+           )
+           &ExpressionMatrix::getCellMetaData
+       )
        .def("cellIdFromString", &ExpressionMatrix::cellIdFromString)
 
-       // Get expression counts.
+
+
+       // Accessors for expression counts.
+       .def
+       (
+           "getCellExpressionCount",
+           (
+               float (ExpressionMatrix::*)
+               (CellId, GeneId) const
+           )
+           &ExpressionMatrix::getCellExpressionCount
+       )
+       .def
+       (
+           "getCellExpressionCountFromGeneName",
+           (
+               float (ExpressionMatrix::*)
+               (CellId, const string& geneName) const
+           )
+           &ExpressionMatrix::getCellExpressionCount
+       )
+       .def("getCellExpressionCounts", &ExpressionMatrix::getCellExpressionCounts)
+       .def
+       (
+           "getCellsExpressionCount",
+           (
+               vector<float> (ExpressionMatrix::*)
+               (const vector<CellId>&, GeneId) const
+           )
+           &ExpressionMatrix::getCellsExpressionCount
+       )
+       .def
+       (
+           "getCellsExpressionCountFromGeneName",
+           (
+               vector<float> (ExpressionMatrix::*)
+               (const vector<CellId>&, const string& geneName) const
+           )
+           &ExpressionMatrix::getCellsExpressionCount
+       )
+       .def("getCellsExpressionCounts", &ExpressionMatrix::getCellsExpressionCounts)
+
+
 
        // Gene sets.
-       .def("createGeneSetUsingInformationContent", createGeneSetUsingInformationContent)
+       .def(
+           "createGeneSetUsingInformationContent",
+           (
+               void (ExpressionMatrix::*)
+               (
+                   const string& existingGeneSetName,
+                   const string& cellSetName,
+                   NormalizationMethod normalizationMethod,
+                   double geneInformationContentThreshold,
+                   const string& newGeneSetName
+               )
+           )
+           &ExpressionMatrix::createGeneSetUsingInformationContent
+       )
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion)
-       .def("createGeneSetDifference", createGeneSetDifference)
+       .def
+       (
+           "createGeneSetDifference",
+           (
+               bool (ExpressionMatrix::*)
+               (const string&, const string&, const string&)
+           )
+           &ExpressionMatrix::createGeneSetDifference
+       )
 
-       // Cell sets.
-       .def("createCellSetUsingMetaData", createCellSetUsingMetaData)
+
+
+        // Cell sets.
+       .def
+       (
+           "createCellSetUsingMetaData",
+           (
+               bool (ExpressionMatrix::*)
+               (const string&, const string&, const string&)
+           )
+           &ExpressionMatrix::createCellSetDifference
+       )
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
-       .def("createCellSetDifference", createCellSetDifference)
+       .def
+       (
+           "createCellSetDifference",
+           (
+               bool (ExpressionMatrix::*)
+               (const string&, const string&, const string&)
+           )
+           &ExpressionMatrix::createCellSetDifference
+       )
        .def("getCellSetNames", &ExpressionMatrix::getCellSetNames)
        .def("getCellSet", &ExpressionMatrix::getCellSet)
+
+
 
        // Compute cell similarity.
        .def("computeCellSimilarity", &ExpressionMatrix::computeCellSimilarity)
