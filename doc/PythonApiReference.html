@@ -17,25 +17,55 @@ h3 {
 
 <h1>Reference information for the Python API</h1>
 
-This document contains reference information on the Python API
+<p>This document contains reference information on the Python API
 provided by <code>ExpressionMatrix2.so</code>. All names documented below
 are in the namespace of the <code>Expression2</code> module
 and become available after the module is imported.
 
-<br><br><h2>Error handling</h2>
+<p>This document includes the following sections:
+<ul>
+<li><a href=#ErrorHandling>Error handling</a>
+<li><a href=#Threading>Threading considerations</a>
+<li><a href=#Pair>Pair classes</a>
+<li><a href=#Container>Container classes</a>
+<li><a href=#Constants>Constants</a>
+<li><a href=#CellGraphVertexInfo>Class <code>CellGraphVertexInfo</code></a>
+<li><a href=#ExpressionMatrix>Class <code>ExpressionMatrix</code></a>
+<ul>
+    <li><a href=#Constructors>Constructors</a>
+    <li><a href=#Sizes>Sizes</a>
+    <li><a href=#Genes>Genes</a>
+    <li><a href=#Cells>Cells</a>
+    <li><a href=#CellMetaDataSection>Cell meta data</a>
+    <li><a href=#ExpressionCounts>Cell expression counts</a>
+    <li><a href=#GeneSets>Gene sets</a>
+    <li><a href=#CellSets>Cell sets</a>
+    <li><a href=#CellSimilarity>Cell similarity</a>
+    <li><a href=#SimilarPairs>Pairs of similar cells</a>
+    <li><a href=#CellGraphs>Cell graphs</a>
+    <li><a href=#Miscellaneous>Miscellaneous</a>
+</ul>
+<li><a href=#ExpressionMatrixCreationParameters>Class <code>ExpressionMatrixCreationParameters</code></a>
+<li><a href=#NormalizationMethod><code>NormalizationMethod</code></a>
+<li><a href=#ServerParameters>Class <code>ServerParameters</code></a>
+<li><a href=#Debugging>Debugging and testing functions</a>
+</ul>
+
+
+<br><br><h2 id=ErrorHandling>Error handling</h2>
 Most errors are reported by raising a Python <code>Exception</code> 
 containing an explanatory message. 
 Some functions, as noted below in the documentation for individual functions,
 return <code>True</code> if the operation succeeded, <code>False</code> otherwise.
 
-<br><br><h2>Threading considerations</h2>
+<br><br><h2 id=Threading>Threading considerations</h2>
 The underlying C++ code is currently written as single-threaded and
 therefore it uses data structures that don't support concurrent execution.
 If the calling Python code is multithreaded, it should use a mutex 
 to serialize calls into each <code>ExpressionMatrix</code> object.
 However, concurrent calls to separate <code>ExpressionMatrix</code> objects are permitted.
 
-<br><br><h2>Pair classes</h2>
+<br><br><h2 id=Pair>Pair classes</h2>
 A pair class has two data members named <code>first</code> and <code>second</code>.
 The name of each pair class ends with <code>Pair</code> and reflects the types of the two data members.
 All pair classes have additional names that reflect
@@ -71,7 +101,7 @@ specific usages and improve code readability.
 
 
 
-<br><br><h2>Container classes</h2>
+<br><br><h2 id=Container>Container classes</h2>
 A container class behaves similarly to a Python list
 where all elements are of the same type:
 <ul>
@@ -165,7 +195,7 @@ specific usages and improve code readability.
 
 
 
-<br><br><h2>Constants</h2>
+<br><br><h2 id=Constants>Constants</h2>
 <p>The <code>ExpressionMatrix2</code> module defines the following constants:
 <ul>
 <li><code id=invalidGeneId><b>invalidGeneId</b></code>: an <code>integer</code> used to indicate a missing/invalid/undefined gene id.
@@ -212,7 +242,7 @@ Most high level functionality is provided by this class.
 Binary data files for an instance of this class are stored in a single directory on disk.
 They are accessed as memory mapped files.
 
-<h3>Constructors</h3>
+<h3 id=Constructors>Constructors</h3>
 
 <p>
 <code><b>ExpressionMatrix</b>(directoryName, expressionMatrixCreationParameters)
@@ -234,7 +264,7 @@ The directory must exist.
 
 
 
-<h3>Sizes</h3>
+<h3 id=Sizes>Sizes</h3>
 
 <p>
 <code>ExpressionMatrix.<b>geneCount</b>()
@@ -247,7 +277,7 @@ The directory must exist.
 <br>Return value: the number of cells currently defined (<code>integer</code>).
 
 
-<h3>Genes</h3>
+<h3 id=Genes>Genes</h3>
 
 <p>
 <code>ExpressionMatrix.<b>geneName</b>(geneId)
@@ -267,7 +297,7 @@ and <code>False</code> if the gene already existed.
 
 
 
-<h3>Cells</h3>
+<h3 id=Cells>Cells</h3>
 
 <p>
 <code>ExpressionMatrix.<b>addCell</b>(jsonString)
@@ -328,7 +358,7 @@ exists.
 
 
 
-<h3>Cell meta data</h3>
+<h3 id=CellMetaDataSection>Cell meta data</h3>
 <p>Each cell has a set of meta data which consists of (name, value) pairs. 
 Each cell is permitted to have a different set of meta data names
 from all other cells.
@@ -370,7 +400,7 @@ specified by <code>cellIdList</code>. Each element in the returned
 corresponds to the cell id at the same position in <code>cellIdList</code>.
 
 
-<h3>Cell expression counts</h3>
+<h3 id=ExpressionCounts>Cell expression counts</h3>
 
 <p>
 <code>ExpressionMatrix.<b>getCellExpressionCount</b>(cellId, geneId)
@@ -432,7 +462,7 @@ corresponding expression counts.
 
 
 
-<h3>Gene sets</h3>
+<h3 id=GeneSets>Gene sets</h3>
 
 <p>Functionality to create and manipulate gene sets is provided and described in this section.
 A gene set is a subset of all the genes known to the <code>ExpressionMatrix</code> object.
@@ -509,7 +539,7 @@ or the output gene set already exists, <code>True</code> otherwise.
 
 
 
-<h3>Cell sets</h3>
+<h3 id=CellSets>Cell sets</h3>
 
 <p>Functionality to create and manipulate cell sets is provided and described in this section.
 A cell set is a subset of all the cells known to the <code>ExpressionMatrix</code> object.
@@ -596,7 +626,7 @@ returns an ampty container.
 
 
 
-<h3>Cell similarity</h3>
+<h3 id=CellSimilarity>Cell similarity</h3>
 
 <p>
 <code>ExpressionMatrix.<b>computeCellSimilarity</b>(cellId0, cellId1)
@@ -631,7 +661,7 @@ See the source code in the <code>ExpressionMatrix2/src</code> directory for more
 
 
 
-<h3>Pairs of similar cells</h3>
+<h3 id=SimilarPairs>Pairs of similar cells</h3>
 
 <p>
 <code id=findSimilarPairs0>ExpressionMatrix.<b>findSimilarPairs0</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold)
@@ -704,7 +734,7 @@ See the source code in the <code>ExpressionMatrix2/src</code> directory for more
 
 
 
-<h3>Cell graphs</h3>
+<h3 id=CellGraphs>Cell graphs</h3>
 
 <p>A <em>cell graph</em> or <em>cell similarity graph</em>
 is an undirected graph in which each vertex represents a cell.
@@ -772,7 +802,7 @@ The graph must have been previously created with a call to
 
 
 
-<h3>Miscellaneous</h3>
+<h3 id=Miscellaneous>Miscellaneous</h3>
 
 <p>
 <code>ExpressionMatrix.<b>explore</b>(serverParameters)
@@ -912,7 +942,7 @@ the server will still run but the <i>Help</i> button will not be available.
 
 
 
-<br><br><h2>Debugging and testing functions</h2>
+<br><br><h2 id=Debugging>Debugging and testing functions</h2>
 <p>This section lists functions that are only intended to be used
 to debug or test the <code>ExpressionMatrix2</code> module.
 For more information about them, see the source code
