@@ -523,7 +523,7 @@ string ExpressionMatrix::geneName(GeneId geneId) const
 // Return a gene id given a string.
 // The string can be a gene name or GeneId (a string).
 // Returns imnvalidGeneId if the gene was not found.
-GeneId ExpressionMatrix::geneIdFromString(const string& s)
+GeneId ExpressionMatrix::geneIdFromString(const string& s) const
 {
     // If the strings represent a GeneId in the expected range, treat it as a gene id.
     try {
@@ -537,6 +537,15 @@ GeneId ExpressionMatrix::geneIdFromString(const string& s)
 
     // Not an integer. Treat it as a gene name.
     return geneNames(s);
+}
+
+
+
+// Return a gene id given its name.
+// Returns invalidGeneId if the gene was not found.
+GeneId ExpressionMatrix::geneIdFromName(const string& geneName) const
+{
+    return geneNames(geneName);
 }
 
 
@@ -660,7 +669,8 @@ void ExpressionMatrix::decrementCellMetaDataNameUsageCount(StringId nameId)
 
 
 
-// Return the raw expression count for a given CellId and GeneId.
+// Get the expression count for a given cell and gene.
+// This can be zero.
 float ExpressionMatrix::getCellExpressionCount(CellId cellId, GeneId geneId) const
 {
     CZI_ASSERT(cellId < cellCount());
@@ -672,6 +682,82 @@ float ExpressionMatrix::getCellExpressionCount(CellId cellId, GeneId geneId) con
     } else {
         return it->second;
     }
+}
+
+
+
+// Same as above, specifying a gene name instead of a GeneId.
+float ExpressionMatrix::getCellExpressionCount(CellId cellId, const string& geneName) const
+{
+    // Find the GeneId.
+    const GeneId geneId = geneIdFromName(geneName);
+    if(geneId == invalidGeneId) {
+        throw runtime_error("Gene " + geneName + " does not exist.");
+    }
+
+    // Call the function that uses the GeneId.
+    return getCellExpressionCount(cellId, geneId);
+}
+
+
+
+// Get all the non-zero expression counts for a given cell.
+vector< pair<GeneId, float> > ExpressionMatrix::getCellExpressionCounts(CellId cellId) const
+{
+    const auto& countsForThisCell = cellExpressionCounts[cellId];
+    vector< pair<GeneId, float> > returnVector;
+    returnVector.reserve(countsForThisCell.size());
+    for(const auto& p: countsForThisCell) {
+        returnVector.push_back(p);
+    }
+    return returnVector;
+}
+
+
+
+// Get the expression count for a given gene, for a specified set of cells.
+// Each position in the returned vector has the count for
+// the cell at the same position in the input vector.
+// Some of the returned counts can be zero.
+vector<float> ExpressionMatrix::getCellsExpressionCount(const vector<CellId>& cellIds, GeneId geneId) const
+{
+    vector<float> returnVector;
+    returnVector.reserve(cellIds.size());
+    for(const CellId cellId: cellIds) {
+        returnVector.push_back(getCellExpressionCount(cellId, geneId));
+    }
+    return returnVector;
+}
+
+
+
+// Same as above, specifying a gene name instead of a GeneId.
+vector<float> ExpressionMatrix::getCellsExpressionCount(const vector<CellId>& cellIds, const string& geneName) const
+{
+    // Find the GeneId.
+    const GeneId geneId = geneIdFromName(geneName);
+    if(geneId == invalidGeneId) {
+        throw runtime_error("Gene " + geneName + " does not exist.");
+    }
+
+    // Call the function that uses the GeneId.
+    return getCellsExpressionCount(cellIds, geneId);
+}
+
+
+
+// Get all the non-zero expression counts for a specified set of cells.
+// Each position in the returned vector has the counts for
+// the cell at the same position in the input vector.
+vector< vector< pair<GeneId, float> > > ExpressionMatrix::getCellsExpressionCounts(const vector<CellId>& cellIds) const
+{
+    vector< vector< pair<GeneId, float> > > returnVector(cellIds.size());
+    for(size_t i=0; i<cellIds.size(); i++) {
+        const CellId cellId = cellIds[i];
+        vector< pair<GeneId, float> > v = getCellExpressionCounts(cellId);
+        v.swap(returnVector[i]);
+    }
+    return returnVector;
 }
 
 

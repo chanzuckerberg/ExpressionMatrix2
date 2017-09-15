@@ -178,6 +178,8 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("getCellsMetaData", getCellsMetaData)
        .def("cellIdFromString", &ExpressionMatrix::cellIdFromString)
 
+       // Get expression counts.
+
        // Gene sets.
        .def("createGeneSetUsingInformationContent", createGeneSetUsingInformationContent)
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection)

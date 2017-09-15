@@ -451,9 +451,37 @@ private:
     // This is indexed by the CellId.
     MemoryMapped::VectorOfVectors<pair<GeneId, float>, uint64_t> cellExpressionCounts;
 
-    // Return the raw cell count for a given cell and gene.
-    // This does a binary search in the cellExpressionCounts for the given cell.
+
+
+    // Accessors for expression counts, mostly used in Python.
+    // The ones that specify a gene id or gene name can be slow,
+    // as they require binary searches.
+
+    // Get the expression count for a given cell and gene.
+    // This can be zero.
     float getCellExpressionCount(CellId, GeneId) const;
+
+    // Same as above, specifying a gene name instead of a GeneId.
+    float getCellExpressionCount(CellId, const string& GeneName) const;
+
+    // Get all the non-zero expression counts for a given cell.
+    vector< pair<GeneId, float> > getCellExpressionCounts(CellId) const;
+
+    // Get the expression count for a given gene, for a specified set of cells.
+    // Each position in the returned vector has the count for
+    // the cell at the same position in the input vector.
+    // Some of the returned counts can be zero.
+    vector<float> getCellsExpressionCount(const vector<CellId>&, GeneId) const;
+
+    // Same as above, specifying a gene name instead of a GeneId.
+    vector<float> getCellsExpressionCount(const vector<CellId>&, const string& geneName) const;
+
+    // Get all the non-zero expression counts for a specified set of cells.
+    // Each position in the returned vector has the counts for
+    // the cell at the same position in the input vector.
+    vector< vector< pair<GeneId, float> > > getCellsExpressionCounts(const vector<CellId>&) const;
+
+
 
     // Compute the expression vector for a cell and a given GeneSet,
     // normalizing it as requested.
@@ -546,12 +574,16 @@ public:
     // Return a cell id given a string.
     // The string can be a cell name or a CellId (an integer).
     // Returns invalidCellId if the cell was not found.
-    CellId cellIdFromString(const string& s);
+    CellId cellIdFromString(const string&);
 
     // Return a gene id given a string.
     // The string can be a gene name or GeneId (a string).
     // Returns invalidGeneId if the gene was not found.
-    GeneId geneIdFromString(const string& s);
+    GeneId geneIdFromString(const string&) const;
+
+    // Return a gene id given its name.
+    // Returns invalidGeneId if the gene was not found.
+    GeneId geneIdFromName(const string&) const;
 
 private:
     // Functionality to define and maintain cell sets.
