@@ -139,34 +139,53 @@ Note that, when using this format, the expression matrix read on input is repres
 
 <h3 id=addCellsFromBioHub>Adding cells from files created by the BioHub pipeline</h3>
 
+<p>As the BioHub single-cell RNA pipeline evolves, 
+the file formats it creates change.
+Functionality to add cells from this pipeline in one of these formats
+is described below.
+
+
+
+<h4>For Illumina data, July 2017</h4>
 <p>
-Function <code>ExpressionMatrix.addCellsFromBioHub</code> can be used to
-add to the system cells created by the NioHub pipeline.
-The BioHub pipeline creates three files for each plate:
+Function <code>ExpressionMatrix.addCellsFromBioHub1</code> can be used to
+add to the system cells created by the BioHub pipeline
+as of July 2017 from Illumina data. For each plate, three files
+are used:
 <ul>
 <li>A csv file containing expression counts by cell, with one row per cell
   and one column per gene plus a header line containing gene names.
-The name of this file is specified as the first parameter to <code>addCellsFromBioHub</code>.
+The name of this file is specified as the first parameter to <code>addCellsFromBioHub1</code>.
 The first column contains the cell name.
 Additional columns are also allowed before and after the last gene.
 These columns are treated as per-cell meta data.
 The number of these initial and final columns is specified in the second and
-third parameter to <code>addCellsFromBioHub</code>.
+third parameter to <code>addCellsFromBioHub1</code>.
 <li>A csv file containing plate meta data. The first row contains plate names.
 The plate name is obtained from the name of the expression counts file
 (it is the portion in the file name that preceded the first period).
 The row in this file corresponding to that plate name is used to assign meta
 data to all the cells.
 <li>A csv file containing cell meta data, with one row for each cell and one
-column for each meta data field. The first column containes the cell name
-(which matches the cell name used in the excpression count file).
+column for each meta data field. The first column contains the cell name
+(which matches the cell name used in the expression count file).
 The cells in this file are not required
 to be in the same order as the cells in the expression counts file.
 </ul>
 
-The names of the first two files are passed as arguments to <code>addCellGFromBioHub</code>.
+The names of the first two files are passed as arguments to <code>addCellsFromBioHub1</code>.
 The additional cell meta data in the third file can then be added using a call
 to <code>addCellMetaData<code>.
+
+
+
+<h4>For 10X Genomics data, September 2017</h4>
+<p>
+Function <code>ExpressionMatrix.addCellsFromBioHub2</code> can be used to
+add to the system cells created by the BioHub pipeline
+as of September 2017 from 10X genomics data. 
+
+<p><emph>This functionality is not yet available.</emph> 
 
 
 

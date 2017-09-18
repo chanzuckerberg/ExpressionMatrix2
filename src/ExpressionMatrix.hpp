@@ -210,7 +210,7 @@ public:
     // Add cells from files created by the BioHub pipeline.
     // See the beginning of ExpressionMatrixBioHub.cpp for a detailed description
     // of the expected formats.
-    void addCellsFromBioHub(
+    void addCellsFromBioHub1(
         const string& expressionCountsFileName, // The name of the csv file containing expression counts.
         size_t initialMetaDataCount,            // The number of initial columns containing meta data.
         size_t finalMetaDataCount,              // The number of final columns containing meta data.
