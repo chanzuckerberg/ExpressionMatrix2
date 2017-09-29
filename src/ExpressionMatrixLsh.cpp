@@ -822,9 +822,7 @@ void ExpressionMatrix::findSimilarPairs1(
 
     // Compute the similarity (cosine of the angle) corresponding to every number of mismatching bits
     // up to the threshold.
-    cout << "***1 " << mismatchCountThreshold << endl;
     vector<double> similarityTable(mismatchCountThreshold + 1);
-    cout << "***2" << endl;
     for(size_t mismatchingBitCount = 0;
         mismatchingBitCount <= mismatchCountThreshold; mismatchingBitCount++) {
         const double angle = double(mismatchingBitCount) *
@@ -835,7 +833,6 @@ void ExpressionMatrix::findSimilarPairs1(
 
     // Create the SimilarPairs object where we will store the pairs.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
-    cout << "***3" << endl;
 
 
 
