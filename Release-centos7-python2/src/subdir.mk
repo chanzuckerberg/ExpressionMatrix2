@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Aws.cpp \
 ../src/CellGraph.cpp \
 ../src/CellSets.cpp \
 ../src/ClusterGraph.cpp \
@@ -30,6 +31,7 @@ CPP_SRCS += \
 ../src/touchMemory.cpp 
 
 OBJS += \
+./src/Aws.o \
 ./src/CellGraph.o \
 ./src/CellSets.o \
 ./src/ClusterGraph.o \
@@ -56,6 +58,7 @@ OBJS += \
 ./src/touchMemory.o 
 
 CPP_DEPS += \
+./src/Aws.d \
 ./src/CellGraph.d \
 ./src/CellSets.d \
 ./src/ClusterGraph.d \
@@ -86,7 +89,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

@@ -198,18 +198,28 @@ public:
      The gene names are in data set gene_names. Data set genes is not used. It contains alternative
      gene ids.
 
-     Cell names (or rather the corresponding barcodes) are in data set barcodes.
+     Cell names are generated using the barcodes dataset, prefixing each barcode
+     with the given cellNamePrefix.
 
      Data set shape is also not used.
 
+     Only cells for which the total expression count equals or exceeded
+     the given threshold are added.
+
      *******************************************************************************/
-    void addCellsFromHdf5(const string& fileName);
+    void addCellsFromHdf5(
+        const string& fileName,
+        const string& cellNamePrefix,
+        const vector< pair<string, string> > cellMetaData,  // Added to all cells.
+        double totalExpressionCountThreshold);
 
 
 
     // Add cells from files created by the BioHub pipeline.
-    // See the beginning of ExpressionMatrixBioHub.cpp for a detailed description
+    // See ExpressionMatrixBioHub.cpp for a detailed description
     // of the expected formats.
+
+    // July 2017, Illumina data.
     void addCellsFromBioHub1(
         const string& expressionCountsFileName, // The name of the csv file containing expression counts.
         size_t initialMetaDataCount,            // The number of initial columns containing meta data.
@@ -220,6 +230,13 @@ public:
         const string& plateName,
         const string&plateMetaDataFileName,
         vector<pair<string, string> >& plateMetaData);
+
+    // September 2017, 10X Genomics data.
+    void addCellsFromBioHub2(
+        const string& platesFileName,    // The name of the file containing per-plate meta data.
+        double totalExpressionCountThreshold
+        );
+
 
     // Add cell meta data contained in a csv file, one line per cell.
     // This can be used to read cell mata data in the BioHub pipeline

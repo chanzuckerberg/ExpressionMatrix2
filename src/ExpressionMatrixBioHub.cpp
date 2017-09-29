@@ -2,7 +2,11 @@
 
 Functionality to read expression matrix data from the BioHub pipeline.
 
-The BioHub pipeline creates three files for each plate:
+
+
+JULY 2017, ILLUMINA DATA: addCellsFromBioHub1
+
+This version of the BioHub pipeline creates three files for each plate:
 
 - A csv file containing expression counts by cell, with one row per cell
   and one column per gene plus a header line containing gene names.
@@ -18,32 +22,61 @@ The BioHub pipeline creates three files for each plate:
   The row in this file corresponding to that plate name is used to assign meta
   data to all the cells.
 - A csv file containing cell meta data, with one row for each cell and one
-  column for each meta data field. The first column containes the cell name
-  (which matches the cell name used in the excpression count file).
+  column for each meta data field. The first column contains the cell name
+  (which matches the cell name used in the expression count file).
   The cells in this file are not required
   to be in the same order as the cells in the expression counts file.
 
 The names of the first two files are passed as arguments to addCellGFromBioHub.
-The additional cell meta datga in the third file can then be added using a call
+The additional cell meta data in the third file can then be added using a call
 to addCellMetaData.
+
+
+
+SEPTEMBER 2017, 10X GENOMICS DATA: addCellsFromBioHub2
+
+This uses a master file which is a comma separated file containing
+a header line containing column names plus one line for each plate.
+The name of this master file is given as the only argument
+to addCellsFromBioHub2.
+A single call to addCellsFromBioHub2 is used to load all of the cells.
+
+The following two columns are mandatory:
+    - PlateName: contains the name of the plate that
+      each line in the file refers to.
+    - aws-s3-hdf5: contains the AWS S3 path name of the hdf5 for the plate.
+      A valid path must begin with "s3://" followed by the name of the
+      S3 bucket that contains the data.
+
+The remaining columns are treated as plate meta data.
+The meta data for a plate are added to all of the cells found on the plate.
+
+Cells are named using the pattern PlateName-Barcode, where the barcode
+is as obtained from the HDF5 file for each plate.
 
 *******************************************************************************/
 
 
 
 #include "ExpressionMatrix.hpp"
+#include "Aws.hpp"
 #include "timestamp.hpp"
 #include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/filesystem.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "fstream.hpp"
 #include "iterator.hpp"
 
 
 
+//JULY 2017, ILLUMINA DATA: addCellsFromBioHub1
+// See the beginning of this file for more information.
 void ExpressionMatrix::addCellsFromBioHub1(
     const string& expressionCountsFileName, // The name of the csv file containing expression counts.
     size_t initialMetaDataCount,            // The number of initial columns containing meta data.
@@ -326,4 +359,115 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
         }
     }
 
+}
+
+
+
+// SEPTEMBER 2017, 10X GENOMICS DATA: addCellsFromBioHub2
+// See the beginning of this file for more information.
+void ExpressionMatrix::addCellsFromBioHub2(
+    const string& plateFileName,
+    double totalExpressionCountThreshold
+    )
+{
+    // Open the plate file.
+    ifstream plateFile(plateFileName);
+    if(!plateFile) {
+        throw runtime_error("Plate file " + plateFileName + " not found or could not be opened.");
+    }
+
+    // Read the header line.
+    string line;
+    getline(plateFile, line);
+    if(!plateFile || line.size()==0) {
+        throw runtime_error("Unable to read header line from plate file " + plateFileName);
+    }
+
+    // Parse the header line to get the column names.
+    if(line[line.size()-1] == 13) {
+        line.resize(line.size()-1); // Remove Windows style line end if necessary.
+    }
+    vector<string> columnNames;
+    tokenize(",", line, columnNames);
+
+    // Find the index of the column containing the PlateName.
+    const auto plateNameIt = find(columnNames.begin(), columnNames.end(), "PlateName");
+    if(plateNameIt == columnNames.end()) {
+        throw runtime_error("Plate file " + plateFileName + " does not have PlateName column.");
+    }
+    const size_t plateNamePosition = plateNameIt - columnNames.begin();
+
+    // Find the index of the column containing the aws-s3-hdf5 path.
+    const auto awsPathIt = find(columnNames.begin(), columnNames.end(), "aws-s3-hdf5");
+    if(awsPathIt == columnNames.end()) {
+        throw runtime_error("Plate file " + plateFileName + " does not have aws-s3-hdf5 column.");
+    }
+    const size_t awsPathPosition = awsPathIt - columnNames.begin();
+
+
+    // Prepare the vector of cell meta data.
+    vector< pair<string, string> > cellMetaData;
+    for(const string& columnName: columnNames) {
+        cellMetaData.push_back(make_pair(columnName, ""));
+    }
+
+
+
+    // Main loop over the remaining lines of the plate file.
+    // Each line corresponds to a plate.
+    size_t plateCount = 0;
+    for(; ; ++plateCount) {
+
+        // Read this line.
+        getline(plateFile, line);
+        if(!plateFile | line.empty()) {
+            break;
+        }
+        if(line[line.size()-1] == 13) {
+            line.resize(line.size()-1); // Remove Windows style line end if necessary.
+        }
+
+        // Parse it.
+        vector<string> columnValues;
+        tokenize(",", line, columnValues);
+        if(columnValues.size() != columnNames.size()) {
+            cout << line << endl;
+            cout << "Found " << columnValues.size() << " tokens in the above line, expected ";
+            cout << columnValues.size() << endl;
+            throw runtime_error("Unexpected number of tokens in line of plate file " + plateFileName);
+
+        }
+
+        // Fill in the cell meta data for this plate.
+        for(size_t i=0; i<columnNames.size(); i++) {
+            cellMetaData[i].second = columnValues[i];
+        }
+
+        // Extract the PlateName and the aws path.
+        CZI_ASSERT(plateNamePosition < columnValues.size());
+        CZI_ASSERT(awsPathPosition < columnValues.size());
+        const string& plateName = columnValues[plateNamePosition];
+        const string awsPath = columnValues[awsPathPosition];
+        cout << timestamp << " Working on plate " << plateCount << " " << plateName << endl;
+
+        // Make a local copy of the hdf5 file.
+        const string uuid = boost::uuids::to_string(boost::uuids::uuid(boost::uuids::random_generator()()));
+        const string localPath = string("/dev/shm/aws-") + uuid;
+        const string command = "aws s3 cp --quiet " + awsPath + " " + localPath;
+        const int returnCode = ::system(command.c_str());
+        if(returnCode!=0) {
+            throw runtime_error("Error " +
+                lexical_cast<string>(returnCode) +
+                " from command: " + command);
+        }
+
+        // Add cells from this hdf5 file.
+        addCellsFromHdf5(localPath, plateName, cellMetaData, totalExpressionCountThreshold);
+
+
+        // Remove the local copy.
+        boost::filesystem::remove(localPath);
+
+    }
+    cout << timestamp << "Processed " << plateCount << " plates." << endl;
 }

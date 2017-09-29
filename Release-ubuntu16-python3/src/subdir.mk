@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Aws.cpp \
 ../src/CellGraph.cpp \
 ../src/CellSets.cpp \
 ../src/ClusterGraph.cpp \
@@ -30,6 +31,7 @@ CPP_SRCS += \
 ../src/touchMemory.cpp 
 
 OBJS += \
+./src/Aws.o \
 ./src/CellGraph.o \
 ./src/CellSets.o \
 ./src/ClusterGraph.o \
@@ -56,6 +58,7 @@ OBJS += \
 ./src/touchMemory.o 
 
 CPP_DEPS += \
+./src/Aws.d \
 ./src/CellGraph.d \
 ./src/CellSets.d \
 ./src/ClusterGraph.d \

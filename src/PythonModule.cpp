@@ -169,6 +169,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("addCells", &ExpressionMatrix::addCells)
        .def("addCellsFromHdf5", &ExpressionMatrix::addCellsFromHdf5)
        .def("addCellsFromBioHub1", &ExpressionMatrix::addCellsFromBioHub1)
+       .def("addCellsFromBioHub2", &ExpressionMatrix::addCellsFromBioHub2)
        .def("addCellMetaData", &ExpressionMatrix::addCellMetaData)
 
 

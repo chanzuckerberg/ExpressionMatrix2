@@ -41,7 +41,11 @@ Data set shape is also not used.
 
 *******************************************************************************/
 
-void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
+void ExpressionMatrix::addCellsFromHdf5(
+    const string& fileName,
+    const string& cellNamePrefix,
+    const vector< pair<string, string> > cellMetaDataArgument,  // Added to all cells.
+    double totalExpressionCountThreshold)
 {
 
     try {
@@ -62,7 +66,7 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
         const H5::DataSet geneNamesDataSet = file.openDataSet(groupName + "genes");
         vector<string> hdf5GeneNames;
         hdf5::read(geneNamesDataSet, hdf5GeneNames);
-        cout << "Found " << hdf5GeneNames.size() << " genes." << endl;
+        // cout << "Found " << hdf5GeneNames.size() << " genes." << endl;
 
         // Check for duplications in the gene names.
         {
@@ -88,7 +92,7 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
         const H5::DataSet cellNamesDataSet = file.openDataSet(groupName + "barcodes");
         vector<string> hdf5CellNames;
         hdf5::read(cellNamesDataSet, hdf5CellNames);
-        cout << "Found " << hdf5CellNames.size() << " cells." << endl;
+        // cout << "Found " << hdf5CellNames.size() << " cells." << endl;
 
         // Read the index pointers.
         // These can be used to locate the information for each cell in the
@@ -112,6 +116,11 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
             addGene(hdf5GeneName);
         }
 
+        // Prepare the cell metadata to be added for all cells.
+        // Only the CellName will be different for each cell.
+        vector<pair<string, string> > cellMetaData(cellMetaDataArgument.size()+1);
+        cellMetaData.front().first = "CellName";
+        copy(cellMetaDataArgument.begin(), cellMetaDataArgument.end(), cellMetaData.begin()+1);
 
 
         // Main loop over the cells.
@@ -128,14 +137,17 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
         // The four vectors are defined here to avoid reallocation inside the loop.
         vector<uint32_t> data;
         vector<uint64_t> indices;	// Silly, but that's the way 10X does it.
-        vector<pair<string, string> > metaData(1, make_pair("CellName", ""));
         vector<pair<string, float> > expressionCounts;
         const H5::DataSet dataDataSet = file.openDataSet(groupName + "data");
         const H5::DataSet indicesDataSet = file.openDataSet(groupName + "indices");
+        size_t addedCellsCount = 0;
         for (size_t i = 0; i < hdf5CellNames.size(); i++) {
+            /*
             if ((i % 1000) == 0) {
-                cout << timestamp << "Added " << i << " cells of " << hdf5CellNames.size() << endl;
+                cout << timestamp << "Processed " << i << " barcodes of " << hdf5CellNames.size();
+                cout << ", added " << addedCellsCount << " cells." << endl;
             }
+            */
 
             // Read the data and indices for this cell.
             const uint64_t offset = indexPointers[i];
@@ -148,17 +160,26 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
             // cout << "offset = " << offset << endl;
             // cout << "n = " << n << endl;
 
-            // Add this cell.
+            // Gather the expression counts.
             expressionCounts.clear();
-            metaData.front().second = hdf5CellNames[i];
+            cellMetaData.front().second = cellNamePrefix + "-" + hdf5CellNames[i];
+            double totalExpressionCount = 0.;
             for (size_t j = 0; j < n; j++) {
                 // cout << j << " " << indices[j] << endl;
                 const uint64_t hdf5GeneIndex = indices[j];
                 CZI_ASSERT(hdf5GeneIndex < hdf5GeneNames.size());
                 expressionCounts.push_back(make_pair(hdf5GeneNames[hdf5GeneIndex], float(data[j])));
+                totalExpressionCount+= data[j];
             }
+
+            // If the total expression count is not enough, skip.
+            if(totalExpressionCount < totalExpressionCountThreshold) {
+                continue;
+            }
+            ++addedCellsCount;
+
             try {
-                addCell(metaData, expressionCounts);
+                addCell(cellMetaData, expressionCounts);
             } catch (...) {
                 cout << "Error occurred adding cell " << i << " ";
                 cout << hdf5CellNames[i] << " from HDF5 file " << fileName << endl;
@@ -177,6 +198,7 @@ void ExpressionMatrix::addCellsFromHdf5(const string& fileName)
             }
         }
 
+        cout << "Added " << addedCellsCount << " cells from " << hdf5CellNames.size() << " barcodes." << endl;
 
 
     }
