@@ -7,9 +7,10 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "fstream.hpp"
 
@@ -87,8 +88,33 @@ void ExpressionMatrix::processRequest(
             }
         }
 
-        // This is not a documentation request. Write a message and stop here.
-        html << "\r\nUnsupported keyword " << keyword;
+
+
+        // This is not a documentation request.
+        // See if we can interpret as a file name in the current directory.
+        // Note that this gives the client access to all files in the
+        // current directory.
+        if(keyword.size()>1 && keyword[0]=='/') {
+            using namespace boost::filesystem;
+            const string fileName = keyword.substr(1);  // Remove the initial slash
+            if(fileName.find('/') == string::npos) {    // Make sure there are no other slashes
+                ifstream file(fileName);
+                if (file) {
+                    const string fileExtension = boost::filesystem::extension(fileName);
+                    if(fileExtension == "pdf") {
+                        html << "Content-Type: application/pdf\r\n";
+                    }
+                    html << "\r\n" << file.rdbuf();
+                    return;
+                }
+            }
+        }
+
+
+
+        // We don't know how to satisfy this request.
+        // Write a message and stop here.
+        html << "\r\nUnsupported request " << keyword;
         return;
     }
 
