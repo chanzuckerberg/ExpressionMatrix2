@@ -33,7 +33,7 @@ void ExpressionMatrix::exploreGraphs(
         "<th class=centered>Number<br>of<br>isolated<br>vertices<br>removed"
         "<th class=centered>Clustering"
         "<th class=centered>Action";
-    for(const auto& p: graphs) {
+    for(const auto& p: cellGraphs) {
         const string& graphName = p.first;
         const GraphInformation& info = p.second.first;
         // const CellGraph& graph = *(p.second.second);
@@ -87,7 +87,7 @@ void ExpressionMatrix::exploreGraphs(
 
 
     // Form to compare two graphs.
-    if(graphs.size() > 1) {
+    if(cellGraphs.size() > 1) {
         html << "<p><form action=compareGraphs><input type=submit value=Compare> graphs ";
         writeGraphSelection(html, "graphName0", false);
         html << " and ";
@@ -113,9 +113,9 @@ void ExpressionMatrix::compareGraphs(
     getParameterValue(request, "graphName1", graphName1);
 
     // Locate the graphs.
-    const auto it0 = graphs.find(graphName0);
-    const auto it1 = graphs.find(graphName1);
-    if(it0==graphs.end() || it1==graphs.end()) {
+    const auto it0 = cellGraphs.find(graphName0);
+    const auto it1 = cellGraphs.find(graphName1);
+    if(it0==cellGraphs.end() || it1==cellGraphs.end()) {
         html << "<p>Did not find one or both of the graphs to be compared.";
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
@@ -361,8 +361,8 @@ void ExpressionMatrix::exploreGraph(
     }
 
     // Find the graph.
-    const auto it = graphs.find(graphName);
-    if(it == graphs.end()) {
+    const auto it = cellGraphs.find(graphName);
+    if(it == cellGraphs.end()) {
         html << "<p>Graph " << graphName << " does not exists.";
         return;
     }

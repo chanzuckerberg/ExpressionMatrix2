@@ -809,7 +809,7 @@ public:
 
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
-    map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > graphs;
+    map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > cellGraphs;
 
     // Get the names of all currently defined cell similarity graphs.
     vector<string> getCellGraphNames() const;

@@ -1418,7 +1418,7 @@ bool ExpressionMatrix::downsampleCellSet(
 vector<string> ExpressionMatrix::getCellGraphNames() const
 {
     vector<string> v;
-    for(const auto& p: graphs) {
+    for(const auto& p: cellGraphs) {
         v.push_back(p.first);
     }
     return v;
@@ -1437,7 +1437,7 @@ void ExpressionMatrix::createCellGraph(
  )
 {
     // A graph with this name should not already exist.
-    if(graphs.find(graphName) != graphs.end()) {
+    if(cellGraphs.find(graphName) != cellGraphs.end()) {
         throw runtime_error("Graph " + graphName + " already exists.");
     }
 
@@ -1470,7 +1470,7 @@ void ExpressionMatrix::createCellGraph(
     graphInformation.edgeCount = num_edges(*graph);
 
     // Store it.
-    graphs.insert(make_pair(graphName, make_pair(graphInformation, graph)));
+    cellGraphs.insert(make_pair(graphName, make_pair(graphInformation, graph)));
 
 }
 
@@ -1480,8 +1480,8 @@ void ExpressionMatrix::createCellGraph(
 void ExpressionMatrix::computeCellGraphLayout(const string& graphName)
 {
     // Locate the graph.
-    const auto it = graphs.find(graphName);
-    if(it == graphs.end()) {
+    const auto it = cellGraphs.find(graphName);
+    if(it == cellGraphs.end()) {
         throw runtime_error("Graph " + graphName + " does not exist.");
     }
     CellGraph& cellGraph = *(it->second.second);
@@ -1499,8 +1499,8 @@ void ExpressionMatrix::computeCellGraphLayout(const string& graphName)
 vector<CellGraphVertexInfo> ExpressionMatrix::getCellGraphVertices(const string& graphName) const
 {
     // Locate the graph.
-    const auto it = graphs.find(graphName);
-    if(it == graphs.end()) {
+    const auto it = cellGraphs.find(graphName);
+    if(it == cellGraphs.end()) {
         throw runtime_error("Graph " + graphName + " does not exist.");
     }
     const CellGraph& cellGraph = *(it->second.second);
@@ -1524,8 +1524,8 @@ vector<CellGraphVertexInfo> ExpressionMatrix::getCellGraphVertices(const string&
 vector< pair<CellId, CellId> > ExpressionMatrix::getCellGraphEdges(const string& graphName) const
 {
     // Locate the graph.
-    const auto it = graphs.find(graphName);
-    if(it == graphs.end()) {
+    const auto it = cellGraphs.find(graphName);
+    if(it == cellGraphs.end()) {
         throw runtime_error("Graph " + graphName + " does not exist.");
     }
     const CellGraph& cellGraph = *(it->second.second);

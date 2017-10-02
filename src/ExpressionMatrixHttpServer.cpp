@@ -430,7 +430,7 @@ ostream& ExpressionMatrix::writeGraphSelection(
         html << " multiple";
     }
     html << " name=" << selectName << "><option value=''></option>";
-    for(const auto& p: graphs) {
+    for(const auto& p: cellGraphs) {
         const string& graphName = p.first;
         html << "<option value=" << graphName << ">" << graphName << "</option>";
     }
@@ -548,8 +548,8 @@ void ExpressionMatrix::cluster(
 
 
     // Find the cell graph.
-    const auto it = graphs.find(graphName);
-    if(it == graphs.end()) {
+    const auto it = cellGraphs.find(graphName);
+    if(it == cellGraphs.end()) {
         html << "<p>Graph " << graphName << " does not exists.";
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
@@ -753,7 +753,7 @@ void ExpressionMatrix::createNewGraph(
     }
 
     // Check that the name does not already exist.
-    if(graphs.find(graphName) != graphs.end()) {
+    if(cellGraphs.find(graphName) != cellGraphs.end()) {
         html << "<p>Graph " << graphName << " already exists.";
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
@@ -764,7 +764,7 @@ void ExpressionMatrix::createNewGraph(
     html << "<div style='font-family:courier'>";
     html << timestamp << "Cell graph creation begins.";
     createCellGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
-    const GraphInformation& graphInfo = graphs[graphName].first;
+    const GraphInformation& graphInfo = cellGraphs[graphName].first;
     html <<
         "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<
         " vertices and " << graphInfo.edgeCount << " edges"
@@ -787,11 +787,11 @@ void ExpressionMatrix::removeGraph(
     if(!getParameterValue(request, "graphName", graphName)) {
         html << "<p>Missing graph name.";
     } else {
-        const auto it = graphs.find(graphName);
-        if(it == graphs.end()) {
+        const auto it = cellGraphs.find(graphName);
+        if(it == cellGraphs.end()) {
             html << "<p>Graph " << graphName << " does not exist.";
         } else {
-            graphs.erase(it);
+            cellGraphs.erase(it);
             html << "<p>Graph " << graphName << " was removed.";
         }
     }
