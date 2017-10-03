@@ -16,7 +16,8 @@ using namespace ExpressionMatrix2;
 
 
 
-// Fill the server function table, which contains the function associate with each keyword.
+// Fill the server function table, which contains the function associated with each keyword.
+// The macro can only be used when the keyword and the function name are identical.
 #define CZI_ADD_TO_FUNCTION_TABLE(name) serverFunctionTable[string("/") + #name ] = &ExpressionMatrix::name
 void ExpressionMatrix::fillServerFunctionTable()
 {
@@ -24,47 +25,47 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable[""]                                 = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/"]                                = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/index"]                           = &ExpressionMatrix::exploreSummary;
-    serverFunctionTable["/exploreHashTableSummary"]         = &ExpressionMatrix::exploreHashTableSummary;
+    CZI_ADD_TO_FUNCTION_TABLE(exploreHashTableSummary);
 
     // Genes and gene sets.
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
     serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
-    serverFunctionTable["/removeGeneSet"]                   = &ExpressionMatrix::removeGeneSet;
-    serverFunctionTable["/createGeneSetFromRegex"]          = &ExpressionMatrix::createGeneSetFromRegex;
-    serverFunctionTable["/createGeneSetFromGeneNames"]      = &ExpressionMatrix::createGeneSetFromGeneNames;
-    serverFunctionTable["/createGeneSetIntersectionOrUnion"]= &ExpressionMatrix::createGeneSetIntersectionOrUnion;
-    serverFunctionTable["/createGeneSetDifference"]         = &ExpressionMatrix::createGeneSetDifference;
-    serverFunctionTable["/createGeneSetUsingInformationContent"]    = &ExpressionMatrix::createGeneSetUsingInformationContent;
+    CZI_ADD_TO_FUNCTION_TABLE(removeGeneSet);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneSetFromRegex);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneSetFromGeneNames);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneSetIntersectionOrUnion);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneSetDifference);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneSetUsingInformationContent);
 
     // Cells and cell sets.
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
-    serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
+    CZI_ADD_TO_FUNCTION_TABLE(compareTwoCells);
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
     serverFunctionTable["/cellSet"]                         = &ExpressionMatrix::exploreCellSet;
-    serverFunctionTable["/createCellSetUsingMetaData"]      = &ExpressionMatrix::createCellSetUsingMetaData;
-    serverFunctionTable["/createCellSetIntersectionOrUnion"]= &ExpressionMatrix::createCellSetIntersectionOrUnion;
-    serverFunctionTable["/createCellSetDifference"]         = &ExpressionMatrix::createCellSetDifference;
-    serverFunctionTable["/downsampleCellSet"]               = &ExpressionMatrix::downsampleCellSet;
-    serverFunctionTable["/removeCellSet"]                   = &ExpressionMatrix::removeCellSet;
+    CZI_ADD_TO_FUNCTION_TABLE(createCellSetUsingMetaData);
+    CZI_ADD_TO_FUNCTION_TABLE(createCellSetIntersectionOrUnion);
+    CZI_ADD_TO_FUNCTION_TABLE(createCellSetDifference);
+    CZI_ADD_TO_FUNCTION_TABLE(downsampleCellSet);
+    CZI_ADD_TO_FUNCTION_TABLE(removeCellSet);
 
     // Cell meta data.
     serverFunctionTable["/metaData"]                        = &ExpressionMatrix::exploreMetaData;
-    serverFunctionTable["/metaDataHistogram"]               = &ExpressionMatrix::metaDataHistogram;
-    serverFunctionTable["/metaDataContingencyTable"]        = &ExpressionMatrix::metaDataContingencyTable;
-    serverFunctionTable["/removeMetaData"]                  = &ExpressionMatrix::removeMetaData;
+    CZI_ADD_TO_FUNCTION_TABLE(metaDataHistogram);
+    CZI_ADD_TO_FUNCTION_TABLE(metaDataContingencyTable);
+    CZI_ADD_TO_FUNCTION_TABLE(removeMetaData);
 
     // Cell graphs.
     serverFunctionTable["/cellGraphs"]                      = &ExpressionMatrix::exploreCellGraphs;
-    serverFunctionTable["/compareCellGraphs"]               = &ExpressionMatrix::compareCellGraphs;
+    CZI_ADD_TO_FUNCTION_TABLE(compareCellGraphs);
     serverFunctionTable["/cellGraph"]                       = &ExpressionMatrix::exploreCellGraph;
-    serverFunctionTable["/createCellGraph"]                 = &ExpressionMatrix::createCellGraph;
-    serverFunctionTable["/removeCellGraph"]                 = &ExpressionMatrix::removeCellGraph;
+    CZI_ADD_TO_FUNCTION_TABLE(createCellGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(removeCellGraph);
 
     // Clustering and cluster graphs.
-    serverFunctionTable["/clusterDialog"]                   = &ExpressionMatrix::clusterDialog;
-    serverFunctionTable["/cluster"]                         = &ExpressionMatrix::cluster;
+    CZI_ADD_TO_FUNCTION_TABLE(clusterDialog);
+    CZI_ADD_TO_FUNCTION_TABLE(cluster);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 
