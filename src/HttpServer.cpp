@@ -11,6 +11,7 @@ using namespace ExpressionMatrix2;
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/v6_only.hpp>
+#include <boost/chrono.hpp>
 using namespace boost;
 using namespace asio;
 using namespace ip;
@@ -50,7 +51,11 @@ void HttpServer::explore(uint16_t port)
               return;
           }
           cout << timestamp << remoteEndpoint.address().to_string() << " ";
+          const auto t0 = boost::chrono::steady_clock::now();
           processRequest(s);
+          const auto t1 = boost::chrono::steady_clock::now();
+          const boost::chrono::duration<double> t01 = t1 - t0;
+          cout << timestamp << "Request satisfied in " << t01 << "." << endl;
     }
 }
 

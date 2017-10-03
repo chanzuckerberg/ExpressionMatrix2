@@ -32,6 +32,10 @@ void ExpressionMatrix::exploreCellGraphs(
         "<th class=centered>Number<br>of<br>edges"
         "<th class=centered>Number<br>of<br>isolated<br>vertices<br>removed"
         "<th class=centered>Clustering"
+        "<br>(being phased out"
+        "<br>in favor of"
+        "<br>the Clustering button"
+        "<br>at the top of the page)"
         "<th class=centered>Action";
     for(const auto& p: cellGraphs) {
         const string& graphName = p.first;
@@ -89,9 +93,9 @@ void ExpressionMatrix::exploreCellGraphs(
     // Form to compare two graphs.
     if(cellGraphs.size() > 1) {
         html << "<p><form action=compareCellGraphs><input type=submit value=Compare> graphs ";
-        writeGraphSelection(html, "graphName0", false);
+        writeCellGraphSelection(html, "graphName0", false);
         html << " and ";
-        writeGraphSelection(html, "graphName1", false);
+        writeCellGraphSelection(html, "graphName1", false);
         html << ".</form>";
     }
 

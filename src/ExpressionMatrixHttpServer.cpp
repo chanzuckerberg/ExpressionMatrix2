@@ -66,6 +66,10 @@ void ExpressionMatrix::fillServerFunctionTable()
     // Clustering and cluster graphs.
     CZI_ADD_TO_FUNCTION_TABLE(clusterDialog);
     CZI_ADD_TO_FUNCTION_TABLE(cluster);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphs);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(createClusterGraphDialog);
+    CZI_ADD_TO_FUNCTION_TABLE(createClusterGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 
@@ -200,6 +204,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Cell sets", "cellSets");
     writeNavigation(html, "Cell meta data", "metaData");
     writeNavigation(html, "Cell graphs", "cellGraphs");
+    writeNavigation(html, "Clustering", "exploreClusterGraphs");
 
     if(!serverParameters.docDirectory.empty()) {
         writeNavigation(html, "Help", "help/index.html");
@@ -434,7 +439,7 @@ ostream& ExpressionMatrix::writeMetaDataSelection(
 
 
 
-ostream& ExpressionMatrix::writeGraphSelection(
+ostream& ExpressionMatrix::writeCellGraphSelection(
     ostream& html,
     const string& selectName,
     bool multiple) const

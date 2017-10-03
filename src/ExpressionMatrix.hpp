@@ -560,7 +560,7 @@ private:
     ostream& writeCellSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeGeneSetSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeGeneSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
-    ostream& writeGraphSelection(ostream& html, const string& selectName, bool multiple) const;
+    ostream& writeCellGraphSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
     void removeCellSet(const vector<string>& request, ostream& html);
@@ -576,6 +576,10 @@ private:
     void metaDataHistogram(const vector<string>& request, ostream& html);
     void metaDataContingencyTable(const vector<string>& request, ostream& html);
     void removeMetaData(const vector<string>& request, ostream& html);
+    void exploreClusterGraphs(const vector<string>& request, ostream& html);
+    void exploreClusterGraph(const vector<string>& request, ostream& html);
+    void createClusterGraphDialog(const vector<string>& request, ostream& html);
+    void createClusterGraph(const vector<string>& request, ostream& html);
 
 
 
