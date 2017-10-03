@@ -17,12 +17,16 @@ using namespace ExpressionMatrix2;
 
 
 // Fill the server function table, which contains the function associate with each keyword.
+#define CZI_ADD_TO_FUNCTION_TABLE(name) serverFunctionTable[string("/") + #name ] = &ExpressionMatrix::name
 void ExpressionMatrix::fillServerFunctionTable()
 {
+    // Summary.
     serverFunctionTable[""]                                 = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/"]                                = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/index"]                           = &ExpressionMatrix::exploreSummary;
     serverFunctionTable["/exploreHashTableSummary"]         = &ExpressionMatrix::exploreHashTableSummary;
+
+    // Genes and gene sets.
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
     serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
@@ -33,6 +37,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/createGeneSetIntersectionOrUnion"]= &ExpressionMatrix::createGeneSetIntersectionOrUnion;
     serverFunctionTable["/createGeneSetDifference"]         = &ExpressionMatrix::createGeneSetDifference;
     serverFunctionTable["/createGeneSetUsingInformationContent"]    = &ExpressionMatrix::createGeneSetUsingInformationContent;
+
+    // Cells and cell sets.
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
     serverFunctionTable["/compareTwoCells"]                 = &ExpressionMatrix::compareTwoCells;
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
@@ -42,18 +48,25 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/createCellSetDifference"]         = &ExpressionMatrix::createCellSetDifference;
     serverFunctionTable["/downsampleCellSet"]               = &ExpressionMatrix::downsampleCellSet;
     serverFunctionTable["/removeCellSet"]                   = &ExpressionMatrix::removeCellSet;
-    serverFunctionTable["/graphs"]                          = &ExpressionMatrix::exploreGraphs;
-    serverFunctionTable["/compareGraphs"]                   = &ExpressionMatrix::compareGraphs;
-    serverFunctionTable["/graph"]                           = &ExpressionMatrix::exploreGraph;
-    serverFunctionTable["/clusterDialog"]                   = &ExpressionMatrix::clusterDialog;
-    serverFunctionTable["/cluster"]                         = &ExpressionMatrix::cluster;
-    serverFunctionTable["/createNewGraph"]                  = &ExpressionMatrix::createNewGraph;
-    serverFunctionTable["/removeGraph"]                     = &ExpressionMatrix::removeGraph;
+
+    // Cell meta data.
     serverFunctionTable["/metaData"]                        = &ExpressionMatrix::exploreMetaData;
     serverFunctionTable["/metaDataHistogram"]               = &ExpressionMatrix::metaDataHistogram;
     serverFunctionTable["/metaDataContingencyTable"]        = &ExpressionMatrix::metaDataContingencyTable;
     serverFunctionTable["/removeMetaData"]                  = &ExpressionMatrix::removeMetaData;
+
+    // Cell graphs.
+    serverFunctionTable["/cellGraphs"]                      = &ExpressionMatrix::exploreCellGraphs;
+    serverFunctionTable["/compareCellGraphs"]               = &ExpressionMatrix::compareCellGraphs;
+    serverFunctionTable["/cellGraph"]                       = &ExpressionMatrix::exploreCellGraph;
+    serverFunctionTable["/createCellGraph"]                 = &ExpressionMatrix::createCellGraph;
+    serverFunctionTable["/removeCellGraph"]                 = &ExpressionMatrix::removeCellGraph;
+
+    // Clustering and cluster graphs.
+    serverFunctionTable["/clusterDialog"]                   = &ExpressionMatrix::clusterDialog;
+    serverFunctionTable["/cluster"]                         = &ExpressionMatrix::cluster;
 }
+#undef CZI_ADD_TO_FUNCTION_TABLE
 
 
 
@@ -185,7 +198,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Compare two cells", "compareTwoCells");
     writeNavigation(html, "Cell sets", "cellSets");
     writeNavigation(html, "Cell meta data", "metaData");
-    writeNavigation(html, "Graphs", "graphs");
+    writeNavigation(html, "Cell graphs", "cellGraphs");
 
     if(!serverParameters.docDirectory.empty()) {
         writeNavigation(html, "Help", "help/index.html");
@@ -487,7 +500,7 @@ void ExpressionMatrix::clusterDialog(
     string graphName;
     if(!getParameterValue(request, "graphName", graphName)) {
         html << "Missing graph name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
@@ -526,7 +539,7 @@ void ExpressionMatrix::cluster(
     string graphName;
     if(!getParameterValue(request, "graphName", graphName)) {
         html << "Missing graph name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
     size_t seed = 231;
@@ -551,7 +564,7 @@ void ExpressionMatrix::cluster(
     const auto it = cellGraphs.find(graphName);
     if(it == cellGraphs.end()) {
         html << "<p>Graph " << graphName << " does not exists.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
     const CellGraphInformation& graphInformation = it->second.first;
@@ -712,7 +725,7 @@ void ExpressionMatrix::cluster(
 
 
 
-void ExpressionMatrix::createNewGraph(
+void ExpressionMatrix::createCellGraph(
     const vector<string>& request,
     ostream& html)
 {
@@ -720,42 +733,42 @@ void ExpressionMatrix::createNewGraph(
     string graphName;
     if(!getParameterValue(request, "graphName", graphName)) {
         html << "Missing graph name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
     string cellSetName;
     if(!getParameterValue(request, "cellSetName", cellSetName)) {
         html << "Missing cell set name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
     string similarPairsName;
     if(!getParameterValue(request, "similarPairsName", similarPairsName)) {
         html << "Missing similar pairs name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
     double similarityThreshold;
     if(!getParameterValue(request, "similarityThreshold", similarityThreshold)) {
         html << "Missing or invalid similarity threshold.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
     int maxConnectivity;
     if(!getParameterValue(request, "maxConnectivity", maxConnectivity)) {
         html << "Missing or invalid max connectivity.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
     // Check that the name does not already exist.
     if(cellGraphs.find(graphName) != cellGraphs.end()) {
         html << "<p>Graph " << graphName << " already exists.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 
@@ -772,14 +785,14 @@ void ExpressionMatrix::createNewGraph(
     html << "</div>";
 
     // Add a button to continue.
-    html << "<p><form action=graphs><input type=submit autofocus value=Continue></form>";
+    html << "<p><form action=cellGraphs><input type=submit autofocus value=Continue></form>";
 
 
 }
 
 
 
-void ExpressionMatrix::removeGraph(
+void ExpressionMatrix::removeCellGraph(
     const vector<string>& request,
     ostream& html)
 {
@@ -797,7 +810,7 @@ void ExpressionMatrix::removeGraph(
     }
 
 
-    html << "<p><form action=graphs><input type=submit autofocus value=Continue></form>";
+    html << "<p><form action=cellGraphs><input type=submit autofocus value=Continue></form>";
 }
 
 

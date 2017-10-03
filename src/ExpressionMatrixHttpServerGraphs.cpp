@@ -12,18 +12,18 @@ using namespace ExpressionMatrix2;
 
 
 
-void ExpressionMatrix::exploreGraphs(
+void ExpressionMatrix::exploreCellGraphs(
     const vector<string>& request,
     ostream& html)
 {
-    html << "<h1>Cell similarity graphs</h1>";
+    html << "<h1>Cell graphs</h1>";
 
 
 
-    // Table with existing graphs.
+    // Table with existing cell graphs.
     html <<
         "<table><tr>"
-        "<th class=centered>Graph<br>name"
+        "<th class=centered>Celll<br>graph<br>name"
         "<th class=centered>Cell<br>set<br>name"
         "<th class=centered>Similar<br>pairs<br>name"
         "<th class=centered>Similarity<br>threshold"
@@ -37,7 +37,7 @@ void ExpressionMatrix::exploreGraphs(
         const string& graphName = p.first;
         const CellGraphInformation& info = p.second.first;
         // const CellGraph& graph = *(p.second.second);
-        html << "<tr><td><a href='graph?graphName=" << urlEncode(graphName);
+        html << "<tr><td><a href='cellGraph?graphName=" << urlEncode(graphName);
         if(info.edgeCount>50000) {
             // The graph has lots of edges. Don't display them initially.
             html << "&hideEdges=on";
@@ -52,7 +52,7 @@ void ExpressionMatrix::exploreGraphs(
         html << "<td class=centered>" << info.edgeCount;
         html << "<td class=centered>" << info.isolatedVertexCount;
         html << "<td class=centered><form action=clusterDialog><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Run clustering on graph " << graphName << "'></form>";
-        html << "<td class=centered><form action=removeGraph><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Remove graph " << graphName << "'></form>";
+        html << "<td class=centered><form action=removeCellGraph><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Remove graph " << graphName << "'></form>";
     }
 
 
@@ -63,7 +63,7 @@ void ExpressionMatrix::exploreGraphs(
 
     html <<
         "<tr>"
-        "<form action=createNewGraph>"
+        "<form action=createCellGraph>"
         "<td class=centered><input type=text size=8 required autofocus name=graphName>"
         "<td class=centered>";
 
@@ -79,7 +79,7 @@ void ExpressionMatrix::exploreGraphs(
     html <<
         "<td class=centered><input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
         "<td class=centered><input type=text style='text-align:center' size=8 name=maxConnectivity value='20'>"
-        "<td><td><td><td><td class=centered><input type=submit value='Create a new graph'>"
+        "<td><td><td><td><td class=centered><input type=submit value='Create a new cell graph'>"
         "</form>";
 
     html << "</table>";
@@ -88,7 +88,7 @@ void ExpressionMatrix::exploreGraphs(
 
     // Form to compare two graphs.
     if(cellGraphs.size() > 1) {
-        html << "<p><form action=compareGraphs><input type=submit value=Compare> graphs ";
+        html << "<p><form action=compareCellGraphs><input type=submit value=Compare> graphs ";
         writeGraphSelection(html, "graphName0", false);
         html << " and ";
         writeGraphSelection(html, "graphName1", false);
@@ -102,7 +102,7 @@ void ExpressionMatrix::exploreGraphs(
 
 
 
-void ExpressionMatrix::compareGraphs(
+void ExpressionMatrix::compareCellGraphs(
     const vector<string>& request,
     ostream& html)
 {
@@ -116,13 +116,13 @@ void ExpressionMatrix::compareGraphs(
     const auto it0 = cellGraphs.find(graphName0);
     const auto it1 = cellGraphs.find(graphName1);
     if(it0==cellGraphs.end() || it1==cellGraphs.end()) {
-        html << "<p>Did not find one or both of the graphs to be compared.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p>Did not find one or both of the cell graphs to be compared.";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
     if(it0 == it1) {
-        html << "<p>Comparison of a graph with itself requested. ";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p>Comparison of a cell graph with itself requested. ";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
     const CellGraphInformation& graphCreationParameters0 = it0->second.first;
@@ -348,7 +348,7 @@ void ExpressionMatrix::compareGraphs(
 
 
 
-void ExpressionMatrix::exploreGraph(
+void ExpressionMatrix::exploreCellGraph(
     const vector<string>& request,
     ostream& html)
 {
@@ -356,7 +356,7 @@ void ExpressionMatrix::exploreGraph(
     string graphName;
     if(!getParameterValue(request, "graphName", graphName)) {
         html << "Missing graph name.";
-        html << "<p><form action=graphs><input type=submit value=Continue></form>";
+        html << "<p><form action=cellGraphs><input type=submit value=Continue></form>";
         return;
     }
 

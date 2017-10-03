@@ -319,7 +319,15 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
        // Cell graphs.
        .def("getCellGraphNames", &ExpressionMatrix::getCellGraphNames)
-       .def("createCellGraph", &ExpressionMatrix::createCellGraph)
+       .def
+       (
+           "createCellGraph",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, double, size_t)
+           )
+           &ExpressionMatrix::createCellGraph
+       )
        .def("computeCellGraphLayout", &ExpressionMatrix::computeCellGraphLayout)
        .def("getCellGraphVertices", &ExpressionMatrix::getCellGraphVertices)
        .def("getCellGraphEdges", &ExpressionMatrix::getCellGraphEdges)

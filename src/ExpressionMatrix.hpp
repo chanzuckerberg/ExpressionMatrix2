@@ -564,13 +564,13 @@ private:
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
     void removeCellSet(const vector<string>& request, ostream& html);
-    void exploreGraphs(const vector<string>& request, ostream& html);
-    void compareGraphs(const vector<string>& request, ostream& html);
-    void exploreGraph(const vector<string>& request, ostream& html);
+    void exploreCellGraphs(const vector<string>& request, ostream& html);
+    void compareCellGraphs(const vector<string>& request, ostream& html);
+    void exploreCellGraph(const vector<string>& request, ostream& html);
     void clusterDialog(const vector<string>& request, ostream& html);
     void cluster(const vector<string>& request, ostream& html);
-    void createNewGraph(const vector<string>& request, ostream& html);
-    void removeGraph(const vector<string>& request, ostream& html);
+    void createCellGraph(const vector<string>& request, ostream& html);
+    void removeCellGraph(const vector<string>& request, ostream& html);
     void getAvailableSimilarPairs(vector<string>&) const;
     void exploreMetaData(const vector<string>& request, ostream& html);
     void metaDataHistogram(const vector<string>& request, ostream& html);
