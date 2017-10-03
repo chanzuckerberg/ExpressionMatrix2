@@ -35,7 +35,7 @@ void ExpressionMatrix::exploreGraphs(
         "<th class=centered>Action";
     for(const auto& p: cellGraphs) {
         const string& graphName = p.first;
-        const GraphInformation& info = p.second.first;
+        const CellGraphInformation& info = p.second.first;
         // const CellGraph& graph = *(p.second.second);
         html << "<tr><td><a href='graph?graphName=" << urlEncode(graphName);
         if(info.edgeCount>50000) {
@@ -125,8 +125,8 @@ void ExpressionMatrix::compareGraphs(
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
     }
-    const GraphInformation& graphCreationParameters0 = it0->second.first;
-    const GraphInformation& graphCreationParameters1 = it1->second.first;
+    const CellGraphInformation& graphCreationParameters0 = it0->second.first;
+    const CellGraphInformation& graphCreationParameters1 = it1->second.first;
     const auto graphPointer0 = it0->second.second;
     const auto graphPointer1 = it1->second.second;
     CZI_ASSERT(graphPointer0);
@@ -366,7 +366,7 @@ void ExpressionMatrix::exploreGraph(
         html << "<p>Graph " << graphName << " does not exists.";
         return;
     }
-    const GraphInformation& graphInformation = it->second.first;
+    const CellGraphInformation& graphInformation = it->second.first;
     const string& similarPairsName = graphInformation.similarPairsName;
     vector<string> geneSetNames = geneSetNamesFromSimilarPairsName(similarPairsName);
     const string geneSetName = geneSetNames.empty() ? "" : geneSetNames.front();

@@ -17,6 +17,7 @@ namespace ChanZuckerberg {
         class ClusterGraph;
         class ClusterGraphVertex;
         class ClusterGraphEdge;
+        class ClusterGraphCreationParameters;
 
         // The base class for class ClusterGraph.
         using ClusterGraphBaseClass = boost::adjacency_list<
@@ -35,6 +36,20 @@ namespace ChanZuckerberg {
         }
     }
 }
+
+
+
+// Creation parameters for a ClusterGraph.
+// These control the label propagation algorithm.
+class ChanZuckerberg::ExpressionMatrix2::ClusterGraphCreationParameters {
+public:
+    size_t stableIterationCount = 3;    // Stop after this many iterations without changes.
+    size_t maxIterationCount = 100;     // Stop after this many iterations no matter what.
+    size_t seed = 231;                  // To initialize label propagation algorithm.
+    size_t minClusterSize = 100;        // Minimum number of cells for a cluster to be retained.
+    size_t maxConnectivity = 3;
+    double similarityThreshold = 0.5;   // For edges of the cluster graph.
+};
 
 
 

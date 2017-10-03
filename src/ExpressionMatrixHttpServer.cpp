@@ -554,7 +554,7 @@ void ExpressionMatrix::cluster(
         html << "<p><form action=graphs><input type=submit value=Continue></form>";
         return;
     }
-    const GraphInformation& graphInformation = it->second.first;
+    const CellGraphInformation& graphInformation = it->second.first;
     const string& similarPairsName = graphInformation.similarPairsName;
     const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
     const GeneSet& geneSet = similarPairs.getGeneSet();
@@ -764,7 +764,7 @@ void ExpressionMatrix::createNewGraph(
     html << "<div style='font-family:courier'>";
     html << timestamp << "Cell graph creation begins.";
     createCellGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
-    const GraphInformation& graphInfo = cellGraphs[graphName].first;
+    const CellGraphInformation& graphInfo = cellGraphs[graphName].first;
     html <<
         "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<
         " vertices and " << graphInfo.edgeCount << " edges"

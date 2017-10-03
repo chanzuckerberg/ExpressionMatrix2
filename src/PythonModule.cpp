@@ -5,6 +5,7 @@
 
 
 // CZI.
+#include "ClusterGraph.hpp"
 #include "ExpressionMatrix.hpp"
 #include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
@@ -323,6 +324,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("getCellGraphVertices", &ExpressionMatrix::getCellGraphVertices)
        .def("getCellGraphEdges", &ExpressionMatrix::getCellGraphEdges)
 
+       // Cluster graphs.
+       .def("createClusterGraph", &ExpressionMatrix::createClusterGraph)
+
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)
 
@@ -338,6 +342,13 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
         .def_readwrite("cellCapacity", &ExpressionMatrixCreationParameters::cellCapacity)
         .def_readwrite("cellMetaDataNameCapacity", &ExpressionMatrixCreationParameters::cellMetaDataNameCapacity)
         .def_readwrite("cellMetaDataValueCapacity", &ExpressionMatrixCreationParameters::cellMetaDataValueCapacity)
+        ;
+
+    // Class ClusterGraphCreationParameters.
+    class_<ClusterGraphCreationParameters>("ClusterGraphCreationParameters", init<>())
+        .def_readwrite("stableIterationCount", &ClusterGraphCreationParameters::stableIterationCount)
+        .def_readwrite("maxIterationCount", &ClusterGraphCreationParameters::maxIterationCount)
+        .def_readwrite("seed", &ClusterGraphCreationParameters::seed)
         ;
 
 

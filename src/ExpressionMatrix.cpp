@@ -1,5 +1,6 @@
 #include "ExpressionMatrix.hpp"
 #include "CellGraph.hpp"
+#include "ClusterGraph.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -1458,7 +1459,7 @@ void ExpressionMatrix::createCellGraph(
         ));
 
     // Create the GraphInformation object that will be stored with the graph.
-    GraphInformation graphInformation;
+    CellGraphInformation graphInformation;
     graphInformation.cellSetName = cellSetName;
     graphInformation.similarPairsName = similarPairsName;
     graphInformation.similarityThreshold = similarityThreshold;
@@ -1706,3 +1707,77 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(
     }
 }
 
+
+
+// Create a new named ClusterGraph by running clustering on an existing CellGraph.
+void ExpressionMatrix::createClusterGraph(
+    const string& cellGraphName,
+    const ClusterGraphCreationParameters& clusterGraphCreationParameters,
+    const string& clusterGraphName
+ )
+{
+    // Locate the cell graph.
+    const auto it = cellGraphs.find(cellGraphName);
+    if(it == cellGraphs.end()) {
+        throw runtime_error("Cell graph " + cellGraphName + " does not exist.");
+        return;
+    }
+    const CellGraphInformation& cellGraphInformation = it->second.first;
+    const string& similarPairsName = cellGraphInformation.similarPairsName;
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const GeneSet& geneSet = similarPairs.getGeneSet();
+    CellGraph& cellGraph = *(it->second.second);
+
+
+
+    // Check that a ClusterGraph with this name does not already exists.
+    if(clusterGraphs.find(clusterGraphName) != clusterGraphs.end()) {
+        throw runtime_error("Cluster graph " + clusterGraphName + " already exists.");
+        return;
+    }
+
+
+
+    // Do the clustering on this cell graph, using the specified parameters.
+    cellGraph.labelPropagationClustering(
+        cout,
+        clusterGraphCreationParameters.seed,
+        clusterGraphCreationParameters.stableIterationCount,
+        clusterGraphCreationParameters.maxIterationCount);
+
+
+
+    // Create the ClusterGraph.
+    const boost::shared_ptr<ClusterGraph> clusterGraphPointer =
+        boost::shared_ptr<ClusterGraph>(new ClusterGraph(cellGraph));
+    clusterGraphs.insert(make_pair(clusterGraphName, clusterGraphPointer));
+    ClusterGraph& clusterGraph = *clusterGraphPointer;
+
+    // Remove the vertices that correspond to small clusters.
+    clusterGraph.removeSmallVertices(clusterGraphCreationParameters.minClusterSize);
+
+    // Compute the average expression for each cluster - that is, for each vertex
+    // of the cluster graph.
+    BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
+        ClusterGraphVertex& vertex = clusterGraph[v];
+        const NormalizationMethod normalizationMethod = NormalizationMethod::L2;    // Use L2 normalization. We might need to make this configurable.
+        computeAverageExpression(
+            geneSet,
+            vertex.cells,
+            vertex.averageGeneExpression,
+            normalizationMethod);
+    }
+
+    // Store in each edge the similarity of the two clusters, computed using the clusters
+    // average expression stored in each vertex.
+    clusterGraph.computeSimilarities();
+
+    // Remove edges with low similarity.
+    clusterGraph.removeWeakEdges(clusterGraphCreationParameters.similarityThreshold);
+
+    // Make it a k-nn graph.
+    clusterGraph.makeKnn(clusterGraphCreationParameters.maxConnectivity);
+
+    cout << "The cluster graph has " << num_vertices(clusterGraph);
+    cout << " vertices and " << num_edges(clusterGraph) << " edges." << endl;
+}

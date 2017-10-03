@@ -30,10 +30,12 @@ namespace ChanZuckerberg {
 
         class BitSet;
         class CellGraph;
+        class ClusterGraph;
+        class ClusterGraphCreationParameters;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
         class ExpressionMatrixSubset;
-        class GraphInformation;
+        class CellGraphInformation;
         class ServerParameters;
 
     }
@@ -63,7 +65,7 @@ public:
 
 
 // Class used to store information about a cell graph.
-class ChanZuckerberg::ExpressionMatrix2::GraphInformation {
+class ChanZuckerberg::ExpressionMatrix2::CellGraphInformation {
 public:
     string cellSetName;
     string similarPairsName;
@@ -72,7 +74,7 @@ public:
     size_t vertexCount;
     size_t edgeCount;
     size_t isolatedVertexCount;     // The number of isolated vertices that were removed.
-    GraphInformation() {}
+    CellGraphInformation() {}
 };
 
 
@@ -809,23 +811,36 @@ public:
 
     // The cell similarity graphs.
     // This is not persistent (lives in memory only).
-    map<string, pair<GraphInformation, boost::shared_ptr<CellGraph> > > cellGraphs;
+    map<string, pair<CellGraphInformation, boost::shared_ptr<CellGraph> > > cellGraphs;
 
     // Get the names of all currently defined cell similarity graphs.
     vector<string> getCellGraphNames() const;
 
-    // Compute the layout (vertex positions) for the graph with a given name.
+    // Compute the layout (vertex positions) for the cell graph with a given name.
     void computeCellGraphLayout(const string& graphName);
 
-    // Return vertex information for the graph with a given name.
+    // Return vertex information for the cell graph with a given name.
     vector<CellGraphVertexInfo> getCellGraphVertices(const string& graphName) const;
 
     // Return the cell ids of the two vertices corresponding to
     // each of the edges of the cell graph with given name.
     vector< pair<CellId, CellId> > getCellGraphEdges(const string& graphName) const;
 
-    // Store the cluster ids in a graph in a meta data field.
+    // Store the cluster ids in a cell graph in a meta data field.
     void storeClusterId(const string& metaDataName, const CellGraph&);
+
+
+    // The cluster graphs.
+    // This is not persistent (lives in memory only).
+    map<string, boost::shared_ptr<ClusterGraph> > clusterGraphs;
+
+    // Create a new named ClusterGraph by running clustering on an existing CellGraph.
+    void createClusterGraph(
+        const string& cellGraphName,            // The name of the cell graph to do clustering on.
+        const ClusterGraphCreationParameters&,  // Parameters for the clustering algorithm.
+        const string& clusterGraphName          // The name of the ClusterGraph to be created.
+     );
+
 
 
 };

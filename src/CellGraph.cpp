@@ -529,7 +529,7 @@ void CellGraph::labelPropagationClustering(
             }
 
         }
-        out << "<br>Iteration " << iteration << ": " << changeCount << " changes." << flush;
+        out << "Iteration " << iteration << ": " << changeCount << " changes." << endl;
 
         // Scroll to the bottom of the page to show the line we just wrote.
         // But for some reason it does not work.
@@ -550,9 +550,9 @@ void CellGraph::labelPropagationClustering(
 
 
     if(stableIterationCount == stableIterationCountThreshold) {
-        out << "<br>Terminating because the specified number stable iterations was achieved." << endl;
+        out << "Terminating because the specified number of stable iterations was achieved." << endl;
     } else {
-        out << "<br>Terminating because the maximum number of iterations was reached." << endl;
+        out << "Terminating because the maximum number of iterations was reached." << endl;
     }
 
 
