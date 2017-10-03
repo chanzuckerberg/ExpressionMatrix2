@@ -836,6 +836,12 @@ public:
 
     // Create a new named ClusterGraph by running clustering on an existing CellGraph.
     void createClusterGraph(
+        ostream&,                               // For log output.
+        const string& cellGraphName,            // The name of the cell graph to do clustering on.
+        const ClusterGraphCreationParameters&,  // Parameters for the clustering algorithm.
+        const string& clusterGraphName          // The name of the ClusterGraph to be created.
+     );
+    void createClusterGraph(
         const string& cellGraphName,            // The name of the cell graph to do clustering on.
         const ClusterGraphCreationParameters&,  // Parameters for the clustering algorithm.
         const string& clusterGraphName          // The name of the ClusterGraph to be created.

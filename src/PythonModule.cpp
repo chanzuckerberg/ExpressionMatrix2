@@ -325,7 +325,15 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("getCellGraphEdges", &ExpressionMatrix::getCellGraphEdges)
 
        // Cluster graphs.
-       .def("createClusterGraph", &ExpressionMatrix::createClusterGraph)
+       .def
+       (
+           "createClusterGraph",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const ClusterGraphCreationParameters&, const string&)
+           )
+           &ExpressionMatrix::createClusterGraph
+       )
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)

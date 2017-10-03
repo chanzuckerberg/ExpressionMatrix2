@@ -1713,8 +1713,15 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(
 void ExpressionMatrix::createClusterGraph(
     const string& cellGraphName,
     const ClusterGraphCreationParameters& clusterGraphCreationParameters,
-    const string& clusterGraphName
- )
+    const string& clusterGraphName)
+{
+    createClusterGraph(cout, cellGraphName, clusterGraphCreationParameters, clusterGraphName);
+}
+void ExpressionMatrix::createClusterGraph(
+    ostream& out,
+    const string& cellGraphName,
+    const ClusterGraphCreationParameters& clusterGraphCreationParameters,
+    const string& clusterGraphName)
 {
     // Locate the cell graph.
     const auto it = cellGraphs.find(cellGraphName);
@@ -1740,7 +1747,7 @@ void ExpressionMatrix::createClusterGraph(
 
     // Do the clustering on this cell graph, using the specified parameters.
     cellGraph.labelPropagationClustering(
-        cout,
+        out,
         clusterGraphCreationParameters.seed,
         clusterGraphCreationParameters.stableIterationCount,
         clusterGraphCreationParameters.maxIterationCount);
@@ -1778,6 +1785,6 @@ void ExpressionMatrix::createClusterGraph(
     // Make it a k-nn graph.
     clusterGraph.makeKnn(clusterGraphCreationParameters.maxConnectivity);
 
-    cout << "The cluster graph has " << num_vertices(clusterGraph);
-    cout << " vertices and " << num_edges(clusterGraph) << " edges." << endl;
+    out << "Cluster graph " << clusterGraphName << " has " << num_vertices(clusterGraph);
+    out << " vertices and " << num_edges(clusterGraph) << " edges." << endl;
 }
