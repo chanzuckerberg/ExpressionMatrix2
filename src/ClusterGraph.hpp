@@ -7,6 +7,7 @@
 #include <boost/graph/adjacency_list.hpp>
 
 #include "iosfwd.hpp"
+#include "map.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -101,17 +102,29 @@ public:
     void makeKnn(size_t k);
 
     // Write in Graphviz format.
-    void write(ostream&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
-    void write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    void write(
+        ostream&,
+        const string& clusterGraphName,
+        const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    void write(
+        const string& fileName,
+        const string& clusterGraphName,
+        const MemoryMapped::StringTable<GeneId>& geneNames) const;
 
     // Layout in svg and pdf format, stored in memory.
     string svg;
     string pdf;
-    bool computeLayout(size_t timeoutSeconds, const MemoryMapped::StringTable<GeneId>& geneNames);
+    bool computeLayout(
+        size_t timeoutSeconds,
+        const string& clusterGraphName,
+        const MemoryMapped::StringTable<GeneId>& geneNames);
     bool hasLayout() const
     {
         return (!svg.empty()) && (!pdf.empty());
     }
+
+    // Maps clusterId to vertex_descriptor.
+    map<uint32_t, vertex_descriptor> vertexMap;
 
 private:
 
@@ -119,11 +132,16 @@ private:
 
     class Writer {
     public:
-        Writer(const ClusterGraph&, const vector<GeneId>&, const MemoryMapped::StringTable<GeneId>& geneNames);
+        Writer(
+            const ClusterGraph&,
+            const string& clusterGraphName,
+            const vector<GeneId>&,
+            const MemoryMapped::StringTable<GeneId>& geneNames);
         void operator()(ostream&) const;
         void operator()(ostream&, vertex_descriptor) const;
         void operator()(ostream&, edge_descriptor) const;
         const ClusterGraph& graph;
+        const string& clusterGraphName;
         const vector<GeneId>& geneSet;
         const MemoryMapped::StringTable<GeneId>& geneNames;
     private:

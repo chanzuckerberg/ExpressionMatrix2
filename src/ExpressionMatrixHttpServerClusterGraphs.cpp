@@ -171,7 +171,7 @@ void ExpressionMatrix::exploreClusterGraph(
     html << "<h1>Cluster graph " << clusterGraphName << "</h1>";
 
     // Create the graph layout.
-    if(!clusterGraph.computeLayout(timeout, geneNames)) {
+    if(!clusterGraph.computeLayout(timeout, clusterGraphName, geneNames)) {
         throw runtime_error("Error or timeout computing layout for clusger graph " + clusterGraphName);
     }
 
@@ -208,4 +208,147 @@ void ExpressionMatrix::exploreClusterGraphPdf(
     // Write out the pdf.
     html << "Content-Type: application/pdf\r\n\r\n" << clusterGraph.pdf;
 
+}
+
+
+
+void ExpressionMatrix::exploreCluster(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Locate the cluster graph.
+    string clusterGraphName;
+    if(!getParameterValue(request, "clusterGraphName", clusterGraphName)) {
+        html << "Missing cluster graph name.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        html << "Cluster graph name " << clusterGraphName << " does not exist.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Get the cluster id.
+    uint32_t clusterId;
+    if(!getParameterValue(request, "clusterId", clusterId)) {
+        html << "Cluster id is missing.";
+        return;
+    }
+
+    // Find the vertex of the ClusterGraph corresponding to this cluster.
+    const auto jt = clusterGraph.vertexMap.find(clusterId);
+    if(jt == clusterGraph.vertexMap.end()) {
+        html << "<p>Cluster " << clusterId << " of cluster graph " << clusterGraphName << " does not exist.";
+    }
+    const ClusterGraph::vertex_descriptor v = jt->second;
+    const ClusterGraphVertex& vertex = clusterGraph[v];
+
+    // Title.
+    html << "<h1>Cluster " << clusterId << " of cluster graph " << clusterGraphName << "</h1>";
+    html << "<p>This cluster has " << vertex.cells.size() << " cells.";
+
+    // Form to display the cells of the cluster with selected meta data.
+    html <<
+        "<form action=exploreClusterCells>"
+        "<input type=submit value='Show the cells of this cluster with the following cell meta data fields:'><br>";
+    writeMetaDataSelection(html, "metadata", true);
+    html <<
+        "<input type=hidden name=clusterGraphName value='" << clusterGraphName << "'>"
+        "<input type=hidden name=clusterId value='" << clusterId << "'>"
+        "</form>";
+}
+
+
+
+void ExpressionMatrix::exploreClusterCells(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Locate the cluster graph.
+    string clusterGraphName;
+    if(!getParameterValue(request, "clusterGraphName", clusterGraphName)) {
+        html << "Missing cluster graph name.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        html << "Cluster graph name " << clusterGraphName << " does not exist.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Get the cluster id.
+    uint32_t clusterId;
+    if(!getParameterValue(request, "clusterId", clusterId)) {
+        html << "Cluster id is missing.";
+        return;
+    }
+
+    // Find the vertex of the ClusterGraph corresponding to this cluster.
+    const auto jt = clusterGraph.vertexMap.find(clusterId);
+    if(jt == clusterGraph.vertexMap.end()) {
+        html << "<p>Cluster " << clusterId << " of cluster graph " << clusterGraphName << " does not exist.";
+    }
+    const ClusterGraph::vertex_descriptor v = jt->second;
+    const ClusterGraphVertex& vertex = clusterGraph[v];
+
+
+
+    // Get the names of the meta data to display and the corresponding string ids.
+    set<string> metaDataToDisplay;
+    getParameterValues(request, string("metadata"), metaDataToDisplay);
+    vector< pair<StringId, string> > metaDataToDisplayStrings;
+    for(const string& s: metaDataToDisplay) {
+        const StringId stringId = cellMetaDataNames(s);
+        if(stringId == MemoryMapped::StringTable<StringId>::invalidStringId) {
+            html << "<p>Invalid meta data field " << s << " will not be shown.";
+        } else {
+            metaDataToDisplayStrings.push_back(make_pair(stringId, s));
+        }
+    }
+    // Sort them by string id so they appear in the order in which the meta data
+    // was initially created.
+    sort(metaDataToDisplayStrings.begin(), metaDataToDisplayStrings.end());
+
+
+
+    // Title.
+    html << "<h1>Cells of cluster " << clusterId << " of cluster graph " << clusterGraphName << "</h1>";
+    html << "<p>This cluster has " << vertex.cells.size() << " cells.";
+
+
+
+    // Write out the table with the cells.
+    html << "<br><table><tr><th class=centered>Cell<br>id<th class=centered>Cell<br>name";
+    for(const auto& metaDataFieldName: metaDataToDisplayStrings) {
+        html << "<th>" << metaDataFieldName.second;
+    }
+    for(const CellId cellId: vertex.cells) {
+        CZI_ASSERT(cellId < cells.size());
+        const string& cellName = cellNames[cellId];
+        html << "<tr><td class=centered>";
+        writeCellLink(html, cellId, true) << "<td class=centered>";
+        writeCellLink(html, cellId, false);
+
+        // Write the requested meta data.
+        for(const pair<StringId, string>& p: metaDataToDisplayStrings) {
+            const StringId metaDateNameStringId = p.first;
+            for(const pair<StringId, StringId>& q: cellMetaData[cellId]) {
+                if(q.first == metaDateNameStringId) {
+                    const StringId metaDataValueStringId = q.second;
+                    const auto metaDataValueMemoryRange = cellMetaDataValues(metaDataValueStringId);
+                    html << "<td class=centered>";
+                    for(const char c: metaDataValueMemoryRange) {
+                        html << c;
+                    }
+                }
+            }
+        }
+    }
+    html << "</table>";
 }

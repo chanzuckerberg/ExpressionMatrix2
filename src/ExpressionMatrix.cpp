@@ -1804,7 +1804,7 @@ bool ExpressionMatrix::computeClusterGraphLayout(
     ClusterGraph& clusterGraph = *(it->second);
 
     // Compute the layout.
-    return clusterGraph.computeLayout(timeoutSeconds, geneNames);
+    return clusterGraph.computeLayout(timeoutSeconds, clusterGraphName, geneNames);
 
 }
 

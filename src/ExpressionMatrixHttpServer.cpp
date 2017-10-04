@@ -72,6 +72,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     nonHtmlKeywords.insert("/exploreClusterGraphPdf");
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraphDialog);
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreCluster);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterCells);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 
@@ -632,7 +634,7 @@ void ExpressionMatrix::cluster(
     clusterGraph.makeKnn(maxConnectivity);
 
     // Write out the cluster graph in graphviz format.
-    clusterGraph.write("ClusterGraph.dot", geneNames);
+    clusterGraph.write("ClusterGraph.dot", "", geneNames);
 
 
 

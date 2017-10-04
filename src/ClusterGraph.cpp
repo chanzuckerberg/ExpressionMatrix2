@@ -35,7 +35,6 @@ ClusterGraph::ClusterGraph(
 {
 
     // Construct the vertices of the ClusterGraph.
-    map<uint32_t, vertex_descriptor> vertexMap;    // Maps clusterId to vertex_descriptor.
     BGL_FORALL_VERTICES(cv, cellGraph, CellGraph){
         const CellGraphVertex& cVertex = cellGraph[cv];
         const uint32_t clusterId = cVertex.clusterId;
@@ -123,6 +122,7 @@ void ClusterGraph::removeSmallVertices(size_t clusterSizeThreshold)
         }
     }
     for(const vertex_descriptor cv: verticesToBeRemoved) {
+        vertexMap.erase((*this)[cv].clusterId);
         clear_vertex(cv, *this);
         remove_vertex(cv, *this);
     }
@@ -198,26 +198,33 @@ void ClusterGraph::makeKnn(size_t k)
 
 
 // Write the graph in Graphviz format.
-void ClusterGraph::write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(
+    const string& fileName,
+    const string& clusterGraphName,
+    const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
     ofstream outputFileStream(fileName);
     if(!outputFileStream) {
         throw runtime_error("Error opening " + fileName);
     }
-    write(outputFileStream, geneNames);
+    write(outputFileStream, clusterGraphName, geneNames);
 }
-void ClusterGraph::write(ostream& s, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(
+    ostream& s,
+    const string& clusterGraphName,
+    const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
-    Writer writer(*this, geneSet, geneNames);
+    Writer writer(*this, clusterGraphName, geneSet, geneNames);
     boost::write_graphviz(s, *this, writer, writer, writer,
         boost::get(&ClusterGraphVertex::clusterId, *this));
 }
 
 ClusterGraph::Writer::Writer(
     const ClusterGraph& graph,
+    const string& clusterGraphName,
     const vector<GeneId>& geneSet,
     const MemoryMapped::StringTable<GeneId>& geneNames) :
-    graph(graph), geneSet(geneSet), geneNames(geneNames)
+    graph(graph), clusterGraphName(clusterGraphName), geneSet(geneSet), geneNames(geneNames)
 {
 }
 
@@ -295,6 +302,9 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
     // Tooltip.
     s << " tooltip=\"Cluster " << vertex.clusterId << "\"";
 
+    // URL.
+    s << "URL=\"exploreCluster?clusterGraphName=" << clusterGraphName << "&clusterId=" << vertex.clusterId << "\"";
+
     // End vertex attributes.
     s << "]";
 }
@@ -359,6 +369,7 @@ int ClusterGraph::Writer::fontSize(size_t cellCount0, size_t cellCount1)
 // using UIDs.
 bool ClusterGraph::computeLayout(
     size_t timeoutSeconds,
+    const string& clusterGraphName,
     const MemoryMapped::StringTable<GeneId>& geneNames)
 {
     // If we already have a layout, don't do anything.
@@ -377,7 +388,7 @@ bool ClusterGraph::computeLayout(
 
     // Write the graph in graphviz format.
     const string dotFileName = baseFileName + "dot";
-    write(dotFileName, geneNames);
+    write(dotFileName, clusterGraphName, geneNames);
 
     // Compute the layout, with output still in dot format.
     // This way we can use the same layout computation for svg and pdf output.
