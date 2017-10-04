@@ -30,6 +30,7 @@ and become available after the module is imported.
 <li><a href=#Container>Container classes</a>
 <li><a href=#Constants>Constants</a>
 <li><a href=#CellGraphVertexInfo>Class <code>CellGraphVertexInfo</code></a>
+<li><a href=#ClusterGraphCreationParameters>Class <code>ClusterGraphCreationParameters</code></a>
 <li><a href=#ExpressionMatrix>Class <code>ExpressionMatrix</code></a>
 <ul>
     <li><a href=#Constructors>Constructors</a>
@@ -43,6 +44,7 @@ and become available after the module is imported.
     <li><a href=#CellSimilarity>Cell similarity</a>
     <li><a href=#SimilarPairs>Pairs of similar cells</a>
     <li><a href=#CellGraphs>Cell graphs</a>
+    <li><a href=#ClusterGraphs>Cluster graphs</a>
     <li><a href=#Miscellaneous>Miscellaneous</a>
 </ul>
 <li><a href=#ExpressionMatrixCreationParameters>Class <code>ExpressionMatrixCreationParameters</code></a>
@@ -235,6 +237,59 @@ the graph the vertex belongs to.
 the graph the vertex belongs to.
 
 
+<br><br><h2 id=ClusterGraphCreationParameters>Class <code>ClusterGraphCreationParameters</code></h2>
+<p>This class describes parameters to be used when running the label propagation clustering algorithm to create a
+new cluster graph from an existing cell graph.
+<p>
+<code><b>ClusterGraphCreationParameters</b>()
+</code>
+<br>Return value: <code>ClusterGraphCreationParameters</code>.
+<br>The default constructor creates a <code>ClusterGraphCreationParameters</code>
+initialized with "reasonable" values of the clustering parameters.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>stableIterationCount</b>
+</code>
+<br>Type: <code>integer</code>
+<br>This data member specifies the number of stable iterations (iterations
+without any changes in the cluster labels) after which the label propagation
+algorithm stops.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>maxIterationCount</b>
+</code>
+<br>Type: <code>integer</code>
+<br>This data member specifies the maximum number of iterations that the label propagation
+algorithm will run.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>seed</b>
+</code>
+<br>Type: <code>integer</code>
+<br>This data member specifies an integer used as a random seed to initialize the
+label propagation clustering algorithm.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>minClusterSize</b>
+</code>
+<br>Type: <code>integer</code>
+<br>The minimum number of cells in a cluster. Smaller clusters are discarded.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>maxConnectivity</b>
+</code>
+<br>Type: <code>integer</code>
+<br>The maximum connectivity (k of the k-NN graph) for the cluster graph.
+A vertex can actually have more edges than this value, if the extra edges
+are required by the opposite vertex.
+
+<p>
+<code>ClusterGraphCreationParameters.<b>similarityThreshold</b>
+</code>
+<br>Type: <code>integer</code>
+<br>The minimum similarity for an edge between two vertices to be created.
+The edge is only created if the similarity between the average expression
+vectors for the corresponding clusters exceeds this value.
 
 <br><br><h2 id=ExpressionMatrix>Class <code>ExpressionMatrix</code></h2>
 <p>This is the top level class in the <code>ExpressionMatrix2</code> module. 
@@ -324,24 +379,36 @@ from files. See
 <a href=PythonApi.html#addCells>here</a> for more information.
 
 <p>
-<code>ExpressionMatrix.<b>addCellsFromHdf5</b>(fileName)
+<code>ExpressionMatrix.<b>addCellsFromHdf5</b>(fileName, cellNamePrefix, cellMetaData, totalExpressionCountThreshold)
 <br>fileName: string
+<br>cellNamePrefix: string
+<br>cellMetaData: <a href=#StringStringPairList>StringStringPairList</a>
+<br>totalExpressionCountThreshold: float
 </code>
 <br>Return value: <code>None</code>
 <br>Adds cells to the system, reading expression counts from a file
 in HDF5 format as created by the 10X Genomics pipeline. See
 <a href=PythonApi.html#addCellsFromHdf5>here</a> for more information.
 
-<p>
-<code>ExpressionMatrix.<b>addCellsFromBioHub</b>(expressionCountsFileName, initialMetaDataCount, finalMetaDataCount, plateMetaDataFileName)
+<p id=addCellsFromBioHub1>
+<code>ExpressionMatrix.<b>addCellsFromBioHub1</b>(expressionCountsFileName, initialMetaDataCount, finalMetaDataCount, plateMetaDataFileName)
 <br>expressionCountsFileName: string
 <br>initialMetaDataCount: integer
 <br>finalMetaDataCount: integer
 <br>plateMetaDataFileName: string
 </code>
 <br>Return value: <code>None</code>
-<br>Add to the system cells created by the BioHub pipeline.
-See <a href=PythonApi.html#addCellsFromBioHub>here</a> for more information.
+<br>Add to the system cells created by the BioHub pipeline (July 2017 version, for Illumina data).
+See <a href=PythonApi.html#addCellsFromBioHub1>here</a> for more information.
+
+<p id=addCellsFromBioHub2>
+<code>ExpressionMatrix.<b>addCellsFromBioHub2</b>(plateFileName, totalExpressionCountThreshold)
+<br>plateFileName: string
+<br>totalExpressionCountThreshold: integer
+</code>
+<br>Return value: <code>None</code>
+<br>Add to the system cells created by the BioHub pipeline (September 2017 version, for 10X data).
+See <a href=PythonApi.html#addCellsFromBioHub2>here</a> for more information.
 
 
 
@@ -799,6 +866,25 @@ of each edge of the cell graph with the given name.
 The graph must have been previously created with a call to
 <code><a href=#createCellGraph>createCellGraph</a></code>.
 
+
+<h3 id=ClusterGraphs>Cluster graphs</h3>
+
+<p>A <em>cluster graph</em> 
+is an undirected graph in which each vertex represents a cluster found in a cell graph.
+An edge between two vertices is created if the corresponding clusters
+have average expression vectors that are sufficiently similar.
+In areas of high connectivity, only the edges with the highest
+connectivity for each cluster are kept.
+
+
+<p>
+<code id=createClusterGraph>ExpressionMatrix.<b>createClusterGraph</b>(cellGraphName, clusterGraphCreationParameters, clusterGraphName)
+<br>cellGraphName: string
+<br>clusterGraphCreationParameters: <a href=#ClusterGraphCreationParameters>ClusterGraphCreationParameters</a>
+<br>clusterGraphName: string
+</code>
+<br>Return value: <code>None</code>
+<br>Create a new cluster graph by running label propagation clustering on an existing cell graph.
 
 
 

@@ -146,10 +146,11 @@ is described below.
 
 
 
-<h4>For Illumina data, July 2017</h4>
+<h4 id=addCellsFromBioHub1>For Illumina data, July 2017</h4>
 <p>
-Function <code>ExpressionMatrix.addCellsFromBioHub1</code> can be used to
-add to the system cells created by the BioHub pipeline
+Function 
+<a href=PythonApiReference.html#addCellsFromBioHub1><code>ExpressionMatrix.addCellsFromBioHub1</code></a> 
+can be used to add to the system cells created by the BioHub pipeline
 as of July 2017 from Illumina data. For each plate, three files
 are used:
 <ul>
@@ -179,13 +180,36 @@ to <code>addCellMetaData<code>.
 
 
 
-<h4>For 10X Genomics data, September 2017</h4>
+<h4 id=addCellsFromBioHub2>For 10X Genomics data, September 2017</h4>
 <p>
-Function <code>ExpressionMatrix.addCellsFromBioHub2</code> can be used to
+Function 
+<a href=PythonApiReference.html#addCellsFromBioHub2><code>ExpressionMatrix.addCellsFromBioHub2</code></a>
+can be used to
 add to the system cells created by the BioHub pipeline
 as of September 2017 from 10X genomics data. 
+It uses a plate file which is a comma separated file containing
+a line for each plate to be processed plus a header line
+containing column names.
 
-<p><emph>This functionality is not yet available.</emph> 
+<p>
+The following columns are required to be present in the plate file:
+<ul>
+<li><code>PlateName</code> specifies the name of each plate. The name of each cell is created
+by concatenating the plate name with the 10X barcode within the plate.
+<li><code>aws-s3-hdf5</code> specifies the AWS S3 path to the hdf5 file containing expression 
+data for each plate. A valid AWS S3 path begins with "s3://" followed by the S3 bucket name. 
+This uses the AWS CLI (ubuntu package name <code>awscli</code>) to make a temporary local copy of each file. 
+The AWS CLI must be installed amd configured for access to the buckets where the data are stored.
+</ul>
+
+<p>
+All the fields in each row of the plate file are used as cell meta data for the
+cells found in the plate.
+
+<p>
+The second argument to <code>addCellsFromBioHub2</code> specifies a threshold on the total expression
+count for a cell to be added. Barcodes for which the total expression count (total UMI)
+is less than this value are not used to generate a cell.
 
 
 
@@ -223,8 +247,18 @@ The ExpressionMatrix2 code requires the following HDF5 data sets to be present, 
 You can use Python code like this to add to an expression matrix a set of cells described in this format:
 
 <pre>
-e.addCellsFromHdf5('file.h5')
+fileName = 'MyData.h5'                 
+cellNamePrefix = 'MyExperiment-'       
+cellMetaData = StringStringPairList()
+totalExpressionCountThreshold = 1000.
+e.addCellsFromHdf5(fileName, cellNamePrefix, cellMetaData, totalExpressionCountThreshold)
 </pre>
+
+<p>
+Cell names are constructed by concatenating the specified <code>cellNamePrefix</code> with the barcodes in the hdf5 file.
+The specified cell meta data is added to all the cells. 
+Cells for which the total expression count is less than the specified
+<code>totalExpressionCountThreshold</code> are skipped. 
 
 <p>
 The argument specifies the name of the HDF5 file. Note then, when using this format, cells have no meta data except for their name.
@@ -236,11 +270,11 @@ The argument specifies the name of the HDF5 file. Note then, when using this for
 <p>
 If your expression data are in a custom format, you can write Python code to create a simple JSON for each cell you want to add, then call function <code>addCell</code> passing the JSON as the argument. This simple example shows the format of the expected JSON and the Python code required to add the cell to an expression matrix object:
 
-<code>
+<pre>
 import json
 cell = {'metaData': {'cellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
 e.addCell(json.dumps(jSonString))
-</code>
+</pre>
 
 <p>
 Each cell is required ot have the <code>cellName</code> meta data field, but other than that the set of meta data for each cell is completely arbitrary. each cell can have a different set of meta data fields.
