@@ -68,6 +68,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(cluster);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphs);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphPdf);
+    nonHtmlKeywords.insert("/exploreClusterGraphPdf");
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraphDialog);
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraph);
 }
@@ -140,22 +142,25 @@ void ExpressionMatrix::processRequest(
 
     // We found the keyword. Get the function that processes this keyword.
     const auto function = it->second;
+    const bool isHtml = nonHtmlKeywords.find(keyword) == nonHtmlKeywords.end();
 
 
 
     // Write everything that goes before the html body.
-    html <<
-        "\r\n"
-        "<!DOCTYPE html>"
-        "<html>"
-        "<head>"
-        "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
-        "<meta charset='UTF-8'>";
-    writeStyle(html);
-    html <<
-        "</head>"
-        "<body>";
-    writeNavigation(html);
+    if(isHtml) {
+        html <<
+            "\r\n"
+            "<!DOCTYPE html>"
+            "<html>"
+            "<head>"
+            "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
+            "<meta charset='UTF-8'>";
+        writeStyle(html);
+        html <<
+            "</head>"
+            "<body>";
+        writeNavigation(html);
+    }
 
     // The processing function is only responsible for writing the html body.
     try {
@@ -164,8 +169,10 @@ void ExpressionMatrix::processRequest(
         html << e.what();
     }
 
-    html << "</body>";
-    html << "</html>";
+    if(isHtml) {
+        html << "</body>";
+        html << "</html>";
+    }
 }
 
 
@@ -595,7 +602,7 @@ void ExpressionMatrix::cluster(
     }
 
     // Create the ClusterGraph.
-    ClusterGraph clusterGraph(graph);
+    ClusterGraph clusterGraph(graph, geneSet);
 
     // Remove the vertices that correspond to small clusters.
     clusterGraph.removeSmallVertices(clusterSizeThreshold);
@@ -625,7 +632,7 @@ void ExpressionMatrix::cluster(
     clusterGraph.makeKnn(maxConnectivity);
 
     // Write out the cluster graph in graphviz format.
-    clusterGraph.write("ClusterGraph.dot", similarPairs.getGeneSet(), geneNames);
+    clusterGraph.write("ClusterGraph.dot", geneNames);
 
 
 

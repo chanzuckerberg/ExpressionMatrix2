@@ -526,6 +526,7 @@ private:
     void processRequest(const vector<string>& request, ostream& html);
     typedef void (ExpressionMatrix::*ServerFunction)(const vector<string>& request, ostream& html);
     map<string, ServerFunction> serverFunctionTable;
+    set<string> nonHtmlKeywords;
     void fillServerFunctionTable();
     void writeNavigation(ostream& html);
     void writeNavigation(ostream& html, const string& text, const string& url);
@@ -578,6 +579,7 @@ private:
     void removeMetaData(const vector<string>& request, ostream& html);
     void exploreClusterGraphs(const vector<string>& request, ostream& html);
     void exploreClusterGraph(const vector<string>& request, ostream& html);
+    void exploreClusterGraphPdf(const vector<string>& request, ostream& html);
     void createClusterGraphDialog(const vector<string>& request, ostream& html);
     void createClusterGraph(const vector<string>& request, ostream& html);
 
@@ -851,6 +853,8 @@ public:
         const string& clusterGraphName          // The name of the ClusterGraph to be created.
      );
 
+    // Compute svg and pdf layout for a named cluster graph.
+    bool computeClusterGraphLayout(const string& clusterGraphName, size_t timeoutSeconds);
 
 
 };

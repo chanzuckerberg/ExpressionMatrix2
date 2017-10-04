@@ -82,38 +82,49 @@ public:
 class ChanZuckerberg::ExpressionMatrix2::ClusterGraph : public ClusterGraphBaseClass {
 public:
 
-	// Create the ClusterGraph from the CellGraph.
-	// This uses the clusterId stored in each CellGraphVertex.
-	ClusterGraph(const CellGraph&);
+    // Create the ClusterGraph from the CellGraph.
+    // This uses the clusterId stored in each CellGraphVertex.
+    ClusterGraph(const CellGraph&, const GeneSet& geneSet);
 
-	// Store in each edge the similarity of the two clusters, computed using the clusters
-	// average expression stored in each vertex.
-	void computeSimilarities();
+    // Store in each edge the similarity of the two clusters, computed using the clusters
+    // average expression stored in each vertex.
+    void computeSimilarities();
 
-	// Remove the vertices that correspond to small clusters.
-	void removeSmallVertices(size_t clusterSizeThreshold);
+    // Remove the vertices that correspond to small clusters.
+    void removeSmallVertices(size_t clusterSizeThreshold);
 
-	// Remove edges with low similarity.
-	void removeWeakEdges(double similarityThreshold);
+    // Remove edges with low similarity.
+    void removeWeakEdges(double similarityThreshold);
 
-	// Make it a k-nn graph.
-	// For each vertex, keep the best k edges.
-	void makeKnn(size_t k);
+    // Make it a k-nn graph.
+    // For each vertex, keep the best k edges.
+    void makeKnn(size_t k);
 
-	// Write in Graphviz format.
-    void write(ostream&, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
-    void write(const string& fileName, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    // Write in Graphviz format.
+    void write(ostream&, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+    void write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const;
+
+    // Layout in svg and pdf format, stored in memory.
+    string svg;
+    string pdf;
+    bool computeLayout(size_t timeoutSeconds, const MemoryMapped::StringTable<GeneId>& geneNames);
+    bool hasLayout() const
+    {
+        return (!svg.empty()) && (!pdf.empty());
+    }
 
 private:
 
+    vector<GeneId> geneSet;
+
     class Writer {
     public:
-        Writer(const ClusterGraph&, const GeneSet&, const MemoryMapped::StringTable<GeneId>& geneNames);
+        Writer(const ClusterGraph&, const vector<GeneId>&, const MemoryMapped::StringTable<GeneId>& geneNames);
         void operator()(ostream&) const;
         void operator()(ostream&, vertex_descriptor) const;
         void operator()(ostream&, edge_descriptor) const;
         const ClusterGraph& graph;
-        const GeneSet& geneSet;
+        const vector<GeneId>& geneSet;
         const MemoryMapped::StringTable<GeneId>& geneNames;
     private:
         // Compute font size for a vertex  given number of cells.

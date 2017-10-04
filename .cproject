@@ -37,6 +37,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/hdf5/serial"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.45825771" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
+								<option id="gnu.cpp.compiler.option.other.other.403877977" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-unused-result" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1086298445" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.269164854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -114,7 +115,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/python3.5m"/>
 									<listOptionValue builtIn="false" value="/usr/include/hdf5/serial"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.1040278431" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.1040278431" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-unused-result" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.955945568" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-msse4.2" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.debugging.other.748177729" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-ggdb3" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.files.981806943" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
@@ -194,7 +195,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1840626796" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/python2.7"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.1233542091" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.1233542091" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-unused-result" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.1833615826" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-msse4.2" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.debugging.other.1149848424" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-ggdb3" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.files.1100013915" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>

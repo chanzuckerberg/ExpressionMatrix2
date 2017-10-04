@@ -23,7 +23,7 @@ void ExpressionMatrix::exploreClusterGraphs(
         html << "<p>The following cluster graphs exist:<ul>";
         for(const auto& p: clusterGraphs) {
             const string& clusterGraphName = p.first;
-            html << "<li><a href='exploreClusterGraph?clusterGraphName=" << urlEncode(clusterGraphName) << "'>" << clusterGraphName << "</a>";
+            html << "<li><a href='exploreClusterGraph?timeout=30&clusterGraphName=" << urlEncode(clusterGraphName) << "'>" << clusterGraphName << "</a>";
         }
         html << "</ul>";
     } else {
@@ -163,7 +163,49 @@ void ExpressionMatrix::exploreClusterGraph(
     }
     ClusterGraph& clusterGraph = *(it->second);
 
+    // Get the time out for graph layout computation.
+    size_t timeout = 30;
+    getParameterValue(request, "timeOut", timeout);
+
+    // Title.
     html << "<h1>Cluster graph " << clusterGraphName << "</h1>";
+
+    // Create the graph layout.
+    if(!clusterGraph.computeLayout(timeout, geneNames)) {
+        throw runtime_error("Error or timeout computing layout for clusger graph " + clusterGraphName);
+    }
+
+    // Link to get the output in pdf format.
+    html << "<p><a href='exploreClusterGraphPdf?clusterGraphName=" <<
+        clusterGraphName <<
+        "'>Show this cluster graph in pdf format.</a>";
+
+    // Write the svg to html.
+    html << "<p>" << clusterGraph.svg;
+
 }
 
 
+void ExpressionMatrix::exploreClusterGraphPdf(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Locate the cluster graph.
+    string clusterGraphName;
+    if(!getParameterValue(request, "clusterGraphName", clusterGraphName)) {
+        html << "Missing cluster graph name.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        html << "Cluster graph name " << clusterGraphName << " does not exist.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Write out the pdf.
+    html << "Content-Type: application/pdf\r\n\r\n" << clusterGraph.pdf;
+
+}

@@ -15,6 +15,9 @@ using namespace ExpressionMatrix2;
 
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "algorithm.hpp"
 #include "fstream.hpp"
@@ -26,7 +29,9 @@ using namespace ExpressionMatrix2;
 
 // Create the ClusterGraph from the CellGraph.
 // This uses the clusterId stored in each CellGraphVertex.
-ClusterGraph::ClusterGraph(const CellGraph& cellGraph)
+ClusterGraph::ClusterGraph(
+    const CellGraph& cellGraph,
+    const GeneSet& geneSetArgument)
 {
 
     // Construct the vertices of the ClusterGraph.
@@ -81,7 +86,9 @@ ClusterGraph::ClusterGraph(const CellGraph& cellGraph)
         }
     }
 
-
+    // Store the gene set.
+    geneSet.resize(geneSetArgument.size());
+    copy(geneSetArgument.begin(), geneSetArgument.end(), geneSet.begin());
 }
 
 
@@ -191,15 +198,15 @@ void ClusterGraph::makeKnn(size_t k)
 
 
 // Write the graph in Graphviz format.
-void ClusterGraph::write(const string& fileName, const GeneSet& geneSet, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(const string& fileName, const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
     ofstream outputFileStream(fileName);
     if(!outputFileStream) {
         throw runtime_error("Error opening " + fileName);
     }
-    write(outputFileStream, geneSet, geneNames);
+    write(outputFileStream, geneNames);
 }
-void ClusterGraph::write(ostream& s, const GeneSet& geneSet, const MemoryMapped::StringTable<GeneId>& geneNames) const
+void ClusterGraph::write(ostream& s, const MemoryMapped::StringTable<GeneId>& geneNames) const
 {
     Writer writer(*this, geneSet, geneNames);
     boost::write_graphviz(s, *this, writer, writer, writer,
@@ -208,7 +215,7 @@ void ClusterGraph::write(ostream& s, const GeneSet& geneSet, const MemoryMapped:
 
 ClusterGraph::Writer::Writer(
     const ClusterGraph& graph,
-    const GeneSet& geneSet,
+    const vector<GeneId>& geneSet,
     const MemoryMapped::StringTable<GeneId>& geneNames) :
     graph(graph), geneSet(geneSet), geneNames(geneNames)
 {
@@ -272,7 +279,7 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
             break;
         }
         const GeneId localGeneId = p.first;
-        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
+        const GeneId globalGeneId = geneSet[localGeneId];
         s << geneNames[globalGeneId] << " " << p.second << "\\n";
     }
     s << "\"";
@@ -346,3 +353,86 @@ int ClusterGraph::Writer::fontSize(size_t cellCount0, size_t cellCount1)
 }
 
 
+
+// Compute graph layout in svg and pdf format and store it in memory.
+// This uses temporary files in /dev/shm, with names constructed
+// using UIDs.
+bool ClusterGraph::computeLayout(
+    size_t timeoutSeconds,
+    const MemoryMapped::StringTable<GeneId>& geneNames)
+{
+    // If we already have a layout, don't do anything.
+    if(hasLayout()) {
+        return true;
+    }
+
+    // The directory where temporary files fill be created.
+    const string directoryName = "/dev/shm";
+
+    // Create a UUID that will be used to construct file names in /dev/shm.
+    const string uuid = boost::uuids::to_string(boost::uuids::uuid(boost::uuids::random_generator()()));
+
+    // The base name for all files we create.
+    const string baseFileName = directoryName + "/tmp-" + uuid + ".";
+
+    // Write the graph in graphviz format.
+    const string dotFileName = baseFileName + "dot";
+    write(dotFileName, geneNames);
+
+    // Compute the layout, with output still in dot format.
+    // This way we can use the same layout computation for svg and pdf output.
+    const string dotWithLayoutFileName = baseFileName + "with-layout.dot";
+    const string sfdpCommand =
+        "timeout " +
+        lexical_cast<string>(timeoutSeconds) +
+        " sfdp -o " + dotWithLayoutFileName + " " +
+        dotFileName + " -Goverlap=scalexy -Gsplines=true";
+    const int sfdpCommandStatus = ::system(sfdpCommand.c_str());
+    if(WIFEXITED(sfdpCommandStatus)) {
+        const int exitStatus = WEXITSTATUS(sfdpCommandStatus);
+        if(exitStatus == 124) {
+            return false;   // The timeout was exceeded.
+        }
+        else if(exitStatus!=0 && exitStatus!=1) {    // sfdp returns 1 all the time just because of the message about missing triangulation.
+            throw runtime_error("Error " + lexical_cast<string>(exitStatus) + " running graph layout command: " + sfdpCommand);
+        }
+    } else if(WIFSIGNALED(sfdpCommandStatus)) {
+        const int signalNumber = WTERMSIG(sfdpCommandStatus);
+        throw runtime_error("Signal " + lexical_cast<string>(signalNumber) + " while running graph layout command: " + sfdpCommand);
+    } else {
+        throw runtime_error("Abnormal status " + lexical_cast<string>(sfdpCommandStatus) + " while running graph layout command: " + sfdpCommand);
+    }
+
+    // Use graphviz neato to create svg output.
+    const string svgFileName = baseFileName + "svg";
+    const string neatoSvgCommand = "neato -n2 -T svg -o" + svgFileName + " " + dotWithLayoutFileName;
+    const int neatoSvgCommandStatus = ::system(neatoSvgCommand.c_str());
+    if(neatoSvgCommandStatus != 0) {
+        return false;
+    }
+
+    // Use graphviz neato to create pdf output.
+    const string pdfFileName = baseFileName + "pdf";
+    const string neatoPdfCommand = "neato -n2 -T pdf -o" + pdfFileName + " " + dotWithLayoutFileName;
+    const int neatoPdfCommandStatus = ::system(neatoPdfCommand.c_str());
+    if(neatoPdfCommandStatus != 0) {
+        return false;
+    }
+
+    // Store svg output in memory.
+    ifstream svgFile(svgFileName);
+    using Iterator = std::istreambuf_iterator<char>;
+    svg.assign(Iterator(svgFile), Iterator());
+    svgFile.close();
+
+    // Store pdf output in memory.
+    ifstream pdfFile(pdfFileName);
+    pdf.assign(Iterator(pdfFile), Iterator());
+    pdfFile.close();
+
+    // Remove the files we created.
+    ::system(("rm " + baseFileName + "*").c_str());
+
+    // Success.
+    return hasLayout();
+}

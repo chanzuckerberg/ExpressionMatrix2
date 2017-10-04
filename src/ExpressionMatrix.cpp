@@ -1756,7 +1756,7 @@ void ExpressionMatrix::createClusterGraph(
 
     // Create the ClusterGraph.
     const boost::shared_ptr<ClusterGraph> clusterGraphPointer =
-        boost::shared_ptr<ClusterGraph>(new ClusterGraph(cellGraph));
+        boost::shared_ptr<ClusterGraph>(new ClusterGraph(cellGraph, geneSet));
     clusterGraphs.insert(make_pair(clusterGraphName, clusterGraphPointer));
     ClusterGraph& clusterGraph = *clusterGraphPointer;
 
@@ -1788,3 +1788,23 @@ void ExpressionMatrix::createClusterGraph(
     out << "Cluster graph " << clusterGraphName << " has " << num_vertices(clusterGraph);
     out << " vertices and " << num_edges(clusterGraph) << " edges." << endl;
 }
+
+
+
+// Compute svg and pdf layout for a named cluster graph.
+bool ExpressionMatrix::computeClusterGraphLayout(
+    const string& clusterGraphName,
+    size_t timeoutSeconds)
+{
+    // Locate the cluster graph.
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        throw runtime_error("Cluster graph " + clusterGraphName + " does not exist.");
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Compute the layout.
+    return clusterGraph.computeLayout(timeoutSeconds, geneNames);
+
+}
+
