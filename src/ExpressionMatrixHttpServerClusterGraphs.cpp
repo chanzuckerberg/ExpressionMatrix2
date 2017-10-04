@@ -321,13 +321,19 @@ void ExpressionMatrix::exploreClusterCells(
     html << "<h1>Cells of cluster " << clusterId << " of cluster graph " << clusterGraphName << "</h1>";
     html << "<p>This cluster has " << vertex.cells.size() << " cells.";
 
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
 
 
     // Write out the table with the cells.
-    html << "<br><table><tr><th class=centered>Cell<br>id<th class=centered>Cell<br>name";
+    html << "<p><strong>The cell table below is sortable.</strong> Click on a header to sort by that header. "
+    "Click again to reverse the sorting order.";
+    html << "<br><table id=cellTable class=tablesorter><thead><tr><th class=centered>Cell<br>id<th class=centered>Cell<br>name";
     for(const auto& metaDataFieldName: metaDataToDisplayStrings) {
         html << "<th>" << metaDataFieldName.second;
     }
+    html << "</thead><tbody>";
     for(const CellId cellId: vertex.cells) {
         CZI_ASSERT(cellId < cells.size());
         const string& cellName = cellNames[cellId];
@@ -350,5 +356,10 @@ void ExpressionMatrix::exploreClusterCells(
             }
         }
     }
-    html << "</table>";
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#cellTable').tablesorter();});"
+        "</script>"
+        ;
 }
