@@ -66,6 +66,10 @@ void HttpServer::processRequest(tcp::iostream& s)
     // Get the first line, which must contain the GET request.
     string requestLine;
     getline(s, requestLine);
+    if(requestLine.empty()) {
+        cout << "Empty request ignored." << endl;
+        return;
+    }
 
     // Parse it to get only the request string portion.
     // It is the second word of the first line.
