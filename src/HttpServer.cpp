@@ -50,7 +50,7 @@ void HttpServer::explore(uint16_t port)
               acceptor.close(); // Should not be necessary
               return;
           }
-          cout << timestamp << remoteEndpoint.address().to_string() << " ";
+          cout << timestamp << remoteEndpoint.address().to_string() << " " << flush;
           const auto t0 = boost::chrono::steady_clock::now();
           processRequest(s);
           const auto t1 = boost::chrono::steady_clock::now();
