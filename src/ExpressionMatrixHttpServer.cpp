@@ -64,8 +64,8 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(removeCellGraph);
 
     // Clustering and cluster graphs.
-    CZI_ADD_TO_FUNCTION_TABLE(clusterDialog);
-    CZI_ADD_TO_FUNCTION_TABLE(cluster);
+    // CZI_ADD_TO_FUNCTION_TABLE(clusterDialog);
+    // CZI_ADD_TO_FUNCTION_TABLE(cluster);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphs);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraph);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphPdf);
@@ -506,7 +506,7 @@ NormalizationMethod ExpressionMatrix::getNormalizationMethod(
 }
 
 
-
+#if 0
 void ExpressionMatrix::clusterDialog(
     const vector<string>& request,
     ostream& html)
@@ -737,6 +737,7 @@ void ExpressionMatrix::cluster(
 
 
 }
+#endif
 
 
 

@@ -568,8 +568,8 @@ private:
     void exploreCellGraphs(const vector<string>& request, ostream& html);
     void compareCellGraphs(const vector<string>& request, ostream& html);
     void exploreCellGraph(const vector<string>& request, ostream& html);
-    void clusterDialog(const vector<string>& request, ostream& html);
-    void cluster(const vector<string>& request, ostream& html);
+    // void clusterDialog(const vector<string>& request, ostream& html);
+    // void cluster(const vector<string>& request, ostream& html);
     void createCellGraph(const vector<string>& request, ostream& html);
     void removeCellGraph(const vector<string>& request, ostream& html);
     void getAvailableSimilarPairs(vector<string>&) const;

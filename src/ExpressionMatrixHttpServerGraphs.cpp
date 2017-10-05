@@ -31,11 +31,6 @@ void ExpressionMatrix::exploreCellGraphs(
         "<th class=centered>Number<br>of<br>vertices"
         "<th class=centered>Number<br>of<br>edges"
         "<th class=centered>Number<br>of<br>isolated<br>vertices<br>removed"
-        "<th class=centered>Clustering"
-        "<br>(being phased out"
-        "<br>in favor of"
-        "<br>the Clustering button"
-        "<br>at the top of the page)"
         "<th class=centered>Action";
     for(const auto& p: cellGraphs) {
         const string& graphName = p.first;
@@ -55,7 +50,6 @@ void ExpressionMatrix::exploreCellGraphs(
         html << "<td class=centered>" << info.vertexCount;
         html << "<td class=centered>" << info.edgeCount;
         html << "<td class=centered>" << info.isolatedVertexCount;
-        html << "<td class=centered><form action=clusterDialog><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Run clustering on graph " << graphName << "'></form>";
         html << "<td class=centered><form action=removeCellGraph><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Remove graph " << graphName << "'></form>";
     }
 
@@ -83,7 +77,7 @@ void ExpressionMatrix::exploreCellGraphs(
     html <<
         "<td class=centered><input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
         "<td class=centered><input type=text style='text-align:center' size=8 name=maxConnectivity value='20'>"
-        "<td><td><td><td><td class=centered><input type=submit value='Create a new cell graph'>"
+        "<td><td><td><td class=centered><input type=submit value='Create a new cell graph'>"
         "</form>";
 
     html << "</table>";
