@@ -4,6 +4,7 @@
 
 #include "ExpressionMatrix.hpp"
 #include "ClusterGraph.hpp"
+#include "orderPairs.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -259,6 +260,44 @@ void ExpressionMatrix::exploreCluster(
         "<input type=hidden name=clusterGraphName value='" << clusterGraphName << "'>"
         "<input type=hidden name=clusterId value='" << clusterId << "'>"
         "</form>";
+
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
+
+    // Sort the average expression for this cluster.
+    vector< pair<GeneId, double> > sortedExpression(vertex.averageGeneExpression.size());
+    for(GeneId localGeneId=0; localGeneId<vertex.averageGeneExpression.size(); localGeneId++) {
+        const GeneId globalGeneId = clusterGraph.geneSet[localGeneId];
+        sortedExpression[localGeneId] = make_pair(globalGeneId, vertex.averageGeneExpression[localGeneId]);
+    }
+    sort(sortedExpression.begin(), sortedExpression.end(), OrderPairsBySecondGreater< pair<GeneId, double> >());
+
+    // Show average expression for this cluster.
+    html <<
+        "<h2>Average gene expression</h2>"
+        "<p>Average expression is computed as the average of the L2-normalized gene "
+        "expression vectors for the cells in this cluster. "
+        "The average is also L2-normalized."
+        "<p>The table only includes genes in the gene set in use for this cluster graph. "
+        "All L2 normalizations are also done using only genes in the same gene set."
+        "<p><strong>The table below is sortable.</strong> Click on a header to sort by that header. "
+        "Click again to reverse the sorting order."
+        "<br><table id=expressionTable class=tablesorter><thead>"
+        "<tr><th class=centered>Gene<th class=centered>Average<br>expression"
+        "</thead><tbody>";
+    for(const auto& p: sortedExpression) {
+        const GeneId globalGeneId = p.first;
+        const double& expression = p.second;
+        html << "<tr><td>" << geneNames[globalGeneId] << "<td>" << expression;
+    }
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#expressionTable').tablesorter();});"
+        "</script>"
+        ;
+
 }
 
 

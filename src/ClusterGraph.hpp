@@ -126,9 +126,9 @@ public:
     // Maps clusterId to vertex_descriptor.
     map<uint32_t, vertex_descriptor> vertexMap;
 
+    vector<GeneId> geneSet;
 private:
 
-    vector<GeneId> geneSet;
 
     class Writer {
     public:
