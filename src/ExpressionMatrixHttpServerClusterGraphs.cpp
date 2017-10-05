@@ -5,6 +5,7 @@
 #include "ExpressionMatrix.hpp"
 #include "ClusterGraph.hpp"
 #include "orderPairs.hpp"
+#include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -253,10 +254,15 @@ void ExpressionMatrix::exploreCluster(
 
     // Form to display the cells of the cluster with selected meta data.
     html <<
+        "<h2>Show the cells of this cluster</h2>"
         "<form action=exploreClusterCells>"
-        "<input type=submit value='Show the cells of this cluster with the following cell meta data fields:'><br>";
+        "<input type=submit value='Show the cells of this cluster'>"
+        "<br>Select zero, one, or multiple cell meta data fields to be shown:<br>";
     writeMetaDataSelection(html, "metadata", true);
     html <<
+        "<br>Also include expression for the following genes:"
+        "<br><input type=text name=genes size=40>"
+        "<br>(enter gene names separated by spaces)."
         "<input type=hidden name=clusterGraphName value='" << clusterGraphName << "'>"
         "<input type=hidden name=clusterId value='" << clusterId << "'>"
         "</form>";
@@ -328,6 +334,23 @@ void ExpressionMatrix::exploreClusterCells(
         return;
     }
 
+    // Get the genes for which we will write expression counts.
+    string genesString;
+    getParameterValue(request, "genes", genesString);
+    vector<string> requestedGeneNames;
+    tokenize(" ", genesString, requestedGeneNames, true);
+
+    // Find the corresponding gene ids.
+    vector<GeneId> geneIds;
+    for(const string& geneName: requestedGeneNames) {
+        const GeneId geneId = geneIdFromName(geneName);
+        if(geneId == invalidGeneId) {
+            html << "<p>Expression counts for non-existent gene " << geneName << " will not be shown.";
+        } else {
+            geneIds.push_back(geneId);
+        }
+    }
+
     // Find the vertex of the ClusterGraph corresponding to this cluster.
     const auto jt = clusterGraph.vertexMap.find(clusterId);
     if(jt == clusterGraph.vertexMap.end()) {
@@ -372,6 +395,9 @@ void ExpressionMatrix::exploreClusterCells(
     for(const auto& metaDataFieldName: metaDataToDisplayStrings) {
         html << "<th>" << metaDataFieldName.second;
     }
+    for(const GeneId geneId: geneIds) {
+        html << "<th>" << geneNames[geneId];
+    }
     html << "</thead><tbody>";
     for(const CellId cellId: vertex.cells) {
         CZI_ASSERT(cellId < cells.size());
@@ -393,6 +419,11 @@ void ExpressionMatrix::exploreClusterCells(
                     }
                 }
             }
+        }
+
+        // Write the requested expression counts.
+        for(const GeneId geneId: geneIds) {
+            html << "<td class=centered>" << getCellExpressionCount(cellId, geneId);
         }
     }
     html <<
