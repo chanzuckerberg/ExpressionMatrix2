@@ -1829,3 +1829,30 @@ vector<uint32_t> ExpressionMatrix::getClusterGraphVertices(const string& cluster
 
     return clusterIds;
 }
+
+
+// Get a vector of the cell ids in a given cluster.
+vector<CellId> ExpressionMatrix::getClusterCells(
+    const string& clusterGraphName,
+    uint32_t clusterId) const
+{
+    // Locate the cluster graph.
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        throw runtime_error("Cluster graph " + clusterGraphName + " does not exist.");
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Find the vertex corresponding to the requested cluster id.
+    const auto jt = clusterGraph.vertexMap.find(clusterId);
+    if(jt == clusterGraph.vertexMap.end()) {
+        throw runtime_error("Cluster " + lexical_cast<string>(clusterId) +
+            " of cluster graph " + clusterGraphName + " does not exist.");
+    }
+    const ClusterGraph::vertex_descriptor v = jt->second;
+    const ClusterGraphVertex& vertex = clusterGraph[v];
+    CZI_ASSERT(vertex.clusterId == clusterId);
+
+    // The cells are stored in the vertex.
+    return vertex.cells;
+}

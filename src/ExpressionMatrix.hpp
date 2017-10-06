@@ -895,6 +895,9 @@ public:
     // Get a vector of cluster ids for the vertices of a named cluster graph.
     vector<uint32_t> getClusterGraphVertices(const string& clusterGraphName) const;
 
+    // Get a vector of the cell ids in a given cluster.
+    vector<CellId> getClusterCells(const string& clusterGraphName, uint32_t clusterId) const;
+
 
 };
 
