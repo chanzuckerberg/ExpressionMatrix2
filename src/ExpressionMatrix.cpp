@@ -1808,3 +1808,24 @@ bool ExpressionMatrix::computeClusterGraphLayout(
 
 }
 
+
+
+// Get a vector of cluster ids for the vertices of a named cluster graph.
+vector<uint32_t> ExpressionMatrix::getClusterGraphVertices(const string& clusterGraphName) const
+{
+    // Locate the cluster graph.
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        throw runtime_error("Cluster graph " + clusterGraphName + " does not exist.");
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Gather the cluster ids of the vertices.
+    vector<uint32_t> clusterIds;
+    CZI_ASSERT(clusterGraph.vertexMap.size() == num_vertices(clusterGraph));
+    for(const auto& p: clusterGraph.vertexMap) {
+        clusterIds.push_back(p.first);
+    }
+
+    return clusterIds;
+}

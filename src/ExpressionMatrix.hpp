@@ -892,6 +892,9 @@ public:
     // Compute svg and pdf layout for a named cluster graph.
     bool computeClusterGraphLayout(const string& clusterGraphName, size_t timeoutSeconds);
 
+    // Get a vector of cluster ids for the vertices of a named cluster graph.
+    vector<uint32_t> getClusterGraphVertices(const string& clusterGraphName) const;
+
 
 };
 

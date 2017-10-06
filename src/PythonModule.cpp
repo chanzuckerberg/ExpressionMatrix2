@@ -346,6 +346,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
            &ExpressionMatrix::createClusterGraph
        )
        .def("computeClusterGraphLayout", &ExpressionMatrix::computeClusterGraphLayout)
+       .def("getClusterGraphVertices", &ExpressionMatrix::getClusterGraphVertices)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)
