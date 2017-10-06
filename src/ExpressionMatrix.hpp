@@ -554,6 +554,7 @@ private:
     void exploreCellSets(const vector<string>& request, ostream& html);
     void exploreCellSet(const vector<string>& request, ostream& html);
     void createCellSetUsingMetaData(const vector<string>& request, ostream& html);
+    void createCellSetUsingNumericMetaData(const vector<string>& request, ostream& html);
     void createCellSetIntersectionOrUnion(const vector<string>& request, ostream& html);
     void createCellSetDifference(const vector<string>& request, ostream& html);
     void downsampleCellSet(const vector<string>& request, ostream& html);

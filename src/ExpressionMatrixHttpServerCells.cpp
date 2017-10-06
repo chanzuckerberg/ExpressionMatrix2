@@ -529,18 +529,34 @@ void ExpressionMatrix::exploreCellSets(
     html << "</table>";
 
 
-    // Form to create a new cell set from meta data.
+    // Form to create a new cell set from string meta data.
     html <<
-        "<br><h2>Create a new cell set using meta data</h2>"
+        "<br><h2>Create a new cell set using string meta data</h2>"
         "<p><form action=createCellSetUsingMetaData>"
         "<input type=submit value='Create a new cell set'> named "
         "<input type=text required name=cellSetName>"
         " consisting of cells for which meta data field ";
-        set<string> metaDataNames;
-        writeMetaDataSelection(html, "metaData", metaDataNames, false);
+        writeMetaDataSelection(html, "metaData", false);
     html <<
         " matches this regular expression: "
         "<input type=text name=regex>"
+        "</form>";
+
+
+
+    // Form to create a new cell set from numeric meta data.
+    html <<
+        "<br><h2>Create a new cell set using numeric meta data</h2>"
+        "<p><form action=createCellSetUsingNumericMetaData>"
+        "<input type=submit value='Create a new cell set'> named "
+        "<input type=text required name=cellSetName>"
+        " consisting of cells for which meta data field ";
+        writeMetaDataSelection(html, "metaData", false);
+    html <<
+        " is numeric, greater than "
+        "<input type=text name=lowerBound>"
+        " (leave blank to ignore), and less than "
+        "<input type=text name=upperBound> (leave blank to ignore)"
         "</form>";
 
 
@@ -733,6 +749,62 @@ void ExpressionMatrix::createCellSetUsingMetaData(const vector<string>& request,
     }
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
+}
+
+
+
+void ExpressionMatrix::createCellSetUsingNumericMetaData(const vector<string>& request, ostream& html)
+{
+    string cellSetName;
+    if(!getParameterValue(request, "cellSetName", cellSetName)) {
+        html << "Missing cell set name.";
+        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    string metaData;
+    if(!getParameterValue(request, "metaData", metaData)) {
+        html << "Missing meta data name.";
+        html << "<p><form action=cellSets><input type=submit value=Continue></form>";
+        return;
+    }
+
+    bool useLowerBound = false;
+    double lowerBound = 0.;
+    string lowerBoundString;
+    if(getParameterValue(request, "lowerBound", lowerBoundString)) {
+        try {
+            lowerBound = lexical_cast<double>(lowerBoundString);
+            useLowerBound = true;
+        } catch(bad_lexical_cast) {
+            html << "Invalid lower bound value.";
+        }
+    }
+
+    bool useUpperBound = false;
+    double upperBound = 0.;
+    string upperBoundString;
+    if(getParameterValue(request, "upperBound", upperBoundString)) {
+        try {
+            upperBound = lexical_cast<double>(upperBoundString);
+            useUpperBound = true;
+        } catch(bad_lexical_cast) {
+            html << "Invalid upper bound value.";
+        }
+    }
+
+
+    try {
+        createCellSetUsingNumericMetaData(
+            cellSetName, metaData,
+            useLowerBound, lowerBound,
+            useUpperBound, upperBound);
+        html << "<p>Newly created cell set " << cellSetName << " has ";
+        html << cellSets.cellSets[cellSetName]->size() << " cells.";
+    } catch(...) {
+        html << "<p>Unable to create cell set " << cellSetName << ".";
+    }
+    html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 }
 
 

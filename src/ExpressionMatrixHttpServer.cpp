@@ -45,6 +45,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
     serverFunctionTable["/cellSet"]                         = &ExpressionMatrix::exploreCellSet;
     CZI_ADD_TO_FUNCTION_TABLE(createCellSetUsingMetaData);
+    CZI_ADD_TO_FUNCTION_TABLE(createCellSetUsingNumericMetaData);
     CZI_ADD_TO_FUNCTION_TABLE(createCellSetIntersectionOrUnion);
     CZI_ADD_TO_FUNCTION_TABLE(createCellSetDifference);
     CZI_ADD_TO_FUNCTION_TABLE(downsampleCellSet);
