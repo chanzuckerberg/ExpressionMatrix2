@@ -93,6 +93,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
     exposeVector< pair<string, string> >("StringStringPairList");
     exposeVector< vector< pair<string, string> > >("StringStringPairListList");
     exposeVector<float>("FloatList");
+    exposeVector<double>("DoubleList");
     exposeVector< pair<uint32_t, float> >("UintFloatPairList");
     exposeVector< vector< pair<uint32_t, float> > >("UintFloatPairListList");
     exposeVector<CellGraphVertexInfo>("CellGraphVertexInfoList");
@@ -347,7 +348,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        )
        .def("computeClusterGraphLayout", &ExpressionMatrix::computeClusterGraphLayout)
        .def("getClusterGraphVertices", &ExpressionMatrix::getClusterGraphVertices)
+       .def("getClusterGraphGenes", &ExpressionMatrix::getClusterGraphGenes)
        .def("getClusterCells", &ExpressionMatrix::getClusterCells)
+       .def("getClusterAverageExpression", &ExpressionMatrix::getClusterAverageExpression)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)

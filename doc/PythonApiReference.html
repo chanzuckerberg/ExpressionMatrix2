@@ -172,6 +172,10 @@ specific usages and improve code readability.
     <code>FloatList
 <td><code>Float
 
+<tr><td id=DoubleList>
+    <code>DoubleList
+<td><code>Float
+
 <tr><td id=UintFloatPairList>
     <code>UintFloatPairList
     <br id=GeneIdFloatPairList>GeneIdFloatPairList
@@ -931,7 +935,16 @@ Each vertex of the cluster graph corresponds to a cluster.
 
 
 <p>
-<code id=getClusterGraphVertices>ExpressionMatrix.<b>getClusterCells</b>(clusterGraphName, clusterId)
+<code id=getClusterGraphGenes>ExpressionMatrix.<b>getClusterGraphGenes</b>(clusterGraphName)
+<br>clusterGraphName: string
+</code>
+<br>Return value: <code><a href=#GeneList>GeneList</a></code>
+<br>Return a list of the ids of the genes used to create a cluster graph.
+
+
+
+<p>
+<code id=getClusterCells>ExpressionMatrix.<b>getClusterCells</b>(clusterGraphName, clusterId)
 <br>clusterGraphName: string
 <br>clusterId: integer
 </code>
@@ -940,6 +953,49 @@ Each vertex of the cluster graph corresponds to a cluster.
 The cluster is specified using the name of the cluster graph it belongs to, 
 and its cluster id within that cluster graph. 
 
+
+
+<p>
+<code id=getClusterAverageExpression>ExpressionMatrix.<b>getClusterAverageExpression</b>(clusterGraphName, clusterId)
+<br>clusterGraphName: string
+<br>clusterId: integer
+</code>
+<br>Return value: <code><a href=#DoubleList>DoubleList</a></code>
+<br>Return the average, L2-normalized, gene expression of a cluster.
+The cluster is specified using the name of the cluster graph it belongs to, 
+and its cluster id within that cluster graph. 
+The values returned correspond one on one to the gene ids returned
+by <a href=#getClusterGraphGenes>getClusterGraphGenes</a> for the same cluster graph.
+
+
+<p>
+The example code below illustrates some cluster graph functionality.
+It assumes that the entire <code>ExpressionMatrix2</code>
+module was imported in the global Python namespace.
+
+<pre>
+# Access a previously created ExpressionMatrix object.
+e = ExpressionMatrix('data')
+
+# Create a cell graph.
+e.createCellGraph('AllCells', 'AllCells', 'Exact', 0.5, 20)
+
+# Run clustering on the cell graph we just created. This creates a cluster graph.
+e.createClusterGraph('AllCells', ClusterGraphCreationParameters(), 'AllCells')
+
+# Get the genes used by this cluster graph.
+genes = e.getClusterGraphGenes('AllCells')
+
+# Get average expression for cluster 0.
+counts = e.getClusterAverageExpression('AllCells', 0)
+
+# Write out the gene expression.
+for i in range(len(genes)):
+    globalGeneId = genes[i]
+    geneName = e.geneName(globalGeneId)
+    print(i, globalGeneId, geneName, counts[i])
+</pre>
+<br>
 
 
 

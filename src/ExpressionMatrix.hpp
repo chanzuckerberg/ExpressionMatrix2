@@ -896,8 +896,16 @@ public:
     // Get a vector of cluster ids for the vertices of a named cluster graph.
     vector<uint32_t> getClusterGraphVertices(const string& clusterGraphName) const;
 
+    // Get the global GeneId's of the genes used by a ClusterGraph.
+    vector<GeneId> getClusterGraphGenes(const string& clusterGraphName) const;
+
     // Get a vector of the cell ids in a given cluster.
     vector<CellId> getClusterCells(const string& clusterGraphName, uint32_t clusterId) const;
+
+    // Get the average expression vector(L2-normalized) in a cluster.
+    // The entries in the returned vector correspond on-on-one
+    // to the gene ids returned by getClusterGraphGenes.
+    vector<double> getClusterAverageExpression(const string& clusterGraphName, uint32_t clusterId) const;
 
 
 };
