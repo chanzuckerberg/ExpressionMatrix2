@@ -288,6 +288,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
            )
            &ExpressionMatrix::createCellSetDifference
        )
+       .def("createCellSetUsingNumericMetaDataGreaterThan", &ExpressionMatrix::createCellSetUsingNumericMetaDataGreaterThan)
+       .def("createCellSetUsingNumericMetaDataLessThan", &ExpressionMatrix::createCellSetUsingNumericMetaDataLessThan)
+       .def("createCellSetUsingNumericMetaDataBetween", &ExpressionMatrix::createCellSetUsingNumericMetaDataBetween)
        .def("createCellSetIntersection", &ExpressionMatrix::createCellSetIntersection)
        .def("createCellSetUnion", &ExpressionMatrix::createCellSetUnion)
        .def

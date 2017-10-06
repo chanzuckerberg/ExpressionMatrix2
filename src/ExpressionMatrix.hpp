@@ -625,8 +625,17 @@ public:
     vector<string> getCellSetNames() const;
 
     // Get a copy of the cell set with a given name, for use in the Python API.
-    // Returns an empty cell set if a cel set with the specified name does not exist.
+    // Returns an empty cell set if a cell set with the specified name does not exist.
     vector<CellId> getCellSet(const string& cellSetName) const;
+
+    // Return a reference to the cell set with a given name,
+    // throwing an exception if it does not exist.
+    CellSet& cellSet(const string&);
+    const CellSet& cellSet(const string&) const;
+
+    // Check that a cell set with the given name does not exist,
+    // and throw an exception if it does exist.
+    void checkCellSetDoesNotExist(const string&) const;
 
 
 
@@ -795,6 +804,31 @@ public:
         const string& metaDataFieldName,    // The name of the meta data field to be used.
         const string& regex                 // The regular expression that must be matched for a cell to be added to the set.
         );
+
+
+
+    // Create a new cell set consisting of cells for which a given meta data field
+    // is numeric and is greater than, less than, or between specified values.
+    void createCellSetUsingNumericMetaDataGreaterThan(
+        const string& cellSetName,          // The name of the cell set to be created.
+        const string& metaDataFieldName,
+        double lowerBound);
+    void createCellSetUsingNumericMetaDataLessThan(
+        const string& cellSetName,          // The name of the cell set to be created.
+        const string& metaDataFieldName,
+        double upperBound);
+    void createCellSetUsingNumericMetaDataBetween(
+        const string& cellSetName,          // The name of the cell set to be created.
+        const string& metaDataFieldName,
+        double lowerBound,
+        double upperBound);
+    void createCellSetUsingNumericMetaData(
+        const string& cellSetName,          // The name of the cell set to be created.
+        const string& metaDataFieldName,
+        bool useLowerBound, double lowerBound,
+        bool useUpperBound, double upperBound);
+
+
 
     // Create a new cell set as the intersection or union of two or more existing cell sets.
     // The input cell sets are specified comma separated in the first argument.

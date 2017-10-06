@@ -642,6 +642,38 @@ to specify numeric ranges for meta data fields interpreted as numbers
 is not current available but may become available at a future time.
 
 <p>
+<code>ExpressionMatrix.<b>createCellSetUsingNumericMetaDataGreaterThan</b>(cellSetName, metaDataName, lowerBound)
+<br>cellSetName: string
+<br>metaDataName: string
+<br>lowerBound: float
+</code>
+<br>Return value: <code>None</code>.
+<br>Creates a new cell set <code>cellSetName</code> consisting of all cells for which the
+specified <code>metaDataName</code> is numeric and greater than <code>lowerBound</code>. 
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetUsingNumericMetaDataLessThan</b>(cellSetName, metaDataName, upperBound)
+<br>cellSetName: string
+<br>metaDataName: string
+<br>upperBound: float
+</code>
+<br>Return value: <code>None</code>.
+<br>Creates a new cell set <code>cellSetName</code> consisting of all cells for which the
+specified <code>metaDataName</code> is numeric and less than <code>upperBound</code>. 
+
+<p>
+<code>ExpressionMatrix.<b>createCellSetUsingNumericMetaDataBetween</b>(cellSetName, metaDataName, lowerBound, upperBound)
+<br>cellSetName: string
+<br>metaDataName: string
+<br>lowerBound: float
+<br>upperBound: float
+</code>
+<br>Return value: <code>None</code>.
+<br>Creates a new cell set <code>cellSetName</code> consisting of all cells for which the
+specified <code>metaDataName</code> is numeric, greater than <code>lowerBound</code>, and
+less than <code>upperBound</code>. 
+
+<p>
 <code>ExpressionMatrix.<b>createCellSetIntersection</b>(inputCellSetNames, outputCellSetName)
 <br>inputCellSetNames: string
 <br>outputCellSetName: string

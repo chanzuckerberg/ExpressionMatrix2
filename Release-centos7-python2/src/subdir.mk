@@ -10,10 +10,12 @@ CPP_SRCS += \
 ../src/ClusterGraph.cpp \
 ../src/ExpressionMatrix.cpp \
 ../src/ExpressionMatrixBioHub.cpp \
+../src/ExpressionMatrixCells.cpp \
 ../src/ExpressionMatrixFindSimilarPairs.cpp \
 ../src/ExpressionMatrixHdf5.cpp \
 ../src/ExpressionMatrixHttpServer.cpp \
 ../src/ExpressionMatrixHttpServerCells.cpp \
+../src/ExpressionMatrixHttpServerClusterGraphs.cpp \
 ../src/ExpressionMatrixHttpServerGenes.cpp \
 ../src/ExpressionMatrixHttpServerGraphs.cpp \
 ../src/ExpressionMatrixLsh.cpp \
@@ -37,10 +39,12 @@ OBJS += \
 ./src/ClusterGraph.o \
 ./src/ExpressionMatrix.o \
 ./src/ExpressionMatrixBioHub.o \
+./src/ExpressionMatrixCells.o \
 ./src/ExpressionMatrixFindSimilarPairs.o \
 ./src/ExpressionMatrixHdf5.o \
 ./src/ExpressionMatrixHttpServer.o \
 ./src/ExpressionMatrixHttpServerCells.o \
+./src/ExpressionMatrixHttpServerClusterGraphs.o \
 ./src/ExpressionMatrixHttpServerGenes.o \
 ./src/ExpressionMatrixHttpServerGraphs.o \
 ./src/ExpressionMatrixLsh.o \
@@ -64,10 +68,12 @@ CPP_DEPS += \
 ./src/ClusterGraph.d \
 ./src/ExpressionMatrix.d \
 ./src/ExpressionMatrixBioHub.d \
+./src/ExpressionMatrixCells.d \
 ./src/ExpressionMatrixFindSimilarPairs.d \
 ./src/ExpressionMatrixHdf5.d \
 ./src/ExpressionMatrixHttpServer.d \
 ./src/ExpressionMatrixHttpServerCells.d \
+./src/ExpressionMatrixHttpServerClusterGraphs.d \
 ./src/ExpressionMatrixHttpServerGenes.d \
 ./src/ExpressionMatrixHttpServerGraphs.d \
 ./src/ExpressionMatrixLsh.d \
@@ -89,7 +95,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
