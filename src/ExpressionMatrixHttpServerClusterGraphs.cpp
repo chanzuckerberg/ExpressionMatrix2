@@ -627,7 +627,7 @@ void ExpressionMatrix::compareClusters(
     // Write a scatter plot of the expressions of the two sets of clusters.
     html <<
         "<br>In the scatter plot below, expression values less than 10<sup>-6</sup> are replaced with 10<sup>-6</sup>."
-        "<br>All expression values are L2-nornalized."
+        "<br>All expression values are L2-normalized."
         "<br>You can hover on a data point to display the gene name."
         "<script src='https://www.gstatic.com/charts/loader.js'></script>"
         "<script>"
