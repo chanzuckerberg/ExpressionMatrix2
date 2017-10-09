@@ -287,7 +287,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
                bool (ExpressionMatrix::*)
                (const string&, const string&, const string&)
            )
-           &ExpressionMatrix::createCellSetDifference
+           &ExpressionMatrix::createCellSetUsingMetaData
        )
        .def("createCellSetUsingNumericMetaDataGreaterThan", &ExpressionMatrix::createCellSetUsingNumericMetaDataGreaterThan)
        .def("createCellSetUsingNumericMetaDataLessThan", &ExpressionMatrix::createCellSetUsingNumericMetaDataLessThan)
