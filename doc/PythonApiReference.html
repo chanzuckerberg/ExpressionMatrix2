@@ -249,12 +249,13 @@ new cluster graph from an existing cell graph.
 </code>
 <br>Return value: <code>ClusterGraphCreationParameters</code>.
 <br>The default constructor creates a <code>ClusterGraphCreationParameters</code>
-initialized with "reasonable" values of the clustering parameters.
+initialized with the default values of the clustering parameters listed below.
 
 <p>
 <code>ClusterGraphCreationParameters.<b>stableIterationCount</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>3</code>
 <br>This data member specifies the number of stable iterations (iterations
 without any changes in the cluster labels) after which the label propagation
 algorithm stops.
@@ -263,6 +264,7 @@ algorithm stops.
 <code>ClusterGraphCreationParameters.<b>maxIterationCount</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>100</code>
 <br>This data member specifies the maximum number of iterations that the label propagation
 algorithm will run.
 
@@ -270,6 +272,7 @@ algorithm will run.
 <code>ClusterGraphCreationParameters.<b>seed</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>231</code>
 <br>This data member specifies an integer used as a random seed to initialize the
 label propagation clustering algorithm.
 
@@ -277,12 +280,14 @@ label propagation clustering algorithm.
 <code>ClusterGraphCreationParameters.<b>minClusterSize</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>100</code>
 <br>The minimum number of cells in a cluster. Smaller clusters are discarded.
 
 <p>
 <code>ClusterGraphCreationParameters.<b>maxConnectivity</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>3</code>
 <br>The maximum connectivity (k of the k-NN graph) for the cluster graph.
 A vertex can actually have more edges than this value, if the extra edges
 are required by the opposite vertex.
@@ -291,6 +296,7 @@ are required by the opposite vertex.
 <code>ClusterGraphCreationParameters.<b>similarityThreshold</b>
 </code>
 <br>Type: <code>integer</code>
+<br>Default value: <code>0.5</code>
 <br>The minimum similarity for an edge between two vertices to be created.
 The edge is only created if the similarity between the average expression
 vectors for the corresponding clusters exceeds this value.
