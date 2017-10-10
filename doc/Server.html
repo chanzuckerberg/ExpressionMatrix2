@@ -37,18 +37,55 @@ firewall rules or other provisions must be deployed to prevent unauthorized acce
 The easiest way to prevent access to other users is to run the server on a single-user machine with a firewall setup that allows no inbound connections, and then to access the server from a browser running on the same single-user machine.
 
 <h2>Starting the browser</h2>
+
+<h3>Server and browser running on the same machine</h2>
 <p>
-In the simplest case, the browser runs on the same machine that runs the server. In this case, you can access the server by pointing your browser to <a href="http://localhost:17100">http://localhost:17100</a>, where the port number must agree with the port number used in the Python code that started the server. 
+In the simplest case, the browser runs on the same machine that runs the server. In this case, you can access the server by pointing your browser to <code><a href="http://localhost:17100">http://localhost:17100</a></code>, where the port number must agree with the port number used in the Python code that started the server. 
+
+<h3>Server and browser running on different machines</h2>
+<p>
+Alternatively, the browser can run on a different machine. In this case the URL must specify, instead of <code>localhost</code>, the name or ip address of the machine running the server. For example:
+<pre>
+192.168.1.20:17100
+MyLaptop:17100
+</pre>
+ Note that, for this mode of operation to work, firewall rules on the machine running the server must allow inbound connections to the port the server is listening to. In this case, THE IMPORTANT SECURITY WARNING IN THE PREVIOUS SECTION APPLIES.
 
 <p>
-Alternatively, the browser can run on a different machine. In this case the URL must specify, instead of localhost, the name or ip address of the machine running the server. Note that, fr this mode of operation to work, firewall rules on the machine running the server mst allow inbound connections to the port the server is listening to. In this case, the security warning in the previous section applies.
+Note that, if the server uses an ipv6 address, the ip address must be enclosed in brackets. For example:
+<pre>
+[2001:db8:a0b:12f0::1]:80
+</pre>
 
 <p>
-Note that, if the server uses an ipv6 address, the ip address must be enclosed in brackets [].
+Depending on browser choice and setting, it may be necessary to use an <code>http://</code> prefix when entering these URLs. For example:
+<pre>
+htpp://192.168.1.20:17100
+htpp://MyLaptop:17100
+</pre>
+
+<h3>Server running on an Amazon AWS EC2 instance</h3>
+<p>
+If the server is running on an Amazon AWS EC2 instance, you must run the browser on your local machine. To access the server, you can use the "IPv4 Public IP" address available in the Amazon AWS console for the instance your server is running on. 
+However, for this to work, you need to authorize inbound connections, on that instance, to the port or ports you will be using. 
+To do this, you must do the following in the Amazon AWS console:
+<ul>
+<li>Create a new Security Group.
+<li>In that security group, enable inbound access to the ports you will be using.
+<li>Connect the newly created security group to the instance that is running the http server.
+</ul>
+
+<h3>Choice of browsers</h3>
+<p>
+The ExpressionMatrix2 code was developed and tested using Firefox and Chrome as a browser. However most functionality should work with most browsers.
 
 <p>
-The ExpressionMatrix2 code was developed an tested using Firefox as a browser. However most functionality should work with most major browsers.
-
+Some versions of the Firefox browser make speculative connections to the server to improve performance in some cases. This does not work well with the ExpressionMatrix2 http server, which is single-threaded. 
+If the server log repeatedly shows the message "Empty request ignored", you can improve response time as follows:
+<ul>
+<li>In the Firefox address bar, type "About:Config", then press enter.
+<li>Change the value of configuration parameter <code>network.http.speculative-parallel-limit</code> to 0.
+</ul>
 
 
 <h2>Server data flow</h2>
