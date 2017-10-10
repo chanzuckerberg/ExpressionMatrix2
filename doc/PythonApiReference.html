@@ -724,18 +724,30 @@ one of the input cell sets does not exist
 or the output cell set already exists, <code>True</code> otherwise.
 
 
+
 <p>
 <code>ExpressionMatrix.<b>getCellSet</b>(cellSetName)
 <br>cellSetName: string
 </code>
-<br>Return value: <a href=#CellIdList>CellIdList</a>
+<br>Return value: <code><a href=#CellIdList>CellIdList</a></code>
 <br>Returns the cell ids of the cells in the cell set with the
 specified name. If the cell set does not exists,
-returns an ampty container.
+returns an empty container.
 
 
 
-<h3 id=CellSimilarity>Cell similarity</h3>
+<p>
+<code>ExpressionMatrix.<b>removeCellSet</b>(cellSetName)
+<br>cellSetName: string
+</code>
+<br>Return value: <code>None</code>
+<br>Removes the cell set with the
+specified name. If the cell set does not exists,
+raises an exception.
+
+
+
+<br><br><h3 id=CellSimilarity>Cell similarity</h3>
 
 <p>
 <code>ExpressionMatrix.<b>computeCellSimilarity</b>(cellId0, cellId1)

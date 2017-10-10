@@ -640,6 +640,9 @@ public:
     // and throw an exception if it does exist.
     void checkCellSetDoesNotExist(const string&) const;
 
+    // Remove an existing cell set.
+    void removeCellSet(const string&);
+
 
 
     // Gene sets, keyed by gene set name.

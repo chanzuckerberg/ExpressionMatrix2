@@ -56,6 +56,9 @@ public:
         return cellSets.find(cellSetName) != cellSets.end();
     }
 
+    // Remove an existing cell set.
+    void removeCellSet(const string& cellSetName);
+
     // The currently defined cell sets.
     map<string, boost::shared_ptr<CellSet> > cellSets;
 

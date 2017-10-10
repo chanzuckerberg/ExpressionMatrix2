@@ -305,6 +305,15 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        )
        .def("getCellSetNames", &ExpressionMatrix::getCellSetNames)
        .def("getCellSet", &ExpressionMatrix::getCellSet)
+       .def
+       (
+           "removeCellSet",
+           (
+               void (ExpressionMatrix::*)
+               (const string&)
+           )
+           &ExpressionMatrix::removeCellSet
+       )
 
 
 

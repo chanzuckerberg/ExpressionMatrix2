@@ -108,3 +108,9 @@ void ExpressionMatrix::createCellSetUsingNumericMetaData(
 }
 
 
+
+// Remove an existing cell set.
+void ExpressionMatrix::removeCellSet(const string& cellSetName)
+{
+    cellSets.removeCellSet(cellSetName);
+}

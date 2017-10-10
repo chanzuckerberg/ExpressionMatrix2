@@ -84,3 +84,17 @@ void CellSets::addCellSet(
     cellSets.insert(make_pair(cellSetName, mappedCellSet));
 
 }
+
+
+
+// Remove an existing cell set.
+void CellSets::removeCellSet(const string& cellSetName)
+{
+    const auto it = cellSets.find(cellSetName);
+    if(it == cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+
+    it->second->remove();
+}
+
