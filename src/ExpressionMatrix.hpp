@@ -801,14 +801,15 @@ public:
         int& emptyCount);
 
     // Create a new cell set that contains cells for which
-    // the value of a specified meta data field matches
-    // a given regular expression.
+    // the value of a specified meta data field is identical to a given string
+    // or matches a given regular expression.
     // Return true if successful, false if a cell set with
     // the specified name already exists.
     bool createCellSetUsingMetaData(
         const string& cellSetName,          // The name of the cell set to be created.
         const string& metaDataFieldName,    // The name of the meta data field to be used.
-        const string& regex                 // The regular expression that must be matched for a cell to be added to the set.
+        const string&,                      // The string or regular expression that must be matched.
+        bool useRegex                       // true=match as regular expression, false=match as string.
         );
 
 

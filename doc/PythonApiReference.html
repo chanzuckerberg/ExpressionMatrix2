@@ -632,24 +632,24 @@ created and maintained (that is, updated if new cells are added).
 cell sets.
 
 <p>
-<code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>(cellSetName, metaDataName, regularExpression)
+<code>ExpressionMatrix.<b>createCellSetUsingMetaData</b>(cellSetName, metaDataName, matchTarget, useRegularExpression)
 <br>cellSetName: string
 <br>metaDataName: string
-<br>regularExpression: string
+<br>matchTarget: string
+<br>useRegularExpression: Boolean
 </code>
 <br>Return value: <code>Boolean</code> (<code>True</code> if the operation succeeded, <code>False</code> otherwise).
 <br>Creates a new cell set <code>cellSetName</code> consisting of all cells for which the
-specified <code>metaDataName</code> matches the given 
-<code>regularExpression</code>. 
+specified <code>metaDataName</code> matches the given <code>matchTarget</code>. 
+If <code>useRegularExpression</code> is <code>False</code>, this uses a simple string matching.
+Otherwise, <code>matchTarget</code> is treated as a regular expression to be matched.
 As a simple application example, suppose all cells contain a meta data name
 <code>Tissue</code> that gives the type of tissue from which the cell was obtained.
-Calling <code>createCellSetUsingMetaData</code> with <code>metaDataName='Tissue'</code>
-and <code>regularExpression='Brain'</code> will create a new cell set consisting of
+Calling <code>createCellSetUsingMetaData</code> with <code>metaDataName='Tissue'</code>,
+<code>matchTarget='Brain'</code>, and <code>useRegularExpression='False'</code> will create a new cell set consisting of
 the cells for which the value of the <code>Tissue</code> meta data field
-is <code>Brain</code>. More complex regular expressions can be used to
-select values that satisfy a variety of criteria. Functionality
-to specify numeric ranges for meta data fields interpreted as numbers
-is not current available but may become available at a future time.
+is <code>Brain</code>. Regular expressions can be used to
+select values that satisfy a variety of criteria. 
 
 <p>
 <code>ExpressionMatrix.<b>createCellSetUsingNumericMetaDataGreaterThan</b>(cellSetName, metaDataName, lowerBound)

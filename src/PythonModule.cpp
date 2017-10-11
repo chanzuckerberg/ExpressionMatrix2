@@ -285,7 +285,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
            "createCellSetUsingMetaData",
            (
                bool (ExpressionMatrix::*)
-               (const string&, const string&, const string&)
+               (const string&, const string&, const string&, bool)
            )
            &ExpressionMatrix::createCellSetUsingMetaData
        )

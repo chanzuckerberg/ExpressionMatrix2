@@ -1203,13 +1203,15 @@ vector<string> ExpressionMatrix::getCellSetNames() const
 
 
 // Create a new cell set that contains cells for which
-// the value of a specified meta data field matches
-// a given regular expression.
-// Return true if successful.
+// the value of a specified meta data field is identical to a given string
+// or matches a given regular expression.
+// Return true if successful, false if a cell set with
+// the specified name already exists.
 bool ExpressionMatrix::createCellSetUsingMetaData(
     const string& cellSetName,          // The name of the cell set to be created.
     const string& metaDataFieldName,    // The name of the meta data field to be used.
-    const string& regexString           // The regular expression that must be matched for a cell to be added to the set.
+    const string& matchString,          // The string or regular expression that must be matched.
+    bool useRegex                       // true=match as regular expression, false=match as string.
     )
 {
     // See if a cell set with this name already exists.
@@ -1218,8 +1220,11 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
         return false;
     }
 
-    // Create the regular expression we are going to match.
-    const boost::regex regex(regexString);
+    // If regular expression matching was requested, create the regular expression we are going to match.
+    boost::regex regex;
+    if(useRegex) {
+        regex = matchString;
+    }
 
 
 
@@ -1238,14 +1243,26 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
                 continue;
             }
 
-            // If the meta data value matches the regular expression,
-            // add the cell to the set and stop looping over the remaining
-            // meta data fields.
+            // Figure out if this cell should be included in the new cell set.
             const auto metaDataValue = cellMetaDataValues(p.second);
-            if(boost::regex_match(metaDataValue.begin(), metaDataValue.end(), regex)) {
-                cellSet.push_back(cellId);
-                break;
+            bool includeThisCell;
+            if(useRegex) {
+                includeThisCell = boost::regex_match(metaDataValue.begin(), metaDataValue.end(), regex);
+            } else {
+                includeThisCell =
+                    (metaDataValue.size() == matchString.size()) &&
+                    equal(matchString.begin(), matchString.end(), metaDataValue.begin());
             }
+
+            // If the meta data value matches the given string or regular expression,
+            // add the cell to the set.
+            if(includeThisCell) {
+                cellSet.push_back(cellId);
+            }
+
+            // We don't need to check the remaining meta data fields,
+            // since we found the one we were looking for.
+            break;
         }
     }
 

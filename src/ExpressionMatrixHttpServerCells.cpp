@@ -538,8 +538,12 @@ void ExpressionMatrix::exploreCellSets(
         " consisting of cells for which meta data field ";
         writeMetaDataSelection(html, "metaData", false);
     html <<
-        " matches this regular expression: "
-        "<input type=text name=regex>"
+        " matches this "
+        "<select name=matchType>"
+        "<option value=stringMatch selected=selected>string</option>"
+        "<option value=regexMatch>regular expression</option>"
+        "</select>:"
+        "<input type=text name=matchTarget>"
         "</form>";
 
 
@@ -731,17 +735,22 @@ void ExpressionMatrix::createCellSetUsingMetaData(const vector<string>& request,
         return;
     }
 
-
-    string regex;
-    if(!getParameterValue(request, "regex", regex)) {
-        html << "Missing regular expression.";
+    // Get the string or reggular expression to be matches.
+    string matchTarget;
+    if(!getParameterValue(request, "matchTarget", matchTarget)) {
+        html << "Missing string or regular expression to match.";
         html << "<p><form action=cellSets><input type=submit value=Continue></form>";
         return;
     }
-    string decodedRegex;
-    urlDecode(regex, decodedRegex);
+    string decodedMatchTarget;
+    urlDecode(matchTarget, decodedMatchTarget);
 
-    if(createCellSetUsingMetaData(cellSetName, metaData, decodedRegex)) {
+    // Figure out if we are supposed to match a string or a regular expression.
+    string matchType = "stringMatch";
+    getParameterValue(request, "matchType", matchType);
+    const bool useRegex = (matchType == "regexMatch");
+
+    if(createCellSetUsingMetaData(cellSetName, metaData, decodedMatchTarget, useRegex)) {
         html << "<p>Newly created cell set " << cellSetName << " has ";
         html << cellSets.cellSets[cellSetName]->size() << " cells.";
     } else {
