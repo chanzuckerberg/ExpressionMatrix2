@@ -763,6 +763,52 @@ vector< vector< pair<GeneId, float> > > ExpressionMatrix::getCellsExpressionCoun
 
 
 
+// Get all the non-zero expression counts for a specified set of cells,
+// but only including a specified set of genes.
+// Each position in the returned vector has the counts for
+// the cell at the same position in the input vector.
+// Note that in each returned pair<GeneId, float>, the geneId is
+// a global GeneId.
+vector< vector< pair<GeneId, float> > > ExpressionMatrix::getCellsExpressionCountsForGenes(
+    const vector<CellId>& cellIds,
+    const vector<GeneId>& geneIds) const
+{
+
+    // Create a vector of flags that, for each global gene,
+    // tells us whether that gene is in the geneIds vector.
+    vector<bool> isGeneIncluded(geneCount(), false);
+    for(const GeneId& geneId: geneIds) {
+        isGeneIncluded[geneId] = true;
+    }
+
+    // Create the vector to be returned, with one entry for each of the cell ids.
+    vector< vector< pair<GeneId, float> > > returnVector(cellIds.size());
+
+
+
+    // Process one cell at a time.
+    for(size_t i=0; i<cellIds.size(); i++) {
+        const CellId cellId = cellIds[i];
+
+        // Loop over non-zero expression counts for this cell.
+        for(const pair<GeneId, float>& p: cellExpressionCounts[cellId]) {
+
+            // Add it, only if this is one of the genes we want.
+            const GeneId geneId = p.first;
+            if(isGeneIncluded[geneId]) {
+                returnVector[i].push_back(p);
+            }
+        }
+    }
+
+
+
+    // Done.
+    return returnVector;
+}
+
+
+
 // Compute the average expression vector for a given gene set
 // and for a given vector of cells (which is not the same type as a CellSet).
 // The last parameter controls the normalization used for the expression counts

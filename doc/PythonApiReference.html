@@ -352,6 +352,13 @@ The directory must exist.
 <br>Returns the name of the gene with the given <code>geneId</code>.
 
 <p>
+<code>ExpressionMatrix.<b>geneIdFromName</b>(geneName)
+<br>geneName: string
+</code>
+<br>Return value: <code>integer</code>
+<br>Returns the id of the gene with the given <code>geneName</code>.
+
+<p>
 <code>ExpressionMatrix.<b>addGene</b>(geneName)
 <br>geneName: string
 </code>
@@ -534,6 +541,16 @@ This can be slow as it requires a binary search.
 </code>
 <br>Return value: <code><a href=#ExpressionCountListList>ExpressionCountListList</a></code>
 <br>Returns the non-zero expression counts for a given set of cells.
+The returned container contains, for each cell, a list of pairs of gene ids and the
+corresponding expression counts.
+
+<p>
+<code>ExpressionMatrix.<b>getCellsExpressionCountsForGenes</b>(cellIds, geneIds)
+<br>cellIds: <a href=#CellIdList>CellIdList</a>
+<br>geneIds: <a href=#GeneIdList>GeneIdList</a>
+</code>
+<br>Return value: <code><a href=#ExpressionCountListList>ExpressionCountListList</a></code>
+<br>Returns the non-zero expression counts for given sets of cells and genes.
 The returned container contains, for each cell, a list of pairs of gene ids and the
 corresponding expression counts.
 

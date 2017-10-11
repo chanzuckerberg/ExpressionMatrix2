@@ -501,6 +501,16 @@ public:
     // the cell at the same position in the input vector.
     vector< vector< pair<GeneId, float> > > getCellsExpressionCounts(const vector<CellId>&) const;
 
+    // Get all the non-zero expression counts for a specified set of cells,
+    // but only including a specified set of genes.
+    // Each position in the returned vector has the counts for
+    // the cell at the same position in the input vector.
+    // Note that in each returned pair<GeneId, float>, the geneId is
+    // a global GeneId.
+    vector< vector< pair<GeneId, float> > > getCellsExpressionCountsForGenes(
+        const vector<CellId>&,
+        const vector<GeneId>&) const;
+
 private:
 
 
