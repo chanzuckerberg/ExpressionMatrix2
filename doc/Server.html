@@ -44,24 +44,24 @@ In the simplest case, the browser runs on the same machine that runs the server.
 
 <h3>Server and browser running on different machines</h2>
 <p>
-Alternatively, the browser can run on a different machine. In this case the URL must specify, instead of <code>localhost</code>, the name or ip address of the machine running the server. For example:
+Alternatively, the browser can run on a different machine (typically a local desktop, laptop, or other device connected to the Internet). In this case the URL must specify, instead of <code>localhost</code>, the name or ip address of the machine running the server. For example, assuming the server is using port 17100:
 <pre>
 192.168.1.20:17100
-MyLaptop:17100
+myserver.mycompany:17100
 </pre>
  Note that, for this mode of operation to work, firewall rules on the machine running the server must allow inbound connections to the port the server is listening to. In this case, THE IMPORTANT SECURITY WARNING IN THE PREVIOUS SECTION APPLIES.
 
 <p>
 Note that, if the server uses an ipv6 address, the ip address must be enclosed in brackets. For example:
 <pre>
-[2001:db8:a0b:12f0::1]:80
+[2001:db8:a0b:12f0::1]:17100
 </pre>
 
 <p>
-Depending on browser choice and setting, it may be necessary to use an <code>http://</code> prefix when entering these URLs. For example:
+Depending on browser choice and settings, it may be necessary to use an <code>http://</code> prefix when entering these URLs. For example:
 <pre>
 htpp://192.168.1.20:17100
-htpp://MyLaptop:17100
+htpp://myserver.mycompany:17100
 </pre>
 
 <h3>Server running on an Amazon AWS EC2 instance</h3>
@@ -77,7 +77,7 @@ To do this, you must do the following in the Amazon AWS console:
 
 <h3>Choice of browsers</h3>
 <p>
-The ExpressionMatrix2 code was developed and tested using Firefox and Chrome as a browser. However most functionality should work with most browsers.
+The ExpressionMatrix2 code was developed and tested using Firefox and Chrome as a browser. However most functionality should work with most browsers, including the ones available on cell phones.
 
 <p>
 Some versions of the Firefox browser make speculative connections to the server to improve performance in some cases. This does not work well with the ExpressionMatrix2 http server, which is single-threaded. 
