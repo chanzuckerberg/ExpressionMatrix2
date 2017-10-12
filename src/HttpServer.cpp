@@ -17,6 +17,7 @@ using namespace asio;
 using namespace ip;
 
 #include "iostream.hpp"
+#include "stdexcept.hpp"
 #include <sstream>
 
 
@@ -35,15 +36,20 @@ void HttpServer::explore(uint16_t port)
     acceptor.set_option(ipv6Option);
 
     // Bind to the requested port, and try the next port if that fails.
-    for(int iteration=0; ; ++iteration) {
+    bool bindWasSuccessful = false;
+    for(int iteration=0; iteration<10; ++iteration) {
         try {
             acceptor.bind(endpoint);
+            bindWasSuccessful = true;
             break;
         } catch(...) {
             // The bind failed. try again on the next port.
             cout << "Port " << port << " is not available." << endl;
             endpoint.port(++port);
         }
+    }
+    if(!bindWasSuccessful) {
+        throw runtime_error("Unable to find a usable port.");
     }
 
     // The acceptor is bound to this port. Start listening for connections.
