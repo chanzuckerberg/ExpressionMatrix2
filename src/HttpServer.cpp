@@ -33,7 +33,20 @@ void HttpServer::explore(uint16_t port)
     acceptor.open(endpoint.protocol());
     v6_only ipv6Option(false);
     acceptor.set_option(ipv6Option);
-    acceptor.bind(endpoint);
+
+    // Bind to the requested port, and try the next port if that fails.
+    for(int iteration=0; ; ++iteration) {
+        try {
+            acceptor.bind(endpoint);
+            break;
+        } catch(...) {
+            // The bind failed. try again on the next port.
+            cout << "Port " << port << " is not available." << endl;
+            endpoint.port(++port);
+        }
+    }
+
+    // The acceptor is bound to this port. Start listening for connections.
     acceptor.listen();
     cout << "Listening for http requests on port " << port << endl;
 
