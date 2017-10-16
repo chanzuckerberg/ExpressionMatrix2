@@ -75,20 +75,35 @@ To do this, you must do the following in the Amazon AWS console:
 <li>Connect the newly created security group to the instance that is running the http server.
 </ul>
 
-<h3>Choice of browsers</h3>
+<br><h3>Choice of browsers</h3>
 <p>
 The ExpressionMatrix2 code was developed and tested using Firefox and Chrome as a browser. However most functionality should work with most browsers, including the ones available on cell phones.
 
+
+<br><h3>What to do if the server writes "Empty request ignored" messages</h3>
 <p>
-Some versions of the Firefox browser make speculative connections to the server to improve performance in some cases. This does not work well with the ExpressionMatrix2 http server, which is single-threaded. 
+Some versions of the Firefox and Chrome browsers, and perhaps other browsers too, make speculative connections to the server to improve performance in some cases. This does not work well with the ExpressionMatrix2 http server, which is single-threaded,
+and can cause long delays before a server response is seen in the browser.
 If the server log repeatedly shows the message "Empty request ignored", you can improve response time as follows:
+
+<ul>
+<li>For Firefox:
 <ul>
 <li>In the Firefox address bar, type "About:Config", then press enter.
 <li>Change the value of configuration parameter <code>network.http.speculative-parallel-limit</code> to 0.
 </ul>
+<li>For Chrome:
+<ul>
+<li>Click the "Menu" button in the upper-right corner of the browser window 
+(it is displayed with three dots aligned vertically).
+<li>Click on "Settings".
+<li>Scroll down and click on "Advanced".
+<li>Turn off the option "Use a prediction service to load pagges more quickly".
+</ul>
+</ul>
 
 
-<h2>Server data flow</h2>
+<br><h2>Server data flow</h2>
 
 <p>The http server supports the following types of functionality:
 
