@@ -361,6 +361,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("getClusterGraphGenes", &ExpressionMatrix::getClusterGraphGenes)
        .def("getClusterCells", &ExpressionMatrix::getClusterCells)
        .def("getClusterAverageExpression", &ExpressionMatrix::getClusterAverageExpression)
+       .def("createMetaDataFromClusterGraph", &ExpressionMatrix::createMetaDataFromClusterGraph)
 
        // Run the http server.
        .def("explore", &ExpressionMatrix::explore)

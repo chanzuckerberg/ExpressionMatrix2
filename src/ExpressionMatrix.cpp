@@ -1969,3 +1969,28 @@ vector<double> ExpressionMatrix::getClusterAverageExpression(
     return vertex.averageGeneExpression;
 
 }
+
+
+
+// Create meta data from the cluster ids stored in a ClusterGraph.
+void ExpressionMatrix::createMetaDataFromClusterGraph(
+    const string& clusterGraphName,
+    const string& metaDataName)
+{
+    // Locate the cluster graph.
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        throw runtime_error("Cluster graph " + clusterGraphName + " does not exist.");
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Loop over all vertices of the cluster graph.
+    // Each vertex corresponds to a cluster.
+    BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
+        const ClusterGraphVertex& vertex = clusterGraph[v];
+        const string clusterIdString = lexical_cast<string>(vertex.clusterId);
+        for(const CellId cellId: vertex.cells) {
+            setCellMetaData(cellId, metaDataName, clusterIdString);
+        }
+    }
+}

@@ -483,8 +483,15 @@ specified by <code>cellIdList</code>. Each element in the returned
 <code><a href=#CellMetaDataList>CellMetaDataList</a></code>
 corresponds to the cell id at the same position in <code>cellIdList</code>.
 
+<p>
+<code>ExpressionMatrix.<b>createMetaDataFromClusterGraph</b>(clusterGraphName, metaDataName)
+</code>
+<br>See <a href=#createMetaDataFromClusterGraph>here</a> for details.
 
-<h3 id=ExpressionCounts>Cell expression counts</h3>
+
+
+
+<br><br><h3 id=ExpressionCounts>Cell expression counts</h3>
 
 <p>
 <code>ExpressionMatrix.<b>getCellExpressionCount</b>(cellId, geneId)
@@ -1003,38 +1010,20 @@ The values returned correspond one on one to the gene ids returned
 by <a href=#getClusterGraphGenes>getClusterGraphGenes</a> for the same cluster graph.
 
 
+
 <p>
-The example code below illustrates some cluster graph functionality.
-It assumes that the entire <code>ExpressionMatrix2</code>
-module was imported in the global Python namespace.
-
-<pre>
-# Access a previously created ExpressionMatrix object.
-e = ExpressionMatrix('data')
-
-# Create a cell graph.
-e.createCellGraph('AllCells', 'AllCells', 'Exact', 0.5, 20)
-
-# Run clustering on the cell graph we just created. This creates a cluster graph.
-e.createClusterGraph('AllCells', ClusterGraphCreationParameters(), 'AllCells')
-
-# Get the genes used by this cluster graph.
-genes = e.getClusterGraphGenes('AllCells')
-
-# Get average expression for cluster 0.
-counts = e.getClusterAverageExpression('AllCells', 0)
-
-# Write out the gene expression.
-for i in range(len(genes)):
-    globalGeneId = genes[i]
-    geneName = e.geneName(globalGeneId)
-    print(i, globalGeneId, geneName, counts[i])
-</pre>
-<br>
+<code id=createMetaDataFromClusterGraph>ExpressionMatrix.<b>createMetaDataFromClusterGraph</b>(clusterGraphName, metaDataName)
+<br>clusterGraphName: string
+<br>metaDataName: string
+</code>
+<br>Return value: <code>None</a></code>
+<br>Stores the cluster ids in the specified cluster graph into a cell meta data field.
 
 
 
-<h3 id=Miscellaneous>Miscellaneous</h3>
+
+
+<br><br><h3 id=Miscellaneous>Miscellaneous</h3>
 
 <p>
 <code>ExpressionMatrix.<b>explore</b>(serverParameters)

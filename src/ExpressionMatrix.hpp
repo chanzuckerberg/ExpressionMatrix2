@@ -924,6 +924,11 @@ public:
     // to the gene ids returned by getClusterGraphGenes.
     vector<double> getClusterAverageExpression(const string& clusterGraphName, uint32_t clusterId) const;
 
+    // Create meta data from the cluster ids stored in a ClusterGraph.
+    void createMetaDataFromClusterGraph(
+        const string& clusterGraphName,
+        const string& metaDataName);
+
 
 };
 
