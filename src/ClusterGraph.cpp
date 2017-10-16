@@ -545,6 +545,7 @@ function removeTitle(element)
 removeTitle(document.getElementById("graph0"));
 var edges = document.getElementsByClassName("edge");
 for(var i=0; i<edges.length; i++) {
+    var edge = edges[i];
     removeTitle(edge);
 }
 </script>
