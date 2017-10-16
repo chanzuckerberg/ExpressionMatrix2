@@ -78,6 +78,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterCells);
     CZI_ADD_TO_FUNCTION_TABLE(compareClustersDialog);
     CZI_ADD_TO_FUNCTION_TABLE(compareClusters);
+    CZI_ADD_TO_FUNCTION_TABLE(createMetaDataFromClusterGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 

@@ -598,6 +598,7 @@ private:
     void exploreClusterCells(const vector<string>& request, ostream& html);
     void compareClustersDialog(const vector<string>& request, ostream& html);
     void compareClusters(const vector<string>& request, ostream& html);
+    void createMetaDataFromClusterGraph(const vector<string>& request, ostream& html);
 
 
 

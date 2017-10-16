@@ -188,6 +188,14 @@ void ExpressionMatrix::exploreClusterGraph(
         clusterGraphName <<
         "'>Compare gene expression between clusters.</a>";
 
+    // Link to create meta data from the cluster ids in this cluster graph.
+    html <<
+        "<form action=createMetaDataFromClusterGraph>"
+        "<input type=submit value='Store the cluster ids in this cluster graph in cell meta data name'> "
+        "<input type=text name=metaDataName>"
+        "<input type=hidden name=clusterGraphName value=" << clusterGraphName << ">"
+        "</form>";
+
     // Write the svg layout without labels to html,
     // computing it first if necessary.
     clusterGraph.computeLayout(timeout, clusterGraphName, geneNames, false);
@@ -517,6 +525,28 @@ void ExpressionMatrix::compareClustersDialog(
         "<input type=hidden name=clusterGraphName value='" << clusterGraphName << "'>"
         "<br><input type=submit value=Compare>"
         "</form>";
+}
+
+
+
+void ExpressionMatrix::createMetaDataFromClusterGraph(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Locate the cluster graph.
+    string clusterGraphName;
+    getParameterValue(request, "clusterGraphName", clusterGraphName);
+
+    // Get the name of the meta data field where the cluster ids should be stored.
+    string metaDataName;
+    getParameterValue(request, "metaDataName", metaDataName);
+    if(metaDataName.empty()) {
+        throw runtime_error("Missing meta data name.");
+    }
+
+    createMetaDataFromClusterGraph(clusterGraphName, metaDataName);
+    html << "<p>The cluster ids in cluster graph " << clusterGraphName <<
+        " were stored in cell meta data " << metaDataName << ".";
 }
 
 
