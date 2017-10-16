@@ -357,7 +357,6 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
            )
            &ExpressionMatrix::createClusterGraph
        )
-       .def("computeClusterGraphLayout", &ExpressionMatrix::computeClusterGraphLayout)
        .def("getClusterGraphVertices", &ExpressionMatrix::getClusterGraphVertices)
        .def("getClusterGraphGenes", &ExpressionMatrix::getClusterGraphGenes)
        .def("getClusterCells", &ExpressionMatrix::getClusterCells)

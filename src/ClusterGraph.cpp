@@ -201,20 +201,22 @@ void ClusterGraph::makeKnn(size_t k)
 void ClusterGraph::write(
     const string& fileName,
     const string& clusterGraphName,
-    const MemoryMapped::StringTable<GeneId>& geneNames) const
+    const MemoryMapped::StringTable<GeneId>& geneNames,
+    bool withLabels) const
 {
     ofstream outputFileStream(fileName);
     if(!outputFileStream) {
         throw runtime_error("Error opening " + fileName);
     }
-    write(outputFileStream, clusterGraphName, geneNames);
+    write(outputFileStream, clusterGraphName, geneNames, withLabels);
 }
 void ClusterGraph::write(
     ostream& s,
     const string& clusterGraphName,
-    const MemoryMapped::StringTable<GeneId>& geneNames) const
+    const MemoryMapped::StringTable<GeneId>& geneNames,
+    bool withLabels) const
 {
-    Writer writer(*this, clusterGraphName, geneSet, geneNames);
+    Writer writer(*this, clusterGraphName, geneSet, geneNames, withLabels);
     boost::write_graphviz(s, *this, writer, writer, writer,
         boost::get(&ClusterGraphVertex::clusterId, *this));
 }
@@ -223,18 +225,35 @@ ClusterGraph::Writer::Writer(
     const ClusterGraph& graph,
     const string& clusterGraphName,
     const vector<GeneId>& geneSet,
-    const MemoryMapped::StringTable<GeneId>& geneNames) :
-    graph(graph), clusterGraphName(clusterGraphName), geneSet(geneSet), geneNames(geneNames)
+    const MemoryMapped::StringTable<GeneId>& geneNames,
+    bool withLabels) :
+    graph(graph),
+    clusterGraphName(clusterGraphName),
+    geneSet(geneSet),
+    geneNames(geneNames),
+    withLabels(withLabels)
 {
+    // Find the maximum number of cells in a vertex.
+    maxClusterSize = 0.;
+    BGL_FORALL_VERTICES(v, graph, ClusterGraph) {
+        maxClusterSize = max(maxClusterSize, graph[v].cells.size());
+    }
 }
 
 
 
 void ClusterGraph::Writer::operator()(std::ostream& s) const
 {
-    s << "tooltip=\"Cluster graph\";\n";
-    s << "node [shape=circle];\n";
-    s << "edge [fontsize=8];\n";
+    // s << "tooltip=\"Cluster graph\";\n";
+    if(withLabels) {
+        s << "node [shape=circle];\n";
+    } else {
+        s << "K=2;\n"; // This roughly controls the edge lengths.
+        s << "packmode=\"graph\";\n";
+        s << "smoothing=\"triangle\";\n";
+        s << "node [shape=point];\n";
+    }
+    s << "edge [fontsize=8 len=1];\n";
 }
 
 
@@ -277,30 +296,50 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
 #endif
 
     // Label.
-    s << "label=\"";
-    s << "Cluster " << vertex.clusterId << "\\n";
-    s << vertex.cells.size() << " cells\\n";
-    const auto oldPrecision = s.precision(3);
-    for(const auto& p: sortedExpressionCounts) {
-        if(p.second < 0.2) {
-            break;
+    if(withLabels) {
+        s << "label=\"";
+        s << "Cluster " << vertex.clusterId << "\\n";
+        s << vertex.cells.size() << " cells\\n";
+        const auto oldPrecision = s.precision(3);
+        for(const auto& p: sortedExpressionCounts) {
+            if(p.second < 0.2) {
+                break;
+            }
+            const GeneId localGeneId = p.first;
+            const GeneId globalGeneId = geneSet[localGeneId];
+            s << geneNames[globalGeneId] << " " << p.second << "\\n";
         }
-        const GeneId localGeneId = p.first;
-        const GeneId globalGeneId = geneSet[localGeneId];
-        s << geneNames[globalGeneId] << " " << p.second << "\\n";
+        s << "\"";
+        s.precision(oldPrecision);
     }
-    s << "\"";
-    s.precision(oldPrecision);
 
 
     // Font size.
-    s << " fontsize=" << fontSize(vertex.cells.size());
+    if(withLabels) {
+        s << " fontsize=" << fontSize(vertex.cells.size());
+    }
 
     // Vertex size.
-    // s << " width=" << 0.2 * sqrt(double(vertex.cells.size()));
+    if(!withLabels) {
+        const double vertexSize = 0.5 * sqrt(double(vertex.cells.size()) / double(maxClusterSize));
+        s << " width=" << vertexSize;
+    }
 
     // Tooltip.
-    s << " tooltip=\"Cluster " << vertex.clusterId << "\"";
+    if(!withLabels) {
+        s << " tooltip=\"Cluster " << vertex.clusterId << "&#010;" << vertex.cells.size() << " cells";
+        const auto oldPrecision = s.precision(3);
+        for(const auto& p: sortedExpressionCounts) {
+            if(p.second < 0.2) {
+                break;
+            }
+            const GeneId localGeneId = p.first;
+            const GeneId globalGeneId = geneSet[localGeneId];
+            s << "&#010;" << geneNames[globalGeneId] << " " << p.second;
+        }
+        s << "\"";
+        s.precision(oldPrecision);
+    }
 
     // URL.
     s << "URL=\"exploreCluster?clusterGraphName=" << clusterGraphName << "&clusterId=" << vertex.clusterId << "\"";
@@ -326,11 +365,14 @@ void ClusterGraph::Writer::operator()(std::ostream& s, edge_descriptor e) const
     const auto oldPrecision = s.precision(2);
     const auto oldOptions = s.setf(std::ios::fixed);
     s << "label=\"" << edge.similarity << "\"";
+    // s << " tooltip=\"" << edge.similarity << "\"";
     s.precision(oldPrecision);
     s.setf(oldOptions);
 
     // Font size.
-    s << " fontsize=" << fontSize(vertex0.cells.size(), vertex1.cells.size());
+    if(withLabels) {
+        s << " fontsize=" << fontSize(vertex0.cells.size(), vertex1.cells.size());
+    }
 
     // End edge attributes.
     s << "]";
@@ -364,17 +406,25 @@ int ClusterGraph::Writer::fontSize(size_t cellCount0, size_t cellCount1)
 
 
 
-// Compute graph layout in svg and pdf format and store it in memory.
-// This uses temporary files in /dev/shm, with names constructed
-// using UIDs.
-bool ClusterGraph::computeLayout(
+// Compute graph layout and store it in memory.
+// This uses temporary files in /dev/shm, with names constructed using UIDs.
+// If withLabels==true, this computes the layouts with labels in svg and pdf format.
+// Otherwise, it computes the layout without labels in svg format (only).
+void ClusterGraph::computeLayout(
     size_t timeoutSeconds,
     const string& clusterGraphName,
-    const MemoryMapped::StringTable<GeneId>& geneNames)
+    const MemoryMapped::StringTable<GeneId>& geneNames,
+    bool withLabels)
 {
-    // If we already have a layout, don't do anything.
-    if(hasLayout()) {
-        return true;
+    // If we already have the layout we need, don't do anything.
+    if(withLabels) {
+        if(!svgLayoutWithLabels.empty() || !pdfLayoutWithLabels.empty()) {
+            return;
+        }
+    } else {
+        if(!svgLayoutWithoutLabels.empty()) {
+            return;
+        }
     }
 
     // The directory where temporary files fill be created.
@@ -388,62 +438,118 @@ bool ClusterGraph::computeLayout(
 
     // Write the graph in graphviz format.
     const string dotFileName = baseFileName + "dot";
-    write(dotFileName, clusterGraphName, geneNames);
+    write(dotFileName, clusterGraphName, geneNames, withLabels);
 
-    // Compute the layout, with output still in dot format.
+
+
+    // Use graphviz sfdp to compute the layout, with output still in dot format.
     // This way we can use the same layout computation for svg and pdf output.
     const string dotWithLayoutFileName = baseFileName + "with-layout.dot";
-    const string sfdpCommand =
+    string sfdpCommand =
         "timeout " +
         lexical_cast<string>(timeoutSeconds) +
         " sfdp -o " + dotWithLayoutFileName + " " +
-        dotFileName + " -Goverlap=scalexy -Gsplines=true";
+        dotFileName;
+    if(withLabels) {
+        sfdpCommand += " -Goverlap=scalexy -Gsplines=true";
+    }
     const int sfdpCommandStatus = ::system(sfdpCommand.c_str());
     if(WIFEXITED(sfdpCommandStatus)) {
         const int exitStatus = WEXITSTATUS(sfdpCommandStatus);
         if(exitStatus == 124) {
-            return false;   // The timeout was exceeded.
+            throw runtime_error("Timeout exceeded running graph layout command: " + sfdpCommand);
         }
         else if(exitStatus!=0 && exitStatus!=1) {    // sfdp returns 1 all the time just because of the message about missing triangulation.
-            throw runtime_error("Error " + lexical_cast<string>(exitStatus) + " running graph layout command: " + sfdpCommand);
+            throw runtime_error(
+                "Error " +
+                lexical_cast<string>(exitStatus) +
+                " running graph layout command: " + sfdpCommand);
         }
     } else if(WIFSIGNALED(sfdpCommandStatus)) {
         const int signalNumber = WTERMSIG(sfdpCommandStatus);
-        throw runtime_error("Signal " + lexical_cast<string>(signalNumber) + " while running graph layout command: " + sfdpCommand);
+        throw runtime_error("Signal " +
+            lexical_cast<string>(signalNumber) +
+            " while running graph layout command: " +
+            sfdpCommand);
     } else {
-        throw runtime_error("Abnormal status " + lexical_cast<string>(sfdpCommandStatus) + " while running graph layout command: " + sfdpCommand);
+        throw runtime_error("Abnormal status " +
+            lexical_cast<string>(sfdpCommandStatus) +
+            " while running graph layout command: " +
+            sfdpCommand);
     }
+
+
 
     // Use graphviz neato to create svg output.
     const string svgFileName = baseFileName + "svg";
     const string neatoSvgCommand = "neato -n2 -T svg -o" + svgFileName + " " + dotWithLayoutFileName;
     const int neatoSvgCommandStatus = ::system(neatoSvgCommand.c_str());
     if(neatoSvgCommandStatus != 0) {
-        return false;
+        throw runtime_error(
+            "Error " +
+            lexical_cast<string>(neatoSvgCommandStatus) +
+            " running graph layout command: " +
+            neatoSvgCommand);
     }
 
     // Use graphviz neato to create pdf output.
     const string pdfFileName = baseFileName + "pdf";
-    const string neatoPdfCommand = "neato -n2 -T pdf -o" + pdfFileName + " " + dotWithLayoutFileName;
-    const int neatoPdfCommandStatus = ::system(neatoPdfCommand.c_str());
-    if(neatoPdfCommandStatus != 0) {
-        return false;
+    if(withLabels) {
+        const string neatoPdfCommand = "neato -n2 -T pdf -o" + pdfFileName + " " + dotWithLayoutFileName;
+        const int neatoPdfCommandStatus = ::system(neatoPdfCommand.c_str());
+        if(neatoPdfCommandStatus != 0) {
+            throw runtime_error(
+                "Error " +
+                lexical_cast<string>(neatoPdfCommandStatus) +
+                " running graph layout command: " +
+                neatoPdfCommand);
+        }
     }
 
     // Store svg output in memory.
     ifstream svgFile(svgFileName);
     using Iterator = std::istreambuf_iterator<char>;
-    svg.assign(Iterator(svgFile), Iterator());
+    if(withLabels) {
+        svgLayoutWithLabels.assign(Iterator(svgFile), Iterator());
+    } else {
+        svgLayoutWithoutLabels.assign(Iterator(svgFile), Iterator());
+    }
     svgFile.close();
 
     // Store pdf output in memory.
-    ifstream pdfFile(pdfFileName);
-    pdf.assign(Iterator(pdfFile), Iterator());
-    pdfFile.close();
+    if(withLabels) {
+        ifstream pdfFile(pdfFileName);
+        pdfLayoutWithLabels.assign(Iterator(pdfFile), Iterator());
+        pdfFile.close();
+    }
 
     // Remove the files we created.
     ::system(("rm " + baseFileName + "*").c_str());
 
-    // Success.
-    return hasLayout();
+
+
+    // Some tweaks for the case without labels.
+    if(!withLabels) {
+
+        // Turn off tooltips on the entire graph and for the edges.
+        const string s = R"^^^(
+<script>
+function removeTitle(element)
+{
+    for(var i=element.childNodes.length-1; i>=0; i--) {
+        if(element.childNodes[i].nodeName == "title") {
+            element.removeChild(element.childNodes[i]);
+        }
+    }
+}
+removeTitle(document.getElementById("graph0"));
+var edges = document.getElementsByClassName("edge");
+for(var i=0; i<edges.length; i++) {
+    removeTitle(edge);
+}
+</script>
+        )^^^";       ;
+        svgLayoutWithoutLabels += s;
+    }
+
 }

@@ -1854,10 +1854,11 @@ void ExpressionMatrix::createClusterGraph(
 
 
 
-// Compute svg and pdf layout for a named cluster graph.
-bool ExpressionMatrix::computeClusterGraphLayout(
+// Compute svg and pdf layout with labels for a named cluster graph.
+void ExpressionMatrix::computeClusterGraphLayout(
     const string& clusterGraphName,
-    size_t timeoutSeconds)
+    size_t timeoutSeconds,
+    bool withLabels)
 {
     // Locate the cluster graph.
     const auto it = clusterGraphs.find(clusterGraphName);
@@ -1867,7 +1868,7 @@ bool ExpressionMatrix::computeClusterGraphLayout(
     ClusterGraph& clusterGraph = *(it->second);
 
     // Compute the layout.
-    return clusterGraph.computeLayout(timeoutSeconds, clusterGraphName, geneNames);
+    clusterGraph.computeLayout(timeoutSeconds, clusterGraphName, geneNames, withLabels);
 
 }
 

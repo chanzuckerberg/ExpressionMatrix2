@@ -105,23 +105,38 @@ public:
     void write(
         ostream&,
         const string& clusterGraphName,
-        const MemoryMapped::StringTable<GeneId>& geneNames) const;
+        const MemoryMapped::StringTable<GeneId>& geneNames,
+        bool withLabels) const;
     void write(
         const string& fileName,
         const string& clusterGraphName,
-        const MemoryMapped::StringTable<GeneId>& geneNames) const;
+        const MemoryMapped::StringTable<GeneId>& geneNames,
+        bool withLabels) const;
 
-    // Layout in svg and pdf format, stored in memory.
-    string svg;
-    string pdf;
-    bool computeLayout(
+
+
+    // Layout with labels in svg and pdf format, stored in memory.
+    // For large graphs these are not going to look great,
+    // because they need sfdp option -Goverlap=scalexy with does not
+    // work very well. The graphviz package on ubuntu is built
+    // with the prism algorithm disabled, so -Goverlap=false
+    // uses the Voronoi algorithm which is very slow.
+    string svgLayoutWithLabels;
+    string pdfLayoutWithLabels;
+
+    // Layout without labels in svg format.
+    string svgLayoutWithoutLabels;
+
+    // Compute the layout with or without labels.
+    // If the requested layout is already available,
+    // this does nothing.
+    void computeLayout(
         size_t timeoutSeconds,
         const string& clusterGraphName,
-        const MemoryMapped::StringTable<GeneId>& geneNames);
-    bool hasLayout() const
-    {
-        return (!svg.empty()) && (!pdf.empty());
-    }
+        const MemoryMapped::StringTable<GeneId>& geneNames,
+        bool withLabels);
+
+
 
     // Maps clusterId to vertex_descriptor.
     map<uint32_t, vertex_descriptor> vertexMap;
@@ -136,7 +151,8 @@ private:
             const ClusterGraph&,
             const string& clusterGraphName,
             const vector<GeneId>&,
-            const MemoryMapped::StringTable<GeneId>& geneNames);
+            const MemoryMapped::StringTable<GeneId>& geneNames,
+            bool withLabels);
         void operator()(ostream&) const;
         void operator()(ostream&, vertex_descriptor) const;
         void operator()(ostream&, edge_descriptor) const;
@@ -144,6 +160,8 @@ private:
         const string& clusterGraphName;
         const vector<GeneId>& geneSet;
         const MemoryMapped::StringTable<GeneId>& geneNames;
+        bool withLabels;
+        size_t maxClusterSize;
     private:
         // Compute font size for a vertex  given number of cells.
         static int fontSize(size_t cellCount);

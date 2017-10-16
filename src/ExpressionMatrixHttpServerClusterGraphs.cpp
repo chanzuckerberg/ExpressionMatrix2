@@ -174,28 +174,29 @@ void ExpressionMatrix::exploreClusterGraph(
     // Title.
     html << "<h1>Cluster graph " << clusterGraphName << "</h1>";
 
-    // Create the graph layout.
-    if(!clusterGraph.computeLayout(timeout, clusterGraphName, geneNames)) {
-        throw runtime_error("Error or timeout computing layout for clusger graph " + clusterGraphName);
-    }
-
-    // Link to get the output in pdf format.
-    html << "<p><a href='exploreClusterGraphPdf?clusterGraphName=" <<
+    // Links to get the layout with labels in svg or pdf format.
+    html << "<p>Show this cluster graph with vertex labels in "
+        "<a href='exploreClusterGraphSvgWithLabels?clusterGraphName=" <<
         clusterGraphName <<
-        "'>Show this cluster graph in pdf format.</a>";
+        "'>svg</a>";
+    html << " or <a href='exploreClusterGraphPdfWithLabels?clusterGraphName=" <<
+        clusterGraphName <<
+        "'>pdf</a> format.";
 
     // Link to compare gene expression in sets of clusters
     html << "<br><a href='compareClustersDialog?clusterGraphName=" <<
         clusterGraphName <<
         "'>Compare gene expression between clusters.</a>";
 
-    // Write the svg to html.
-    html << "<p>" << clusterGraph.svg;
+    // Write the svg layout without labels to html,
+    // computing it first if necessary.
+    clusterGraph.computeLayout(timeout, clusterGraphName, geneNames, false);
+    html << "<p>" << clusterGraph.svgLayoutWithoutLabels;
 
 }
 
 
-void ExpressionMatrix::exploreClusterGraphPdf(
+void ExpressionMatrix::exploreClusterGraphPdfWithLabels(
     const vector<string>& request,
     ostream& html)
 {
@@ -214,8 +215,43 @@ void ExpressionMatrix::exploreClusterGraphPdf(
     }
     ClusterGraph& clusterGraph = *(it->second);
 
-    // Write out the pdf.
-    html << "Content-Type: application/pdf\r\n\r\n" << clusterGraph.pdf;
+    // Compute the layouts with labels, if needed.
+    const int timeoutSeconds = 30;
+    clusterGraph.computeLayout(timeoutSeconds, clusterGraphName, geneNames, true);
+
+    // Write out the pdf layout with labels.
+    html << "Content-Type: application/pdf\r\n\r\n" << clusterGraph.pdfLayoutWithLabels;
+
+}
+
+
+
+void ExpressionMatrix::exploreClusterGraphSvgWithLabels(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Locate the cluster graph.
+    string clusterGraphName;
+    if(!getParameterValue(request, "clusterGraphName", clusterGraphName)) {
+        html << "Missing cluster graph name.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        html << "Cluster graph name " << clusterGraphName << " does not exist.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+    ClusterGraph& clusterGraph = *(it->second);
+
+    // Compute the layouts with labels, if needed.
+    const int timeoutSeconds = 30;
+    clusterGraph.computeLayout(timeoutSeconds, clusterGraphName, geneNames, true);
+
+    // Write out the svg layout with labels.
+    html << "<h1>Cluster graph " << clusterGraphName << "</h1>";
+    html << clusterGraph.svgLayoutWithLabels;
 
 }
 

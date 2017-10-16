@@ -590,7 +590,8 @@ private:
     void removeMetaData(const vector<string>& request, ostream& html);
     void exploreClusterGraphs(const vector<string>& request, ostream& html);
     void exploreClusterGraph(const vector<string>& request, ostream& html);
-    void exploreClusterGraphPdf(const vector<string>& request, ostream& html);
+    void exploreClusterGraphSvgWithLabels(const vector<string>& request, ostream& html);
+    void exploreClusterGraphPdfWithLabels(const vector<string>& request, ostream& html);
     void createClusterGraphDialog(const vector<string>& request, ostream& html);
     void createClusterGraph(const vector<string>& request, ostream& html);
     void exploreCluster(const vector<string>& request, ostream& html);
@@ -906,8 +907,8 @@ public:
         const string& clusterGraphName          // The name of the ClusterGraph to be created.
      );
 
-    // Compute svg and pdf layout for a named cluster graph.
-    bool computeClusterGraphLayout(const string& clusterGraphName, size_t timeoutSeconds);
+    // Compute layouts for a named cluster graph.
+    void computeClusterGraphLayout(const string& clusterGraphName, size_t timeoutSeconds, bool withLabels);
 
     // Get a vector of cluster ids for the vertices of a named cluster graph.
     vector<uint32_t> getClusterGraphVertices(const string& clusterGraphName) const;

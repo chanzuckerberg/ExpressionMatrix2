@@ -69,8 +69,9 @@ void ExpressionMatrix::fillServerFunctionTable()
     // CZI_ADD_TO_FUNCTION_TABLE(cluster);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphs);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraph);
-    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphPdf);
-    nonHtmlKeywords.insert("/exploreClusterGraphPdf");
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphSvgWithLabels);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreClusterGraphPdfWithLabels);
+    nonHtmlKeywords.insert("/exploreClusterGraphPdfWithLabels");
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraphDialog);
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraph);
     CZI_ADD_TO_FUNCTION_TABLE(exploreCluster);
