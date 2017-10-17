@@ -883,7 +883,7 @@ Thinner edge
                     const uint32_t iColor = graphColoringTable[group];
                     string colorString = "black";
                     if(iColor < 12) {
-                        colorString = brewerSetColor(iColor);
+                        colorString = colorPalette1(iColor);
                     }
                     colorMap.insert(make_pair(group, colorString));
                 }
@@ -894,7 +894,7 @@ Thinner edge
                 for(size_t group=0; group<sortedFrequencyTable.size(); group++) {
                     string colorString = "black";
                     if(group<12) {
-                        colorString = brewerSetColor(group);
+                        colorString = colorPalette1(group);
                     } else {
                         couldNotColor += sortedFrequencyTable[group].first;
                     }

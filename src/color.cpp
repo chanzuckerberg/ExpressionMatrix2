@@ -105,3 +105,32 @@ string ChanZuckerberg::ExpressionMatrix2::brewerSetColor(size_t index)
 
     return table[index];
 }
+
+
+// I created this by hand. It uses brighter colors than brewerSetColor,
+// but it does not use red and black which are used for special purposes.
+// It also has 12 colors.
+string ChanZuckerberg::ExpressionMatrix2::colorPalette1(size_t index)
+{
+
+    static const array<string, 12> table =
+    {
+        "#00ff00",
+        "#0000ff",
+        "#ffff00",
+        "#ff00ff",
+
+        "#00ffff",
+        "#ff8000",
+        "#804000",
+        "#ffa0a0",
+
+        "#308000",
+        "#900080",
+        "#9999ff",
+        "#b0b0b0"
+    };
+    CZI_ASSERT(index < table.size());
+
+    return table[index];
+}

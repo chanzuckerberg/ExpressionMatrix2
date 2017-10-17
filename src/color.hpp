@@ -22,6 +22,11 @@ namespace ChanZuckerberg {
         // using the Brewer 12-class qualitative (Set) color scale.
         // See colorbrewer2.org.
         string brewerSetColor(size_t index);
+
+        // I created this by hand. It uses brighter colors than brewerSetColor,
+        // but it does not use red and black which are used for special purposes.
+        // It also has 12 colors.
+        string colorPalette1(size_t index);
     }
 }
 

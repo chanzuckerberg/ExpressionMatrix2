@@ -348,7 +348,7 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
     // Color.
     if(!withLabels) {
         if(vertex.clusterId < 12) {
-            s << " color=\"" << brewerSetColor(vertex.clusterId) << "\"";
+            s << " color=\"" << colorPalette1(vertex.clusterId) << "\"";
         }
 
     }
