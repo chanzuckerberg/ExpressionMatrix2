@@ -4,6 +4,7 @@
 
 #include "ClusterGraph.hpp"
 #include "CellGraph.hpp"
+#include "color.hpp"
 #include "CZI_ASSERT.hpp"
 #include "deduplicate.hpp"
 #include "GeneSet.hpp"
@@ -344,6 +345,13 @@ void ClusterGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) cons
     // URL.
     s << "URL=\"exploreCluster?clusterGraphName=" << clusterGraphName << "&clusterId=" << vertex.clusterId << "\"";
 
+    // Color.
+    if(!withLabels) {
+        if(vertex.clusterId < 12) {
+            s << " color=\"" << brewerSetColor(vertex.clusterId) << "\"";
+        }
+
+    }
     // End vertex attributes.
     s << "]";
 }
