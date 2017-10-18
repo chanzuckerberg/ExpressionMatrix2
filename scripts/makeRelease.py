@@ -1,35 +1,88 @@
 #!/usr/bin/python3
 
+
+
+"""
+
+This script creates a tar file containing a release package containing 
+shared libraries for all supported platforms.
+
+Is should be invoked with a single argument, the name of the release 
+package to create (e. g. 0.1.0). 
+
+This script must be invoked from a directory containing the ExpressionMatrix2 tree.
+The following goes into the tar file:
+ExpressionMatrix2/doc
+ExpressionMatrix2/tests
+ExpressionMatrix2/platformName/ExpressionMatrix2.so (for all supported platforms).
+The shared libraries are assumed to be up to date. This script
+does not attempt to rebuild them. Remember to strip each of them
+before creating the release package!
+
+"""
+
+
+
+# Import what we need.
 import os
+import sys
 
-"""
-This scripts creates a tar file containing a release package for the current, existing build.
-It should be invoked fom the top level directory of the ExpressionMatrix2 tree
-(that is, the directory containing src, doc, etc.). It will create a file named
-Release.tar in the same directory.
-"""
 
-# Function to check if a directory exists.
+
+# Function to check if a path exists and is a regular file or a directory.
+def regularFileExists(name):
+    return os.path.exists(name) and os.path.isfile(name)
 def directoryExists(name):
     return os.path.exists(name) and os.path.isdir(name)
 
+
+
+# Get the releaseName as the first and only argument.
+if len(sys.argv) != 2:
+    raise Exception('Invoke with one parameter, the name of the release (e. g. 0.0.1).')
+releaseName = sys.argv[1]
+
+
+
 # Make sure we are in the right directory.
-message = 'The src directory is missing. This command should be invoked from the top level directory of the ExpressionMatrix2 directory.'
-currentDirectory = os.getcwd()
-if not directoryExists('src') or not directoryExists('doc') or not directoryExists('Release') or not directoryExists('tests'):
-    raise Exception(message)
+if (
+    not directoryExists('ExpressionMatrix2') or 
+    not directoryExists('ExpressionMatrix2/src') or 
+    not directoryExists('ExpressionMatrix2/doc') or 
+    not directoryExists('ExpressionMatrix2/tests')):
+    raise Exception('This command should be invoked from the directory containing the ExpressionMatrix2 directory.')
 
-# Make sure the shared library exists.    
-if not os.path.exists('Release/ExpressionMatrix2.so'):
-    raise Exception('Release/ExpressionMatrix2.so not found')
 
-# Create the tar file with the doc and tests directories.
-os.system('tar --create --file Release.tar doc tests')
 
-# Strip the shared library, then add it to the archive at the top level.
-# Stripping it reduces its size by a large factor.    
-os.chdir('Release')  
-os.system('strip ExpressionMatrix2.so')
-os.system('tar --append --file ../Release.tar ExpressionMatrix2.so')
+# Create the list of files and directories to add to the tar file.
+files = ['ExpressionMatrix2/doc', 'ExpressionMatrix2/tests']
+platformNames = [
+    'Release-ubuntu16-python3',
+    'Release-centos7-python2',
+]
+for platformName in platformNames:
+    platformDirectory = 'ExpressionMatrix2/' + platformName
+
+    # Check that the directory for this platform exists.
+    if not directoryExists(platformDirectory):
+        raise Exception('The platform directory ' + platformDirectory + ' does not exist.')
+
+    # Make sure the shared library exists. 
+    # We assume that is is up to date and not attempt to rebuild it.
+    sharedLibraryName = platformDirectory + '/ExpressionMatrix2.so'   
+    if not regularFileExists(sharedLibraryName):
+        raise Exception(sharedLibraryName + ' not found')
+
+    # Add it to the list of files to be included in the tar file.
+    files.append(sharedLibraryName)
+
+
+# Create the tar file.
+tarFileName = 'ExpressionMatrix2-' + releaseName + '.tar'
+os.system('tar --create --bzip2 --file ' + tarFileName + ' ' + ' '.join(files))
+
+
+
+
 
 
