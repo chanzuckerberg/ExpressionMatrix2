@@ -171,6 +171,13 @@ public:
         const string& metaDataFileName,
         const string& metaDataFileSeparators
         );
+    // Old version that needs much more memory.
+    void addCellsOld1(
+        const string& expressionCountsFileName,
+        const string& expressionCountsFileSeparators,
+        const string& metaDataFileName,
+        const string& metaDataFileSeparators
+        );
 
 
 
