@@ -22,6 +22,7 @@ CPP_SRCS += \
 ../src/ExpressionMatrixSubset.cpp \
 ../src/GeneSet.cpp \
 ../src/HttpServer.cpp \
+../src/Lsh.cpp \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
 ../src/PythonModule.cpp \
@@ -51,6 +52,7 @@ OBJS += \
 ./src/ExpressionMatrixSubset.o \
 ./src/GeneSet.o \
 ./src/HttpServer.o \
+./src/Lsh.o \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
 ./src/PythonModule.o \
@@ -80,6 +82,7 @@ CPP_DEPS += \
 ./src/ExpressionMatrixSubset.d \
 ./src/GeneSet.d \
 ./src/HttpServer.d \
+./src/Lsh.d \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \
 ./src/PythonModule.d \

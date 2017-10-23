@@ -24,6 +24,7 @@
 #include "ExpressionMatrix.hpp"
 #include "BitSet.hpp"
 #include "ExpressionMatrixSubset.hpp"
+#include "Lsh.hpp"
 #include "nextPowerOfTwo.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -1221,3 +1222,64 @@ void ExpressionMatrix::analyzeSimilarPairs(
 
 }
 
+
+
+// Find similar cell pairs by looping over all pairs
+// and using an LSH approximation to compute the similarity between two cells.
+// This is a newer replacement for findSimilarPairs3.
+// It is written using class Lsh.
+void ExpressionMatrix::findSimilarPairs3(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold,     // The minimum similarity for a pair to be stored.
+    size_t lshCount,                // The number of LSH vectors to use.
+    unsigned int seed               // The seed used to generate the LSH vectors.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs3 begins." << endl;
+
+    // Sanity check.
+    CZI_ASSERT(similarityThreshold <= 1.);
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the SimilarPairs object where we will store the pairs.
+    cout << timestamp << "Initializing SimilarPairs object." << endl;
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    cout << timestamp << "Sorting similar pairs." << endl;
+    similarPairs.sort();
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs3 ends." << endl;
+}

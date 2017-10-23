@@ -6,6 +6,7 @@
 // on LSH signatures. Similar to boost::dynamic_bitset.
 
 #include "CZI_ASSERT.hpp"
+#include "vector.hpp"
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {

@@ -329,6 +329,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("findSimilarPairs0", &ExpressionMatrix::findSimilarPairs0)
        .def("findSimilarPairs1", &ExpressionMatrix::findSimilarPairs1)
        .def("findSimilarPairs2", &ExpressionMatrix::findSimilarPairs2)
+       .def("findSimilarPairs3", &ExpressionMatrix::findSimilarPairs3)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
        .def("analyzeSimilarPairs", &ExpressionMatrix::analyzeSimilarPairs)
 
