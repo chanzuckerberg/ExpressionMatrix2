@@ -6,7 +6,7 @@ import ExpressionMatrix2
 
 
 # Construct the ExpressionMatrix using the binary data stored in directory "data".
-e = ExpressionMatrix2.ExpressionMatrix('data')
+e = ExpressionMatrix2.ExpressionMatrix('data', True)
 
 # Run the server.
 serverParameters = ExpressionMatrix2.ServerParameters()

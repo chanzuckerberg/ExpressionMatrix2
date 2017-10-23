@@ -14,11 +14,24 @@ void GeneSet::createNew(const string& name)
 
 
 
-void GeneSet::accessExisting(const string& name)
+void GeneSet::accessExisting(const string& name, bool allowReadOnly)
 {
-    globalGeneIdVector.accessExistingReadWrite(name + "-GlobalIds");
-    localGeneIdVector.accessExistingReadWrite(name + "-LocalIds");
-    sort();
+    globalGeneIdVector.accessExistingReadWrite(name + "-GlobalIds", allowReadOnly);
+    localGeneIdVector.accessExistingReadWrite(name + "-LocalIds", allowReadOnly);
+
+
+
+    // Make sure it is sorted.
+    if(std::is_sorted(globalGeneIdVector.begin(), globalGeneIdVector.end())) {
+        // It is sorted. Just set the isSorted flag.
+        forceSorted();
+    } else if(globalGeneIdVector.isOpenWithWriteAccess && localGeneIdVector.isOpenWithWriteAccess) {
+        // It is not sorted and we have write access.
+        sort();
+    } else {
+        // It is not sorted and we only have read access.
+        throw runtime_error("Gene set " + name + " is not sorted and accessed read-only.");
+    }
 }
 
 

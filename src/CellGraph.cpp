@@ -39,7 +39,7 @@ CellGraph::CellGraph(
     typedef SimilarPairs::Pair Pair;
 
     // Create the SimilarPairs object.
-    const SimilarPairs similarPairs(similarPairsName);
+    const SimilarPairs similarPairs(similarPairsName, true);
 
     // Create a vertex for each cell in the cell set.
     for(const CellId cellId: cellSet) {

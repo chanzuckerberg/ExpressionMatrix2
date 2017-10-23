@@ -1130,7 +1130,7 @@ void ExpressionMatrix::analyzeSimilarPairs(
     double csvDownsample) const
 {
     // Open the SimilarPairs object we want to analyze.
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
     const GeneSet& geneSet = similarPairs.getGeneSet();
     const CellSet& cellSet = similarPairs.getCellSet();
     const CellId cellCount = CellId(cellSet.size());

@@ -99,7 +99,7 @@ public:
     ExpressionMatrix(const string& directoryName, const ExpressionMatrixCreationParameters&);
 
     // Access a previously created expression matrix stored in the specified directory.
-    ExpressionMatrix(const string& directoryName);
+    ExpressionMatrix(const string& directoryName, bool allowReadOnly);
 
     // Add a gene.
     // Returns true if the gene was added, false if it was already present.

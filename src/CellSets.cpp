@@ -31,9 +31,9 @@ void CellSets::createNew(const string& directoryNameArgument)
 }
 
 // Access existing CellSets in the specified directory.
-void CellSets::accessExisting(const string& directoryNameArgument)
+void CellSets::accessExisting(const string& directoryNameArgument, bool allowReadOnly)
 {
-    // Some boost functionality we usein this function.
+    // Some boost functionality we use in this function.
     using boost::filesystem::directory_iterator;
     using boost::filesystem::directory_iterator;
 
@@ -54,7 +54,7 @@ void CellSets::accessExisting(const string& directoryNameArgument)
 
         // We found a file containing a CellSet. Access it.
         boost::shared_ptr<CellSet> mappedCellSet = boost::shared_ptr<CellSet>(new CellSet);
-        mappedCellSet->accessExistingReadWrite(fileName);
+        mappedCellSet->accessExistingReadWrite(fileName, allowReadOnly);
 
         // Store it in our table of known cell sets.
         const string cellSetName = fileName.substr((directoryName + "/CellSet-").size());

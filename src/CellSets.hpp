@@ -29,7 +29,7 @@ public:
     void createNew(const string& directoryName);
 
     // Access existing CellSets in the specified directory.
-    void accessExisting(const string& directoryName);
+    void accessExisting(const string& directoryName, bool allowReadOnly);
 
     // Add a new cell set.
     void addCellSet(

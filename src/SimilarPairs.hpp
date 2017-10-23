@@ -42,7 +42,7 @@ public:
         const CellSet& cellSet);
 
     // Access an existing SimilarPairs object.
-    SimilarPairs(const string& name);
+    SimilarPairs(const string& name, bool allowReadOnly);
 
     // The type used to store a cell similarity.
     typedef float CellSimilarity;

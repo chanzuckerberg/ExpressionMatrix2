@@ -145,8 +145,9 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
 
 
     // Class ExpressionMatrix.
-    class_<ExpressionMatrix, boost::noncopyable>("ExpressionMatrix", init<string, ExpressionMatrixCreationParameters>())
-       .def(init<string>())
+    class_<ExpressionMatrix, boost::noncopyable>("ExpressionMatrix",
+        init<string, ExpressionMatrixCreationParameters>())
+       .def(init<string, bool>())
 
        // Get the total number of genes or cells currently in the system.
        .def("geneCount", &ExpressionMatrix::geneCount)

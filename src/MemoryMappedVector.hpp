@@ -74,9 +74,12 @@ public:
     void createNew(const string& name, size_t n=0, size_t requiredCapacity=0);
 
     // Open a previously created vector with read-only or read-write access.
+    // If accessExistingReadWrite is called with allowReadOnly=true,
+    // it attempts to open with read-write access, but if that fails falls back to
+    // read-only access.
     void accessExisting(const string& name, bool readWriteAccess);
     void accessExistingReadOnly(const string& name);
-    void accessExistingReadWrite(const string& name);
+    void accessExistingReadWrite(const string& name, bool allowReadOnly);
 
     // Sync the mapped memory to disk.
     // This guarantees that the data on disk reflect all the latest changes in memory.
@@ -294,7 +297,7 @@ template<class T> inline const T* ChanZuckerberg::ExpressionMatrix2::MemoryMappe
 
 template<class T> inline T* ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::end()
 {
-    CZI_ASSERT(isOpenWithWriteAccess);
+    CZI_ASSERT(isOpen);
     return data + size();
 }
 
@@ -504,9 +507,22 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
 {
     accessExisting(name, false);
 }
-template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::accessExistingReadWrite(const string& name)
+template<class T> inline
+    void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::accessExistingReadWrite(
+        const string& name,
+        bool allowReadOnly)
 {
-    accessExisting(name, true);
+    if(allowReadOnly) {
+        try {
+            accessExisting(name, true);     // Try read-write access.
+        } catch(runtime_error e) {
+            accessExisting(name, false);    // Read-write access failed, try read-only access.
+            cout << name << " was accessed with read-only access. "
+                "A segmentation fault will occur if write access is attempted." << endl;
+        }
+    } else {
+        accessExisting(name, true);
+    }
 }
 
 

@@ -81,7 +81,7 @@ void ExpressionMatrix::findSimilarPairs0(
 // Dump to csv file a set of similar cell pairs.
 void ExpressionMatrix::writeSimilarPairs(const string& name) const
 {
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name);
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, true);
     ofstream csvOut("SimilarPairs-" + name + ".csv");
     csvOut << "Cell0,Cell1,Computed,Exact\n";
 

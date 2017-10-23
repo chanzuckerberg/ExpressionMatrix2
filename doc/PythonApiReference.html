@@ -319,13 +319,27 @@ They are accessed as memory mapped files.
 The directory must not exists. 
 
 <p>
-<code><b>ExpressionMatrix</b>(directoryName)
+<code><b>ExpressionMatrix</b>(directoryName, allowReadOnly)
 <br>directoryName : string
+<br>allowReadOnly : Boolean
 </code>
 <br>Return value: <code>ExpressionMatrix</code>.
 <br>This constructor can be used to access an existing <code>ExpressionMatrix</code> 
 object in the specified directory.
 The directory must exist. 
+<p>
+If write access is not permitted on some of the data,
+the operation fails if 
+<code>allowReadOnly</code> is <code>False</code>,
+and falls back to read-only access
+If <code>allowReadOnly</code> is <code>True</code>. 
+In this case, however, any <em>write operations on data with read-only
+access will generate a Segmentation Fault and cause immediate termination of
+the calling Python script, without cleanup</em>. 
+Therefore, this constructor should be called with 
+<code>allowReadOnly = False</code>
+except in circumstances where limited functionality 
+with read-only access to the data is desired.
 
 
 

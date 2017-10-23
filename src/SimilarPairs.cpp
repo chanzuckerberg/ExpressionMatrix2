@@ -39,13 +39,13 @@ SimilarPairs::SimilarPairs(
 
 
 // Access an existing SimilarPairs object.
-SimilarPairs::SimilarPairs(const string& name)
+SimilarPairs::SimilarPairs(const string& name, bool allowReadOnly)
 {
     info.accessExistingReadOnly(name + "-Info");
     similarPairs.accessExistingReadOnly(name + "-Pairs");
     usedCount.accessExistingReadOnly(name + "-UsedCounts");
     lowestStoredSimilarityInfo.accessExistingReadOnly(name + "-LowestStoredSimilarityInfo");
-    geneSet.accessExisting(name + "-GeneSet");
+    geneSet.accessExisting(name + "-GeneSet", allowReadOnly);
     cellSet.accessExistingReadOnly(name + "-CellSet");
 }
 

@@ -78,20 +78,20 @@ ExpressionMatrix::ExpressionMatrix(
 
 
 // Access a previously created expression matrix stored in the specified directory.
-ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
+ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOnly) :
     directoryName(directoryName)
 {
     // Access the binary data with read-write access, so we can add new cells
     // and perform other operations that change the state on disk.
-    geneNames.accessExistingReadWrite(directoryName + "/" + "GeneNames");
-    cells.accessExistingReadWrite(directoryName + "/" + "Cells");
-    cellNames.accessExistingReadWrite(directoryName + "/" + "CellNames");
-    cellMetaData.accessExistingReadWrite(directoryName + "/" + "CellMetaData");
-    cellMetaDataNames.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNames");
-    cellMetaDataValues.accessExistingReadWrite(directoryName + "/" + "CellMetaDataValues");
-    cellMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNamesUsageCount");
-    cellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "CellExpressionCounts");
-    cellSets.accessExisting(directoryName);
+    geneNames.accessExistingReadWrite(directoryName + "/" + "GeneNames", allowReadOnly);
+    cells.accessExistingReadWrite(directoryName + "/" + "Cells", allowReadOnly);
+    cellNames.accessExistingReadWrite(directoryName + "/" + "CellNames", allowReadOnly);
+    cellMetaData.accessExistingReadWrite(directoryName + "/" + "CellMetaData", allowReadOnly);
+    cellMetaDataNames.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNames", allowReadOnly);
+    cellMetaDataValues.accessExistingReadWrite(directoryName + "/" + "CellMetaDataValues", allowReadOnly);
+    cellMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNamesUsageCount", allowReadOnly);
+    cellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "CellExpressionCounts", allowReadOnly);
+    cellSets.accessExisting(directoryName, allowReadOnly);
 
 
 
@@ -106,7 +106,7 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName) :
         }
         CZI_ASSERT(regexMatchResults.size() == 2);
         const string& geneSetName = regexMatchResults[1];
-        geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName);
+        geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName, allowReadOnly);
     }
     if(geneSets.find("AllGenes") == geneSets.end()) {
         throw runtime_error("Gene set \"AllGenes\" is missing.");
@@ -1517,7 +1517,7 @@ bool ExpressionMatrix::createGeneSetDifference(
 vector<string> ExpressionMatrix::geneSetNamesFromSimilarPairsName(const string& similarPairsName) const
 {
     // Open the existing SimilarPairs object.
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
 
     // Start with no gene sets.
     vector<string> geneSetNames;
@@ -2093,7 +2093,7 @@ void ExpressionMatrix::createClusterGraph(
     }
     const CellGraphInformation& cellGraphInformation = it->second.first;
     const string& similarPairsName = cellGraphInformation.similarPairsName;
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName);
+    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
     const GeneSet& geneSet = similarPairs.getGeneSet();
     CellGraph& cellGraph = *(it->second.second);
 

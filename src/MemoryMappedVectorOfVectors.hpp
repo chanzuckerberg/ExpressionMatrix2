@@ -56,9 +56,17 @@ public:
         accessExisting(name, false);
     }
 
-    void accessExistingReadWrite(const string& name)
+    void accessExistingReadWrite(const string& name, bool allowReadOnly)
     {
-        accessExisting(name, true);
+        if(allowReadOnly) {
+            try {
+                accessExisting(name, true);
+            } catch(runtime_error e) {
+                accessExisting(name, false);
+            }
+        } else {
+            accessExisting(name, true);
+        }
     }
 
     void remove()

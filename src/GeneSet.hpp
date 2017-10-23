@@ -23,7 +23,7 @@ public:
     void createNew(const string& name);
 
     // Access a previously created GeneSet.
-    void accessExisting(const string& name);
+    void accessExisting(const string& name, bool allowReadOnly);
 
     // Make a copy of this gene set.
     void makeCopy(GeneSet& copy, const string& newName) const;
@@ -96,7 +96,7 @@ public:
         CZI_ASSERT(isSorted);
     }
 
-    // Set the isSorted flag without checking that the ste is sorted.
+    // Set the isSorted flag without checking that the set is sorted.
     // The caller is responsible for guaranteeing that the set is sorted.
     void forceSorted()
     {

@@ -54,7 +54,7 @@ public:
 
     // Access an existing StringTable.
     void accessExistingReadOnly(const string& name);
-    void accessExistingReadWrite(const string& name);
+    void accessExistingReadWrite(const string& name, bool allowReadOnly);
 
     // Return the StringId corresponding to a given string,
     // adding it to the table if not already present.
@@ -139,10 +139,11 @@ template<class StringId> inline
 
 template<class StringId> inline
     void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::StringTable<StringId>::accessExistingReadWrite(
-        const string& name)
+        const string& name,
+        bool allowReadOnly)
 {
-    strings.accessExistingReadWrite(name + "-strings");
-    hashTable.accessExistingReadWrite(name + "-hashTable");
+    strings.accessExistingReadWrite(name + "-strings", allowReadOnly);
+    hashTable.accessExistingReadWrite(name + "-hashTable", allowReadOnly);
     mask = hashTable.size() - 1ULL;
 }
 
