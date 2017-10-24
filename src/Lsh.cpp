@@ -6,6 +6,7 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/chrono.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -24,6 +25,8 @@ Lsh::Lsh(
 
     cout << timestamp << "Computing cell LSH signatures." << endl;
     computeCellLshSignatures(expressionMatrixSubset);
+
+    computeSimilarityTable();
 }
 
 
@@ -51,7 +54,7 @@ void Lsh::generateLshVectors(
 
 
     // Loop over genes.
-    for(size_t geneId = 0; geneId<lshCount; geneId++) {
+    for(size_t geneId = 0; geneId<geneCount; geneId++) {
 
         // For this gene, generate the components of all the LSH vectors.
         for(size_t lshVectorId = 0; lshVectorId<lshCount; lshVectorId++) {
@@ -68,7 +71,7 @@ void Lsh::generateLshVectors(
     for(auto& f: normalizationFactor) {
         f = 1. / sqrt(f);
     }
-    for(size_t geneId = 0; geneId<lshCount; geneId++) {
+    for(size_t geneId = 0; geneId<geneCount; geneId++) {
         for(size_t lshVectorId = 0; lshVectorId<lshCount; lshVectorId++) {
             lshVectors[geneId][lshVectorId] *= normalizationFactor[lshVectorId];
         }
@@ -179,5 +182,47 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
     cout << "    Seconds per inner loop iteration " << t01 / (double(nonZeroExpressionCount) * double(lshCount)) << endl;
     cout << "    Gflop/s " << 2. * 1e-9 * double(nonZeroExpressionCount) * double(lshCount) / t01 << endl;
 
+}
+
+
+
+// Compute the similarity (cosine of the angle) corresponding to each number of mismatching bits.
+void Lsh::computeSimilarityTable()
+{
+    // Initialize the similarity table.
+    const size_t lshCount = lshVectors.front().size();
+    similarityTable.resize(lshCount + 1);
+
+    // Loop over all possible numbers of mismatching bits.
+    for(size_t mismatchingBitCount = 0;
+        mismatchingBitCount <= lshCount; mismatchingBitCount++) {
+
+        // Compute the angle between the vectors corresponding to
+        // this number of mismatching bits.
+        const double angle = double(mismatchingBitCount) *
+            boost::math::double_constants::pi / double(lshCount);
+
+        // The cosine of the angle is the similarity for
+        // this number of mismatcning bits.
+        CZI_ASSERT(mismatchingBitCount < similarityTable.size());
+        similarityTable[mismatchingBitCount] = std::cos(angle);
+    }
+
+}
+
+
+// Compute the LSH similarity between two cells,
+// specified by their ids local to the cell set used by this Lsh object.
+double Lsh::computeCellSimilarity(CellId localCellId0, CellId localCellId1) const
+{
+    // Access the LSH signatures for the two cells.
+    const BitSet& signature0 = signatures[localCellId0];
+    const BitSet& signature1 = signatures[localCellId1];
+
+    // Count the number of bits where the signatures of these two cells disagree.
+    const size_t mismatchingBitCount = countMismatches(signature0, signature1);
+
+    // Return the similarity corresponding to this number of mismatching bits.
+    return similarityTable[mismatchingBitCount];
 }
 

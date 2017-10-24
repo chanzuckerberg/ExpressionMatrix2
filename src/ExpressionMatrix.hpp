@@ -422,7 +422,14 @@ public:
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 
-
+    // Analyze the quality of the LSH computation of cell similarity.
+    void analyzeLsh(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed,              // The seed used to generate the LSH vectors and to downsample.
+        double csvDownsample            // The fraction of pairs that will be included in the output spreadsheet.
+        );
 
     // Dump cell to csv file a set of similar cell pairs.
     void writeSimilarPairs(const string& name) const;

@@ -333,6 +333,7 @@ BOOST_PYTHON_MODULE(ExpressionMatrix2)
        .def("findSimilarPairs3", &ExpressionMatrix::findSimilarPairs3)
        .def("writeSimilarPairs", &ExpressionMatrix::writeSimilarPairs)
        .def("analyzeSimilarPairs", &ExpressionMatrix::analyzeSimilarPairs)
+       .def("analyzeLsh", &ExpressionMatrix::analyzeLsh)
 
        // Cell graphs.
        .def("getCellGraphNames", &ExpressionMatrix::getCellGraphNames)

@@ -8,6 +8,7 @@
 // using the cosine distance of Locality Sensitive Hashing (LSH)
 
 #include "BitSet.hpp"
+#include "Ids.hpp"
 
 #include "cstddef.hpp"
 #include "cstdint.hpp"
@@ -29,6 +30,10 @@ public:
         size_t lshCount,                // Number of LSH hyperplanes
         uint32_t seed                   // Seed to generate LSH hyperplanes.
         );
+
+    // Compute the LSH similarity between two cells,
+    // specified by their ids local to the cell set used by this Lsh object.
+    double computeCellSimilarity(CellId localCellId0, CellId localCellId1) const;
 
 private:
 
@@ -55,6 +60,10 @@ private:
     // and negative otherwise.
     vector<BitSet> signatures;
     void computeCellLshSignatures(const ExpressionMatrixSubset&);
+
+    // The similarity (cosine of the angle) corresponding to each number of mismatching bits.
+    vector<double> similarityTable;
+    void computeSimilarityTable();
 };
 
 #endif

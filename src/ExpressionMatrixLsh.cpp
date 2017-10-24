@@ -1278,8 +1278,96 @@ void ExpressionMatrix::findSimilarPairs3(
     // Create the Lsh object that will do the computation.
     Lsh lsh(expressionMatrixSubset, lshCount, seed);
 
+    CZI_ASSERT(0);  // Not implemented.
+
     // Sort the similar pairs for each cell by decreasing similarity.
     cout << timestamp << "Sorting similar pairs." << endl;
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs3 ends." << endl;
+}
+
+
+
+// Analyze the quality of the LSH computation of cell similarity.
+void ExpressionMatrix::analyzeLsh(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    size_t lshCount,                // The number of LSH vectors to use.
+    unsigned int seed,              // The seed used to generate the LSH vectors and to downsample.
+    double csvDownsample            // The fraction of pairs that will be included in the output spreadsheet.
+    )
+{
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset";
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+
+    // Random number generator used for downsampling
+    using RandomSource = boost::mt19937;
+    using UniformDistribution = boost::uniform_01<>;
+    RandomSource randomSource(seed);
+    UniformDistribution uniformDistribution;
+    boost::variate_generator<RandomSource, UniformDistribution>
+        uniformGenerator(randomSource, uniformDistribution);
+
+    // Open the output csv file.
+    ofstream csvOut( "Lsh-Data.csv");
+    csvOut << "LocalCellId0,LocalCellId1,GlobalCellId0,GlobalCellId1,ExactSimilarity,LshSimilarity\n";
+
+
+    // Loop over pairs of cells.
+    for(CellId localCellId0=0; localCellId0<cellCount-1; localCellId0++) {
+        if((localCellId0%1000) == 0 ) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellCount << endl;
+        }
+        for(CellId localCellId1=localCellId0+1; localCellId1<cellCount; localCellId1++) {
+
+            // Compute exact similarity for this pair.
+            const double exactSimilarity = expressionMatrixSubset.
+                computeCellSimilarity(localCellId0, localCellId1);
+
+            // Compute LSH similarity for this pair.
+            const double lshSimilarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
+
+            // Write to the output csv file, subject to downsampling.
+            if(uniformGenerator() < csvDownsample) {
+                csvOut << localCellId0 << ",";
+                csvOut << localCellId1 << ",";
+                csvOut << cellSet[localCellId0] << ",";
+                csvOut << cellSet[localCellId1] << ",";
+                csvOut << exactSimilarity << ",";
+                csvOut << lshSimilarity << ",\n";
+            }
+        }
+
+    }
+
 }
