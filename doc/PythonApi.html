@@ -326,25 +326,25 @@ e.findSimilarPairs0(geneSetName, cellSetName, similarPairsName, k, similarityThr
 
 
 
-<h3>Function findSimilarPairs1 (preliminary documentation)</h3>
+<h3>Function findSimilarPairs3 (preliminary documentation)</h3>
 
 <p>
-Until more complete documentation on the Locality Sensitive Hashing methods used in ExpressionMatrix2 code is available, this will serve as preliminary documentation for function <code>findSimilarPairs1</code> .
+Until more complete documentation on the Locality Sensitive Hashing methods used in ExpressionMatrix2 code is available, this will serve as preliminary documentation for function <code>findSimilarPairs3</code> .
 
 <p>
-Function <code>findSimilarPairs1</code> loops over pairs of cells, and approximately computes the similarity of the two cells in each pair, defined as the <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression counts of the two cells, using Locality Sensitive Hashing (LSH). It is called as follows:
+Function <code>findSimilarPairs3</code> loops over pairs of cells, and approximately computes the similarity of the two cells in each pair, defined as the <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression counts of the two cells, using Locality Sensitive Hashing (LSH). It is called as follows:
 
 <pre>
 seed = 231
 lshCount = 1024
-e.findSimilarPairs1(cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
+e.findSimilarPairs3(cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
 </pre>
 
 <p>
 The first two parameters specify the set of cells for which the computation is to be performed, and the name of the object containing the similar pairs that will be created. The next two parameters were described above. Until complete documentation is available, the above parameter values for the last two parameters should be used. This is much faster than even approximate computation using <code>findSimilarPairs0</code> described above, however it still grows with the square of the number of cells. It typically becomes computationally prohibitive when the number of cells is in the hundreds of thousands. With the parameter values above, it computes similarity values that typically have a standard deviation 0.03 through 0.05 from the exact value.
 
 <p>
-Note that, for this function to perform at high speed, use of the POPCOUNT instruction must be enabled. For the Ubuntu build under Eclipse, this is done using compiler option <code>-msse4.2</code>. Equivalent means would have to be used by a port to a different platform to ensure high performance of function <code>findSimilarPairs1</code>.
+Note that, for this function to perform at high speed, use of the POPCOUNT instruction must be enabled. For the Ubuntu build under Eclipse, this is done using compiler option <code>-msse4.2</code>. Equivalent means would have to be used by a port to a different platform to ensure high performance of function <code>findSimilarPairs3</code>.
 
 
 

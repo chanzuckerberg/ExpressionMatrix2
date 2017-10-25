@@ -1278,7 +1278,27 @@ void ExpressionMatrix::findSimilarPairs3(
     // Create the Lsh object that will do the computation.
     Lsh lsh(expressionMatrixSubset, lshCount, seed);
 
-    CZI_ASSERT(0);  // Not implemented.
+    // Loop over all pairs. This is much faster than findSimilarPairs0
+    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
+    // still scales like the square of the number of cells in the cell set.
+    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
+        if(localCellId0>0 && ((localCellId0%10000) == 0)) {
+            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
+        }
+        for(CellId localCellId1=localCellId0+1; localCellId1!=cellCount; localCellId1++) {
+
+            // Compute the LSH similarity between these two cells.
+            const double similarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
+
+            // If the similarity is sufficient, pass it to the SimilarPairs container,
+            // which will make the decision whether to store it, depending on the
+            // number of pairs already stored for cellId0 and cellId1.
+            if(similarity > similarityThreshold) {
+                similarPairs.add(localCellId0, localCellId1, similarity);
+            }
+        }
+    }
 
     // Sort the similar pairs for each cell by decreasing similarity.
     cout << timestamp << "Sorting similar pairs." << endl;
@@ -1338,8 +1358,15 @@ void ExpressionMatrix::analyzeLsh(
     boost::variate_generator<RandomSource, UniformDistribution>
         uniformGenerator(randomSource, uniformDistribution);
 
+    // Statistics for bins of exact similarity values.
+    const size_t binCount = 200;
+    const double binWidth = 2. / binCount;
+    vector<size_t> sum0(binCount, 0);
+    vector<double> sum1(binCount, 0.);
+    vector<double> sum2(binCount, 0.);
+
     // Open the output csv file.
-    ofstream csvOut( "Lsh-Data.csv");
+    ofstream csvOut( "Lsh-analysis.csv");
     csvOut << "LocalCellId0,LocalCellId1,GlobalCellId0,GlobalCellId1,ExactSimilarity,LshSimilarity\n";
 
 
@@ -1357,6 +1384,14 @@ void ExpressionMatrix::analyzeLsh(
             // Compute LSH similarity for this pair.
             const double lshSimilarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
 
+            // Update statistics.
+            const double delta = lshSimilarity - exactSimilarity;
+            const size_t bin = size_t(floor((exactSimilarity+1.) / binWidth));
+            CZI_ASSERT(bin < binCount);
+            ++(sum0[bin]);
+            sum1[bin] += delta;
+            sum2[bin] += delta*delta;
+
             // Write to the output csv file, subject to downsampling.
             if(uniformGenerator() < csvDownsample) {
                 csvOut << localCellId0 << ",";
@@ -1370,4 +1405,29 @@ void ExpressionMatrix::analyzeLsh(
 
     }
 
+
+
+    // Compute average and standard deviation of the error for each bin.
+    ofstream statsOut("LSH-analysis-statistics.csv");
+    statsOut << "Similarity,Bias,Rms,RmsTheory\n";
+    for(size_t bin=0; bin<binCount; bin++) {
+        if(sum0[bin] < 2) {
+            continue;
+        }
+        using boost::math::double_constants::pi;
+        const double similarity = (double(bin) + 0.5) * binWidth - 1.;
+        const double sinTheta = sqrt(1.-similarity*similarity);
+        const double theta = std::acos(similarity);
+        const double p = 1.- theta / pi;
+        const double theoreticalSigma = pi * sinTheta * sqrt(p*(1.-p)/double(lshCount));
+        const double s0 = double(sum0[bin]);
+        const double s1 = sum1[bin];
+        const double s2 = sum2[bin];
+        const double average = s1 / s0;
+        const double sigma = sqrt(s2 / s0); // Sigma around 0.
+        statsOut << similarity << ",";
+        statsOut << average << ",";
+        statsOut << sigma << ",";
+        statsOut << theoreticalSigma << "\n";
+    }
 }

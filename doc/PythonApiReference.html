@@ -845,10 +845,11 @@ The required computing time will typically be a few minutes for a few thousand c
 or several hours for a few tens of thousands cells.
 When the number of cells exceeds a few thousands, it is more practical
 to perform an approximate computation using 
-<a href=#findSimilarPairs1>findSimilarPairs1</a>.
+<a href=#findSimilarPairs3>findSimilarPairs3</a>.
 
 <p>
-<code id=findSimilarPairs1>ExpressionMatrix.<b>findSimilarPairs1</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
+<code id=findSimilarPairs3>ExpressionMatrix.<b>findSimilarPairs3</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)</code>
+<br><code id=findSimilarPairs1>ExpressionMatrix.<b>findSimilarPairs1</b>(geneSetName, cellSetName, similarPairsName, k, similarityThreshold, lshCount, seed)
 <br>geneSetName: string
 <br>cellSetName: string
 <br>similarPairsName: string
@@ -869,7 +870,14 @@ For the suggested value <code>lshCount=1024</code>, the standard deviation of
 the pair similarity computed in this way is 0.05 or less.
 Improved LSH functionality that avoids the loop over cell pairs will be provided
 by <a href=#findSimilarPairs2>findSimilarPairs2</a> but is not yet available.
-More documentation for <code>findSimilarPairs1</code> will become available at a later time. 
+More documentation for <code>findSimilarPairs3</code> will become available at a later time. 
+The two functions <code>findSimilarPairs1</code> and <code>findSimilarPairs3</code>
+have identical functionality, but <code>findSimilarPairs1</code> is  
+prototype code that will become obsolete, while <code>findSimilarPairs3</code>
+is faster and uses better organized code.
+Therefore, new scripts should use <code>findSimilarPairs3</code>.
+Old scripts that use <code>findSimilarPairs1</code>
+should be converted to use <code>findSimilarPairs3</code> instead.
 
 
 <p>
