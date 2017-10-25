@@ -26,6 +26,7 @@ CPP_SRCS += \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
 ../src/PythonModule.cpp \
+../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
 ../src/hdf5.cpp \
@@ -56,6 +57,7 @@ OBJS += \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
 ./src/PythonModule.o \
+./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
 ./src/hdf5.o \
@@ -86,6 +88,7 @@ CPP_DEPS += \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \
 ./src/PythonModule.d \
+./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
 ./src/hdf5.d \
@@ -98,7 +101,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -I/usr/include/python3.5m -I/usr/include/hdf5/serial -O3 -msse4.2 -ggdb3 -Wall -Wconversion -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -std=c++0x -I/usr/include/python3.5m -I/usr/local/include/python3.5 -I/usr/include/hdf5/serial -O3 -msse4.2 -ggdb3 -Wall -Wconversion -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
