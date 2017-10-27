@@ -1,0 +1,8 @@
+To generate the reference information of the Python API:
+
+- Make sure PYTHONPATH points to the Release-ubuntu16-python3 directory
+  and that ExpressionMatrix2.so in that directory is up to date
+  (the documentation is obtained from the Python docstrings in 
+  ExpressionMatrix2.so).
+- From this directory, do "make clean", followed by "make html".
+- The html files are created under _build/html. 
