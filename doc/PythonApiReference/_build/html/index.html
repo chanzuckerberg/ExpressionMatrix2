@@ -32,9 +32,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ExpressionMatrix2  documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -58,26 +55,30 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="class">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">CellGraphVertexInfo</code></dt>
-<dd><p>Class used to store information about a vertex of a cell graph.</p>
+<dd><p>This class is used to give the Python code access to information about the vertices of a cell similarity graph. An object of this type contains information for a single vertex.</p>
 <dl class="method">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.CellGraphVertexInfo</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd></dd></dl>
+<dd><p>This constructor creates an uninitialized CellGraphVertexInfo object.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo.cellId">
 <code class="descname">cellId</code></dt>
-<dd></dd></dl>
+<dd><p>This data member contains the cell id of the cell corresponding to the vertex.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo.x">
 <code class="descname">x</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.CellGraphVertexInfo</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd></dd></dl>
+<dd><p>Returns the x coordinate of the vertex in the two-dimensional layout of the graph the vertex belongs to.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo.y">
 <code class="descname">y</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.CellGraphVertexInfo</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd></dd></dl>
+<dd><p>Returns the y coordinate of the vertex in the two-dimensional layout of the graph the vertex belongs to.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -130,7 +131,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="class">
 <dt id="ExpressionMatrix2.ExpressionMatrix">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ExpressionMatrix</code></dt>
-<dd><p>Top level object used to store and manipulate an expression matrix containing information on its genes and cells and many related data structures.</p>
+<dd><p>This is the top level class in the ExpressionMatrix2 module. Most high level functionality is provided by this class. Binary data files for an instance of this class are stored in a single directory on disk. They are accessed as memory mapped files.</p>
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
@@ -138,191 +139,191 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <ol class="arabic simple">
 <li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, parameters: ChanZuckerberg::ExpressionMatrix2::ExpressionMatrixCreationParameters) -&gt; None</li>
 </ol>
-<p>Construct a new, empty ExpressionMatrix.</p>
+<p>This constructor creates a new (empty) ExpressionMatrix object in the specified directory. The directory must not exists.</p>
 <ol class="arabic simple" start="2">
 <li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, allowReadOnly: bool=False) -&gt; None</li>
 </ol>
-<p>Access an existing ExpressionMatrix.</p>
+<p>This constructor can be used to access an existing ExpressionMatrix object in the specified directory. The directory must exist. If write access is not permitted on some of the data, the operation fails if allowReadOnly is False, and falls back to read-only access If allowReadOnly is True. In this case, however, any write operations on data with read-only access will generate a Segmentation Fault and cause immediate termination of the calling Python script, without cleanup. Therefore, this constructor should be called with allowReadOnly = False except in circumstances where limited functionality with read-only access to the data is desired.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCell">
 <code class="descname">addCell</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>jsonString: str</em><span class="sig-paren">)</span> &rarr; int</dt>
-<dd><p>Add a cell described by a JSON string.</p>
+<dd><p>Adds a cell to the system. The cell expression counts and meta data are given in a JSON string. See <a class="reference external" href="../../../PythonApi.html#addCell">here</a> for information on the expected format of the JSON string. Returns the cell id of the cell that was just added. Cell ids begin at zero and increment by one each time a cell is added.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCellMetaData">
 <code class="descname">addCellMetaData</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellMetaDataFileName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Add meta data for existing cells from an input csv file.</p>
+<dd><p>Add cell meta data reading it from a csv file. Each line of the file contains cell meta data values for one cell. Cell meta data names are in the first line. The first column of the file contain cell names. All cell names must already be present.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCells">
 <code class="descname">addCells</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>expressionCountsFileName: str</em>, <em>expressionCountsFileSeparators: str='</em>, <em>'</em>, <em>cellMetaDataFileName: str</em>, <em>cellMetaDataFileSeparators: str='</em>, <em>'</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Add cells and their meta data from input files in delimited format.</p>
+<dd><p>Adds cells to the system, reading expression counts and cell meta data from files. See <a class="reference external" href="../../../PythonApi.html#addCells">here</a> for more information. .</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub1">
 <code class="descname">addCellsFromBioHub1</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>expressionCountsFileName: str</em>, <em>initialMetaDataCount: int</em>, <em>finalMetaDataCount: int</em>, <em>plateMetaDataFileName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Add cells in the format used by the BioHub pipeline, July 2017.</p>
+<dd><p>Add to the system cells created by the BioHub pipeline (July 2017 version, for Illumina data). See <a class="reference external" href="../../../PythonApi.html#addCellsFromBioHub1">here</a> for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub2">
 <code class="descname">addCellsFromBioHub2</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>plateFileName: str</em>, <em>totalExpressionCountThreshold: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Add cells in the format used by the BioHub pipeline, September 2017.</p>
+<dd><p>Add to the system cells created by the BioHub pipeline (September 2017 version, for 10X data). See <a class="reference external" href="../../../PythonApi.html#addCellsFromBioHub2">here</a> for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCellsFromHdf5">
 <code class="descname">addCellsFromHdf5</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, fileName: str, cellNamePrefix: str, cellMetaDataArgument: List[Tuple[str, str]], totalExpressionCountThreshold: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Add cells from an input file in hdf5 format.</p>
+<dd><p>Adds cells to the system, reading expression counts from a file in HDF5 format as created by the 10X Genomics pipeline. See <a class="reference external" href="../../../PythonApi.html#addCellsFromHdf5">here</a> for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addGene">
 <code class="descname">addGene</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Add a new gene with a given name.</p>
+<dd><p>Adds a gene with the specified name. Returns True if the gene was added and False if the gene already existed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.analyzeLsh">
 <code class="descname">analyzeLsh</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em>, <em>arg1: str</em>, <em>arg2: int</em>, <em>arg3: int</em>, <em>arg4: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.analyzeSimilarPairs">
 <code class="descname">analyzeSimilarPairs</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em>, <em>arg1: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.cellCount">
 <code class="descname">cellCount</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em><span class="sig-paren">)</span> &rarr; int</dt>
-<dd><p>Return the total number of cells.</p>
+<dd><p>Returns the total number of cells.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.cellIdFromString">
 <code class="descname">cellIdFromString</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellString: str</em><span class="sig-paren">)</span> &rarr; int</dt>
-<dd><p>Return the cellId corresponding to a given cell name (or cell id string).</p>
+<dd><p>Returns the cell id corresponding to a given name, or invalidCellId if no cell with the given name exists.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.computeApproximateLshCellSimilarity">
 <code class="descname">computeApproximateLshCellSimilarity</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: int</em>, <em>arg1: int</em>, <em>arg2: int</em>, <em>arg3: int</em>, <em>arg4: int</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.computeCellGraphLayout">
 <code class="descname">computeCellGraphLayout</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Compute the two-dimensional layout of a cell graph to be used for visualization.</p>
+<dd><p>Computes the two-dimensional layout for the graph with the given name. The graph must have been previously created with a call to <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.createCellGraph" title="ExpressionMatrix2.ExpressionMatrix.createCellGraph"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.createCellGraph()</span></code></a>. This function must be called once before the first call to <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.getCellGraphVertices" title="ExpressionMatrix2.ExpressionMatrix.getCellGraphVertices"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.getCellGraphVertices()</span></code></a> for the graph.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.computeCellSimilarity">
 <code class="descname">computeCellSimilarity</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId0: int</em>, <em>cellId1: int</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd><p>Compute the similarity between two cells, taking into account all genes.</p>
+<dd><p>Returns the similarity between the expression vectors of two cells, specified by their cell ids. The similarity is computed using all the genes in the system. It is computed as the <a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression vectors of the two cells. The computed similarity is always between -1 and 1, and it is rarely negative.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellGraph">
 <code class="descname">createCellGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>similarityThreshold: float</em>, <em>k: int</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a new cell graph.</p>
+<dd><p>Create a new cell similarity graph. similarityThreshold is the minimum cell similarity required for an edge to be created. k controls the maximum connectivity of the graph. A cell graph or cell similarity graph is an undirected graph in which each vertex represents a cell. An edge between two vertices is created if the corresponding cells have similarity that exceeds a chosen threshold. In areas of high connectivity, only the edges with the highest similarity for each cell are kept.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetDifference">
 <code class="descname">createCellSetDifference</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetName0: str</em>, <em>inputSetName1: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new cell set as the set difference of two existing cell sets.</p>
+<dd><p>Creates a new cell set as the difference between two cell sets. The newly created cell set consists of all cells that are in inputCellSetName0 but not in inputCellSetName1. Returns False if the operation failed because one of the input cell sets does not exist or the output cell set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetIntersection">
 <code class="descname">createCellSetIntersection</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetsNames: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new cell set as the intersection of two or more existing cell sets.</p>
+<dd><p>Creates a new cell set as the intersection of two or more cell sets. The names of the input cell sets specified as the first argument must be separated by commas. Returns False if the operation failed because one of the input cell sets does not exist or the output cell set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetUnion">
 <code class="descname">createCellSetUnion</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetsNames: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new cell set as the union of two or more existing cell sets.</p>
+<dd><p>Creates a new cell set as the union of two or more cell sets. The names of the input cell sets specified as the first argument must be separated by commas. Returns False if the operation failed because one of the input cell sets does not exist or the output cell set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetUsingMetaData">
 <code class="descname">createCellSetUsingMetaData</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em>, <em>metaDataFieldName: str</em>, <em>matchString: str</em>, <em>useRegex: bool</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new cell set using cell meta data.</p>
+<dd><p>Creates a new cell set cellSetName consisting of all cells for which the specified metaDataName matches the given matchTarget. If useRegularExpression is False, this uses a simple string matching. Otherwise, matchTarget is treated as a regular expression to be matched. As a simple application example, suppose all cells contain a meta data name Tissue that gives the type of tissue from which the cell was obtained. Calling createCellSetUsingMetaData with metaDataName=&#8217;Tissue&#8217;, matchTarget=&#8217;Brain&#8217;, and useRegularExpression=&#8217;False&#8217; will create a new cell set consisting of the cells for which the value of the Tissue meta data field is Brain. Regular expressions can be used to select values that satisfy a variety of criteria.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetUsingNumericMetaDataBetween">
 <code class="descname">createCellSetUsingNumericMetaDataBetween</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em>, <em>metaDataFieldName: str</em>, <em>lowerBound: float</em>, <em>upperBound: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a new cell set consisting of cells for which a specified meta data field is numeric and in a specified interval.</p>
+<dd><p>Creates a new cell set cellSetName consisting of all cells for which the specified metaDataName is numeric, greater than lowerBound, and less than upperBound.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetUsingNumericMetaDataGreaterThan">
 <code class="descname">createCellSetUsingNumericMetaDataGreaterThan</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em>, <em>metaDataFieldName: str</em>, <em>lowerBound: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a new cell set consisting of cells for which a specified meta data field is numeric and greater than a specified value.</p>
+<dd><p>Creates a new cell set cellSetName consisting of all cells for which the specified metaDataName is numeric and greater than lowerBound.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellSetUsingNumericMetaDataLessThan">
 <code class="descname">createCellSetUsingNumericMetaDataLessThan</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em>, <em>metaDataFieldName: str</em>, <em>upperBound: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a new cell set consisting of cells for which a specified meta data field is numeric and less than a specified value.</p>
+<dd><p>Creates a new cell set cellSetName consisting of all cells for which the specified metaDataName is numeric and less than upperBound.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createClusterGraph">
 <code class="descname">createClusterGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellGraphName: str</em>, <em>clusterGraphCreationParameters: ChanZuckerberg::ExpressionMatrix2::ClusterGraphCreationParameters</em>, <em>clusterGraphName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a new cluster graph by running clustering on an existing cell graph.</p>
+<dd><p>Creates a new cluster graph by running label propagation clustering on an existing cell graph. A cluster graph is an undirected graph in which each vertex represents a cluster found in a cell graph. An edge between two vertices is created if the corresponding clusters have average expression vectors that are sufficiently similar. In areas of high connectivity, only the edges with the highest similarity for each cluster are kept.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetDifference">
 <code class="descname">createGeneSetDifference</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetName0: str</em>, <em>inputSetName1: str</em>, <em>oututSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new gene set as the set difference of two existing gene sets.</p>
+<dd><p>Creates a new gene set as the difference between two gene sets. The newly created gene set consists of all genes that are in inputGeneSetName0 but not in inputGeneSetName1. Returns False if the operation failed because one of the input gene sets does not exist or the output gene set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetIntersection">
 <code class="descname">createGeneSetIntersection</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetsNames: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new gene set as the intersection of two or more existing gene sets.</p>
+<dd><p>Creates a new gene set as the intersection of two or more gene sets. The names of the input gene sets specified as the first argument must be separated by commas. Returns False if the operation failed because one of the input gene sets does not exist or the output gene set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetUnion">
 <code class="descname">createGeneSetUnion</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetsNames: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
-<dd><p>Create a new gene set as the union of two or more existing gene sets.</p>
+<dd><p>Creates a new gene set as the union of two or more gene sets. The names of the input gene sets specified as the first argument must be separated by commas. Returns False if the operation failed because one of the input gene sets does not exist or the output gene set already exists, True otherwise.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetUsingInformationContent">
 <code class="descname">createGeneSetUsingInformationContent</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>existingGeneSetName: str</em>, <em>cellSetName: str</em>, <em>normalizationMethod: ChanZuckerberg::ExpressionMatrix2::NormalizationMethod</em>, <em>geneInformationContentThreshold: float</em>, <em>newGeneSetName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create a gene set using an information content criterion.</p>
+<dd><p>Creates a new gene set consisting of genes that pass an information content test. The information content, in bits, of each gene in existingGeneSetName is computed using cellSetName and the specified NormalizationMethod. The new gene set newGeneSetName is created, consisting of genes whose computed information content (in bits) exceeds the specified geneInformationContentThreshold. The information content is roughly related to the variability of the expression of that gene in the specified cell set. Genes that are widely expressed have a low information content. Genes that are very selectively expressed have a high information content. A gene that is equally expressed in all cells has zero information content. A gene that is expressed only in one cell has log2N bits of information content, where N is the number of cells in the cell set used to compute information content. A geneInformationContentThreshold of 2 bits is often effective in filtering out widely expressed genes.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createMetaDataFromClusterGraph">
 <code class="descname">createMetaDataFromClusterGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>clusterGraphName: str</em>, <em>metaDataName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Create meta data from the cluster ids stored in a ClusterGraph.</p>
+<dd><p>Creates meta data from the cluster ids stored in a cluster graph by storing the cluster ids in the specified cluster graph into a cell meta data field.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.explore">
 <code class="descname">explore</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>serverParameters: ChanZuckerberg::ExpressionMatrix2::ServerParameters</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Run the http server.</p>
+<dd><p>Starts an http server that can be used, in conjunction with a Web browser, to interact with the ExpressionMatrix object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs0">
 <code class="descname">findSimilarPairs0</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str</em>, <em>cellSetName: str</em>, <em>similarPairsName: str</em>, <em>k: int</em>, <em>similarityThreshold: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Find pairs of similar cells using direct computation.</p>
+<dd><p>Creates and stores a new object similarPairsName containing pairs of similar cells from cellSetName. The computation is done by directly looping over all possible cell pairs with both cells in cellSetName and performing for each pair an exact computation of the cell similarity, taking into account only genes in geneSetName. For each cell, only the best (most similar) k or fewer similar cells are stored, among those that exceed the specified similarityThreshold. This computational cost of this function grows with the square of the number of cells in cellSetName. The required computing time will typically be a few minutes for a few thousand cells or several hours for a few tens of thousands cells. When the number of cells exceeds a few thousands, it is more practical to perform an approximate computation using findSimilarPairs3.</p>
 </dd></dl>
 
 <dl class="method">
@@ -334,19 +335,19 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs2">
 <code class="descname">findSimilarPairs2</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em>, <em>arg1: str</em>, <em>arg2: int</em>, <em>arg3: float</em>, <em>arg4: int</em>, <em>arg5: int</em>, <em>arg6: int</em>, <em>arg7: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Prototype code, not ready for production use.</p>
+<dd><p>Development of this functionality is in progress. It will provide LSH-based computation of similar cell pairs without looping over all possible pairs of cells.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3">
 <code class="descname">findSimilarPairs3</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=20</em>, <em>similarityThreshold: float=0.5</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Find pairs of similar cells using Locality Sensitive Hashing, but still looping over all possible cell pairs.</p>
+<dd><p>Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) with lshCount LSH hashes to speed up the computation of the similar pairs. Like findSimilarPairs0, this still loops over all possible cell pairs with both cells in cellSetName and therefore the computational cost still grows asymptotically with the square of the number of cells. However the computation is orders of magnitudes faster. The computation is approximate, and the error decreases as lshCount increases. For the suggested value lshCount=1024, the standard deviation of the pair similarity computed in this way is 0.05 or less. Improved LSH functionality that avoids the loop over cell pairs will be provided by findSimilarPairs2 but is not yet available. More documentation for findSimilarPairs3 will become available at a later time. The two functions findSimilarPairs1 and findSimilarPairs3 have identical functionality, but findSimilarPairs1 is prototype code that will become obsolete, while findSimilarPairs3 is faster and uses better organized code. Therefore, new scripts should use findSimilarPairs3. Old scripts that use findSimilarPairs1 should be converted to use findSimilarPairs3 instead.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.geneCount">
 <code class="descname">geneCount</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em><span class="sig-paren">)</span> &rarr; int</dt>
-<dd><p>Return the total number of genes.</p>
+<dd><p>Returns the total number of genes.</p>
 </dd></dl>
 
 <dl class="method">
@@ -364,121 +365,121 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellExpressionCount">
 <code class="descname">getCellExpressionCount</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em>, <em>geneId: int</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd><p>Get the expression count for a given cell id and gene id.</p>
+<dd><p>Returns the expression count for a given cell and gene. The returned value can be zero.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellExpressionCountFromGeneName">
 <code class="descname">getCellExpressionCountFromGeneName</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em>, <em>geneName: str</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd><p>Get the expression count for a given cell id and gene name.</p>
+<dd><p>Returns the expression count for a given cell and gene. The returned value can be zero.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellExpressionCounts">
 <code class="descname">getCellExpressionCounts</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em><span class="sig-paren">)</span> &rarr; List[Tuple[int, float]]</dt>
-<dd><p>Get all the expression counts for a given cell id.</p>
+<dd><p>Returns the non-zero expression counts for a given cell. The returned list contains pairs of gene ids and the corresponding expression counts for the given cell.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellGraphEdges">
 <code class="descname">getCellGraphEdges</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em><span class="sig-paren">)</span> &rarr; List[Tuple[int, int]]</dt>
-<dd><p>Get the pairs of cell ids corresponding to the edges of a cell graph.</p>
+<dd><p>Returns the cell ids corresponding to the two vertices of each edge of the cell graph with the given name. The graph must have been previously created with a call to <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.createCellGraph" title="ExpressionMatrix2.ExpressionMatrix.createCellGraph"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.createCellGraph()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellGraphNames">
 <code class="descname">getCellGraphNames</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em><span class="sig-paren">)</span> &rarr; List[str]</dt>
-<dd><p>Get the names of all currently defined cell graphs.</p>
+<dd><p>Return a list containing the names of all currently defined cell similarity graphs.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellGraphVertices">
 <code class="descname">getCellGraphVertices</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em><span class="sig-paren">)</span> &rarr; List[ChanZuckerberg::ExpressionMatrix2::CellGraphVertexInfo]</dt>
-<dd><p>Get the cell ids corresponding to the vertices of a cell graph.</p>
+<dd><p>Returns information about the vertices of the cell graph with the given name. The graph must have been previously created with a call to <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.createCellGraph" title="ExpressionMatrix2.ExpressionMatrix.createCellGraph"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.createCellGraph()</span></code></a> and its two-dimensional layout must have been computed with a call to <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.computeCellGraphLayout" title="ExpressionMatrix2.ExpressionMatrix.computeCellGraphLayout"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.computeCellGraphLayout()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellMetaData">
 <code class="descname">getCellMetaData</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em><span class="sig-paren">)</span> &rarr; List[Tuple[str, str]]</dt>
-<dd><p>Get all meta data values for a given cell id.</p>
+<dd><p>Returns all meta data pairs (name, value) for a given cell.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellMetaDataValue">
-<code class="descname">getCellMetaDataValue</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em>, <em>name: str</em><span class="sig-paren">)</span> &rarr; str</dt>
-<dd><p>Get a single meta data value for a given cell id.</p>
+<code class="descname">getCellMetaDataValue</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId: int</em>, <em>metaDataName: str</em><span class="sig-paren">)</span> &rarr; str</dt>
+<dd><p>Returns the value of the specified meta data name for the given cell. Returns an empty string if the cell does not have that meta data name. The only meta data field that all cells are guaranteed to have is CellName.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellSet">
 <code class="descname">getCellSet</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em><span class="sig-paren">)</span> &rarr; List[int]</dt>
-<dd><p>Get the ids of the cells in an existing cell set.</p>
+<dd><p>Returns the cell ids of the cells in the cell set with the specified name. If the cell set does not exists, returns an empty container.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellSetNames">
 <code class="descname">getCellSetNames</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em><span class="sig-paren">)</span> &rarr; List[str]</dt>
-<dd><p>Get the names of all existing cell sets.</p>
+<dd><p>Returns a list containing the names of all currently defined cell sets.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellsExpressionCount">
 <code class="descname">getCellsExpressionCount</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, cellIds: List[int], geneId: int</em><span class="sig-paren">)</span> &rarr; List[float]</dt>
-<dd><p>Get the expression counts for a given gene id and for a specified list of cell ids.</p>
+<dd><p>Returns the expression counts for a set of cells and for a given gene. Some or all of the returned values can be zero.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellsExpressionCountFromGeneName">
 <code class="descname">getCellsExpressionCountFromGeneName</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, cellIds: List[int], geneName: str</em><span class="sig-paren">)</span> &rarr; List[float]</dt>
-<dd><p>Get the expression counts for a given gene name and for a specified list of cell ids.</p>
+<dd><p>Returns the expression counts for a set of cells and for a given gene. Some or all of the returned values can be zero.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellsExpressionCounts">
 <code class="descname">getCellsExpressionCounts</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, cellIds: List[int]</em><span class="sig-paren">)</span> &rarr; List[List[Tuple[int, float]]]</dt>
-<dd><p>Get all the expression counts for a specified list of cell ids.</p>
+<dd><p>Returns the non-zero expression counts for a given set of cells. The returned list contains, for each cell, a list of pairs of gene ids and the corresponding expression counts.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellsExpressionCountsForGenes">
 <code class="descname">getCellsExpressionCountsForGenes</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, cellIds: List[int], geneIds: List[int]</em><span class="sig-paren">)</span> &rarr; List[List[Tuple[int, float]]]</dt>
-<dd><p>Get all the expression counts for a specified list of cell ids and gene ids.</p>
+<dd><p>Returns the non-zero expression counts for given sets of cells and genes. The returned list contains, for each cell, pairs of gene ids and the corresponding expression counts.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getCellsMetaData">
 <code class="descname">getCellsMetaData</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, cellIds: List[int]</em><span class="sig-paren">)</span> &rarr; List[List[Tuple[str, str]]]</dt>
-<dd><p>Get all meta data fields for a given list of cell ids.</p>
+<dd><p>Returns all meta data pairs (name, value) for a set of cells specified by list cellIds. Each element in the returned list corresponds to the cell id at the same position in list cellIds.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getClusterAverageExpression">
 <code class="descname">getClusterAverageExpression</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>clusterGraphName: str</em>, <em>clusterId: int</em><span class="sig-paren">)</span> &rarr; List[float]</dt>
-<dd><p>Get L2-normalized average gene expression for a cluster.</p>
+<dd><p>Return the average, L2-normalized, gene expression of a cluster. The cluster is specified using the name of the cluster graph it belongs to, and its cluster id within that cluster graph. The values returned correspond one on one to the gene ids returned by <a class="reference internal" href="#ExpressionMatrix2.ExpressionMatrix.getClusterGraphGenes" title="ExpressionMatrix2.ExpressionMatrix.getClusterGraphGenes"><code class="xref py py-func docutils literal"><span class="pre">ExpressionMatrix2.ExpressionMatrix.getClusterGraphGenes()</span></code></a> for the same cluster graph. .</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getClusterCells">
 <code class="descname">getClusterCells</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>clusterGraphName: str</em>, <em>clusterId: int</em><span class="sig-paren">)</span> &rarr; List[int]</dt>
-<dd><p>Get the cell ids of a cluster.</p>
+<dd><p>Returns a list of the cell ids for the cells a cluster. The cluster is specified using the name of the cluster graph it belongs to, and its cluster id within that cluster graph.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getClusterGraphGenes">
 <code class="descname">getClusterGraphGenes</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>clusterGraphName: str</em><span class="sig-paren">)</span> &rarr; List[int]</dt>
-<dd><p>Get the gene ids of the genes used by a cluster graph.</p>
+<dd><p>Returns a list of the ids of the genes used to create a cluster graph.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getClusterGraphVertices">
 <code class="descname">getClusterGraphVertices</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>clusterGraphName: str</em><span class="sig-paren">)</span> &rarr; List[int]</dt>
-<dd><p>Get the cluster ids for the vertices of a cluster graph.</p>
+<dd><p>Returns a list of the cluster ids for the vertices of an existing cluster graph. Each vertex of a cluster graph corresponds to a cluster.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.removeCellSet">
 <code class="descname">removeCellSet</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellSetName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Remove an existing cell set.</p>
+<dd><p>Removes the cell set with the specified name. If the cell set does not exists, raises an exception.</p>
 </dd></dl>
 
 <dl class="method">
@@ -490,19 +491,19 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.writeLshSimilarityComparison">
 <code class="descname">writeLshSimilarityComparison</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: int</em>, <em>arg1: int</em>, <em>arg2: int</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.writeLshSimilarityComparisonSlow">
 <code class="descname">writeLshSimilarityComparisonSlow</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: int</em>, <em>arg1: int</em>, <em>arg2: int</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.writeSimilarPairs">
 <code class="descname">writeSimilarPairs</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>For debugging/testing use only.</p>
+<dd><p>Only intended to be used for testing. See the source code in the ExpressionMatrix2/src directory for more information. For debugging/testing use only.</p>
 </dd></dl>
 
 </dd></dl>
@@ -545,6 +546,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dt id="ExpressionMatrix2.NormalizationMethod">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">NormalizationMethod</code></dt>
 <dd><p>Various ways to normalize gene expressions.</p>
+<ul class="simple">
+<li>none: no normalization.</li>
+<li>L1: L1 normalization (sum of values is 1).</li>
+<li>L2: L2 normalization (sum of squares of values is 1).</li>
+<li>Invalid: invalid normalization.</li>
+</ul>
 </dd></dl>
 
 </div>
@@ -622,9 +629,6 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ExpressionMatrix2  documentation</a> &raquo;</li> 
       </ul>
     </div>

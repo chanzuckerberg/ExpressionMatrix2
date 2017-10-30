@@ -29,16 +29,29 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
     class_<ExpressionMatrix>(
         module,
         "ExpressionMatrix",
-        "Top level object used to store and manipulate an expression matrix "
-        "containing information on its genes and cells "
-        "and many related data structures.")
+        "This is the top level class in the ExpressionMatrix2 module. "
+        "Most high level functionality is provided by this class. "
+        "Binary data files for an instance of this class are stored "
+        "in a single directory on disk. They are accessed as memory mapped files. ")
        .def(init<string, ExpressionMatrixCreationParameters>(),
-           "Construct a new, empty ExpressionMatrix.",
+           "This constructor creates a new (empty) ExpressionMatrix object "
+           "in the specified directory. "
+           "The directory must not exists. ",
            arg("directoryName"),
            arg("parameters")
        )
        .def(init<string, bool>(),
-           "Access an existing ExpressionMatrix.",
+           "This constructor can be used to access an existing ExpressionMatrix object "
+           "in the specified directory. The directory must exist. "
+           "If write access is not permitted on some of the data, "
+           "the operation fails if allowReadOnly is False, "
+           "and falls back to read-only access If allowReadOnly is True. "
+           "In this case, however, any write operations on data with read-only access "
+           "will generate a Segmentation Fault and cause immediate termination "
+           "of the calling Python script, without cleanup. "
+           "Therefore, this constructor should be called with allowReadOnly = False "
+           "except in circumstances where limited functionality "
+           "with read-only access to the data is desired. ",
            arg("directoryName"),
            arg("allowReadOnly")=false
        )
@@ -46,17 +59,18 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        // Get the total number of genes or cells currently in the system.
        .def("geneCount",
            &ExpressionMatrix::geneCount,
-           "Return the total number of genes."
+           "Returns the total number of genes."
        )
        .def("cellCount",
            &ExpressionMatrix::cellCount,
-           "Return the total number of cells."
+           "Returns the total number of cells."
        )
 
        // Genes.
        .def("addGene",
            &ExpressionMatrix::addGene,
-           "Add a new gene with a given name.",
+           "Adds a gene with the specified name. "
+           "Returns True if the gene was added and False if the gene already existed. ",
            arg("geneName")
            )
        .def("geneName",
@@ -71,7 +85,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
 
 
-
        // Various ways to add cells.
        .def
        (
@@ -81,12 +94,18 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string& jsonString)
            )
            &ExpressionMatrix::addCell,
-           "Add a cell described by a JSON string.",
+           "Adds a cell to the system. The cell expression counts "
+           "and meta data are given in a JSON string. "
+           "See `here <../../../PythonApi.html#addCell>`__ "
+           "for information on the expected format of the JSON string. "
+           "Returns the cell id of the cell that was just added. "
+           "Cell ids begin at zero and increment by one each time a cell is added. ",
            arg("jsonString")
        )
        .def("addCells",
            &ExpressionMatrix::addCells,
-           "Add cells and their meta data from input files in delimited format.",
+           "Adds cells to the system, reading expression counts and cell meta data from files. "
+           "See `here <../../../PythonApi.html#addCells>`__ for more information. .",
            arg("expressionCountsFileName"),
            arg("expressionCountsFileSeparators") = ",",
            arg("cellMetaDataFileName"),
@@ -94,7 +113,9 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("addCellsFromHdf5",
            &ExpressionMatrix::addCellsFromHdf5,
-           "Add cells from an input file in hdf5 format.",
+           "Adds cells to the system, reading expression counts "
+           "from a file in HDF5 format as created by the 10X Genomics pipeline. "
+           "See `here <../../../PythonApi.html#addCellsFromHdf5>`__ for more information. ",
            arg("fileName"),
            arg("cellNamePrefix"),
            arg("cellMetaDataArgument"),
@@ -102,7 +123,9 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("addCellsFromBioHub1",
            &ExpressionMatrix::addCellsFromBioHub1,
-           "Add cells in the format used by the BioHub pipeline, July 2017.",
+           "Add to the system cells created by the BioHub pipeline "
+           "(July 2017 version, for Illumina data). "
+           "See `here <../../../PythonApi.html#addCellsFromBioHub1>`__ for more information. ",
            arg("expressionCountsFileName"),
            arg("initialMetaDataCount"),
            arg("finalMetaDataCount"),
@@ -110,13 +133,19 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("addCellsFromBioHub2",
            &ExpressionMatrix::addCellsFromBioHub2,
-           "Add cells in the format used by the BioHub pipeline, September 2017.",
+           "Add to the system cells created by the BioHub pipeline "
+           "(September 2017 version, for 10X data). "
+           "See `here <../../../PythonApi.html#addCellsFromBioHub2>`__ for more information. ",
            arg("plateFileName"),
            arg("totalExpressionCountThreshold")
        )
        .def("addCellMetaData",
            &ExpressionMatrix::addCellMetaData,
-           "Add meta data for existing cells from an input csv file.",
+           "Add cell meta data reading it from a csv file. "
+           "Each line of the file contains cell meta data values for one cell. "
+           "Cell meta data names are in the first line. "
+           "The first column of the file contain cell names. "
+           "All cell names must already be present. ",
            arg("cellMetaDataFileName")
        )
 
@@ -128,12 +157,14 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "getCellMetaDataValue",
            (
                string (ExpressionMatrix::*)
-               (CellId, const string& name) const
+               (CellId, const string& metaDataName) const
            )
            &ExpressionMatrix::getCellMetaData,
-           "Get a single meta data value for a given cell id.",
+           "Returns the value of the specified meta data name for the given cell. "
+           "Returns an empty string if the cell does not have that meta data name. "
+           "The only meta data field that all cells are guaranteed to have is CellName. ",
            arg("cellId"),
-           arg("name")
+           arg("metaDataName")
        )
        .def
        (
@@ -143,7 +174,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (CellId) const
            )
            &ExpressionMatrix::getCellMetaData,
-           "Get all meta data values for a given cell id.",
+           "Returns all meta data pairs (name, value) for a given cell.",
            arg("cellId")
        )
        .def
@@ -154,12 +185,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const vector<CellId>&) const
            )
            &ExpressionMatrix::getCellMetaData,
-           "Get all meta data fields for a given list of cell ids.",
+           "Returns all meta data pairs (name, value) "
+           "for a set of cells specified by list cellIds. "
+           "Each element in the returned list corresponds to the cell id at the same position in list cellIds. ",
            arg("cellIds")
        )
        .def("cellIdFromString",
            &ExpressionMatrix::cellIdFromString,
-           "Return the cellId corresponding to a given cell name (or cell id string).",
+           "Returns the cell id corresponding to a given name, "
+           "or invalidCellId if no cell with the given name exists. ",
            arg("cellString")
        )
 
@@ -174,7 +208,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (CellId, GeneId) const
            )
            &ExpressionMatrix::getCellExpressionCount,
-           "Get the expression count for a given cell id and gene id.",
+           "Returns the expression count for a given cell and gene. "
+           "The returned value can be zero.",
            arg("cellId"),
            arg("geneId")
        )
@@ -186,13 +221,16 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (CellId, const string& geneName) const
            )
            &ExpressionMatrix::getCellExpressionCount,
-           "Get the expression count for a given cell id and gene name.",
+           "Returns the expression count for a given cell and gene. "
+           "The returned value can be zero.",
            arg("cellId"),
            arg("geneName")
        )
        .def("getCellExpressionCounts",
            &ExpressionMatrix::getCellExpressionCounts,
-           "Get all the expression counts for a given cell id.",
+           "Returns the non-zero expression counts for a given cell. "
+           "The returned list contains pairs of gene ids "
+           "and the corresponding expression counts for the given cell.",
            arg("cellId")
        )
        .def
@@ -203,7 +241,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const vector<CellId>&, GeneId) const
            )
            &ExpressionMatrix::getCellsExpressionCount,
-           "Get the expression counts for a given gene id and for a specified list of cell ids.",
+           "Returns the expression counts for a set of cells and for a given gene. "
+           "Some or all of the returned values can be zero. ",
            arg("cellIds"),
            arg("geneId")
        )
@@ -215,18 +254,23 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const vector<CellId>&, const string& geneName) const
            )
            &ExpressionMatrix::getCellsExpressionCount,
-           "Get the expression counts for a given gene name and for a specified list of cell ids.",
+           "Returns the expression counts for a set of cells and for a given gene. "
+           "Some or all of the returned values can be zero. ",
            arg("cellIds"),
            arg("geneName")
        )
        .def("getCellsExpressionCounts",
            &ExpressionMatrix::getCellsExpressionCounts,
-           "Get all the expression counts for a specified list of cell ids.",
+           "Returns the non-zero expression counts for a given set of cells. "
+           "The returned list contains, for each cell, "
+           "a list of pairs of gene ids and the corresponding expression counts.",
            arg("cellIds")
            )
        .def("getCellsExpressionCountsForGenes",
            &ExpressionMatrix::getCellsExpressionCountsForGenes,
-           "Get all the expression counts for a specified list of cell ids and gene ids.",
+           "Returns the non-zero expression counts for given sets of cells and genes. "
+           "The returned list contains, for each cell, pairs of gene ids "
+           "and the corresponding expression counts.",
            arg("cellIds"),
            arg("geneIds")
        )
@@ -247,7 +291,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                )
            )
            &ExpressionMatrix::createGeneSetUsingInformationContent,
-           "Create a gene set using an information content criterion.",
+           "Creates a new gene set consisting of genes that pass an information content test. "
+           "The information content, in bits, of each gene in existingGeneSetName "
+           "is computed using cellSetName and the specified NormalizationMethod. "
+           "The new gene set newGeneSetName is created, "
+           "consisting of genes whose computed information content (in bits) "
+           "exceeds the specified geneInformationContentThreshold. "
+           "The information content is roughly related to the variability "
+           "of the expression of that gene in the specified cell set. "
+           "Genes that are widely expressed have a low information content. "
+           "Genes that are very selectively expressed have a high information content. "
+           "A gene that is equally expressed in all cells has zero information content. "
+           "A gene that is expressed only in one cell has log2N bits of information content, "
+           "where N is the number of cells in the cell set used to compute information content. "
+           "A geneInformationContentThreshold of 2 bits is often effective "
+           "in filtering out widely expressed genes. ",
            arg("existingGeneSetName"),
            arg("cellSetName"),
            arg("normalizationMethod"),
@@ -255,12 +313,20 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("newGeneSetName")
        )
        .def("createGeneSetIntersection", &ExpressionMatrix::createGeneSetIntersection,
-           "Create a new gene set as the intersection of two or more existing gene sets.",
+           "Creates a new gene set as the intersection of two or more gene sets. "
+           "The names of the input gene sets specified as the first argument "
+           "must be separated by commas. "
+           "Returns False if the operation failed because one of the input gene sets "
+           "does not exist or the output gene set already exists, True otherwise. ",
            arg("inputSetsNames"),
            arg("outputSetName")
        )
        .def("createGeneSetUnion", &ExpressionMatrix::createGeneSetUnion,
-           "Create a new gene set as the union of two or more existing gene sets.",
+           "Creates a new gene set as the union of two or more gene sets. "
+           "The names of the input gene sets specified as the first argument "
+           "must be separated by commas. "
+           "Returns False if the operation failed because one of the input gene sets "
+           "does not exist or the output gene set already exists, True otherwise.",
            arg("inputSetsNames"),
            arg("outputSetName")
        )
@@ -272,7 +338,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const string&, const string&)
            )
            &ExpressionMatrix::createGeneSetDifference,
-           "Create a new gene set as the set difference of two existing gene sets.",
+           "Creates a new gene set as the difference between two gene sets. "
+           "The newly created gene set consists of all genes that are in inputGeneSetName0 "
+           "but not in inputGeneSetName1. "
+           "Returns False if the operation failed because one of the input gene sets "
+           "does not exist or the output gene set already exists, True otherwise. ",
            arg("inputSetName0"),
            arg("inputSetName1"),
            arg("oututSetName")
@@ -289,7 +359,16 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const string&, const string&, bool)
            )
            &ExpressionMatrix::createCellSetUsingMetaData,
-           "Create a new cell set using cell meta data.",
+           "Creates a new cell set cellSetName consisting of all cells "
+           "for which the specified metaDataName matches the given matchTarget. "
+           "If useRegularExpression is False, this uses a simple string matching. "
+           "Otherwise, matchTarget is treated as a regular expression to be matched. "
+           "As a simple application example, suppose all cells contain a meta data name Tissue "
+           "that gives the type of tissue from which the cell was obtained. "
+           "Calling createCellSetUsingMetaData with metaDataName='Tissue', matchTarget='Brain', "
+           "and useRegularExpression='False' will create a new cell set "
+           "consisting of the cells for which the value of the Tissue meta data field is Brain. "
+           "Regular expressions can be used to select values that satisfy a variety of criteria.",
            arg("cellSetName"),
            arg("metaDataFieldName"),
            arg("matchString"),
@@ -297,24 +376,26 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("createCellSetUsingNumericMetaDataGreaterThan",
            &ExpressionMatrix::createCellSetUsingNumericMetaDataGreaterThan,
-           "Create a new cell set consisting of cells for which a specified meta data field "
-           "is numeric and greater than a specified value.",
+           "Creates a new cell set cellSetName consisting of all cells "
+           "for which the specified metaDataName is numeric and greater than lowerBound.",
            arg("cellSetName"),
            arg("metaDataFieldName"),
            arg("lowerBound")
        )
        .def("createCellSetUsingNumericMetaDataLessThan",
            &ExpressionMatrix::createCellSetUsingNumericMetaDataLessThan,
-           "Create a new cell set consisting of cells for which a specified meta data field "
-           "is numeric and less than a specified value.",
+           "Creates a new cell set cellSetName consisting of all cells "
+           "for which the specified metaDataName is numeric and less than upperBound. "
+           "",
            arg("cellSetName"),
            arg("metaDataFieldName"),
            arg("upperBound")
        )
        .def("createCellSetUsingNumericMetaDataBetween",
            &ExpressionMatrix::createCellSetUsingNumericMetaDataBetween,
-           "Create a new cell set consisting of cells for which a specified meta data field "
-           "is numeric and in a specified interval.",
+           "Creates a new cell set cellSetName consisting of all cells "
+           "for which the specified metaDataName is numeric, "
+           "greater than lowerBound, and less than upperBound. ",
            arg("cellSetName"),
            arg("metaDataFieldName"),
            arg("lowerBound"),
@@ -322,13 +403,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("createCellSetIntersection",
            &ExpressionMatrix::createCellSetIntersection,
-           "Create a new cell set as the intersection of two or more existing cell sets.",
+           "Creates a new cell set as the intersection of two or more cell sets. "
+           "The names of the input cell sets specified as the first argument "
+           "must be separated by commas. "
+           "Returns False if the operation failed because one of the input cell sets does not exist "
+           "or the output cell set already exists, True otherwise. ",
            arg("inputSetsNames"),
            arg("outputSetName")
        )
        .def("createCellSetUnion",
            &ExpressionMatrix::createCellSetUnion,
-           "Create a new cell set as the union of two or more existing cell sets.",
+           "Creates a new cell set as the union of two or more cell sets. "
+           "The names of the input cell sets specified as the first argument "
+           "must be separated by commas. "
+           "Returns False if the operation failed because one of the input cell sets does not exist "
+           "or the output cell set already exists, True otherwise. ",
            arg("inputSetsNames"),
            arg("outputSetName")
        )
@@ -340,18 +429,23 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const string&, const string&)
            )
            &ExpressionMatrix::createCellSetDifference,
-           "Create a new cell set as the set difference of two existing cell sets.",
+           "Creates a new cell set as the difference between two cell sets. "
+           "The newly created cell set consists of all cells "
+           "that are in inputCellSetName0 but not in inputCellSetName1. "
+           "Returns False if the operation failed because one of the input cell sets does not exist "
+           "or the output cell set already exists, True otherwise. ",
            arg("inputSetName0"),
            arg("inputSetName1"),
            arg("outputSetName")
        )
        .def("getCellSetNames",
            &ExpressionMatrix::getCellSetNames,
-           "Get the names of all existing cell sets."
+           "Returns a list containing the names of all currently defined cell sets. "
        )
        .def("getCellSet",
            &ExpressionMatrix::getCellSet,
-           "Get the ids of the cells in an existing cell set.",
+           "Returns the cell ids of the cells in the cell set with the specified name. "
+           "If the cell set does not exists, returns an empty container.",
            arg("cellSetName")
        )
        .def
@@ -362,7 +456,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&)
            )
            &ExpressionMatrix::removeCellSet,
-           "Remove an existing cell set.",
+           "Removes the cell set with the specified name. "
+           "If the cell set does not exists, raises an exception.",
            arg("cellSetName")
        )
 
@@ -371,27 +466,51 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        // Compute cell similarity.
        .def("computeCellSimilarity",
            &ExpressionMatrix::computeCellSimilarity,
-           "Compute the similarity between two cells, taking into account all genes.",
+           "Returns the similarity between the expression vectors of two cells, "
+           "specified by their cell ids. "
+           "The similarity is computed using all the genes in the system. "
+           "It is computed as the `Pearson correlation coefficient "
+           "<https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`__ "
+           "of the expression vectors of the two cells. "
+           "The computed similarity is always between -1 and 1, and it is rarely negative. ",
            arg("cellId0"),
            arg("cellId1")
        )
        .def("computeApproximateLshCellSimilarity",
            &ExpressionMatrix::computeApproximateLshCellSimilarity,
-           "For debugging/testing use only."
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
        .def("writeLshSimilarityComparison",
            &ExpressionMatrix::writeLshSimilarityComparison,
-           "For debugging/testing use only."
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
        .def("writeLshSimilarityComparisonSlow",
            &ExpressionMatrix::writeLshSimilarityComparisonSlow,
-           "For debugging/testing use only."
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
+
+
 
        // Find similar pairs of cells.
        .def("findSimilarPairs0",
            &ExpressionMatrix::findSimilarPairs0,
-           "Find pairs of similar cells using direct computation.",
+           "Creates and stores a new object similarPairsName "
+           "containing pairs of similar cells from cellSetName. "
+           "The computation is done by directly looping "
+           "over all possible cell pairs with both cells in cellSetName "
+           "and performing for each pair an exact computation of the cell similarity, "
+           "taking into account only genes in geneSetName. "
+           "For each cell, only the best (most similar) k or fewer similar cells are stored, "
+           "among those that exceed the specified similarityThreshold. "
+           "This computational cost of this function grows "
+           "with the square of the number of cells in cellSetName. "
+           "The required computing time will typically be a few minutes "
+           "for a few thousand cells or several hours for a few tens of thousands cells. "
+           "When the number of cells exceeds a few thousands, "
+           "it is more practical to perform an approximate computation using findSimilarPairs3. ",
            arg("geneSetName"),
            arg("cellSetName"),
            arg("similarPairsName"),
@@ -404,11 +523,29 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("findSimilarPairs2",
            &ExpressionMatrix::findSimilarPairs2,
-           "Prototype code, not ready for production use."
+           "Development of this functionality is in progress. "
+           "It will provide LSH-based computation of similar cell pairs "
+           "without looping over all possible pairs of cells."
        )
        .def("findSimilarPairs3",
            &ExpressionMatrix::findSimilarPairs3,
-           "Find pairs of similar cells using Locality Sensitive Hashing, but still looping over all possible cell pairs.",
+           "Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) "
+           "with lshCount LSH hashes to speed up the computation of the similar pairs. "
+           "Like findSimilarPairs0, this still loops over all possible cell pairs "
+           "with both cells in cellSetName and therefore the computational cost "
+           "still grows asymptotically with the square of the number of cells. "
+           "However the computation is orders of magnitudes faster. "
+           "The computation is approximate, and the error decreases as lshCount increases. "
+           "For the suggested value lshCount=1024, "
+           "the standard deviation of the pair similarity computed in this way is 0.05 or less. "
+           "Improved LSH functionality that avoids the loop over cell pairs "
+           "will be provided by findSimilarPairs2 but is not yet available. "
+           "More documentation for findSimilarPairs3 will become available at a later time. "
+           "The two functions findSimilarPairs1 and findSimilarPairs3 have identical functionality, "
+           "but findSimilarPairs1 is prototype code that will become obsolete, "
+           "while findSimilarPairs3 is faster and uses better organized code. "
+           "Therefore, new scripts should use findSimilarPairs3. "
+           "Old scripts that use findSimilarPairs1 should be converted to use findSimilarPairs3 instead. ",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
@@ -419,15 +556,19 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
            "For debugging/testing use only."
        )
        .def("analyzeSimilarPairs",
            &ExpressionMatrix::analyzeSimilarPairs,
-           "For debugging/testing use only."
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
        .def("analyzeLsh",
            &ExpressionMatrix::analyzeLsh,
-           "For debugging/testing use only."
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
 
 
@@ -435,7 +576,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        // Cell graphs.
        .def("getCellGraphNames",
            &ExpressionMatrix::getCellGraphNames,
-           "Get the names of all currently defined cell graphs."
+           "Return a list containing the names of all currently defined cell similarity graphs."
        )
        .def
        (
@@ -445,7 +586,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const string&, const string&, double, size_t)
            )
            &ExpressionMatrix::createCellGraph,
-           "Create a new cell graph.",
+           "Create a new cell similarity graph. "
+           "similarityThreshold is the minimum cell similarity required for an edge to be created. "
+           "k controls the maximum connectivity of the graph. "
+           "A cell graph or cell similarity graph is an undirected graph "
+           "in which each vertex represents a cell. "
+           "An edge between two vertices is created if the corresponding cells "
+           "have similarity that exceeds a chosen threshold. "
+           "In areas of high connectivity, only the edges "
+           "with the highest similarity for each cell are kept. ",
            arg("graphName"),
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
@@ -454,17 +603,28 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("computeCellGraphLayout",
            &ExpressionMatrix::computeCellGraphLayout,
-           "Compute the two-dimensional layout of a cell graph to be used for visualization.",
+           "Computes the two-dimensional layout for the graph with the given name. "
+           "The graph must have been previously created with a call to "
+           ":py:func:`ExpressionMatrix2.ExpressionMatrix.createCellGraph`. "
+           "This function must be called once before the first call to "
+           ":py:func:`ExpressionMatrix2.ExpressionMatrix.getCellGraphVertices` for the graph. ",
            arg("graphName")
        )
        .def("getCellGraphVertices",
            &ExpressionMatrix::getCellGraphVertices,
-           "Get the cell ids corresponding to the vertices of a cell graph.",
+           "Returns information about the vertices of the cell graph with the given name. "
+           "The graph must have been previously created with a call to "
+           ":py:func:`ExpressionMatrix2.ExpressionMatrix.createCellGraph` "
+           "and its two-dimensional layout must have been computed with a call to "
+           ":py:func:`ExpressionMatrix2.ExpressionMatrix.computeCellGraphLayout`. ",
            arg("graphName")
        )
        .def("getCellGraphEdges",
            &ExpressionMatrix::getCellGraphEdges,
-           "Get the pairs of cell ids corresponding to the edges of a cell graph.",
+           "Returns the cell ids corresponding to the two vertices "
+           "of each edge of the cell graph with the given name. "
+           "The graph must have been previously created with a call to "
+           ":py:func:`ExpressionMatrix2.ExpressionMatrix.createCellGraph`.",
            arg("graphName")
        )
 
@@ -479,30 +639,44 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const ClusterGraphCreationParameters&, const string&)
            )
            &ExpressionMatrix::createClusterGraph,
-           "Create a new cluster graph by running clustering on an existing cell graph.",
+           "Creates a new cluster graph by running label propagation clustering "
+           "on an existing cell graph. "
+           "A cluster graph is an undirected graph "
+           "in which each vertex represents a cluster found in a cell graph. "
+           "An edge between two vertices is created if the corresponding clusters "
+           "have average expression vectors that are sufficiently similar. "
+           "In areas of high connectivity, only the edges "
+           "with the highest similarity for each cluster are kept. ",
            arg("cellGraphName"),
            arg("clusterGraphCreationParameters"),
            arg("clusterGraphName")
        )
        .def("getClusterGraphVertices",
            &ExpressionMatrix::getClusterGraphVertices,
-           "Get the cluster ids for the vertices of a cluster graph.",
+           "Returns a list of the cluster ids for the vertices of an existing cluster graph. "
+           "Each vertex of a cluster graph corresponds to a cluster. ",
            arg("clusterGraphName")
        )
        .def("getClusterGraphGenes",
            &ExpressionMatrix::getClusterGraphGenes,
-           "Get the gene ids of the genes used by a cluster graph.",
+           "Returns a list of the ids of the genes used to create a cluster graph. ",
            arg("clusterGraphName")
        )
        .def("getClusterCells",
            &ExpressionMatrix::getClusterCells,
-           "Get the cell ids of a cluster.",
+           "Returns a list of the cell ids for the cells a cluster. "
+           "The cluster is specified using the name of the cluster graph it belongs to, "
+           "and its cluster id within that cluster graph. ",
            arg("clusterGraphName"),
            arg("clusterId")
        )
        .def("getClusterAverageExpression",
            &ExpressionMatrix::getClusterAverageExpression,
-           "Get L2-normalized average gene expression for a cluster.",
+           "Return the average, L2-normalized, gene expression of a cluster. "
+           "The cluster is specified using the name of the cluster graph it belongs to, "
+           "and its cluster id within that cluster graph. "
+           "The values returned correspond one on one to the gene ids "
+           "returned by :py:func:`ExpressionMatrix2.ExpressionMatrix.getClusterGraphGenes` for the same cluster graph. .",
            arg("clusterGraphName"),
            arg("clusterId")
        )
@@ -514,7 +688,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
                (const string&, const string&)
            )
            &ExpressionMatrix::createMetaDataFromClusterGraph,
-           "Create meta data from the cluster ids stored in a ClusterGraph.",
+           "Creates meta data from the cluster ids stored in a cluster graph by "
+           "storing the cluster ids in the specified cluster graph into a cell meta data field.",
            arg("clusterGraphName"),
            arg("metaDataName")
        )
@@ -524,7 +699,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        // Run the http server.
        .def("explore",
            &ExpressionMatrix::explore,
-           "Run the http server.",
+           "Starts an http server that can be used, in conjunction with a Web browser, "
+           "to interact with the ExpressionMatrix object. ",
            arg("serverParameters")
        )
 
@@ -579,19 +755,32 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
     class_<CellGraphVertexInfo>(
         module,
         "CellGraphVertexInfo",
-        "Class used to store information about a vertex of a cell graph.")
-        .def(init<>())
-        .def_readonly("cellId", &CellGraphVertexInfo::cellId)
-        .def("x", &CellGraphVertexInfo::x)
-        .def("y", &CellGraphVertexInfo::y)
+        "This class is used to give the Python code access to information "
+        "about the vertices of a cell similarity graph. "
+        "An object of this type contains information for a single vertex.")
+        .def(init<>(), "This constructor creates an uninitialized CellGraphVertexInfo object.")
+        .def_readonly("cellId", &CellGraphVertexInfo::cellId,
+            "This data member contains the cell id of the cell corresponding to the vertex. ")
+        .def("x", &CellGraphVertexInfo::x,
+            "Returns the x coordinate of the vertex in the two-dimensional layout "
+            "of the graph the vertex belongs to. ")
+        .def("y", &CellGraphVertexInfo::y,
+            "Returns the y coordinate of the vertex in the two-dimensional layout "
+            "of the graph the vertex belongs to. ")
         ;
+
 
 
     // Enum class NormalizationMethod.
     enum_<NormalizationMethod>(
         module,
         "NormalizationMethod",
-        "Various ways to normalize gene expressions.")
+        "Various ways to normalize gene expressions.\n\n"
+        "- none: no normalization.\n"
+        "- L1: L1 normalization (sum of values is 1).\n"
+        "- L2: L2 normalization (sum of squares of values is 1).\n"
+        "- Invalid: invalid normalization.\n"
+        )
         .value(normalizationMethodToShortString(NormalizationMethod::None).c_str(),       NormalizationMethod::None)
         .value(normalizationMethodToShortString(NormalizationMethod::L1).c_str(),         NormalizationMethod::L1)
         .value(normalizationMethodToShortString(NormalizationMethod::L2).c_str(),         NormalizationMethod::L2)
@@ -603,14 +792,17 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
     // Some non-member functions used only for testing or debugging.
     module.def("testMemoryMappedVector",
         testMemoryMappedVector,
-        "For debugging/testing use only."
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
         );
     module.def("testMemoryMappedVectorOfLists",
         testMemoryMappedVectorOfLists,
-        "For debugging/testing use only."
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
         );
     module.def("testMemoryMappedStringTable",
         testMemoryMappedStringTable,
-        "For debugging/testing use only."
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
         );
 }

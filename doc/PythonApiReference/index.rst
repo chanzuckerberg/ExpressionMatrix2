@@ -1,8 +1,3 @@
-.. ExpressionMatrix2 documentation master file, created by
-   sphinx-quickstart on Fri Oct 27 12:48:09 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ExpressionMatrix2 Python API
 ==========================================================
 
@@ -14,7 +9,7 @@ ExpressionMatrix2 Python API
 .. automodule:: ExpressionMatrix2
 
 This page contains reference information for the Python API.
-See `here <../../../index.html>`_ for the complete documentation.
+See `here <../../../index.html>`__ for the complete documentation.
 
 
 
@@ -25,7 +20,6 @@ CellGraphVertexInfo
    :members: 
    
    .. automethod:: __init__
-   .. autoattribute:: cellId
 
 
 
