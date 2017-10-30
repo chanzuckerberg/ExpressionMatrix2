@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Reference information for the ExpressionMatrix2 Python API &mdash; ExpressionMatrix2  documentation</title>
+    <title>ExpressionMatrix2 Python API &mdash; ExpressionMatrix2  documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -44,18 +44,30 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="reference-information-for-the-expressionmatrix2-python-api">
-<h1>Reference information for the ExpressionMatrix2 Python API<a class="headerlink" href="#reference-information-for-the-expressionmatrix2-python-api" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="expressionmatrix2-python-api">
+<h1>ExpressionMatrix2 Python API<a class="headerlink" href="#expressionmatrix2-python-api" title="Permalink to this headline">¶</a></h1>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul class="simple">
 </ul>
 </div>
 <span class="target" id="module-ExpressionMatrix2"></span><p>Software for analysis, visualization, and clustering of gene expression data from single-cell RNA sequencing.</p>
+<div class="section" id="cellgraphvertexinfo">
+<h2>CellGraphVertexInfo<a class="headerlink" href="#cellgraphvertexinfo" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">CellGraphVertexInfo</code><a class="headerlink" href="#ExpressionMatrix2.CellGraphVertexInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class used to store information about a vertex of a cell graph.</p>
+<dl class="method">
+<dt id="ExpressionMatrix2.CellGraphVertexInfo.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.CellGraphVertexInfo</em><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.CellGraphVertexInfo.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.CellGraphVertexInfo.cellId">
+<code class="descname">cellId</code><a class="headerlink" href="#ExpressionMatrix2.CellGraphVertexInfo.cellId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ExpressionMatrix2.CellGraphVertexInfo.x">
 <code class="descname">x</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.CellGraphVertexInfo</em><span class="sig-paren">)</span> &rarr; float<a class="headerlink" href="#ExpressionMatrix2.CellGraphVertexInfo.x" title="Permalink to this definition">¶</a></dt>
@@ -68,10 +80,70 @@
 
 </dd></dl>
 
+</div>
+<div class="section" id="clustergraphcreationparameters">
+<h2>ClusterGraphCreationParameters<a class="headerlink" href="#clustergraphcreationparameters" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters">
+<em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ClusterGraphCreationParameters</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ClusterGraphCreationParameters</em><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.stableIterationCount">
+<code class="descname">stableIterationCount</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.stableIterationCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.maxIterationCount">
+<code class="descname">maxIterationCount</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.maxIterationCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.seed">
+<code class="descname">seed</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.seed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.minClusterSize">
+<code class="descname">minClusterSize</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.minClusterSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.maxConnectivity">
+<code class="descname">maxConnectivity</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.maxConnectivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.similarityThreshold">
+<code class="descname">similarityThreshold</code><a class="headerlink" href="#ExpressionMatrix2.ClusterGraphCreationParameters.similarityThreshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="expressionmatrix">
+<h2>ExpressionMatrix<a class="headerlink" href="#expressionmatrix" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ExpressionMatrix2.ExpressionMatrix">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ExpressionMatrix</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Top level object used to store and manipulate an expression matrix containing information on its genes and cells and many related data structures.</p>
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrix.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, parameters: ChanZuckerberg::ExpressionMatrix2::ExpressionMatrixCreationParameters) -&gt; None</li>
+</ol>
+<p>Construct a new, empty ExpressionMatrix.</p>
+<ol class="arabic simple" start="2">
+<li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, allowReadOnly: bool=False) -&gt; None</li>
+</ol>
+<p>Access an existing ExpressionMatrix.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCell">
 <code class="descname">addCell</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>jsonString: str</em><span class="sig-paren">)</span> &rarr; int<a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrix.addCell" title="Permalink to this definition">¶</a></dt>
@@ -438,38 +510,71 @@
 <dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ExpressionMatrixCreationParameters</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class used to store creation parameters for a new expression matrix.</p>
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrixCreationParameters</em><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters.geneCapacity">
+<code class="descname">geneCapacity</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters.geneCapacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters.cellCapacity">
+<code class="descname">cellCapacity</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters.cellCapacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters.cellMetaDataNameCapacity">
+<code class="descname">cellMetaDataNameCapacity</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters.cellMetaDataNameCapacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ExpressionMatrixCreationParameters.cellMetaDataValueCapacity">
+<code class="descname">cellMetaDataValueCapacity</code><a class="headerlink" href="#ExpressionMatrix2.ExpressionMatrixCreationParameters.cellMetaDataValueCapacity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
+</div>
+<div class="section" id="normalizationmethod">
+<h2>NormalizationMethod<a class="headerlink" href="#normalizationmethod" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="ExpressionMatrix2.NormalizationMethod">
 <em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">NormalizationMethod</code><a class="headerlink" href="#ExpressionMatrix2.NormalizationMethod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Various ways to normalize gene expressions.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ExpressionMatrix2.testMemoryMappedStringTable">
-<code class="descclassname">ExpressionMatrix2.</code><code class="descname">testMemoryMappedStringTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.testMemoryMappedStringTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>For debugging/testing use only.</p>
+</div>
+<div class="section" id="serverparameters">
+<h2>ServerParameters<a class="headerlink" href="#serverparameters" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ExpressionMatrix2.ServerParameters">
+<em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ServerParameters</code><a class="headerlink" href="#ExpressionMatrix2.ServerParameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="ExpressionMatrix2.ServerParameters.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ServerParameters</em><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.ServerParameters.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ServerParameters.port">
+<code class="descname">port</code><a class="headerlink" href="#ExpressionMatrix2.ServerParameters.port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ExpressionMatrix2.ServerParameters.docDirectory">
+<code class="descname">docDirectory</code><a class="headerlink" href="#ExpressionMatrix2.ServerParameters.docDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
-<dl class="function">
-<dt id="ExpressionMatrix2.testMemoryMappedVector">
-<code class="descclassname">ExpressionMatrix2.</code><code class="descname">testMemoryMappedVector</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.testMemoryMappedVector" title="Permalink to this definition">¶</a></dt>
-<dd><p>For debugging/testing use only.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ExpressionMatrix2.testMemoryMappedVectorOfLists">
-<code class="descclassname">ExpressionMatrix2.</code><code class="descname">testMemoryMappedVectorOfLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#ExpressionMatrix2.testMemoryMappedVectorOfLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>For debugging/testing use only.</p>
-</dd></dl>
-
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
 </ul>
 </div>
@@ -482,7 +587,14 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Reference information for the ExpressionMatrix2 Python API</a></li>
+<li><a class="reference internal" href="#">ExpressionMatrix2 Python API</a><ul>
+<li><a class="reference internal" href="#cellgraphvertexinfo">CellGraphVertexInfo</a></li>
+<li><a class="reference internal" href="#clustergraphcreationparameters">ClusterGraphCreationParameters</a></li>
+<li><a class="reference internal" href="#expressionmatrix">ExpressionMatrix</a></li>
+<li><a class="reference internal" href="#normalizationmethod">NormalizationMethod</a></li>
+<li><a class="reference internal" href="#serverparameters">ServerParameters</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 

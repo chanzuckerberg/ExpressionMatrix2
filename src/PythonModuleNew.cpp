@@ -559,6 +559,9 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         .def_readwrite("stableIterationCount", &ClusterGraphCreationParameters::stableIterationCount)
         .def_readwrite("maxIterationCount", &ClusterGraphCreationParameters::maxIterationCount)
         .def_readwrite("seed", &ClusterGraphCreationParameters::seed)
+        .def_readwrite("minClusterSize", &ClusterGraphCreationParameters::minClusterSize)
+        .def_readwrite("maxConnectivity", &ClusterGraphCreationParameters::maxConnectivity)
+        .def_readwrite("similarityThreshold", &ClusterGraphCreationParameters::similarityThreshold)
         ;
 
 

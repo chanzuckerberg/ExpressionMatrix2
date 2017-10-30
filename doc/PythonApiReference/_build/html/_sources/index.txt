@@ -3,17 +3,83 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Reference information for the ExpressionMatrix2 Python API
-=============================================
+ExpressionMatrix2 Python API
+============================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: ExpressionMatrix2
-   :members:
 
+
+.. automodule:: ExpressionMatrix2
+
+
+
+CellGraphVertexInfo
+-------------------------
+
+.. autoclass:: CellGraphVertexInfo
+   :members: 
+   
+   .. automethod:: __init__
+   .. autoattribute:: cellId
+
+
+
+ClusterGraphCreationParameters
+------------------------------------
+
+.. autoclass:: ClusterGraphCreationParameters
+   :members: 
+   
+   .. automethod:: __init__
+   .. autoattribute:: stableIterationCount 
+   .. autoattribute:: maxIterationCount  
+   .. autoattribute:: seed   
+   .. autoattribute:: minClusterSize    
+   .. autoattribute:: maxConnectivity    
+   .. autoattribute:: similarityThreshold    
+
+
+
+ExpressionMatrix
+----------------------
+
+.. autoclass:: ExpressionMatrix
+   :members: 
+   
+   .. automethod:: __init__
+
+.. autoclass:: ExpressionMatrixCreationParameters
+   :members: 
+   
+   .. automethod:: __init__
+   .. autoattribute:: geneCapacity  
+   .. autoattribute:: cellCapacity   
+   .. autoattribute:: cellMetaDataNameCapacity    
+   .. autoattribute:: cellMetaDataValueCapacity     
+
+
+
+NormalizationMethod
+-------------------------
+
+.. autoclass:: NormalizationMethod
+   :members: 
+
+
+
+ServerParameters
+----------------------
+
+.. autoclass:: ServerParameters
+   :members: 
+   
+   .. automethod:: __init__
+   .. autoattribute:: port  
+   .. autoattribute:: docDirectory    
 
 
 
@@ -21,6 +87,5 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
