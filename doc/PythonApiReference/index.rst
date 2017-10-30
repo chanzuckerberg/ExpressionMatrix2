@@ -1,6 +1,13 @@
 ExpressionMatrix2 Python API
 ==========================================================
 
+Software for analysis, visualization, and clustering
+of gene expression data from single-cell RNA sequencing.
+
+This page contains reference information for the Python API.
+See `here <../../../index.html>`__ for the complete documentation.
+
+
 .. toctree::
    :maxdepth: 2
 
@@ -8,8 +15,6 @@ ExpressionMatrix2 Python API
 
 .. automodule:: ExpressionMatrix2
 
-This page contains reference information for the Python API.
-See `here <../../../index.html>`__ for the complete documentation.
 
 
 

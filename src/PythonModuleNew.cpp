@@ -21,9 +21,11 @@ using namespace pybind11;
 
 PYBIND11_MODULE(ExpressionMatrix2, module)
 {
+    /*
     module.doc() =
         "Software for analysis, visualization, and clustering "
         "of gene expression data from single-cell RNA sequencing.";
+    */
 
     // Class ExpressionMatrix.
     class_<ExpressionMatrix>(
