@@ -4,9 +4,7 @@
    contain the root `toctree` directive.
 
 ExpressionMatrix2 Python API
-============================
-
-Contents:
+==========================================================
 
 .. toctree::
    :maxdepth: 2
@@ -14,6 +12,9 @@ Contents:
 
 
 .. automodule:: ExpressionMatrix2
+
+This page contains reference information for the Python API.
+See `here <../../../index.html>`_ for the complete documentation.
 
 
 
