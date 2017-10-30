@@ -19,7 +19,7 @@ See `here <../../../index.html>`__ for the complete documentation.
 
 
 CellGraphVertexInfo
--------------------------
+-------------------
 
 .. autoclass:: CellGraphVertexInfo
    :members: 
@@ -29,7 +29,7 @@ CellGraphVertexInfo
 
 
 ClusterGraphCreationParameters
-------------------------------------
+------------------------------
 
 .. autoclass:: ClusterGraphCreationParameters
    :members: 
@@ -45,12 +45,17 @@ ClusterGraphCreationParameters
 
 
 ExpressionMatrix
-----------------------
+----------------
 
 .. autoclass:: ExpressionMatrix
    :members: 
    
    .. automethod:: __init__
+
+
+
+ExpressionMatrixCreationParameters
+----------------------------------
 
 .. autoclass:: ExpressionMatrixCreationParameters
    :members: 
@@ -64,7 +69,7 @@ ExpressionMatrix
 
 
 NormalizationMethod
--------------------------
+-------------------
 
 .. autoclass:: NormalizationMethod
    :members: 
@@ -72,7 +77,7 @@ NormalizationMethod
 
 
 ServerParameters
-----------------------
+----------------
 
 .. autoclass:: ServerParameters
    :members: 
