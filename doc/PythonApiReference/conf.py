@@ -204,7 +204,7 @@ html_show_copyright = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'ExpressionMatrix2doc'
 
-html_add_permalinks = False
+html_add_permalinks = ''
 
 # -- Options for LaTeX output ---------------------------------------------
 
