@@ -2,6 +2,8 @@
 
 This repository contains software for analysis of gene expression data from single-cell RNA sequencing developed at [Chan-Zuckerberg Initiative](https://chanzuckerberg.com).
 
+Documentation for the latest version of this software is available online through [GitHub Pages](https://chanzuckerberg.github.io/ExpressionMatrix2/doc/index.html), or you can use the directions below to obtain documentation for any previous release.  
+
 This code is at a prototype, pre-alpha stage. It is hoped that it can be useful in its current form, but it is likely that it contains bugs or other errors that impact its ability to give meaningful results. In addition, a validation of this software has not been performed. This prototype code is released in open source form with an MIT license (see the LICENSE file in the top level directory of the repository). 
 
 ## Getting started
