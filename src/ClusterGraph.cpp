@@ -27,6 +27,26 @@ using namespace ExpressionMatrix2;
 #include "utility.hpp"
 
 
+ClusterGraphCreationParameters::ClusterGraphCreationParameters(
+    size_t stableIterationCount,            // Stop after this many iterations without changes.
+    size_t maxIterationCount,               // Stop after this many iterations no matter what.
+    size_t seed,                            // To initialize label propagation algorithm.
+    size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
+    size_t maxConnectivity,
+    double similarityThreshold              // For edges of the cluster graph.
+    ) :
+    stableIterationCount(stableIterationCount),
+    maxIterationCount(maxIterationCount),
+    seed(seed),
+    minClusterSize(minClusterSize),
+    maxConnectivity(maxConnectivity),
+    similarityThreshold(similarityThreshold)
+
+{
+
+}
+
+
 
 // Create the ClusterGraph from the CellGraph.
 // This uses the clusterId stored in each CellGraphVertex.

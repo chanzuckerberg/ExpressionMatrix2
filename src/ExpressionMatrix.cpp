@@ -2100,6 +2100,21 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(
 
 // Create a new named ClusterGraph by running clustering on an existing CellGraph.
 void ExpressionMatrix::createClusterGraph(
+    const string& cellGraphName,            // The name of the cell graph to do clustering on.
+    const string& clusterGraphName,         // The name of the ClusterGraph to be created.
+    size_t stableIterationCount,            // Stop after this many iterations without changes.
+    size_t maxIterationCount,               // Stop after this many iterations no matter what.
+    size_t seed,                            // To initialize label propagation algorithm.
+    size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
+    size_t maxConnectivity,
+    double similarityThreshold              // For edges of the cluster graph.
+ )
+{
+    ClusterGraphCreationParameters parameters(
+        stableIterationCount, maxIterationCount, seed, minClusterSize, maxConnectivity, similarityThreshold);
+    createClusterGraph(cellGraphName, parameters, clusterGraphName);
+}
+void ExpressionMatrix::createClusterGraph(
     const string& cellGraphName,
     const ClusterGraphCreationParameters& clusterGraphCreationParameters,
     const string& clusterGraphName)

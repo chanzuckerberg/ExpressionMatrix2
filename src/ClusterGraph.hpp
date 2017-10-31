@@ -50,6 +50,16 @@ public:
     size_t minClusterSize = 100;        // Minimum number of cells for a cluster to be retained.
     size_t maxConnectivity = 3;
     double similarityThreshold = 0.5;   // For edges of the cluster graph.
+
+    ClusterGraphCreationParameters() {}
+    ClusterGraphCreationParameters(
+        size_t stableIterationCount,
+        size_t maxIterationCount,
+        size_t seed,
+        size_t minClusterSize,
+        size_t maxConnectivity,
+        double similarityThreshold);
+
 };
 
 

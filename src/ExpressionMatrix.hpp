@@ -956,6 +956,16 @@ public:
         const ClusterGraphCreationParameters&,  // Parameters for the clustering algorithm.
         const string& clusterGraphName          // The name of the ClusterGraph to be created.
      );
+    void createClusterGraph(
+        const string& cellGraphName,            // The name of the cell graph to do clustering on.
+        const string& clusterGraphName,         // The name of the ClusterGraph to be created.
+        size_t stableIterationCount,            // Stop after this many iterations without changes.
+        size_t maxIterationCount,               // Stop after this many iterations no matter what.
+        size_t seed,                            // To initialize label propagation algorithm.
+        size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
+        size_t maxConnectivity,
+        double similarityThreshold              // For edges of the cluster graph.
+     );
 
     // Compute layouts for a named cluster graph.
     void computeClusterGraphLayout(const string& clusterGraphName, size_t timeoutSeconds, bool withLabels);

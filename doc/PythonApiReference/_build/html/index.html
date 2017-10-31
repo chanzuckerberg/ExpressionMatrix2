@@ -84,49 +84,6 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 </div>
-<div class="section" id="clustergraphcreationparameters">
-<h2>ClusterGraphCreationParameters</h2>
-<dl class="class">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters">
-<em class="property">class </em><code class="descclassname">ExpressionMatrix2.</code><code class="descname">ClusterGraphCreationParameters</code></dt>
-<dd><dl class="method">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ClusterGraphCreationParameters</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.stableIterationCount">
-<code class="descname">stableIterationCount</code></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.maxIterationCount">
-<code class="descname">maxIterationCount</code></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.seed">
-<code class="descname">seed</code></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.minClusterSize">
-<code class="descname">minClusterSize</code></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.maxConnectivity">
-<code class="descname">maxConnectivity</code></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ExpressionMatrix2.ClusterGraphCreationParameters.similarityThreshold">
-<code class="descname">similarityThreshold</code></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="expressionmatrix">
 <h2>ExpressionMatrix</h2>
 <dl class="class">
@@ -281,7 +238,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createClusterGraph">
-<code class="descname">createClusterGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellGraphName: str</em>, <em>clusterGraphCreationParameters: ChanZuckerberg::ExpressionMatrix2::ClusterGraphCreationParameters</em>, <em>clusterGraphName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
+<code class="descname">createClusterGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellGraphName: str</em>, <em>clusterGraphName: str</em>, <em>stableIterationCount: int=3</em>, <em>maxIterationCount: int=100</em>, <em>seed: int=231</em>, <em>minClusterSize: int=100</em>, <em>k: int=3</em>, <em>similarityThreshold: float=0.5</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Creates a new cluster graph by running label propagation clustering on an existing cell graph. A cluster graph is an undirected graph in which each vertex represents a cluster found in a cell graph. An edge between two vertices is created if the corresponding clusters have average expression vectors that are sufficiently similar. In areas of high connectivity, only the edges with the highest similarity for each cluster are kept.</p>
 </dd></dl>
 
@@ -544,7 +501,6 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
   <ul>
 <li><a class="reference internal" href="#">ExpressionMatrix2 Python API</a><ul>
 <li><a class="reference internal" href="#cellgraphvertexinfo">CellGraphVertexInfo</a></li>
-<li><a class="reference internal" href="#clustergraphcreationparameters">ClusterGraphCreationParameters</a></li>
 <li><a class="reference internal" href="#expressionmatrix">ExpressionMatrix</a></li>
 <li><a class="reference internal" href="#normalizationmethod">NormalizationMethod</a></li>
 </ul>

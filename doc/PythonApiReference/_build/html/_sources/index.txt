@@ -28,22 +28,6 @@ CellGraphVertexInfo
 
 
 
-ClusterGraphCreationParameters
-------------------------------
-
-.. autoclass:: ClusterGraphCreationParameters
-   :members: 
-   
-   .. automethod:: __init__
-   .. autoattribute:: stableIterationCount 
-   .. autoattribute:: maxIterationCount  
-   .. autoattribute:: seed   
-   .. autoattribute:: minClusterSize    
-   .. autoattribute:: maxConnectivity    
-   .. autoattribute:: similarityThreshold    
-
-
-
 ExpressionMatrix
 ----------------
 

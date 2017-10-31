@@ -641,7 +641,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "createClusterGraph",
            (
                void (ExpressionMatrix::*)
-               (const string&, const ClusterGraphCreationParameters&, const string&)
+               (const string&, const string&, size_t, size_t, size_t, size_t, size_t, double)
            )
            &ExpressionMatrix::createClusterGraph,
            "Creates a new cluster graph by running label propagation clustering "
@@ -653,8 +653,13 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "In areas of high connectivity, only the edges "
            "with the highest similarity for each cluster are kept. ",
            arg("cellGraphName"),
-           arg("clusterGraphCreationParameters"),
-           arg("clusterGraphName")
+           arg("clusterGraphName"),
+           arg("stableIterationCount") = 3,
+           arg("maxIterationCount") = 100,
+           arg("seed") = 231,
+           arg("minClusterSize") = 100,
+           arg("k") = 3,
+           arg("similarityThreshold") = 0.5
        )
        .def("getClusterGraphVertices",
            &ExpressionMatrix::getClusterGraphVertices,
@@ -722,19 +727,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "For debugging/testing use only."
        )
        ;
-
-
-
-    // Class ClusterGraphCreationParameters.
-    class_<ClusterGraphCreationParameters>(module, "ClusterGraphCreationParameters")
-        .def(init<>())
-        .def_readwrite("stableIterationCount", &ClusterGraphCreationParameters::stableIterationCount)
-        .def_readwrite("maxIterationCount", &ClusterGraphCreationParameters::maxIterationCount)
-        .def_readwrite("seed", &ClusterGraphCreationParameters::seed)
-        .def_readwrite("minClusterSize", &ClusterGraphCreationParameters::minClusterSize)
-        .def_readwrite("maxConnectivity", &ClusterGraphCreationParameters::maxConnectivity)
-        .def_readwrite("similarityThreshold", &ClusterGraphCreationParameters::similarityThreshold)
-        ;
 
 
 
