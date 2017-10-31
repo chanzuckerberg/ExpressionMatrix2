@@ -123,7 +123,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "See `here <../../../PythonApi.html#addCellsFromHdf5>`__ for more information. ",
            arg("fileName"),
            arg("cellNamePrefix"),
-           arg("cellMetaDataArgument"),
+           arg("cellMetaData"),
            arg("totalExpressionCountThreshold")
        )
        .def("addCellsFromBioHub1",
