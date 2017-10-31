@@ -182,7 +182,18 @@ void ExpressionMatrix::processRequest(
     }
 }
 
+ServerParameters::ServerParameters(uint16_t port, string docDirectory) :
+    port(port),
+    docDirectory(docDirectory)
+{
+}
 
+void ExpressionMatrix::explore(uint16_t port, const string& docDirectory)
+{
+    ServerParameters serverParameters(port, docDirectory);
+    explore(serverParameters);
+
+}
 
 void ExpressionMatrix::explore(const ServerParameters& serverParameters)
 {

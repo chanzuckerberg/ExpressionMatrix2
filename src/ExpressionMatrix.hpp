@@ -84,6 +84,7 @@ class ChanZuckerberg::ExpressionMatrix2::ServerParameters {
 public:
     uint16_t port = 17100;  // The port number to listen to.
     string docDirectory;    // The directory containing the documentation (optional).
+    ServerParameters(uint16_t port, string docDirectory);
 };
 
 
@@ -563,6 +564,7 @@ private:
     // Functions used to implement HttpServer functionality.
 public:
     void explore(const ServerParameters& serverParameters);
+    void explore(uint16_t port, const string& docDirectory);
 private:
     ServerParameters serverParameters;
     void processRequest(const vector<string>& request, ostream& html);

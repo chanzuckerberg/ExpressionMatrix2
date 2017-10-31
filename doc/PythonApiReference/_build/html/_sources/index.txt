@@ -76,18 +76,6 @@ NormalizationMethod
 
 
 
-ServerParameters
-----------------
-
-.. autoclass:: ServerParameters
-   :members: 
-   
-   .. automethod:: __init__
-   .. autoattribute:: port  
-   .. autoattribute:: docDirectory    
-
-
-
 Indices and tables
 ==================
 

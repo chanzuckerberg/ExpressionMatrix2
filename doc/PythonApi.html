@@ -360,14 +360,11 @@ Function <code>findSimilarPairs2</code>, under development, uses Locality Sensit
 <p> See <a href="Server.html">here</a> for a description of functionality offered by the http server. Before you can use that functionality, you need to start the server using Python code like the one shown below:
 
 <pre>
-serverParameters = ExpressionMatrix2.ServerParameters()
-serverParameters.port = 17100
-serverParameters.docDirectory = pathToDocumentationDirectory
-e.explore(serverParameters)
+e.explore(port = 17100, docDirectory = pathToDocumentationDirectory)
 </pre>
 
 <p>
-Specifying the port number is optional. If not specified, the port number defaults to 17100. It is best to use high port numbers (between 1025 and 65535). The call to <code>explore</code> will fail if the specified port number is already in use in the system. If you want to have http servers running for multiple runs, each run will need to use a different port number. 
+Specifying the port number is optional. If not specified, the port number defaults to 17100. It is best to use high port numbers (between 1025 and 65535). If the specified port number is already in use in the system, the next port number will be tried. If you want to have http servers running for multiple runs, each run will use a different port number. 
 
 <p>
 Occasionally, even after a server is interrupted, the port the server was using remains in use for a short period of time (a few seconds or up to a few minutes). This behavior is dictated by the TCP/IP stack and cannot be overridden.

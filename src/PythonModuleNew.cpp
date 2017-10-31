@@ -513,11 +513,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "for a few thousand cells or several hours for a few tens of thousands cells. "
            "When the number of cells exceeds a few thousands, "
            "it is more practical to perform an approximate computation using findSimilarPairs3. ",
-           arg("geneSetName"),
-           arg("cellSetName"),
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
-           arg("k"),
-           arg("similarityThreshold")
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.5
        )
        .def("findSimilarPairs1",
            &ExpressionMatrix::findSimilarPairs1,
@@ -551,7 +551,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
-           arg("k") = 20,
+           arg("k") = 100,
            arg("similarityThreshold") = 0.5,
            arg("lshCount") = 1024,
            arg("seed") = 231
@@ -700,10 +700,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
        // Run the http server.
        .def("explore",
+           (
+               void (ExpressionMatrix::*)
+               (uint16_t, const string&)
+           )
            &ExpressionMatrix::explore,
            "Starts an http server that can be used, in conjunction with a Web browser, "
            "to interact with the ExpressionMatrix object. ",
-           arg("serverParameters")
+           arg("port") = 17100,
+           arg("docDirectory") = ""
        )
 
 
@@ -740,15 +745,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         .def_readwrite("minClusterSize", &ClusterGraphCreationParameters::minClusterSize)
         .def_readwrite("maxConnectivity", &ClusterGraphCreationParameters::maxConnectivity)
         .def_readwrite("similarityThreshold", &ClusterGraphCreationParameters::similarityThreshold)
-        ;
-
-
-
-    // Class ServerParameters.
-    class_<ServerParameters>(module, "ServerParameters")
-        .def(init<>())
-        .def_readwrite("port", &ServerParameters::port)
-        .def_readwrite("docDirectory", &ServerParameters::docDirectory)
         ;
 
 
