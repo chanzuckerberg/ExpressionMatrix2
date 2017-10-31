@@ -622,7 +622,11 @@ void ExpressionMatrix::addCells(
             char* check = const_cast<char*>(countStringBegin + countString.size());
             const float count = strtof(countStringBegin, &check);
             if(check == countStringBegin) {
-                throw runtime_error("Invalid expression count " + countString + " encountered.");
+                throw runtime_error("Invalid expression count " +
+                    (countString.empty() ? "(empty)" : countString) +
+                    " encountered at line " +
+                    lexical_cast<string>(geneNamesInFile.size()+1) +
+                    " of file " + expressionCountsFileName);
             }
             counts[i].push_back(make_pair(geneId, count));
         }
