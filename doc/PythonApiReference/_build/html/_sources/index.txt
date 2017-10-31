@@ -54,20 +54,6 @@ ExpressionMatrix
 
 
 
-ExpressionMatrixCreationParameters
-----------------------------------
-
-.. autoclass:: ExpressionMatrixCreationParameters
-   :members: 
-   
-   .. automethod:: __init__
-   .. autoattribute:: geneCapacity  
-   .. autoattribute:: cellCapacity   
-   .. autoattribute:: cellMetaDataNameCapacity    
-   .. autoattribute:: cellMetaDataValueCapacity     
-
-
-
 NormalizationMethod
 -------------------
 

@@ -60,6 +60,13 @@ public:
     uint64_t cellCapacity = 1<<24;              // Controls the maximum number of cells.
     uint64_t cellMetaDataNameCapacity = 1<<16;  // Controls the maximum number of distinct cell meta data name strings.
     uint64_t cellMetaDataValueCapacity = 1<<28; // Controls the maximum number of distinct cell meta data value strings.
+
+    ExpressionMatrixCreationParameters(
+        uint64_t geneCapacity,
+        uint64_t cellCapacity,
+        uint64_t cellMetaDataNameCapacity,
+        uint64_t cellMetaDataValueCapacity
+        );
 };
 
 
@@ -84,6 +91,7 @@ class ChanZuckerberg::ExpressionMatrix2::ServerParameters {
 public:
     uint16_t port = 17100;  // The port number to listen to.
     string docDirectory;    // The directory containing the documentation (optional).
+    ServerParameters() {}
     ServerParameters(uint16_t port, string docDirectory);
 };
 
@@ -98,6 +106,13 @@ public:
     // it will be created. If the directory already exists, any previous
     // expression matrix stored in the directory will be overwritten by the new one.
     ExpressionMatrix(const string& directoryName, const ExpressionMatrixCreationParameters&);
+    ExpressionMatrix(
+        const string& directoryName,
+        uint64_t geneCapacity,
+        uint64_t cellCapacity,
+        uint64_t cellMetaDataNameCapacity,
+        uint64_t cellMetaDataValueCapacity
+    );
 
     // Access a previously created expression matrix stored in the specified directory.
     ExpressionMatrix(const string& directoryName, bool allowReadOnly);

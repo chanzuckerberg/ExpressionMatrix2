@@ -35,12 +35,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         "Most high level functionality is provided by this class. "
         "Binary data files for an instance of this class are stored "
         "in a single directory on disk. They are accessed as memory mapped files. ")
-       .def(init<string, ExpressionMatrixCreationParameters>(),
+       .def(init<string, uint64_t, uint64_t, uint64_t, uint64_t>(),
            "This constructor creates a new (empty) ExpressionMatrix object "
            "in the specified directory. "
            "The directory must not exists. ",
            arg("directoryName"),
-           arg("parameters")
+           arg("geneCapacity"),
+           arg("cellCapacity"),
+           arg("cellMetaDataNameCapacity"),
+           arg("cellMetaDataValueCapacity")
        )
        .def(init<string, bool>(),
            "This constructor can be used to access an existing ExpressionMatrix object "
@@ -719,20 +722,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "For debugging/testing use only."
        )
        ;
-
-
-
-    // Class ExpressionMatrixCreationParameters.
-    class_<ExpressionMatrixCreationParameters>(
-        module,
-        "ExpressionMatrixCreationParameters",
-        "Class used to store creation parameters for a new expression matrix.")
-        .def(init<>())
-        .def_readwrite("geneCapacity", &ExpressionMatrixCreationParameters::geneCapacity)
-        .def_readwrite("cellCapacity", &ExpressionMatrixCreationParameters::cellCapacity)
-        .def_readwrite("cellMetaDataNameCapacity", &ExpressionMatrixCreationParameters::cellMetaDataNameCapacity)
-        .def_readwrite("cellMetaDataValueCapacity", &ExpressionMatrixCreationParameters::cellMetaDataValueCapacity)
-        ;
 
 
 

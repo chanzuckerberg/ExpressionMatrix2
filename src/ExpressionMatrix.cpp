@@ -74,6 +74,33 @@ ExpressionMatrix::ExpressionMatrix(
     // Fill the table containing commands known to the http server.
     fillServerFunctionTable();
 }
+ExpressionMatrix::ExpressionMatrix(
+    const string& directoryName,
+    uint64_t geneCapacity,
+    uint64_t cellCapacity,
+    uint64_t cellMetaDataNameCapacity,
+    uint64_t cellMetaDataValueCapacity
+    ) :
+    ExpressionMatrix(
+        directoryName,
+        ExpressionMatrixCreationParameters(geneCapacity, cellCapacity, cellMetaDataNameCapacity, cellMetaDataValueCapacity))
+{
+}
+
+
+
+ExpressionMatrixCreationParameters::ExpressionMatrixCreationParameters(
+    uint64_t geneCapacity,
+    uint64_t cellCapacity,
+    uint64_t cellMetaDataNameCapacity,
+    uint64_t cellMetaDataValueCapacity
+    ) :
+    geneCapacity(geneCapacity),
+    cellCapacity(cellCapacity),
+    cellMetaDataNameCapacity(cellMetaDataNameCapacity),
+    cellMetaDataValueCapacity(cellMetaDataValueCapacity)
+{
+}
 
 
 
