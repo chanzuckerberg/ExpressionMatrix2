@@ -1,0 +1,28 @@
+This directory contains scripts that can be used to run
+the ExpressionMatrix2 software on expression data from the
+following paper:
+
+Darmanis et al., 2017, Cell Reports 21, 1399–1410, October 31, 2017
+
+https://doi.org/10.1016/j.celrep.2017.10.030
+
+
+
+The run requires the following input files:
+- GBM_raw_gene_counts.csv
+- GBM_metadata.csv
+
+The input files can be downloaded from here:
+https://www.dropbox.com/sh/e8c2m7wi87z1c5h/AAAuJIhJZEik9JcylNUyh08fa?dl=0
+
+
+
+Quick directions:
+ - Make sure you have a working environment for ExpressionMatrix2.
+ - Download to this directory the two input files listed above.
+ - Run input.py.
+ - Run compute1.py
+ - Optional: run runServer1.py, then point your browser to http://localhost:17100.
+
+For more detailed information, see the complete documentation in GitHub repository chanzuckerberg/ExpressionMatrix2.
+   
