@@ -177,6 +177,13 @@ template<class StringId> inline
 
             // The bucket is empty. This means that this string is not already in the table. Add it.
             stringId = StringId(strings.size());
+            if(stringId > hashTable.size()/2) {
+                throw runtime_error(
+                    hashTable.fileName +
+                    ": string table capacity " +
+                    lexical_cast<string>(hashTable.size()) +
+                    " exceeded.");
+            }
             strings.appendVector(s.begin(), s.end());
             return stringId;
 
