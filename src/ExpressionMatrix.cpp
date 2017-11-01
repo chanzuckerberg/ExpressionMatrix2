@@ -119,6 +119,9 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
     cellMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNamesUsageCount", allowReadOnly);
     cellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "CellExpressionCounts", allowReadOnly);
     cellSets.accessExisting(directoryName, allowReadOnly);
+    if(!cellSets.exists("AllCells")) {
+        throw runtime_error("Cell set \"AllCells\" is missing.");
+    }
 
 
 
