@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=../style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>ExpressionMatrix2 case study 1</h1>
+
+<p>
+In this case study I illustrate the functionality of <code>ExpressionMatrix2</code> software 
+on expression data from <a href=https://doi.org/10.1016/j.celrep.2017.10.030>
+Darmanis et al., 2017, "Single-Cell RNA-Seq Analysis of Infiltrating Neoplastic Cells at the Migrating Front of Human Glioblastoma", Cell Reports <i>21</i>, 1399-1410, October 31, 2017</a>. 
+Special thanks to the paper's authors for providing early access to their data.
+
+<p>
+This page contains detailed information sufficient to run the <code>ExpressionMatrix2</code> software on
+these data. It contains the following sections:
+
+<p>
+<a href=#GettingStarted>Getting started</a>
+
+<br>
+<a href=#SettingUp>Setting up the run</a>
+
+<br>
+<a href=#Downloading>Downloading input files</a>
+
+<br>
+<a href=#Input>Running the input phase of the case study</a>
+
+<p>
+Running this case study can serve as a useful introduction
+to performing a run on your own data.
+
+
+
+<br><br><h2 id=GettingStarted>Getting started</h2>
+<p>
+To begin, use <a href=../GettingStarted.html>these directions</a> to make sure you have access
+to the software and an environment in which it can run.
+When this step is completed, your environment variable <code>PYTHONPATH</code>
+will be set to a directory containing a working version of <code>ExpressionMatrix2.so</code>
+appropriate to your platform. 
+To run this case study you will need to use <code>ExpressionMatrix2</code> release 0.3.0 or later.
+
+
+
+<br><br><h2 id=SettingUp>Setting up the run</h2>
+
+<p>Make a copy of directory <code>tests/CaseStudy1</code> from the 
+<code>ExpressionMatrix2</code> release you are using.
+To avoid possible errors or problems due to 
+incompatibilities between releases,
+make sure to use the same release from which 
+your <code>ExpressionMatrix2.so</code> originates.
+In the rest of this page, I will call this copy the 
+<code>CaseStudy1</code> directory, and assume that all commands are
+run from here.
+
+At this point, your <code>CaseStudy1</code> directory
+only contains some Python scripts and a <code>README</code> file.
+
+
+
+<br><br><h2 id=Downloading>Downloading input files</h2>
+<p>
+The run requires the following input files, which can be downloaded from <a href="https://www.dropbox.com/sh/e8c2m7wi87z1c5h/AAAuJIhJZEik9JcylNUyh08fa?dl=0">here</a>:
+<ul>
+<li><code>GBM_raw_gene_counts.csv</code>
+<li><code>GBM_metadata.csv</code>
+</ul>
+When your downloading is complete, move these files to your 
+<code>CaseStudy1</code> directory. 
+These files will be accessed with read-only access.
+You may want to protect them by changing their access
+permissions accordingly, for example using the following command:
+<p>
+<code>chmod ugo-w *.csv</code>
+
+<p>
+The expression matrix in file <code>GBM_raw_gene_counts.csv</code>
+consists of raw read counts for each gene,
+which are integer numbers.
+However, the <code>ExpressionMatrix2</code> software
+accepts as input expression counts which are floating point numbers,
+for generality. This allows applying, if desired, pre-normalization steps
+and/or non-linear transformations of the raw read counts
+(for exampe, logarithmic transformations to emphasize the importance
+of low expression genes).
+   
+
+
+<br><br><h2 id=Input>Running the input phase of the case study</h2>
+<p>
+You can begin the run using the following command:
+<p>
+<code>./input.py</code>
+<p>
+This causes the <code>ExpressionMatrix2</code>
+software to read the input files and create a binary 
+representation of the expression matrix 
+in <code>GBM_raw_gene_counts.csv</code>
+and of the cell meta data in <code>GBM_metadata.csv</code>.
+This will run quickly, and the run time will be dominated by the
+time to read and parse input file <code>GBM_raw_gene_counts.csv</code>
+containing the expression matrix.
+
+<p> 
+After this, the two input files will no longer be needed.
+Instead, all required information is stored in binary files in the
+<code>data</code> directory that was created in your
+<code>CaseStudy1</code> directory.
+Additional commands to be run later will create
+additional binary files in the <code>data</code>
+directory that will contain various types of
+data structures used by the <code>ExpressionMatrix2</code> software.
+These binary files provide fast sequential or random access to
+the required data structures and are quite compact.
+At this point the size of the <code>data</code> directory
+is about half the size of the input csv files, and
+is dominated by the space necessary to store the expression
+matrix in a compact, sparse format
+(file <code>data/CellExpressionCounts.data</code>).
+
+<p>
+Note that, if for any reason you want to restart the run,
+you need to remove the <code>data</code>
+directory manally before running <code>input.py</code> again.
+This is a safety feature to prevent inadvertent 
+data loss.
+
+<p>
+The scripts in the <code>CaseStudy1</code> directory
+assume you are using a platform that uses Python 3.
+If you use Python 2, you need to use the following instead of the
+above command:
+<p>
+<code>python input.py</code>
+<p>
+This also applies to all invocations of Python scripts
+for the rest of the case study.
+
+
+
+</body>
+</html>
