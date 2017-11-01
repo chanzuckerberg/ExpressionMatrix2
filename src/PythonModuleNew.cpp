@@ -603,8 +603,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("graphName"),
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
-           arg("similarityThreshold"),
-           arg("k")
+           arg("similarityThreshold") = 0.5,
+           arg("k") = 20
        )
        .def("computeCellGraphLayout",
            &ExpressionMatrix::computeCellGraphLayout,

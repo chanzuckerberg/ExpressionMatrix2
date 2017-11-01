@@ -2,4 +2,5 @@
 *.d
 */ExpressionMatrix2.so
 *.tar
+doc/PythonApiReference/_build/doctrees/
 

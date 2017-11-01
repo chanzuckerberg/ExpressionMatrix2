@@ -190,7 +190,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createCellGraph">
-<code class="descname">createCellGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>similarityThreshold: float</em>, <em>k: int</em><span class="sig-paren">)</span> &rarr; None</dt>
+<code class="descname">createCellGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>graphName: str</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>similarityThreshold: float=0.5</em>, <em>k: int=20</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Create a new cell similarity graph. similarityThreshold is the minimum cell similarity required for an edge to be created. k controls the maximum connectivity of the graph. A cell graph or cell similarity graph is an undirected graph in which each vertex represents a cell. An edge between two vertices is created if the corresponding cells have similarity that exceeds a chosen threshold. In areas of high connectivity, only the edges with the highest similarity for each cell are kept.</p>
 </dd></dl>
 

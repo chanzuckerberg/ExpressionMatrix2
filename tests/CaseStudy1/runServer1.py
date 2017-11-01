@@ -10,9 +10,8 @@ e = ExpressionMatrix(directoryName = 'data')
 # recreated every time the server starts.
 e.createCellGraph(
     graphName = 'All', 
-    similarPairsName = 'Lsh',
-    similarityThreshold = 0.5,
-    k=20)
+    similarPairsName = 'Lsh'
+    )
 e.createClusterGraph(
     cellGraphName = 'All',
     clusterGraphName = 'All'
