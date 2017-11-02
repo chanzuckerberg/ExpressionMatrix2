@@ -247,7 +247,7 @@ void ExpressionMatrix::writeNavigation(ostream& html, const string& text, const 
     html <<
         "<button onclick=\"window.location = '" << url << "';\""
         " style='"
-        "background-color:LightCoral;"
+        "background-color:LightBlue;"
         "width:100px;"
         "height:50px;"
         "margin:3px;"

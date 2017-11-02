@@ -1,5 +1,5 @@
 * {
-font-family: sans-serif;
+font-family: Arial;
 }
 pre, code {
 font-family: courier;
@@ -8,13 +8,13 @@ p, input {
 font-size: 16px;
 }
 h1, h2, h3 {
-color: LightCoral;
+color: DarkSlateBlue;
 }
 table {
 border-collapse: collapse;
 }
 th, td {
-border: 2px solid LightCoral;
+border: 2px solid MediumSlateBlue;
 }
 th {
 font-weight: bold;
@@ -27,6 +27,6 @@ td.centered {
 text-align: center;
 }
 a {
-color: LightCoral;
+color: DarkSlateBlue;
 }
 

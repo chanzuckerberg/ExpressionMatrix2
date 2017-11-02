@@ -259,7 +259,7 @@ void HttpServer::writeStyle(ostream& html)
     html << R"%(
 <style>
     * {
-        font-family: sans-serif;
+        font-family: Arial;
     }
     pre {
         font-family: courier;
@@ -268,13 +268,13 @@ void HttpServer::writeStyle(ostream& html)
         font-size: 16px;
     }
     h1, h2, h3 {
-        color: LightCoral;
+        color: DarkSlateBlue;
     }
     table {
         border-collapse: collapse;
     }
     th, td {
-        border: 2px solid LightCoral;
+        border: 2px solid MediumSlateBlue;
     }
     th {
         font-weight: bold;
@@ -287,7 +287,7 @@ void HttpServer::writeStyle(ostream& html)
         text-align: center;
     }
     a {
-        color: LightCoral;
+        color: DarkSlateBlue;
     }
 </style>
     )%";
