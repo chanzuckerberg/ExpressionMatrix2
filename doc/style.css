@@ -29,4 +29,8 @@ text-align: center;
 a {
 color: DarkSlateBlue;
 }
+div.codeSnippet {
+background-color:Linen;
+display:inline-block;
+}
 

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=../style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Case study 1 script input.py</h1>
+
+<p>
+This script initializes the expression matrix from
+the data in the input files. 
+
+<div class=codeSnippet><pre>
+#!/usr/bin/python3
+</pre></div>
+<p>
+This line allows the script to be called directly from the shell,
+<code>
+"./input.py".
+</code>
+This assumes that you are on a platform that uses Python 3.
+If you are on a platform that uses Python 2, you instead need to 
+invoke the script as 
+<code>
+"python input.py".
+</code>
+
+
+<div class=codeSnippet><pre>
+from ExpressionMatrix2 import *
+</pre></div>
+<p>
+This makes the <code>ExpressionMatrix2</code> code accessible
+from Python, without the need to prefix it with a module name.
+This is not necessarily a good idea, particularly for a large script,
+but it does simplify the code a bit.
+<p>
+For this to work, <code>ExpressionMatrix2.so</code> must be located in
+a directory where the Python interpreter can find it. 
+There are several ways to do that, the simplest of which consists
+of simply setting environment variable <code>PYTHONPATH</code>
+to the name of the directory that contains <code>ExpressionMatrix2.so</code>.
+
+
+<div class=codeSnippet><pre>
+# Create a new, empty expression matrix.
+# The data directory must not exist.
+e = ExpressionMatrix(
+    directoryName = 'data', 
+    geneCapacity = 100000,
+    cellCapacity = 10000,
+    cellMetaDataNameCapacity = 10000,
+    cellMetaDataValueCapacity = 1000000
+    )
+</pre></div>
+<p>
+This creates the new <code>ExpressionMatrix</code> object which,
+at this point, is empty (that is, it does not contain any genes or cells).
+The specified directory name must not exists, and is used
+to store all subsequent data structures needed for this 
+<code>ExpressionMatrix</code> object.
+<p>
+The four capacity arguments control the capacity of various
+hash tables used to store genes names, cell names, 
+and cell meta names and values. 
+To avoid performance degradation in the hash tables, make sure to 
+set the capacities to at least a factor of two greater
+that what you think you will need. 
+There is currently no automatic rehashing of the tables,
+so if one of the capacities is exceeded the run will have to
+be restarted from scratch with larger capacities.
+
+See <a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.__init__>here</a> for reference information on
+the <code>ExpressionMatrix</code> constructors.
+
+
+<div class=codeSnippet><pre>
+# Add the cells.
+e.addCells(
+    expressionCountsFileName = 'GBM_raw_gene_counts.csv',
+    expressionCountsFileSeparators = ' ', 
+    cellMetaDataFileName = 'GBM_metadata.csv',
+    cellMetaDataFileSeparators = ' ' 
+    )
+</pre></div>
+<p>
+This causes the expression data and the cell meta data contained
+in the input files to be stored in the <code>ExpressionMatrix</code>
+object (that is, in binary files in the <code>data</code> directory).
+See 
+<a href=../PythonApi.html#addCells>here</a> 
+for more information on the 
+<a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.addCells><code>addCells</code></a> call.
+
+<div class=codeSnippet><pre>
+<pre>
+print('Input completed.')
+</pre></div>
+<p>
+Self-explanatory.
+
+</body>
+</html>
+
