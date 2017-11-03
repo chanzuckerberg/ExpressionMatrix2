@@ -1,6 +1,7 @@
 # ExpressionMatrix2
 
-This repository contains software for analysis of gene expression data from single-cell RNA sequencing developed at [Chan-Zuckerberg Initiative](https://chanzuckerberg.com).
+This repository contains software for analysis, visualization, and clustering of gene expression data from single-cell RNA sequencing developed at [Chan-Zuckerberg Initiative](https://chanzuckerberg.com).
+It scales favorably to large numbers of cells thank to its use of Locality-Sensitive Hashing (LSH), and was successfully used, without downsampling, on a data set with over one million cells.
 
 Documentation for the latest version of this software is available online through [GitHub Pages](https://chanzuckerberg.github.io/ExpressionMatrix2/doc/index.html), or you can use the directions below to obtain documentation for any previous release.  
 

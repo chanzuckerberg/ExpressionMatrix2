@@ -520,7 +520,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
            arg("k") = 100,
-           arg("similarityThreshold") = 0.5
+           arg("similarityThreshold") = 0.2
        )
        .def("findSimilarPairs1",
            &ExpressionMatrix::findSimilarPairs1,
@@ -555,7 +555,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
            arg("k") = 100,
-           arg("similarityThreshold") = 0.5,
+           arg("similarityThreshold") = 0.2,
            arg("lshCount") = 1024,
            arg("seed") = 231
        )

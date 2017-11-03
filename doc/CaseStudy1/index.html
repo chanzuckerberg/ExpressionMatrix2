@@ -4,6 +4,14 @@
 <head>
 <link rel=stylesheet href=../style.css />
 <link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+
+<style>
+img.screenshot {
+border: 2px solid Grey; 
+margin: 6px;
+padding: 6px;
+}
+</style>
 </head>
 
 <body>
@@ -15,6 +23,13 @@ In this case study I illustrate the functionality of <code>ExpressionMatrix2</co
 on expression data from <a href=https://doi.org/10.1016/j.celrep.2017.10.030>
 Darmanis et al., 2017, "Single-Cell RNA-Seq Analysis of Infiltrating Neoplastic Cells at the Migrating Front of Human Glioblastoma", Cell Reports <i>21</i>, 1399-1410, October 31, 2017</a>. 
 Special thanks to the paper's authors for providing early access to their data.
+
+<p>
+This is a small data set with under 4,000 cells. 
+The <code>ExpressionMatrix2</code> software is designed to comfortably run
+on much larger numbers of cells (it was actually run on a data set with over 1 million cells without any downsampling),
+so the compute time required to run the case study is minimal,
+and all phases of the run can be performed interactively.
 
 <p>
 This page contains detailed information sufficient to run the <code>ExpressionMatrix2</code> software on
@@ -30,7 +45,13 @@ these data. It contains the following sections:
 <a href=#Downloading>Downloading input files</a>
 
 <br>
-<a href=#Input>Running the input phase of the case study</a>
+<a href=#Input>The input phase of the case study</a>
+
+<br>
+<a href=#Compute1>Finding pairs of similar cells</a>
+
+<br>
+<a href=#RunServer1>A first look at the data</a>
 
 <p>
 Running this case study can serve as a useful introduction
@@ -94,7 +115,7 @@ of low expression genes).
    
 
 
-<br><br><h2 id=Input>Running the input phase of the case study</h2>
+<br><br><h2 id=Input>The input phase of the case study</h2>
 <p>
 You can begin the run using the following command:
 <p>
@@ -146,10 +167,249 @@ This also applies to all invocations of Python scripts
 for the rest of the case study.
 
 <p>
-See <a href=input.py.html>here</a> for detailed information
-on the Python code in <code>input.py</code>.
+See <a href=input.py.html>here</a> for details of <code>input.py</code>.
 
 
+
+<br><br><h2 id=Compute1>Finding pairs of similar cells</h2>
+<p>
+With the expression data and cell meta data now stored
+in the binary formats required by the <code>ExpressionMatrix2</code>
+software,, the next step is to find pairs of cells that have similar 
+gene expressions, with similarities computed taking all genes
+into account. This is done using command
+
+<pre>
+./compute1.py
+</pre>
+
+The computation is fast (only a few seconds) as it is done
+using Locality Sensitive Hashing (LSH). 
+See <a href=compute1.py.html>here</a> for details of <code>compute1.py</code>.
+
+
+
+<br><br><h2 id=RunServer1>A first look at the data</h2>
+<p>
+At this point we are ready to take a first look at the data
+using the http server functionality of the <code>ExpressionMatrix2</code>
+software. 
+
+<h3>Starting the http server</h3>
+To do this, we use script <code>runServer.py</code>
+to start the <code>ExpressionMatrix2</code> in 
+http server mode:
+<pre>
+./runServer.py
+</pre>
+The code in <code>runServer.py</code> is very simple. It simply
+creates the <code>ExpressionMatrix</code> object just like the
+<code>compute1.py</code> script did, then invokes function 
+<a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.explore>explore</a>
+to start the http server.
+When the server starts, it writes a message containing the port number
+on which it is listening for connections - usually port 17100.
+The server will continue to run until you interrupt it using Ctrl-C
+or by killing the process.  However, most of the time
+it will be doing nothing - it will just be waiting
+for http requests from browsers.
+
+<h3>Connecting a browser to the server</h3>
+<p>
+With the server running, we can use a browser to explore the data.
+The browser communicates  with the server using the http protocol,
+and can run on the same machine as the server, or on a different machine,
+as long as the two machines can communicate over a network or
+via the Internet.
+<p>
+In the simplest mode of operations, the browser runs on the same machine
+as the server. Start the browser and point it to this URL:
+<pre>
+http://localhost:17100
+</pre>
+(Make sure to change the port number from 17100 to whatever 
+port number the server is listening on, which you found
+out when starting the server).
+
+<p>
+If the browser is running on a different machine,
+enter the same URL but replace localhost
+with the name or ip address of the machine
+where the server is running.
+For example, the URL could look like this:
+<pre>
+http://server.company.com:17100
+</pre>
+or
+<pre>
+http://192.51.100.57:17100
+</pre>
+For this to work, however, it may be necessary to change the configuration
+of firewall software or firmware on the server or on one of the routers
+in between by "opening" TCP port 17100, and preferrably the range
+17100-17110 to allow some flexibility, as the server
+will try higher numbered ports if port 17100 is not available.
+
+<p style='text-transform:uppercase;'>
+Security warning: depending on your network and firewall configuration,
+it may be possible for anybody with network access to the server
+to look at your data and manipulate them. 
+Use appropriate security precautions to prevent
+unwanted access to the data. 
+Your IT department will be able to provide security advice.
+
+<p>
+The  <code>ExpressionMatrix2</code> software was developed
+mainly using the Firefox and Chrome browsers.
+However most browsers will work, including browsers available 
+on cell phones and other mobile devices.
+
+
+<h3>Exploring the data in the browser</h3>
+
+<p>
+When you connect your browser to the server, 
+the browser window will look like this:
+<br><img class=screenshot src=Screenshot-Summary.png width=800><br>
+The page summarizes the number of cells genes in the expression matrix
+we are looking at, and then displays the README file in the 
+<code>CaseStudy</code> directory. At the top of the page are
+several buttons that can be clicked to explore the data set in a variety of ways.
+For example, you can display information about genes, cells and cell meta data. 
+You can also create and manipulate gene sets and cell sets, which are
+subsets of the genes and cells in yiour expression matrix. 
+Initially only the <code>AllGenes</code> and <code>AllCells</code> sets exists,
+but you are free to create additional sets in a variety of ways.
+
+<p>
+As an example of using this functionality to explore the data, click on 
+<code>Cell Sets</code> and then, in the table of cell sets, click
+on the hyperlink for cell set <code>AllCells</code>.
+This will display a table of all the cells in this cell set
+(which of course includes all 3589 cells in our expression matrix),
+and also gives you the ability to select meta data fields to be displayed.
+For example, in the field <code>Select cell metadata to display:</code>,
+select <code>Selection</code>, <code>Location</code>, and <code>Sample.name</code> 
+(in most browsers
+you will need to press the Ctrl key while selecting the second and third fields).
+Then click on <code>Redisplay table</code> to obtain a table of
+cells including the meta data fields you selected:
+
+<br><img class=screenshot src=Screenshot-AllCells.png width=800><br>
+
+<p>
+You can then click on any cell to get detailed information about it:
+<br><img class=screenshot src=Screenshot-CellTop.png width=800><br>
+
+<p>
+This also includes gene expression for the cell, which can be seen 
+by scrolling down:
+<br><img class=screenshot src=Screenshot-CellBottom.png width=800><br>
+
+<p>
+As another example of using the http server functionality to explore the data,
+click on the <code>Cell meta data</code> button on the top, then
+under <code>Histogram a meta data field</code> select the <code>AllCells</code>
+cell set and select meta data name <code>Sample.name</code>,
+then click on <code>Create histogram</code>.
+<br><img class=screenshot src=Screenshot-Histogram.png width=800><br>
+
+<p>
+We can also create a contingency table showing the 
+combined frequency of two meta data fields.
+Click the <code>Cell meta data</code> button on the top, then
+under <code>Contingency table for two meta data fields</code> select the <code>AllCells</code>
+cell set and select meta data names <code>Sample.name</code> and <code>Location</code>,
+then click on <code>Create contingency table</code>.
+<br><img class=screenshot src=Screenshot-ContingencyTable.png width=800><br>
+
+<p>
+You can familiarize yourself with the rest of the functionality
+to explore the data. Most of it should be self-explanatory.
+
+
+<p>
+We computed above pairs of similar cells
+using script <code>compute1.py</code>.
+We can now use these pairs of similar cells to create a
+<i>cell similarity graph</i> - an undirected graph in which 
+each vertex represents a cell, and two vertices
+are joined by an edge if the corresponding edges have 
+similarity greater than a chosen similarity threshold.
+To avoid regions in the graph with very high connectivity,
+we use a <code>k</code> 
+parameter that causes only the 
+best <code>k</code> neighbors to be kept for each vertex (k-Nearest
+Neighbor or k-NN graph).
+
+<p>
+To create such a cell similarity graph (or simply <i>cell graph</i>)
+you can click on button <code>Cell graphs</code> at the top of the browser window.
+Then, you can select graph creation parameters:
+<ul>
+<li><code>Cell graph name</code>: for this graph we will use all of our 3589 cells,
+and our similar cell pairs were computed taking all genes into account.
+Therefore, we will choose <code>All</code> as the graph name.
+<li><code>Cell set name</code>:
+we pick the only choice available, <code>AllCells</code>, as we have not yet
+created any additional cell sets.
+<li><code>Similar pairs name</code>:
+we pick the only choice available, <code>Lsh</code>, which is the only 
+set of similar cell pairs we created. As a reminder,
+when doing that we took into account all genes
+when computing cell similarities.
+<li><code>Similarity threshold</code>:
+we will keep the default value of 0.5. Only cell pairs with similarity at least
+0.5 will generate a graph edge. The similar cell pairs were computed
+using a threshold of 0.2 (the default value for 
+<code>similarPairs3</code>), so we will not lose
+any edges due to insufficient information being stored in our similar cell pairs.
+<li><code>Maximum connectivity</code>:
+this is the <code>k</code> for the k-NN graph. 
+We will keep the default value of 20.
+The similar cell pairs were computed  using <code>k</code>=100
+(the default value for 
+<code>similarPairs3</code>), so we will not lose
+any edges due to insufficient information being stored in our similar cell pairs.
+</ul>
+You can now click on <code>Create a new cell graph</code>.
+This shows a page with a message stating the the graph had 84 isolated vertices, which were removed.
+This means that there were 84 cells that no other cell with similarity at least 0.5.
+These cells will not be present in the cell similarity graph.
+Clicking on <code>Continue</code> gets you back to the <code>Cell graphs</code>
+page, which now shows the cell graph you just created, named <code>All</code>.
+You can display the graph by clicking on its name.
+After a short wait to compute the graph layout using the <a href="http://graphviz.org">Graphviz</a> package,
+the graph is displayed:
+<br><img class=screenshot src=Screenshot-CellGraph-All-nocolor.png width=800><br>
+
+The graph is displayed without edges for clarity and performance, but you
+can turn the edges on, if desired, by unchecking the <code>Hide graph edges</code>
+option and clicking on <code>Redraw graph</code>.
+
+<p>
+Note the the Graphviz package is used exclusively to compute the two-dimensional
+layout of graphs for display. This layout is not used for any other
+purpose, including clustering (more information on clustering follows).
+It is just a visual aid.
+
+<p>
+You can experiment using the pink buttons to make the graphics larger, zoom in or out
+to visualize specific regions of the graph, and
+change the display size of vertices and the thickness of edges.
+
+<p>
+You can also color the graph in a variety of ways that should be self-explanatory.
+This includes coloring by expression of a specific gene,
+coloring by similarity to a specific cell, or coloring by
+categorical or numerical meta data. 
+You can also click on a vertex to display the page for the corresponding cell.
+This complements the coloring options to allow you to get 
+an idea of the characteristics of cells present
+in different regions of the graph.
+
+<p>
+To be continued...
 
 </body>
 </html>
