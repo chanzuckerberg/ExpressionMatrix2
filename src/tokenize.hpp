@@ -38,6 +38,13 @@ namespace ChanZuckerberg {
             const string& fileName,
             const string& separators);
 
+        inline void removeWindowsLineEnd(string& s)
+        {
+            if(!s.empty() && s.back()==13) {
+                s.resize(s.size()-1);
+            }
+        }
+
     }
 }
 

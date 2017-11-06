@@ -156,6 +156,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("plateFileName"),
            arg("totalExpressionCountThreshold")
        )
+       .def("addCellsFromBioHub3",
+           &ExpressionMatrix::addCellsFromBioHub3,
+           "Add to the system cells created by the BioHub pipeline "
+           "(November 2017 version, for Illumina data). "
+           "See `here <../../../PythonApi.html#addCellsFromBioHub3>`__ for more information. ",
+           arg("expressionCountsFileName"),
+           arg("expressionCountsFileSeparators") = ",",
+           arg("plateMetaData")
+       )
        .def("addCellMetaData",
            &ExpressionMatrix::addCellMetaData,
            "Add cell meta data reading it from a csv file. "

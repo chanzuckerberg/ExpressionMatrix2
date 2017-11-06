@@ -241,7 +241,7 @@ public:
 
 
     // Add cells from files created by the BioHub pipeline.
-    // See ExpressionMatrixBioHub.cpp for a detailed description
+    // See top of ExpressionMatrixBioHub.cpp for a detailed description
     // of the expected formats.
 
     // July 2017, Illumina data.
@@ -257,14 +257,25 @@ public:
         vector<pair<string, string> >& plateMetaData);
 
     // September 2017, 10X Genomics data.
+    // See top of ExpressionMatrixBioHub.cpp for details.
     void addCellsFromBioHub2(
         const string& platesFileName,    // The name of the file containing per-plate meta data.
         double totalExpressionCountThreshold
         );
 
+    // November 2017, Illumina data.
+    // See top of ExpressionMatrixBioHub.cpp for details.
+    void addCellsFromBioHub3(
+        const string& expressionCountsFileName,         // The name of the csv file containing expression counts.
+        const string& expressionCountsFileSeparators,
+        const vector<pair<string, string> >& plateMetaData  // Meta data that will be added to all cells.
+        );
+
+
+
 
     // Add cell meta data contained in a csv file, one line per cell.
-    // This can be used to read cell mata data in the BioHub pipeline
+    // This can be used to read cell meta data in the BioHub pipeline
     // stored in the .log-by-cell.csv files.
     void addCellMetaData(const string& cellMetaDataName);
 

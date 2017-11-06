@@ -54,6 +54,37 @@ The meta data for a plate are added to all of the cells found on the plate.
 Cells are named using the pattern PlateName-Barcode, where the barcode
 is as obtained from the HDF5 file for each plate.
 
+
+
+NOVEMBER 2017, ILLUMINA DATA: addCellsFromBioHub3
+
+For each of the plates to be processed, there is an expression counts file
+and a cell meta data file. In both files, each column corresponds to a cell,
+in arbitrary order.
+Only cells that are present in both files are added.
+Both files are tab separated, and the header line has
+one fewer fields than all remaining lines.
+
+Arguments:
+
+plateListFileName:
+Name of the file containing the list of plate names to be processed, one per line.
+
+plateMetaDataFileName
+Name of the csv file containing per-plate meta data.
+The first column of each line contains a plate name.
+This meta data for each plate is added to all the cells of the plate.
+This file can contain data for a superset of the plate names
+specified in plateListFileName. Only the plates
+specified in plateListFileName will be processed.
+
+expressionCountsFileNameSuffix
+Suffix to be added to a plate name to obtain the name of the corresponding expression counts file.
+
+metaDataFileNameSuffix
+Suffix to be added to a plate name to obtain the name of the corresponding per-cell meta data file.
+
+
 *******************************************************************************/
 
 
@@ -470,4 +501,101 @@ void ExpressionMatrix::addCellsFromBioHub2(
 
     }
     cout << timestamp << "Processed " << plateCount << " plates." << endl;
+}
+
+
+
+// November 2017, Illumina data.
+// See the beginning of this file for more information.
+void ExpressionMatrix::addCellsFromBioHub3(
+    const string& expressionCountsFileName,             // The name of the csv file containing expression counts.
+    const string& expressionCountsFileSeparators,
+    const vector<pair<string, string> >& plateMetaDataWithoutCellName  // Meta data that will be added to all cells.
+    )
+{
+    // Create cell meta data including a slot for the cell name.
+    vector<pair<string, string> > plateMetaData;
+    plateMetaData.push_back(make_pair("CellName", ""));
+    copy(plateMetaDataWithoutCellName.begin(), plateMetaDataWithoutCellName.end(),
+        back_inserter(plateMetaData));
+
+    // See how many cells we have in this plate.
+    const size_t cellCountInPlate = countTokensInSecondLine(expressionCountsFileName, expressionCountsFileSeparators) - 1;
+
+
+    // Open the expression counts file for this plate.
+    ifstream expressionCountsFile = ifstream(expressionCountsFileName);
+    if(!expressionCountsFile) {
+        throw runtime_error("Error opening " + expressionCountsFileName);
+    }
+
+
+    // Read the cell names from the first line.
+    string line;
+    getline(expressionCountsFile, line);
+    removeWindowsLineEnd(line);
+    vector<string> cellNamesInPlate;
+    tokenize(expressionCountsFileSeparators, line, cellNamesInPlate);
+    if(cellNamesInPlate.size() == cellCountInPlate) {
+        // Do nothing.
+    } else if(cellNamesInPlate.size() == cellCountInPlate+1) {
+        cellNamesInPlate.erase(cellNamesInPlate.begin());
+    } else {
+        throw runtime_error(
+            "File " + expressionCountsFileName +
+            " has inconsistent number of tokens in first two lines.");
+    }
+
+
+
+    // Read the expression file to create expression vectors for all the cells in this plate.
+    vector< vector< pair<string, float> > > cellsInPlateExpressionVectors(cellCountInPlate);
+    vector<string> tokens;
+    for(size_t lineNumber=2; ; ++lineNumber) {
+
+        // Get a line.
+        getline(expressionCountsFile, line);
+        if(!expressionCountsFile) {
+            break;
+        }
+        removeWindowsLineEnd(line);
+        tokenize(expressionCountsFileSeparators, line, tokens);
+        if(tokens.size() != cellCountInPlate+1) {
+            throw runtime_error(
+                "Invalid number of tokens in file "
+                + expressionCountsFileName +
+                " line " + lexical_cast<string>(lineNumber));
+        }
+
+        // Add the gene name.
+        const string& geneName = tokens.front();
+
+        // Add all the non-zero expression counts.
+        for(size_t i=0; i<cellCountInPlate; i++) {
+            const string& token = tokens[i+1];
+            if(token=="0" || token=="0.") {
+                continue;
+            }
+            float expressionCount;
+            try {
+                expressionCount = lexical_cast<float>(token);
+            } catch(bad_lexical_cast) {
+                throw runtime_error("Invalid expression count at line " +
+                    lexical_cast<string>(lineNumber) + " of file " + expressionCountsFileName);
+            }
+            cellsInPlateExpressionVectors[i].push_back(make_pair(geneName, expressionCount));
+        }
+
+    }
+
+
+    // Now we can add the cells.
+    for(size_t i=0; i<cellCountInPlate; i++) {
+        plateMetaData.front().second = cellNamesInPlate[i];
+        addCell(plateMetaData, cellsInPlateExpressionVectors[i]);
+    }
+
+
+
+
 }
