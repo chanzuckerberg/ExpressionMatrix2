@@ -66,7 +66,7 @@ e = ExpressionMatrix.ExpressionMatrix(directoryName = 'data')
 <ul>
 <li>Function <code>addCells</code> can be used to add cells and meta data from files in comma separated format (csv) or similar delimited formats.
 <li>Function <code>addCellsFromHdf5</code> can be used to add cells from expression matrix data in HDF5 format created by the 10x Genomics pipeline.
-<li>Function <code>addCell</code> can be used to add a single cell and meta data specified using a simple JSON format.
+<li>Function <code>addCellFromJson</code> can be used to add a single cell and meta data specified using a simple JSON format.
 </ul>
 
 <p>Each of these three methods is described in more details in one of the sections below. You can use any combination of the three methods, in any sequence, to add different batches of cells to a single expression matrix object. In that case, each batch can use a different set of cell meta data names.
@@ -270,25 +270,22 @@ The argument specifies the name of the HDF5 file. Note then, when using this for
 
 
 
-<h3 id=addCell>Adding cells in simple JSON format</h3>
+<h3 id=addCellFromJson>Adding cells in simple JSON format</h3>
 
 <p>
-If your expression data are in a custom format, you can write Python code to create a simple JSON for each cell you want to add, then call function <code>addCell</code> passing the JSON as the argument. This simple example shows the format of the expected JSON and the Python code required to add the cell to an expression matrix object:
+If your expression data are in a custom format, you can write Python code to create simple JSON for each cell you want to add, then call function <code>addCellFromJson</code> passing the JSON as the argument. This simple example shows the format of the expected JSON and the Python code required to add the cell to an expression matrix object:
 
 <pre>
 import json
 cell = {'metaData': {'cellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
-e.addCell(jsonString = json.dumps(jSonString))
+e.addCellFromJson(jsonString = json.dumps(jSonString))
 </pre>
 
 <p>
 Each cell is required ot have the <code>cellName</code> meta data field, but other than that the set of meta data for each cell is completely arbitrary. each cell can have a different set of meta data fields.
 
 <p>
-As before, the last parameter specifies the maximum number of genes to be used for approximate similarity computations involving these cells. A value of 100 is usually appropriate.
-
-<p>
-Your code will need a loop over all cells to be added. For each cell, the code would read information for that cell in your custom format, create the required JSON, then call <code>addCell</code> as shown above. This provides complete flexibility on the input format, but requires some Python coding.
+Your code will need a loop over all cells to be added. For each cell, the code would read information for that cell in your custom format, create the required JSON, then call <code>addCellFromJson</code> as shown above. This provides complete flexibility on the input format, but requires some Python coding.
 
 
 

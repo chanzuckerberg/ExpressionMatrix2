@@ -93,12 +93,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        // Various ways to add cells.
        .def
        (
-           "addCell",
-           (
-               CellId (ExpressionMatrix::*)
-               (const string& jsonString)
-           )
-           &ExpressionMatrix::addCell,
+           "addCellFromJson",
+           &ExpressionMatrix::addCellFromJson,
            "Adds a cell to the system. The cell expression counts "
            "and meta data are given in a JSON string. "
            "See `here <../../../PythonApi.html#addCell>`__ "

@@ -140,7 +140,7 @@ public:
     // cell = {'metaData': {'CellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
     // expressionMatrix.addCell(json.dumps(jSonString))
     // Note that the cellName metaData entry is required.
-    CellId addCell(const string& jsonString);
+    CellId addCellFromJson(const string& jsonString);
 
 
 

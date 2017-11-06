@@ -22,9 +22,9 @@ cell0 = {'metaData': {'CellName': 'cell0', 'Type': 'type0'}, 'expressionCounts':
 cell1 = {'metaData': {'CellName': 'cell1', 'Type': 'type1'}, 'expressionCounts': {'gene1': 30}}
 cell2 = {'metaData': {'CellName': 'cell2', 'Type': 'type2'}, 'expressionCounts': {'gene2': 40}}
 
-e.addCell(jsonString = json.dumps(cell0)) 
-e.addCell(jsonString = json.dumps(cell1)) 
-e.addCell(jsonString = json.dumps(cell2)) 
+e.addCellFromJson(jsonString = json.dumps(cell0)) 
+e.addCellFromJson(jsonString = json.dumps(cell1)) 
+e.addCellFromJson(jsonString = json.dumps(cell2)) 
 print('There are %i genes and %i cells.' % (e.geneCount(), e.cellCount()))
 
 

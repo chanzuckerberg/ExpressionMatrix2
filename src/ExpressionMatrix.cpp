@@ -330,7 +330,7 @@ CellId ExpressionMatrix::addCell(
 // jSonString = json.dumps(cell)
 // expressionMatrix.addCell(json.dumps(jSonString))
 // Note the CellName metaData entry is required.
-CellId ExpressionMatrix::addCell(const string& jsonString)
+CellId ExpressionMatrix::addCellFromJson(const string& jsonString)
 {
 
     try {
