@@ -133,18 +133,6 @@ public:
         const vector< pair<string, string> >& metaData,
         const vector< pair<string, float> >& expressionCounts
         );
-    CellId abcTest(
-        const vector< pair<string, string> >& u,
-        const vector< pair<string, float> >& v
-        )
-    {
-        for(const auto& x: u) {
-            cout << u.first << " " << u.second << endl;
-        }
-        for(const auto& x: v) {
-            cout << v.first << " " << v.second << endl;
-        }
-    }
 
     // Version of addCell that takes JSON as input.
     // The expected JSON can be constructed using Python code modeled from the following:

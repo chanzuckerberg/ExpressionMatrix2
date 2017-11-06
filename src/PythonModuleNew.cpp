@@ -91,7 +91,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
 
        // Various ways to add cells.
-       .def("abcTest", &ExpressionMatrix::abcTest, arg("u", arg("v"))
        .def
        (
            "addCell",
