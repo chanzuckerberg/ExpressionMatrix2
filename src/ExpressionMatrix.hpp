@@ -130,15 +130,27 @@ public:
     // This changes the metaData vector so the CellName entry is the first entry.
     // It also changes the expression counts - it sorts them by decreasing count.
     CellId addCell(
-        vector< pair<string, string> >& metaData,
-        vector< pair<string, float> >& expressionCounts
+        const vector< pair<string, string> >& metaData,
+        const vector< pair<string, float> >& expressionCounts
         );
+    CellId abcTest(
+        const vector< pair<string, string> >& u,
+        const vector< pair<string, float> >& v
+        )
+    {
+        for(const auto& x: u) {
+            cout << u.first << " " << u.second << endl;
+        }
+        for(const auto& x: v) {
+            cout << v.first << " " << v.second << endl;
+        }
+    }
 
     // Version of addCell that takes JSON as input.
     // The expected JSON can be constructed using Python code modeled from the following:
     // import json
     // cell = {'metaData': {'CellName': 'abc', 'key1': 'value1'}, 'expressionCounts': {'gene1': 10,'gene2': 20}}
-    // expressionMatrix.addCell(json.dumps(jSonString))
+    // expressionMatrix.addCellFromJson(json.dumps(jSonString))
     // Note that the cellName metaData entry is required.
     CellId addCellFromJson(const string& jsonString);
 

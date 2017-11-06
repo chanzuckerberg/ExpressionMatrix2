@@ -186,8 +186,8 @@ bool ExpressionMatrix::addGene(const string& geneName)
 // This changes the metaData vector so the CellName entry is the first entry.
 // It also changes the expression counts - it sorts them by decreasing count.
 CellId ExpressionMatrix::addCell(
-    vector< pair<string, string> >& metaData,
-    vector< pair<string, float> >& expressionCounts)
+    const vector< pair<string, string> >& metaDataArgument,
+    const vector< pair<string, float> >& expressionCounts)
 {
 #if 0
     cout << "ExpressionMatrix::addCell called." << endl;
@@ -201,7 +201,9 @@ CellId ExpressionMatrix::addCell(
     }
 #endif
 
-
+    // Make a writable copy of the meta data.
+    // We will need it to move the cell name to the beginning.
+    vector< pair<string, string> > metaData = metaDataArgument;
 
     // Check that we don't overflow the CellId type.
     CZI_ASSERT(CellId(cells.size()) < std::numeric_limits<CellId>::max());
@@ -297,18 +299,11 @@ CellId ExpressionMatrix::addCell(
         }
     }
 
-    // We need to sort the input expression counts by decreasing count.
-    sort(expressionCounts.begin(), expressionCounts.end(),
-        OrderPairsBySecondGreaterThenByFirstLess< pair<string, float> >());
-
-
     // Add this cell to the AllCells set.
     cellSets.cellSets["AllCells"]->push_back(CellId(cells.size()));
 
     // Store fixed size information for this cell.
     cells.push_back(cell);
-
-
 
 
     // Sanity checks.

@@ -91,13 +91,30 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
 
        // Various ways to add cells.
+       .def("abcTest", &ExpressionMatrix::abcTest, arg("u", arg("v"))
+       .def
+       (
+           "addCell",
+           &ExpressionMatrix::addCell,
+           "Adds a cell to the system. The cell expression counts "
+           "and meta data are given in Python lists. "
+           "metadata is a list of tuples with meta data "
+           "(name, value) pairs. "
+           "expressionCounts is a list of tuples (geneName, count). "
+           "See `here <../../../PythonApi.html#addCell>`__ "
+           "for an example. "
+           "Returns the cell id of the cell that was just added. "
+           "Cell ids begin at zero and increment by one each time a cell is added. ",
+           arg("metaData"),
+           arg("expressionCounts")
+       )
        .def
        (
            "addCellFromJson",
            &ExpressionMatrix::addCellFromJson,
            "Adds a cell to the system. The cell expression counts "
            "and meta data are given in a JSON string. "
-           "See `here <../../../PythonApi.html#addCell>`__ "
+           "See `here <../../../PythonApi.html#addCellFromJson>`__ "
            "for information on the expected format of the JSON string. "
            "Returns the cell id of the cell that was just added. "
            "Cell ids begin at zero and increment by one each time a cell is added. ",

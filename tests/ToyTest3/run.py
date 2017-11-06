@@ -24,7 +24,9 @@ cell2 = {'metaData': {'CellName': 'cell2', 'Type': 'type2'}, 'expressionCounts':
 
 e.addCellFromJson(jsonString = json.dumps(cell0)) 
 e.addCellFromJson(jsonString = json.dumps(cell1)) 
-e.addCellFromJson(jsonString = json.dumps(cell2)) 
+cell2Metadata=[('CellName', 'cell2'), ('Type', 'type2')]
+cell2ExpressionCounts = [('gene2', 40.)]
+e.addCell(metaData=cell2Metadata, expressionCounts=cell2ExpressionCounts) 
 print('There are %i genes and %i cells.' % (e.geneCount(), e.cellCount()))
 
 
