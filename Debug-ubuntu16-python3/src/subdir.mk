@@ -25,7 +25,6 @@ CPP_SRCS += \
 ../src/Lsh.cpp \
 ../src/MemoryMappedStringTable.cpp \
 ../src/MurmurHash2.cpp \
-../src/PythonModule.cpp \
 ../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
@@ -56,7 +55,6 @@ OBJS += \
 ./src/Lsh.o \
 ./src/MemoryMappedStringTable.o \
 ./src/MurmurHash2.o \
-./src/PythonModule.o \
 ./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
@@ -87,7 +85,6 @@ CPP_DEPS += \
 ./src/Lsh.d \
 ./src/MemoryMappedStringTable.d \
 ./src/MurmurHash2.d \
-./src/PythonModule.d \
 ./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
