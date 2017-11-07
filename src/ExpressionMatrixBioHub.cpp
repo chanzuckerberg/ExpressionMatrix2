@@ -524,7 +524,7 @@ void ExpressionMatrix::addCellsFromBioHub3(
 
 
     // Open the expression counts file for this plate.
-    ifstream expressionCountsFile = ifstream(expressionCountsFileName);
+    ifstream expressionCountsFile(expressionCountsFileName);
     if(!expressionCountsFile) {
         throw runtime_error("Error opening " + expressionCountsFileName);
     }
