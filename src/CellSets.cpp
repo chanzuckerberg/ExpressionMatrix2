@@ -4,7 +4,7 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 
 
@@ -20,11 +20,11 @@ void CellSets::createNew(const string& directoryNameArgument)
     cellSets.clear();
 
     // Loop over all files in the directory.
-    boost::regex regex(directoryName + "/CellSet-.*");
+    std::regex regex(directoryName + "/CellSet-.*");
     using boost::filesystem::directory_iterator;
     for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
         const string fileName = it->path().string();
-        if(boost::regex_match(fileName, regex)) {
+        if(std::regex_match(fileName, regex)) {
             boost::filesystem::remove(fileName);
         }
     }
@@ -45,10 +45,10 @@ void CellSets::accessExisting(const string& directoryNameArgument, bool allowRea
     cellSets.clear();
 
     // Loop over all files in the directory.
-    boost::regex regex(directoryName + "/CellSet-.*");
+    std::regex regex(directoryName + "/CellSet-.*");
     for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
         const string fileName = it->path().string();
-        if(!boost::regex_match(fileName, regex)) {
+        if(!std::regex_match(fileName, regex)) {
             continue;
         }
 

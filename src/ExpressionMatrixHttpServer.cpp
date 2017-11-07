@@ -10,9 +10,9 @@ using namespace ExpressionMatrix2;
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/graph/iteration_macros.hpp>
-#include <boost/regex.hpp>
 
 #include "fstream.hpp"
+#include <regex>
 
 
 
@@ -852,13 +852,12 @@ void ExpressionMatrix::getAvailableSimilarPairs(
     vector<string>& availableSimilarPairs) const
 {
 
-    boost::regex regex(directoryName + "/SimilarPairs-(.*)-Info");
-    boost::smatch matches;
+    std::regex regex(directoryName + "/SimilarPairs-(.*)-Info");
     using boost::filesystem::directory_iterator;
     for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
         const string fileName = it->path().string();
-        boost::smatch matches;
-        if(!boost::regex_match(fileName, matches, regex)) {
+        std::smatch matches;
+        if(!std::regex_match(fileName, matches, regex)) {
             continue;
         }
         CZI_ASSERT(matches.size() == 2);

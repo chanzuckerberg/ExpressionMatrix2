@@ -16,13 +16,13 @@ using namespace ExpressionMatrix2;
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <boost/regex.hpp>
 
 #include "fstream.hpp"
 #include "iostream.hpp"
 #include "utility.hpp"
 #include "vector.hpp"
 #include <numeric>
+#include <regex>
 #include <sstream>
 
 
@@ -127,11 +127,11 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
 
     // Access the gene sets.
     using boost::filesystem::directory_iterator;
-    boost::regex regex(directoryName + "/GeneSet-(.*)-GlobalIds");
+    std::regex regex(directoryName + "/GeneSet-(.*)-GlobalIds");
     for(auto it = directory_iterator(directoryName); it != directory_iterator(); ++it) {
         const string fileName = it->path().string();
-        boost::smatch regexMatchResults;
-        if(!boost::regex_match(fileName, regexMatchResults, regex)) {
+        std::smatch regexMatchResults;
+        if(!std::regex_match(fileName, regexMatchResults, regex)) {
             continue;
         }
         CZI_ASSERT(regexMatchResults.size() == 2);
@@ -1358,14 +1358,14 @@ bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const s
     }
 
     // Create the regular expression we are going to match.
-    const boost::regex regex(regexString);
+    const std::regex regex(regexString);
 
     // Create the new gene set.
     GeneSet& geneSet = geneSets[geneSetName];
     geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
     for(GeneId geneId = 0; geneId != geneCount(); geneId++) {
         const string geneName = geneNames[geneId];
-        if(boost::regex_match(geneName, regex)) {
+        if(std::regex_match(geneName, regex)) {
             geneSet.addGene(geneId);
         }
     }
@@ -1595,7 +1595,7 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
     }
 
     // If regular expression matching was requested, create the regular expression we are going to match.
-    boost::regex regex;
+    std::regex regex;
     if(useRegex) {
         regex = matchString;
     }
@@ -1621,7 +1621,7 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
             const auto metaDataValue = cellMetaDataValues(p.second);
             bool includeThisCell;
             if(useRegex) {
-                includeThisCell = boost::regex_match(metaDataValue.begin(), metaDataValue.end(), regex);
+                includeThisCell = std::regex_match(metaDataValue.begin(), metaDataValue.end(), regex);
             } else {
                 includeThisCell =
                     (metaDataValue.size() == matchString.size()) &&
