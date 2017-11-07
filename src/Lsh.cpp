@@ -5,12 +5,12 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
-#include <boost/chrono.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
 
+#include <chrono>
 #include "fstream.hpp"
 
 
@@ -119,7 +119,7 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
     // The CellId is local to the cell set we are using.
     cout << timestamp << "Computation of cell LSH signatures begins." << endl;
     size_t nonZeroExpressionCount = 0;
-    const auto t0 = boost::chrono::steady_clock::now();
+    const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId=0; localCellId<cellCount; localCellId++) {
         if((localCellId % 1000) == 0) {
             cout << timestamp << "Working on cell " << localCellId << " of " << cellCount << endl;
@@ -169,13 +169,13 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
         }
 
     }
-    const auto t1 = boost::chrono::steady_clock::now();
+    const auto t1 = std::chrono::steady_clock::now();
     cout << timestamp << "Computation of cell LSH signatures ends." << endl;
     cout << "Processed " << nonZeroExpressionCount << " non-zero expression counts for ";
     cout << geneCount << " genes and " << cellCount << " cells." << endl;
     cout << "Average expression matrix sparsity is " <<
         double(nonZeroExpressionCount) / (double(geneCount) * double(cellCount)) << endl;
-    const double t01 = 1.e-9 * double((boost::chrono::duration_cast<boost::chrono::nanoseconds>(t1 - t0)).count());
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
     cout << "Computation of LSH cell signatures took " << t01 << "s." << endl;
     cout << "    Seconds per cell " << t01 / cellCount << endl;
     cout << "    Seconds per non-zero expression matrix entry " << t01/double(nonZeroExpressionCount) << endl;
