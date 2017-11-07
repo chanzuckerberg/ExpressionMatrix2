@@ -332,8 +332,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "where N is the number of cells in the cell set used to compute information content. "
            "A geneInformationContentThreshold of 2 bits is often effective "
            "in filtering out widely expressed genes. ",
-           arg("existingGeneSetName"),
-           arg("cellSetName"),
+           arg("existingGeneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
            arg("normalizationMethod"),
            arg("geneInformationContentThreshold"),
            arg("newGeneSetName")
