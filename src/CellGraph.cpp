@@ -360,7 +360,7 @@ void CellGraph::writeSvg(
             const double x = vertex.position[0];
             const double y = vertex.position[1];
             s <<
-                "<a xlink:href='cell?cellId=" << vertex.cellId << "'>"
+                "<a xlink:href='cell?cellId=" << vertex.cellId << "&geneSetName=" << geneSetName << "'>"
                 "<circle cx='" << x << "' cy='" << y << "' r='" << vertexRadius << "' stroke=none";
             if(!vertex.color.empty()) {
                 s << " fill='" << vertex.color << "'";
