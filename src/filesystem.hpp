@@ -20,33 +20,35 @@ which is the version used in CentOs 7).
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
+        namespace filesystem {
 
-        // Return true if the path exists.
-        bool exists(const string&);
+            // Return true if the path exists.
+            bool exists(const string&);
 
-        // Return true if the path exists and is a regular file.
-        bool isRegularFile(const string&);
+            // Return true if the path exists and is a regular file.
+            bool isRegularFile(const string&);
 
-        // Return true if the path exists and is a directory.
-        bool isDirectory(const string&);
+            // Return true if the path exists and is a directory.
+            bool isDirectory(const string&);
 
-        // Create a directory. In case of failure, throw an exception.
-        void createDirectory(const string&);
+            // Create a directory. In case of failure, throw an exception.
+            void createDirectory(const string&);
 
-        // Remove the specified path. In case of failure, throw an exception.
-        void remove(const string&);
+            // Remove the specified path. In case of failure, throw an exception.
+            void remove(const string&);
 
-        // Return the contents of a directory. In case of failure, throw an exception.
-        vector<string> directoryContents(const string&);
+            // Return the contents of a directory. In case of failure, throw an exception.
+            vector<string> directoryContents(const string&);
 
-        // Return the extension of a path - that is, everything following
-        // the last dot after the last slash.
-        // If there is no dot after the last slash, throw an exception.
-        string extension(const string&);
+            // Return the extension of a path - that is, everything following
+            // the last dot after the last slash.
+            // If there is no dot after the last slash, throw an exception.
+            string extension(const string&);
 
-        // Return everything up to the last dot following the last dash of a path.
-        // If there is no dot following the last dash, throw an exception.
-        string fileName(const string&);
+            // Return everything up to the last dot following the last dash of a path.
+            // If there is no dot following the last dash, throw an exception.
+            string fileName(const string&);
+        }
     }
 }
 

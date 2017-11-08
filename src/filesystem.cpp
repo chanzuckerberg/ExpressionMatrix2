@@ -17,13 +17,14 @@ which is the version used in CentOs 7).
 #include "stdexcept.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
+using namespace ChanZuckerberg::ExpressionMatrix2::filesystem;
 
 #include <dirent.h>
 #include <sys/stat.h>
 
 
 // Return true if the path exists.
-bool ChanZuckerberg::ExpressionMatrix2::exists(const string& path)
+bool ChanZuckerberg::ExpressionMatrix2::filesystem::exists(const string& path)
 {
     struct ::stat info;
     return ::stat(path.c_str(), &info) == 0;
@@ -32,7 +33,7 @@ bool ChanZuckerberg::ExpressionMatrix2::exists(const string& path)
 
 
 // Return true if the path exists and is a regular file.
-bool ChanZuckerberg::ExpressionMatrix2::isRegularFile(const string& path)
+bool ChanZuckerberg::ExpressionMatrix2::filesystem::isRegularFile(const string& path)
 {
     struct ::stat info;
     if(::stat(path.c_str(), &info) == -1) {
@@ -45,7 +46,7 @@ bool ChanZuckerberg::ExpressionMatrix2::isRegularFile(const string& path)
 
 
 // Return true if the path exists and is a directory.
-bool ChanZuckerberg::ExpressionMatrix2::isDirectory(const string& path)
+bool ChanZuckerberg::ExpressionMatrix2::filesystem::isDirectory(const string& path)
 {
     struct ::stat info;
     if(::stat(path.c_str(), &info) == -1) {
@@ -58,7 +59,7 @@ bool ChanZuckerberg::ExpressionMatrix2::isDirectory(const string& path)
 
 
 // Create a directory. In case of failure, throw an exception.
-void ChanZuckerberg::ExpressionMatrix2::createDirectory(const string& path)
+void ChanZuckerberg::ExpressionMatrix2::filesystem::createDirectory(const string& path)
 {
     if(::mkdir(path.c_str(), -1) == -1) {
         throw runtime_error("Unable to create directory " + path);
@@ -67,17 +68,17 @@ void ChanZuckerberg::ExpressionMatrix2::createDirectory(const string& path)
 
 
 // Remove the specified path. In case of failure, throw an exception.
-void ChanZuckerberg::ExpressionMatrix2::remove(const string& path)
+void ChanZuckerberg::ExpressionMatrix2::filesystem::remove(const string& path)
 {
     if(::unlink(path.c_str()) == -1) {
-        throw runtime_error("Unable to create directory " + path);
+        throw runtime_error("Unable to remove directory " + path);
     }
 }
 
 
 
 // Return the contents of a directory. In case of failure, throw an exception.
-vector<string> ChanZuckerberg::ExpressionMatrix2::directoryContents(const string& path)
+vector<string> ChanZuckerberg::ExpressionMatrix2::filesystem::directoryContents(const string& path)
 {
     DIR* dir = opendir(path.c_str());
     if(!dir) {
@@ -91,7 +92,10 @@ vector<string> ChanZuckerberg::ExpressionMatrix2::directoryContents(const string
         if(!entry) {
             break;
         }
-        directoryContents.push_back(path + "/" + entry->d_name);
+        const string name(entry->d_name);
+        if(name!="." && name!="..") {
+            directoryContents.push_back(path + "/" + name);
+        }
     }
 
     closedir(dir);
@@ -103,7 +107,7 @@ vector<string> ChanZuckerberg::ExpressionMatrix2::directoryContents(const string
 // Return the extension of a path - that is, everything following
 // the last dot after the last slash.
 // If there is no dot after the last slash, throw an exception.
-string ChanZuckerberg::ExpressionMatrix2::extension(const string& path)
+string ChanZuckerberg::ExpressionMatrix2::filesystem::extension(const string& path)
 {
     // If the path is empty, throw an exception.
     if(path.empty()) {
@@ -139,7 +143,7 @@ string ChanZuckerberg::ExpressionMatrix2::extension(const string& path)
 
 // Return everything up to the last dot following the last dash of a path.
 // If there is no dot following the last dash, throw an exception.
-string ChanZuckerberg::ExpressionMatrix2::fileName(const string& path)
+string ChanZuckerberg::ExpressionMatrix2::filesystem::fileName(const string& path)
 {
     // If the path is empty, throw an exception.
     if(path.empty()) {

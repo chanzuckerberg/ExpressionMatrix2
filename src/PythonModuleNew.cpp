@@ -4,6 +4,12 @@
 // changes should also be made in doc/PythonApiReference.html.
 
 
+
+// Macro that controls exposing to Python of functions declared in filesystem.hpp.
+// This is for testing only and should normally be turned off.
+#define CZI_EXPRESSION_MATRIX2_TEST_FILESYSTEM 0
+
+
 // CZI.
 #include "ClusterGraph.hpp"
 #include "ExpressionMatrix.hpp"
@@ -11,6 +17,10 @@
 #include "MemoryMappedVectorOfLists.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
+
+#if CZI_EXPRESSION_MATRIX2_TEST_FILESYSTEM
+#include "filesystem.hpp"
+#endif
 
 // Pybind11.
 #include <pybind11/pybind11.h>
@@ -805,4 +815,19 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );
+
+
+
+#if CZI_EXPRESSION_MATRIX2_TEST_FILESYSTEM
+    // Functions declared in filesystem.hpp.
+    // This is for testing only and should normally be turned off.
+    module.def("exists", ExpressionMatrix2::filesystem::exists);
+    module.def("isRegularFile", ExpressionMatrix2::filesystem::isRegularFile);
+    module.def("isDirectory", ExpressionMatrix2::filesystem::isDirectory);
+    module.def("createDirectory", ExpressionMatrix2::filesystem::createDirectory);
+    module.def("remove", ExpressionMatrix2::filesystem::remove);
+    module.def("directoryContents", ExpressionMatrix2::filesystem::directoryContents);
+    module.def("extension", ExpressionMatrix2::filesystem::extension);
+    module.def("fileName", ExpressionMatrix2::filesystem::fileName);
+#endif
 }
