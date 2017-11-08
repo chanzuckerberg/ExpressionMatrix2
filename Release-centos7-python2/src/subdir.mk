@@ -28,6 +28,7 @@ CPP_SRCS += \
 ../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
+../src/filesystem.cpp \
 ../src/hdf5.cpp \
 ../src/regressionCoefficient.cpp \
 ../src/tokenize.cpp \
@@ -58,6 +59,7 @@ OBJS += \
 ./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
+./src/filesystem.o \
 ./src/hdf5.o \
 ./src/regressionCoefficient.o \
 ./src/tokenize.o \
@@ -88,6 +90,7 @@ CPP_DEPS += \
 ./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
+./src/filesystem.d \
 ./src/hdf5.d \
 ./src/regressionCoefficient.d \
 ./src/tokenize.d \
@@ -98,7 +101,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	g++ -std=c++0x -I/usr/include/python2.7 -O3 -msse4.2 -ggdb3 -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

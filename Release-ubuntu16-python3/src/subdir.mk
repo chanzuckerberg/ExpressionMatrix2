@@ -28,6 +28,7 @@ CPP_SRCS += \
 ../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
+../src/filesystem.cpp \
 ../src/hdf5.cpp \
 ../src/regressionCoefficient.cpp \
 ../src/tokenize.cpp \
@@ -58,6 +59,7 @@ OBJS += \
 ./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
+./src/filesystem.o \
 ./src/hdf5.o \
 ./src/regressionCoefficient.o \
 ./src/tokenize.o \
@@ -88,6 +90,7 @@ CPP_DEPS += \
 ./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
+./src/filesystem.d \
 ./src/hdf5.d \
 ./src/regressionCoefficient.d \
 ./src/tokenize.d \
