@@ -21,7 +21,7 @@ padding: 6px;
 <p>
 In this case study I illustrate the functionality of 
 <a href="../../index.html"><code>ExpressionMatrix2</code> software</a>
-on expression data from <a href=https://doi.org/10.1016/j.celrep.2017.10.030>
+on expression data from <a id=paper href=https://doi.org/10.1016/j.celrep.2017.10.030>
 Darmanis et al., 2017, "Single-Cell RNA-Seq Analysis of Infiltrating Neoplastic Cells at the Migrating Front of Human Glioblastoma", Cell Reports <i>21</i>, 1399-1410, October 31, 2017</a>. 
 Special thanks to the paper's authors for providing early access to their data.
 
@@ -389,7 +389,7 @@ can turn the edges on, if desired, by unchecking the <code>Hide graph edges</cod
 option and clicking on <code>Redraw graph</code>.
 
 <p>
-Note the the Graphviz package is used exclusively to compute the two-dimensional
+Note that the Graphviz package is used exclusively to compute the two-dimensional
 layout of graphs for display. This layout is not used for any other
 purpose, including clustering (more information on clustering follows).
 It is just a visual aid.
@@ -408,6 +408,168 @@ You can also click on a vertex to display the page for the corresponding cell.
 This complements the coloring options to allow you to get 
 an idea of the characteristics of cells present
 in different regions of the graph.
+
+<p>
+The graph shows clumps that correspond to groups of cells with similar expression vectors. 
+In an overly simplified view of cell populations, each of these groups corresponds 
+to a "cell type". The reality, of course, is much more complex. 
+The <code>ExpressionMatrix2</code> software provides <i>clustering</i> functionality
+which finds these clusters automatically, and I will cover this functionality below.
+The <a href=#paper>Darmanis paper</a> used a commonly used clustering approach, 
+<a href=https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding>t-SNE</a>, 
+to classify the cells in groups, and each cell contains two meta data fields
+that describe the clustering computed by t-SNE:
+<ul>
+<li>Meta data field <code>Cluster_2d</code> 
+contains the id of the cluster each cell was assigned to.
+<li>Meta data field <code>Cluster_2d_color</code> contains the color assigned to
+the cluster each cell was assigned to.
+These colors are the same colors used in Figure 2(A) of the <a href=#paper>Darmanis paper</a>.
+The colors are stored as strings in HTML  
+<a href='https://en.wikipedia.org/wiki/Web_colors#Hex_triplet'>hex triplet</a>
+format, that, is in the form #RRGGBB, where RR, GG, BB are hexadecimal bytes
+representing the red, green, and blue intensities.
+</ul>
+
+<p>
+To see where the t-SNE clusters are located in our cell similarity graph, 
+we can redisplay the graph, coloring each cell in the color given by its
+<code>Cluster_2d_color</code>. 
+To do this, in the form above the graph display check the <code>Color by meta data field</code> button,
+and in the selections to the right of that button
+select meta data field <code>Cluster_2d_color</code>
+and ask that the field be interpreted as a <code>color</code>.
+The graph display will no look like this:
+<br><img class=screenshot src=Screenshot-CellGraph-All-tsne.png width=800><br>
+
+<p>
+We see that the clumps in the graph display correspond roughly to the t-SNE clusters.
+
+
+
+<br><br><h2 id=GettingStarted>Limiting the gene set used to compute cell similarity</h2>
+<p>
+The <code>ExpressionMatrix2</code> graph was constructed 
+taking into account expression counts for all genes, 
+which means that the similarity of two cells is defined
+as the regression coefficient between the expression counts
+of the two cells, taking all genes into account.
+In contrast, the <a href=#paper>Darmanis paper</a>
+used only 500 genes selected based on the variability of their
+expression.
+<p>
+In the <code>ExpressionMatrix2</code> software,
+we can use <i>gene sets</i> to restrict the set of genes used.
+Clicking on the <code>Gene sets</code> button at the top of the browser page
+leads to a page that offers a variety of ways to create a new gene set,
+including by pasting a set of gene names. 
+This option could be used to define a gene set identical to the one
+of 500 genes used in the <a href=#paper>Darmanis paper</a>.
+Another option is to use the dialog near the bottom of the page,
+<code>Create a gene set using gene information content</code>.
+This creates a gene set based on an information content criterion
+(e. g. a gene that is equally expressed in all cells has zero information content,
+a gene expressed only in one of N cells has information content log<sub>2</sub>N bits).
+We can select <code>AllGenes</code> as the starting gene set,
+<code>AllCells</code> as the cell set used to compute information content,
+request an information content of at least two bits,
+and name the resulting gene set <code>HighInformationGenes</code>.
+The same operation could also be performed in Python code 
+using function 
+<a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.createGeneSetUsingInformationContent>createGeneSetUsingInformationContent</a>.
+
+<p>
+The resulting gene set has 22442 genes out of the 23368 total.
+You can use the <code>Gene sets</code> page to look at the new gene set in detail.
+To see what genes were removed, you could create a new gene set
+consisting of the set difference betwene gene sets <code>AllGenes</code>
+and <code>HighInformationGenes</code>.
+You can also show the computed information content of each gene by using the dialog under
+<code>Show gene information content</code>
+near the bottom of the <code>Gene sets</code> page.
+
+<p>
+Now that we have a new gene set, we can redo the computation of the
+pairs of similar cells, this time taking into account only the
+gene set we just created. 
+This is done by <code>compute2.py</code>, which is very similar to
+<code>compute1.py</code>, except that it requests using the gene set we just created.
+To run it, make sure ot first interrupt the http server (using Ctrl+C),
+then run command 
+
+<pre>
+./compute2.py
+</pre>
+
+<p>
+Like <code>compute1.py</code>, this takes just a few seconds for this small data set, 
+after which you can restart the http server:
+
+<pre>
+./runServer.py
+</pre>
+
+<p>
+In the browser, click on the <code>Cell graphs</code> button.
+You will notice that cell graph <code>All</code> we previously created
+disappeared. This happens because graphs (contrary to gene sets
+and cell sets) are currently not persistent. 
+In addition to recreating it, you can also create a new graph,
+which you can name 
+<code>AllHighInfo</code>,
+which still uses cell set <code>AllCells</code>,
+but now uses the similar cell pairs <code>LshHighInfo</code>
+just computed by <code>compute2.py</code>.
+With coloring by t-SNE color as before and displayed with edges hidden, the graph looks like this:
+<br><img class=screenshot src=Screenshot-CellGraph-AllHighInfo.png width=800><br>
+
+<p>
+The clumps are generally more separated. However the table shows that 1596
+vertices (cells) were isolated and were removed. This means that for each
+of the 1596 removed cells there was no other cell with similarity
+greater than 0.5, the default similarity threshold used to construct the graph.
+This means that almost half of the cells were removed.
+This is not surprising, because we discarded genes that were expressed in many cells,
+and were therefore generally increasing the similarity between cells.
+
+<p>
+To obtain a more informative graph, 
+we can create a new graph
+in the same way, but choosing a similarity threshold of 0.2 instead of 0.5.
+Call this new graph <code>AllHighInfo2</code>.
+Now the number of isolated cells that were removed decreases to 22.
+
+<p>
+With coloring by t-SNE color as before, the new graph looks like this:
+<br><img class=screenshot src=Screenshot-CellGraph-AllHighInfo2.png width=800><br>
+
+<p>
+Clearly, it can be useful to experiment with the graph creation parameters.
+Different choices can reveal different aspects of the data set.
+
+<p>
+The http server offers various means to investigate the details of this graph - for example,
+what type of cells are present in each of the clumps. 
+To do this, you can use one or more of the following:
+<ul>
+<li>Click on a vertex of the graph to get to the page describing the corresponding cell.
+From that, find the most expressed genes in that cell 
+(in gene set <code>HighInformationGenes</code>), then redisplay the graph, coloring
+by expression of those genes.
+<li>Hover the mouse on a vertex of the graph to get the cell id (a number)
+of the corresponding cell. Then color the graph by similarity to that cell.
+<li>Color the graph using one of the meta data fields. 
+For this data set, coloring by meta data fields
+<code>Selection</code>,
+<code>Location</code>, and
+<code>Sample.name</code>,
+is particularly informative.
+
+<p>
+For example, using the above techniques we find that the purple clump
+at the top of the graph display
+
+
 
 <p>
 To be continued...
