@@ -1113,22 +1113,23 @@ function removeHighlightedMetaData()
 
             // Write the color legend
             html << "<div><table>";
-            html << "<tr><td>Minimum<td class=centered>" << minValue;
+            html << "<tr style='height:30px;'><td>Minimum<td class=centered>" << minValue;
             const int n = 4;
             for(int i=0; i<=n; i++) {
                 const double x = i * (1./n);
-                html << "<tr><td style='background-color:" << spectralColor(x) << "'>";
+                html << "<tr style='height:30px';><td style='background-color:" << spectralColor(x) << "'>";
                 html << "<td class=centered>";
                 if(i==0) {
-                    html << "<input type=text style='text-align:center;' form=coloringForm name=minColorValue id=minColorInput value='" << minColorValue << "'>";
+                    html << "<input type=text style='text-align:center;background-color:LightGrey;' form=coloringForm name=minColorValue id=minColorInput value='" << minColorValue << "'>";
                 } else if(i==n) {
-                    html << "<input type=text style='text-align:center;' form=coloringForm name=maxColorValue id=maxColorInput value='" << maxColorValue << "'>";
+                    html << "<input type=text style='text-align:center;background-color:LightGrey;' form=coloringForm name=maxColorValue id=maxColorInput value='" << maxColorValue << "'>";
                 } else {
                     html << minColorValue + x*(maxColorValue-minColorValue);;
                 }
             }
-            html << "<tr><td>Maximum<td class=centered>" << maxValue;
+            html << "<tr style='height:30px;'><td>Maximum<td class=centered>" << maxValue;
             html << "</table>";
+            html << "You can change the color scale by editing the cells with a grey background.";
         }
     }
 
