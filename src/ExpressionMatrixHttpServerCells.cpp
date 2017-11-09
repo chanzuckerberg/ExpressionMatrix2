@@ -509,13 +509,22 @@ void ExpressionMatrix::compareTwoCells(
 
 
 
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
+
+
+
     // Write the table with the counts.
     html <<
-        "<table>"
+        "<p><strong>The table is sortable.</strong> Click on a header to sort by that header. "
+        "Click again to reverse the sorting order."
+        "<table id=expressionTable class=tablesorter><thead>"
         "<tr><th>Gene<br>id<th>Gene<br>name<th>Count for<br>cell " << cellIds[0] << "<br>";
     writeCellLink(html, cellIds[0], false);
     html << "<th>Count for<br>cell " << cellIds[1] << "<br>";
     writeCellLink(html, cellIds[1], false);
+    html << "</thead><tbody>";
 
     for(const auto& t: data) {
         const int geneId = t.get<1>();
@@ -525,9 +534,15 @@ void ExpressionMatrix::compareTwoCells(
         writeGeneLink(html, geneId, true);
         html << "<td>";
         writeGeneLink(html, geneId, false);
-        html << "<td>" << count0 << "<td>" << count1;
+        html << "<td class=centered>" << count0 << "<td class=centered>" << count1;
     }
-    html << "</table>";
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#expressionTable').tablesorter();"
+        "window.location='#clusterGraph'});"
+        "</script>"
+        ;
 
 
 }
