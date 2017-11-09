@@ -255,6 +255,11 @@ void ExpressionMatrix::compareTwoCells(
     const bool cellId1IsPresent = getParameterValue(request, "cellId1", cellIdStrings[1]);
     const bool cellIdsArePresent = cellId0IsPresent && cellId1IsPresent;
 
+    // Get the name of the gene set to be used for the comparison.
+    string geneSetName = "AllGenes";
+    getParameterValue(request, "geneSetName", geneSetName);
+
+
     // Write the form to get the cell ids.
     html <<
         "<form>"
@@ -269,9 +274,10 @@ void ExpressionMatrix::compareTwoCells(
     if(cellId1IsPresent) {
         html << " value=" << cellIdStrings[1];
     }
+    html << "><br>Select a gene set to be used for the comparison: ";
+    writeGeneSetSelection(html, "geneSetName", {geneSetName}, false);
     html <<
-        ">"
-        "<input type=submit hidden>"
+        "<br><input type=submit value=Compare>"
         "</form>";
 
     // If the cell ids are not specified, do nothing.
@@ -288,21 +294,33 @@ void ExpressionMatrix::compareTwoCells(
             return;
         }
     }
-    // const Cell& cell0 = cells[cellIds[0]];
-    // const Cell& cell1 = cells[cellIds[1]];
+
+    // Access the gene set.
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        html << "<p>Gene set " << geneSetName << " does not exist." << endl;
+        return;
+    }
+    const GeneSet& geneSet = it->second;
 
     // Write a title.
     html  << "<h1>Comparison of cells " << cellIds[0] << " ";
     writeCellLink(html, cellIds[0], false);
     html << " and " << cellIds[1] << " ";
     writeCellLink(html, cellIds[1], false);
-    html << "</h1>";
+    html << "using gene set " << geneSetName << "</h1>";
 
 
     // Write a table of similarities between these two cells.
-    html << "<table>";
-    html << "<tr><th class=left>Exact similarity<td>" << computeCellSimilarity(cellIds[0], cellIds[1]);
-    html << "</table>";
+    html <<
+        "<p>The similarity of these two cells "
+        "computed using gene set " << geneSetName << " is ";
+    const auto oldPrecision = html.precision(3);
+    const auto oldOptions = html.setf(std::ios::fixed);
+    html << computeCellSimilarity(geneSet, cellIds[0], cellIds[1]);
+    html.precision(oldPrecision);
+    html.setf(oldOptions);
+    html << ".<br>";
 
 
 
@@ -323,35 +341,45 @@ void ExpressionMatrix::compareTwoCells(
                 break;
             } else {
                 // it0 is at end, it1 is not.
-                const size_t geneId = it1->first;
-                const double count1 = it1->second;
-                data.push_back(make_tuple(count1, geneId, 0, count1));
+                const GeneId geneId = it1->first;
+                if(geneSet.contains(geneId)) {
+                    const double count1 = it1->second;
+                    data.push_back(make_tuple(count1, geneId, 0, count1));
+                }
                 ++it1;
             }
         } else {
             if(it1==end1) {
                 // it1 is at end, it0 is not.
-                const size_t geneId = it0->first;
-                const double count0 = it0->second;
-                data.push_back(make_tuple(count0, geneId, count0, 0));
+                const GeneId geneId = it0->first;
+                if(geneSet.contains(geneId)) {
+                    const double count0 = it0->second;
+                    data.push_back(make_tuple(count0, geneId, count0, 0));
+                }
                 ++it0;
             } else {
                 // Neither it0 nor it1 are at end.
                 if(it0->first < it1->first) {
-                    const size_t geneId = it0->first;
-                    const double count0 = it0->second;
-                    data.push_back(make_tuple(count0, geneId, count0, 0));
+                    const GeneId geneId = it0->first;
+                    if(geneSet.contains(geneId)) {
+                        const double count0 = it0->second;
+                        data.push_back(make_tuple(count0, geneId, count0, 0));
+                    }
                     ++it0;
                 } else if(it1->first < it0->first) {
-                    const size_t geneId = it1->first;
-                    const double count1 = it1->second;
-                    data.push_back(make_tuple(count1, geneId, 0, count1));
+                    const GeneId geneId = it1->first;
+                    if(geneSet.contains(geneId)) {
+                        const double count1 = it1->second;
+                        data.push_back(make_tuple(count1, geneId, 0, count1));
+                    }
                     ++it1;
                 } else {
-                    const size_t geneId = it0->first;
-                    const double count0 = it0->second;
-                    const double count1 = it1->second;
-                    data.push_back(make_tuple(count0+count1, geneId, count0, count1));
+                    const GeneId geneId = it0->first;
+                    if(geneSet.contains(geneId)) {
+                        const double count0 = it0->second;
+                        const double count1 = it1->second;
+                        data.push_back(make_tuple(count0+count1, geneId, count0, count1));
+                    }
                     ++it0;
                     ++it1;
                 }
