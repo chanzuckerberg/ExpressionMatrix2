@@ -501,14 +501,19 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
        // Compute cell similarity.
        .def("computeCellSimilarity",
+           (
+               double (ExpressionMatrix::*)
+               (const string&, CellId, CellId) const
+           )
            &ExpressionMatrix::computeCellSimilarity,
            "Returns the similarity between the expression vectors of two cells, "
            "specified by their cell ids. "
-           "The similarity is computed using all the genes in the system. "
+           "The similarity is computed taking into account only genes in the specifified gene set. "
            "It is computed as the `Pearson correlation coefficient "
            "<https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`__ "
            "of the expression vectors of the two cells. "
            "The computed similarity is always between -1 and 1, and it is rarely negative. ",
+           arg("geneSetName") = "AllGenes",
            arg("cellId0"),
            arg("cellId1")
        )

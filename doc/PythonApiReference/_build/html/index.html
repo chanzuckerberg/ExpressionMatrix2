@@ -196,8 +196,8 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.computeCellSimilarity">
-<code class="descname">computeCellSimilarity</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>cellId0: int</em>, <em>cellId1: int</em><span class="sig-paren">)</span> &rarr; float</dt>
-<dd><p>Returns the similarity between the expression vectors of two cells, specified by their cell ids. The similarity is computed using all the genes in the system. It is computed as the <a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression vectors of the two cells. The computed similarity is always between -1 and 1, and it is rarely negative.</p>
+<code class="descname">computeCellSimilarity</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellId0: int</em>, <em>cellId1: int</em><span class="sig-paren">)</span> &rarr; float</dt>
+<dd><p>Returns the similarity between the expression vectors of two cells, specified by their cell ids. The similarity is computed taking into account only genes in the specifified gene set. It is computed as the <a class="reference external" href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">Pearson correlation coefficient</a> of the expression vectors of the two cells. The computed similarity is always between -1 and 1, and it is rarely negative.</p>
 </dd></dl>
 
 <dl class="method">
