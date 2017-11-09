@@ -886,6 +886,11 @@ public:
         bool useRegex                       // true=match as regular expression, false=match as string.
         );
 
+    // Create a new cell set directly, using a vector CellIds.
+    bool createCellSet(
+        const string& cellSetName,
+        vector<CellId>& cellIds
+        );
 
 
     // Create a new cell set consisting of cells for which a given meta data field
