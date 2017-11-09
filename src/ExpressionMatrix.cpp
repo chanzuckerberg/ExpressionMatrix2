@@ -1738,6 +1738,16 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
     return true;
 }
 
+// Create a new cell set using a vector of cellIds.
+bool ExpressionMatrix::createCellSet(const string& cellSetName, vector<CellId>& cellIds)
+{
+    if(cellSets.exists(cellSetName)) {
+        cout << "Cell set " << cellSetName << " already exists." << endl;
+        return false;
+    }
+    cellSets.addCellSet(cellSetName, cellIds);
+    return true;
+};
 
 
 
