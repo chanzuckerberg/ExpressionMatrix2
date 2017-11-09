@@ -4,6 +4,7 @@
 #include "ExpressionMatrix.hpp"
 #include "CellGraph.hpp"
 #include "color.hpp"
+#include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -819,9 +820,11 @@ Thinner edge
             return;
         }
         colorByNumber = true;
+        const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+        const GeneSet& geneSet = similarPairs.getGeneSet();
         BGL_FORALL_VERTICES(v, graph, CellGraph) {
             CellGraphVertex& vertex = graph[v];
-            vertex.value = computeCellSimilarity(cellIdForColoringBySimilarity, vertex.cellId);
+            vertex.value = computeCellSimilarity(geneSet, cellIdForColoringBySimilarity, vertex.cellId);
         }
     }
 
