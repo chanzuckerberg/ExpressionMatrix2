@@ -1294,7 +1294,7 @@ void ExpressionMatrix::histogramMetaData(
 
 // Compute the similarity between two cells given their CellId.
 // The similarity is the correlation coefficient of their
-// expression counts.
+// expression counts. This takes into account all genes.
 double ExpressionMatrix::computeCellSimilarity(CellId cellId0, CellId cellId1) const
 {
     // Compute the scalar product of the expression counts for the two cells.
@@ -1345,6 +1345,95 @@ double ExpressionMatrix::computeCellSimilarity(CellId cellId0, CellId cellId1) c
 #endif
 
     return numerator / denominator;
+}
+
+
+// Compute the similarity between two cells given their CellId.
+// The similarity is the correlation coefficient of their
+// expression counts. This takes into account
+// only the genes in the specified gene set.
+// This is done without creating an ExpressionMatrixSubset.
+double ExpressionMatrix::computeCellSimilarity(
+    const string& geneSetName,
+    CellId cellId0,
+    CellId cellId1) const
+{
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = it->second;
+    return computeCellSimilarity(geneSet, cellId0, cellId1);
+}
+double ExpressionMatrix::computeCellSimilarity(
+    const GeneSet& geneSet,
+    CellId cellId0,
+    CellId cellId1) const
+{
+    // Compute the scalar product of the expression counts for the two cells,
+    // taking into account only genes in this gene set.
+    typedef pair<GeneId, float>const* Iterator;
+    const Iterator begin0 = cellExpressionCounts.begin(cellId0);
+    const Iterator end0 = cellExpressionCounts.end(cellId0);
+    const Iterator begin1 = cellExpressionCounts.begin(cellId1);
+    const Iterator end1 = cellExpressionCounts.end(cellId1);
+    Iterator it0 = begin0;
+    Iterator it1 = begin1;
+    double sum01 = 0.;
+    while((it0 != end0) && (it1 != end1)) {
+        const GeneId geneId0 = it0->first;
+        const GeneId geneId1 = it1->first;
+
+        if(geneId0 < geneId1) {
+            ++it0;
+        } else if(geneId1 < geneId0) {
+            ++it1;
+        } else {
+            // Here, geneId0==geneId1.
+            if(geneSet.contains(geneId0)) {
+                sum01 += it0->second * it1->second;
+            }
+            ++it0;
+            ++it1;
+        }
+    }
+
+
+
+    // Compute the other sums we need to compute the correlation coefficient.
+    double sum0 = 0.;
+    double sum00 = 0.;
+    for(it0=begin0; it0!=end0; ++it0) {
+        const GeneId geneId0 = it0->first;
+        if(geneSet.contains(geneId0)) {
+            const auto& count = it0->second;
+            sum0 += count;
+            sum00 += count*count;
+        }
+    }
+    double sum1 = 0.;
+    double sum11 = 0.;
+    for(it1=begin1; it1!=end1; ++it1) {
+        const GeneId geneId1 = it1->first;
+        if(geneSet.contains(geneId1)) {
+            const auto& count = it1->second;
+            sum1 += count;
+            sum11 += count*count;
+        }
+    }
+
+
+
+    // Compute the correlation coefficient.
+    // See, for example, https://en.wikipedia.org/wiki/Correlation_and_dependence
+    const double n = geneSet.size();
+    const double numerator = n*sum01 - sum0*sum1;
+    const double denominator = sqrt(
+            (n*sum00 - sum0*sum0) *
+            (n*sum11 - sum1*sum1)
+            );
+    return numerator / denominator;
+
 }
 
 

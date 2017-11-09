@@ -322,6 +322,8 @@ public:
     // The similarity is the correlation coefficient of their
     // expression counts.
     double computeCellSimilarity(CellId, CellId) const;
+    double computeCellSimilarity(const string& geneSetName, CellId, CellId) const;
+    double computeCellSimilarity(const GeneSet&, CellId, CellId) const;
 
     // Compute the average expression vector for a given set of cells.
     // The last parameter controls the normalization used for the expression counts

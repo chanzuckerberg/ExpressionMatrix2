@@ -64,7 +64,7 @@ void GeneSet::addGene(GeneId geneId)
 
 
 // Return true if a given global GeneId belongs to the set, false otherwise.
-bool GeneSet::contains(GeneId globalGeneId)
+bool GeneSet::contains(GeneId globalGeneId) const
 {
     return getLocalGeneId(globalGeneId) != invalidGeneId;
 }

@@ -34,7 +34,7 @@ public:
     void addGene(GeneId);
 
     // Return true if a given GeneId belongs to the set, false otherwise.
-    bool contains(GeneId);
+    bool contains(GeneId) const;
 
     // Get a reference to the vector of gene ids for the genes in this set.
     // When this function returns, the vector is guaranteed to be sorted by id.
