@@ -316,10 +316,8 @@ void ExpressionMatrix::compareTwoCells(
         "<p>The similarity of these two cells "
         "computed using gene set " << geneSetName << " is ";
     const auto oldPrecision = html.precision(3);
-    const auto oldOptions = html.setf(std::ios::fixed);
     html << computeCellSimilarity(geneSet, cellIds[0], cellIds[1]);
     html.precision(oldPrecision);
-    html.setf(oldOptions);
     html << ".<br>";
 
 
