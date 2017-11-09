@@ -791,7 +791,8 @@ Thinner edge
             return;
         }
         colorByNumber = true;
-
+#if 0
+        // THIS IS THE OLD CODE THAT USES ALL THE GENES
         // Set the value field for all the vertices.
         BGL_FORALL_VERTICES(v, graph, CellGraph) {
             CellGraphVertex& vertex = graph[v];
@@ -807,6 +808,25 @@ Thinner edge
                 } else if(normalizationMethod == NormalizationMethod::Invalid){
                     html << "<p>Invalid normalization method.";
                     return;
+                }
+            }
+        }
+#endif
+
+        // THIS IS THE NEW CODE THAT USES THE GENE SET APPROPRIATE FOR THIS GRAPH.
+        const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+        const GeneSet& geneSet = similarPairs.getGeneSet();
+        const GeneId localGeneId = geneSet.getLocalGeneId(geneId);
+        CZI_ASSERT(localGeneId != invalidGeneId);
+        vector< pair<GeneId, float> > expressionVector;
+        BGL_FORALL_VERTICES(v, graph, CellGraph) {
+            CellGraphVertex& vertex = graph[v];
+            computeExpressionVector(vertex.cellId, geneSet, normalizationMethod, expressionVector);
+            vertex.value = 0.;
+            for(const auto& p: expressionVector) {  // Could do a binary search instead.
+                if(p.first == localGeneId) {
+                    vertex.value = p.second;
+                    break;
                 }
             }
         }
