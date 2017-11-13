@@ -78,8 +78,24 @@ that can be directly imported by Python code.
 
 
 
- 
+ <h2>Generating documentation for the C++ code</h2>
+<p>
+To generate Doxygen documentation for the C++ code,
+make sure you have Doxygen installed
+(ubuntu package name is <code>doxygen</code>),
+cd to <code>ExpressionMatrix2/doc/doxygen</code>, then issue command 
+<code>doxygen</code> without arguments.
 
+Documentation will be created in directory <code>ExpressionMatrix2/doc/doxygen/html</code>. 
+The top level file
+of the documentation will be <code>ExpressionMatrix2/doc/doxygen/html/index.html</code>.
+Point your browser to that to see the documentation.
+
+For readability, the C++ code does not contain
+any Doxygen directives, so the generated documentation
+will only contain what Doxygen can do with <code>EXTRACT_ALL=YES</code>
+and without relying on documentation directives in the code.
+Even with this limitation, this can be very useful to explore the C++ code.
 
 </body>
 </html>

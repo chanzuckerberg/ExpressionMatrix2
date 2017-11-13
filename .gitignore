@@ -3,4 +3,5 @@
 */ExpressionMatrix2.so
 *.tar
 doc/PythonApiReference/_build/doctrees/
+doc/doxygen/html/
 
