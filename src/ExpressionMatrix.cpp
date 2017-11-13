@@ -2222,4 +2222,9 @@ void ExpressionMatrix::createMetaDataFromClusterGraph(
             setCellMetaData(cellId, metaDataName, clusterIdString);
         }
     }
+
+    // Loop over unclustered cells.
+    for(const CellId cellId: clusterGraph.unclusteredCells) {
+        setCellMetaData(cellId, metaDataName, "Unclustered-" + lexical_cast<string>(cellId));
+    }
 }

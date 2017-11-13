@@ -138,8 +138,10 @@ void ClusterGraph::removeSmallVertices(size_t clusterSizeThreshold)
 {
     vector<vertex_descriptor> verticesToBeRemoved;
     BGL_FORALL_VERTICES(cv, *this, ClusterGraph) {
-        if((*this)[cv].cells.size() < clusterSizeThreshold) {
+        const vector<CellId>& vertexCells = (*this)[cv].cells;
+        if(vertexCells.size() < clusterSizeThreshold) {
             verticesToBeRemoved.push_back(cv);
+            copy(vertexCells.begin(), vertexCells.end(), back_inserter(unclusteredCells));
         }
     }
     for(const vertex_descriptor cv: verticesToBeRemoved) {

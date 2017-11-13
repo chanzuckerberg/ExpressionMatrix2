@@ -152,6 +152,10 @@ public:
     map<uint32_t, vertex_descriptor> vertexMap;
 
     vector<GeneId> geneSet;
+
+    // The cell ids for vertices that were removed.
+    vector<CellId> unclusteredCells;
+
 private:
 
 
