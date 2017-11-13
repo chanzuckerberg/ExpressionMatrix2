@@ -586,12 +586,123 @@ visible in the graph.
 
 <br><br><h2 id=Clustering>Clustering</h2>
 <p>
+The <code>ExpressionMatrix2</code> software also provides clustering functionality
+which can be used to automatically find clumps or clusters in a cell similarity graph.
+It uses the <a href="https://en.wikipedia.org/wiki/Label_Propagation_Algorithm">
+Label Propagation Algorithm</a> to assign vertices to clusters.
+Additional clustering algorithms may also be added in the future.
 
+<p>
+After clusters are computed, <code>ExpressionMatrix2</code> also computes
+similarities between the average expression vectors of each cluster,
+and creates a <i>Cluster Graph</i> in which each vertex represents a cluster,
+and two vertices are joined by an undirected edge if the similarity
+between then average expression vectors of the corresponding clusters exceeds a
+given threshold. 
 
+<p>
+To compute the clustering, click on the <code>Clustering</code>
+button near the top of the browser window, 
+then click on "Run clustering and create a new cluster graph".
+A table appears, requesting various parameters for the clustering computation. 
+Here, specify <code>AllHighInfo2</code> as the cell graph.
+Leave all parameters at their default values except for setting
+the minimum number of cells for each cluster to 50
+and the similarity threshold for graph edges to 0.2
+(the same value we used when creating the cell similarity graph).
+Use the same name <code>AllHighInfo2</code>
+as the name of the cluster graph to be created (cell graphs and cluster graphs
+use different name spaces, so it's ok to use the same name). 
+Finally, click on <code>Run clustering</code>.
+A page showing log output for the clustering appears. 
+Here, click on <code>Continue</code> to get back to ther <code>Cluster graphs</code>
+page. This page will now contain a link to the newly created cluster graph 
+<code>AllHighInfo2</code>. 
+Click on that link to get a display of the cluster graph:
+<br><img class=screenshot src=Screenshot-ClusterGraph.png width=800><br>
 
+<p>
+Here, each circle corresponds to a cluster. You can hover on the circle
+to find out how many cells are in each cluster, and also to see the most
+expressed genes in each cluster.
+You can also get more detailed information on a cluster,
+including the list of cells that belong to it,
+by clicking on it. 
+Each edge in the display is labeled by the similarity between
+the average gene expressions of the two clusters it joins.
+
+<p>
+To see how these cluster correspond to clumps in the cell graph,
+we can store the result of the clustering operation in a new cell meta data field.
+To do this, click on the button labeled <code>Store the cluster ids in this cluster graph
+in cell meta data name</code> after specifying <code>Cluster</code> as the name
+of the cell meta data to be used.
+Now go back to the display of cell graph <code>AllHighInfo2</code>,
+and color it using the meta data field we just created, <code>Cluster</code>,
+interpreted as a category.
+The display of the cell graph will now look like this:
+<br><img class=screenshot src=Screenshot-CellGraph-ByCluster.png width=800><br>
+
+The color in this display correspond to the colors in the display of the cluster
+graph, which allows you to locate each of the computed clusters in the cell graph.
+You can then see that the general connectivity of the cel graph
+is consistent with the graph connectivity of the cluster graph.
+For example, we see from the cell graph that the green and bright purple
+clusters (clusters 0 and 4) are close to each other, 
+and in fact the cluster graph shows a similarity 0.51 between those clusters.
+You can also see that the the relative placement of clusters in the two graphs 
+are similar, even though the two-dimensional layouts,
+which are used for display purposes only, are not necessarily consistent.
+
+<p>
+The cluster graph therefore describes in a synthethic way the
+clumps in the cell graph and their relative similarities.
+Of course, several parameters were used to construct the cell similarity
+graph and the cluster graph, and the actual clusters will depend on the choice 
+of these parameters. This is to be expected, as the type and amount of 
+desired clustering depends on what questions one wants to answer.
+Therefore, changing the creation parameters for the cell and cluster graphs 
+can be used in the process of exploring and understanding the data.
+
+<p>
+Despite the above considerations, it is interesting to
+compare the results of this clustering with 
+the clustering obtained via t-SNE in the
+<a href=#paper>Darmanis paper</a>.
+To do this, click on the button labeled
+o<code>Cell meta data</code>, then, under 
+<code>Contingency table for two meta data fields</code>,
+select cell set name <code>AllCells</code>
+and meta data names <code>Cluster</code>
+(the clustering we just computed)
+and <code>cluster_2d</code>
+(the t-SNE clustering from the <a href=#paper>Darmanis paper</a>).
+This displays a contingency table of the two clusterings -
+that is, a table containing the number of cells
+with each combination of the two clusterings.
+
+<br><img class=screenshot src=Screenshot-ContingencyTable-Clustering.png width=800><br>
+<p>
+For example, this shows that cluster 0 in our clustering (900 cells) is split into clusters 
+7 and 8 in the t-SNE clustering.
+Conversely, t-SNE cluster 8 (1329 cells) is split between clusters 0, 3, 4, 7, and 10
+in our clustering.
+We see from our cluster graph display that, for example, the similarity
+between the average expressions of clusters 0 and 3 is only 0.51,
+so it probably makes sense to keep these are two separate clusters.
+For other clusters, there is more agreement between the two clustering.
+For example, t-SNE cluster 9 largely corresponds to our cluster 2,
+and t-SNE cluster 2 largely corresponds to our cluster 11.
+As discussed above, the relative merits of each clustering
+can be dependent on the type of information we are trying to extract.
+The <code>ExpressionMatrix2</code> software allows quick exploration 
+of clustering alternatives, by making it fast an easy to generate
+multiple cell similarity graphs and cluster graphs with different 
+creation parameters.
 
 <p>
 To be continued...
+
 
 </body>
 </html>
