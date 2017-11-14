@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lboost_filesystem -lpython2.7 -lhdf5_hl_cpp -lhdf5_hl
+LIBS := -lboost_filesystem -lhdf5_hl_cpp -lhdf5_hl
 
