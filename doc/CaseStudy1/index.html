@@ -52,10 +52,13 @@ these data. It contains the following sections:
 <a href=#Compute1>Finding pairs of similar cells</a>
 
 <br>
-<a href=#RunServer1>A first look at the data</a>
+<a href=#RunServer>A first look at the data</a>
 
 <br>
 <a href=#Clustering>Clustering</a>
+
+<br>
+<a href=#Conclusion>Conclusion</a>
 
 <p>
 Running this case study can serve as a useful introduction
@@ -193,7 +196,7 @@ See <a href=compute1.py.html>here</a> for details of <code>compute1.py</code>.
 
 
 
-<br><br><h2 id=RunServer1>A first look at the data</h2>
+<br><br><h2 id=RunServer>A first look at the data</h2>
 <p>
 At this point we are ready to take a first look at the data
 using the http server functionality of the <code>ExpressionMatrix2</code>
@@ -626,13 +629,38 @@ Here, each circle corresponds to a cluster. You can hover on the circle
 to find out how many cells are in each cluster, and also to see the most
 expressed genes in each cluster.
 You can also get more detailed information on a cluster,
-including the list of cells that belong to it,
+including the average gene expression in the cluster and the list of cells that belong to it,
 by clicking on it. 
 Each edge in the display is labeled by the similarity between
 the average gene expressions of the two clusters it joins.
 
 <p>
-To see how these cluster correspond to clumps in the cell graph,
+You can also compare the gene expression of two clusters or sets of clusters.
+To do this, in the page that displays the cluster graph, click on 
+<code>Compare gene expression between clusters</code>.
+In the dialog that appears, specify a "first set" consisting of cluster 0 
+(the cluster displayed in green) and a "second set" consisting of cluster 3
+(the cluster displayed in magenta/fuchsia color).
+According to the display of the cluster graph, the similarity 
+of the average expressions of these two clusters is 0.51.
+Then click on <code>Compare</code>.
+You get the following display - a scatter plot of the average expression counts
+in the second sets versus those in the first set.
+<br><img class=screenshot src=Screenshot-ClusterExpression.png width=800><br>
+
+Here, each point corresponds to a gene, and you can hover on a point to get the gene name.
+This allows you to easily locate genes tha are over-expressed or under-expressed
+in one of the two clusters relative to the other. 
+For example, the rightmost point in the display corresponds to gene <code>CCL3</code>,
+and from its position we can see that this gene is roughly 5 times more
+expressed in the first set (cluster 0) then in the second set (cluster 3).
+
+<p>
+You can do the same
+comparison for arbitrary sets of clusters, not just individual clusters.
+
+<p>
+To see how the cluster correspond to clumps in the cell graph,
 we can store the result of the clustering operation in a new cell meta data field.
 To do this, click on the button labeled <code>Store the cluster ids in this cluster graph
 in cell meta data name</code> after specifying <code>Cluster</code> as the name
@@ -696,12 +724,25 @@ and t-SNE cluster 2 largely corresponds to our cluster 11.
 As discussed above, the relative merits of each clustering
 can be dependent on the type of information we are trying to extract.
 The <code>ExpressionMatrix2</code> software allows quick exploration 
-of clustering alternatives, by making it fast an easy to generate
+of clustering alternatives, by making it fast and easy to generate
 multiple cell similarity graphs and cluster graphs with different 
 creation parameters.
 
+
+
+<br><br><h2 id=Conclusion>Conclusion</h2>
 <p>
-To be continued...
+I used this case study to illustrate most of the functionality of
+the <code>ExpressionMatrix2</code> software currently available, but not all of it. 
+Most notably, this case study did not illustrate
+the functionality to define <i>cell sets</i> - arbitrary subsets of
+cells. 
+Once a cell set is defined, it can be used to create a cell
+similarity graph, which will include only cells in the set.
+This way you can restrict your investigation to a subset of cells of interest.
+This can facilitate data interpretation by reducing distractions
+due to cell populations unrelated to the topic of interest.
+</ul>
 
 
 </body>
