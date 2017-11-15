@@ -595,6 +595,14 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("lshCount") = 1024,
            arg("seed") = 231
        )
+       .def("findSimilarPairs3Benchmark",
+           &ExpressionMatrix::findSimilarPairs3Benchmark,
+           "Like findSimilarPairs3, but does not store anything. Used for benchmarks.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshCount") = 1024,
+           arg("seed") = 231
+       )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
            "Only intended to be used for testing. "

@@ -118,7 +118,6 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
     // Loop over all the cells in the cell set we are using.
     // The CellId is local to the cell set we are using.
     cout << timestamp << "Computation of cell LSH signatures begins." << endl;
-    size_t nonZeroExpressionCount = 0;
     const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId=0; localCellId<cellCount; localCellId++) {
         if((localCellId % 1000) == 0) {
@@ -150,7 +149,6 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
         for(const auto& p : expressionMatrixSubset.cellExpressionCounts[localCellId]) {
             const GeneId localGeneId = p.first;
             const double count = double(p.second);
-            ++nonZeroExpressionCount;
 
             // Add the contribution of this gene to the scalar products.
             const auto& v = lshVectors[localGeneId];
@@ -171,8 +169,10 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
     }
     const auto t1 = std::chrono::steady_clock::now();
     cout << timestamp << "Computation of cell LSH signatures ends." << endl;
+    const size_t nonZeroExpressionCount = expressionMatrixSubset.totalExpressionCounts();
     cout << "Processed " << nonZeroExpressionCount << " non-zero expression counts for ";
     cout << geneCount << " genes and " << cellCount << " cells." << endl;
+    cout << "Average number of expression counts per cell  is " << double(nonZeroExpressionCount) / double(cellCount) << endl;
     cout << "Average expression matrix sparsity is " <<
         double(nonZeroExpressionCount) / (double(geneCount) * double(cellCount)) << endl;
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());

@@ -439,7 +439,7 @@ public:
 
     // Find similar cell pairs by looping over all pairs
     // and using an LSH approximation to compute the similarity between two cells.
-    // This is a newer replacement for findSimilarPairs3.
+    // This is a newer replacement for findSimilarPairs1.
     // It is written using class Lsh.
     void findSimilarPairs3(
         const string& geneSetName,      // The name of the gene set to be used.
@@ -447,6 +447,15 @@ public:
         const string& name,             // The name of the SimilarPairs object to be created.
         size_t k,                       // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
+
+    // Same as findSimilarPairs3, but without storing anything.
+    // Used for benchmarking.
+    void findSimilarPairs3Benchmark(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
         size_t lshCount,                // The number of LSH vectors to use.
         unsigned int seed               // The seed used to generate the LSH vectors.
         );

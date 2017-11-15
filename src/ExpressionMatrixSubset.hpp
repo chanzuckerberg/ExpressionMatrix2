@@ -72,6 +72,13 @@ public:
     // except that it uses local GeneId's and CellId's instead of global ones.
     CellExpressionCounts cellExpressionCounts;
 
+    // Return the total number of non-zero expression counts
+    // for all cells and genes in the subset.
+    size_t totalExpressionCounts() const
+    {
+        return cellExpressionCounts.totalSize();
+    }
+
     // Compute the similarity between two cells, identified by their ids
     // local to our cell set, and using the stored expression counts
     // (which reflect only genes in our gene set).

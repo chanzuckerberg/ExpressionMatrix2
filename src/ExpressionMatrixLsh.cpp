@@ -38,6 +38,7 @@ using namespace ExpressionMatrix2;
 
 #include <cmath>
 #include "fstream.hpp"
+#include <chrono>
 
 
 // Generate the random unit LSH vectors.
@@ -1282,6 +1283,7 @@ void ExpressionMatrix::findSimilarPairs3(
     // (around 15 ns per pair when using LSH vectors of 1024 bits), but
     // still scales like the square of the number of cells in the cell set.
     cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
         if(localCellId0>0 && ((localCellId0%10000) == 0)) {
             cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
@@ -1299,11 +1301,83 @@ void ExpressionMatrix::findSimilarPairs3(
             }
         }
     }
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
 
     // Sort the similar pairs for each cell by decreasing similarity.
     cout << timestamp << "Sorting similar pairs." << endl;
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs3 ends." << endl;
+
+    cout << "Time for all pairs: " << t01 << " s." << endl;
+    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+}
+
+
+
+// Same as findSimilarPairs3, but without storing anything.
+// Used for benchmarking.
+void ExpressionMatrix::findSimilarPairs3Benchmark(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    size_t lshCount,                // The number of LSH vectors to use.
+    unsigned int seed               // The seed used to generate the LSH vectors.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs3Benchmark begins." << endl;
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset";
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+
+    // Loop over all pairs. This is much faster than findSimilarPairs0
+    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
+    // still scales like the square of the number of cells in the cell set.
+    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
+    double sum = 0.;
+    for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
+        for(CellId localCellId1=localCellId0+1; localCellId1!=cellCount; localCellId1++) {
+            // Compute the LSH similarity between these two cells.
+            const double similarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
+            sum += similarity;
+        }
+    }
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+
+
+    cout << "Time for all pairs: " << t01 << " s." << endl;
+    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+    cout << "Average similarity: " << sum / (0.5*double(cellCount)*double(cellCount-1)) << endl;
+
 }
 
 
