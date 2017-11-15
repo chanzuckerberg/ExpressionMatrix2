@@ -5,12 +5,12 @@
 
 // CZI.
 #include "CZI_ASSERT.hpp"
+#include "filesystem.hpp"
 #include "touchMemory.hpp"
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
 #include "boost_lexical_cast.hpp"
-#include <boost/filesystem/operations.hpp>
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
 #include <cstring>
@@ -569,9 +569,7 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
 {
     const string savedFileName = fileName;
     close();	// This forgets the fileName.
-    if(!boost::filesystem::remove(savedFileName)) {
-        throw runtime_error("Error removing " + savedFileName);
-    }
+    filesystem::remove(savedFileName);
 }
 
 

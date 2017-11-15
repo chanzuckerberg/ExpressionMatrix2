@@ -1,9 +1,9 @@
 #include "CellSets.hpp"
 #include "deduplicate.hpp"
+#include "filesystem.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
-#include <boost/filesystem.hpp>
 #include <regex>
 
 
@@ -19,13 +19,13 @@ void CellSets::createNew(const string& directoryNameArgument)
     // Start with no cell sets.
     cellSets.clear();
 
-    // Loop over all files in the directory.
+    // Loop over all files in the directory to remove
+    // any existing cell sets.
     std::regex regex(directoryName + "/CellSet-.*");
-    using boost::filesystem::directory_iterator;
-    for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
-        const string fileName = it->path().string();
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(const string& fileName: directoryContents) {
         if(std::regex_match(fileName, regex)) {
-            boost::filesystem::remove(fileName);
+            filesystem::remove(fileName);
         }
     }
 }
@@ -33,9 +33,6 @@ void CellSets::createNew(const string& directoryNameArgument)
 // Access existing CellSets in the specified directory.
 void CellSets::accessExisting(const string& directoryNameArgument, bool allowReadOnly)
 {
-    // Some boost functionality we use in this function.
-    using boost::filesystem::directory_iterator;
-    using boost::filesystem::directory_iterator;
 
     // Store the directory name.
     // It will be used if new cell sets are created.
@@ -46,8 +43,8 @@ void CellSets::accessExisting(const string& directoryNameArgument, bool allowRea
 
     // Loop over all files in the directory.
     std::regex regex(directoryName + "/CellSet-.*");
-    for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
-        const string fileName = it->path().string();
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(const string& fileName: directoryContents) {
         if(!std::regex_match(fileName, regex)) {
             continue;
         }

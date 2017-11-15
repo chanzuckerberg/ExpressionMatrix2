@@ -1011,9 +1011,10 @@ void ExpressionMatrix::removeCellSet(const vector<string>& request, ostream& htm
 
     const string fileName = it->second->fileName;
     cellSets.cellSets.erase(it);
-    if(boost::filesystem::remove(fileName)) {
+    try {
+    	filesystem::remove(fileName);
         html << "<p>Cell set " << cellSetName << " was removed.";
-    } else {
+    } catch(...) {
         html << "<p>Cell set " << cellSetName << " was removed from memory but the corresponding memory mapped file ";
         html << fileName << " could not be removed.";
     }
