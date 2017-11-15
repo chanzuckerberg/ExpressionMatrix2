@@ -232,12 +232,13 @@ public:
      the given threshold are added.
 
      *******************************************************************************/
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
     void addCellsFromHdf5(
         const string& fileName,
         const string& cellNamePrefix,
         const vector< pair<string, string> > cellMetaData,  // Added to all cells.
         double totalExpressionCountThreshold);
-
+#endif
 
 
     // Add cells from files created by the BioHub pipeline.
@@ -258,10 +259,12 @@ public:
 
     // September 2017, 10X Genomics data.
     // See top of ExpressionMatrixBioHub.cpp for details.
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
     void addCellsFromBioHub2(
         const string& platesFileName,    // The name of the file containing per-plate meta data.
         double totalExpressionCountThreshold
         );
+#endif
 
     // November 2017, Illumina data.
     // See top of ExpressionMatrixBioHub.cpp for details.

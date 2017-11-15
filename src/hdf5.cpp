@@ -1,3 +1,4 @@
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
 // Functions used to read hdf5 files containing expression matrices
 // created by the 10X Genomics pipeline.
 
@@ -82,3 +83,4 @@ void hdf5::getTopLevelGroups(
 	H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, 0, getTopLevelGroupsHelper, &groupNames);
 }
 
+#endif

@@ -13,6 +13,7 @@
 #   default values for one or more of the following 
 #   configuration variables, listed here with their
 #   default values suitable for ubuntu16 and Python 3:
+#   BUILD_WITH_HDF5=ON
 #   PYTHON_INCLUDE_PATH=/usr/include/python3.5m
 #   PYBIND11_INCLUDE_PATH=/usr/local/include/python3.5
 #   HDF5_INCLUDE_PATH=/usr/include/hdf5/serial
@@ -90,6 +91,15 @@ message(STATUS
 
 
 
+# Option to turn off hdf5 functionality (to eliminate
+# dependency on hdf5 include files and libraries).
+option(BUILD_WITH_HDF5 "Include HDF5 functionality in the build." ON)
+message(STATUS "BUILD_WITH_HDF5=" ${BUILD_WITH_HDF5})
+if(NOT BUILD_WITH_HDF5)
+    add_definitions(-DCZI_EXPRESSION_MATRIX2_SKIP_HDF5)
+endif(NOT BUILD_WITH_HDF5)
+
+
 # Include directory for Python.
 # This determines the Python version that the
 # library will work with.
@@ -117,7 +127,9 @@ if(NOT HDF5_INCLUDE_PATH)
     # Default value for ubuntu16.
     set(HDF5_INCLUDE_PATH /usr/include/hdf5/serial)
 endif(NOT HDF5_INCLUDE_PATH)
-include_directories(${HDF5_INCLUDE_PATH})
+if(BUILD_WITH_HDF5)
+    include_directories(${HDF5_INCLUDE_PATH})
+endif(BUILD_WITH_HDF5)
 message(STATUS "HDF5_INCLUDE_PATH=" ${HDF5_INCLUDE_PATH})
 
 
@@ -131,9 +143,11 @@ else(NOT HDF5_LIBRARIES)
 endif(NOT HDF5_LIBRARIES)
 string(REPLACE ";" " " SPACE_SEPARATED_HDF5_LIBRARIES "${HDF5_LIBRARIES}")
 message(STATUS HDF5_LIBRARIES=${SPACE_SEPARATED_HDF5_LIBRARIES})
-foreach(HDF5_LIBRARY IN LISTS HDF5_LIBRARIES)
-    target_link_libraries(ExpressionMatrix2 ${HDF5_LIBRARY})
-endforeach(HDF5_LIBRARY)
+if(BUILD_WITH_HDF5)
+    foreach(HDF5_LIBRARY IN LISTS HDF5_LIBRARIES)
+        target_link_libraries(ExpressionMatrix2 ${HDF5_LIBRARY})
+    endforeach(HDF5_LIBRARY)
+endif(BUILD_WITH_HDF5)
 
 
 

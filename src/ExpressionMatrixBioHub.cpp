@@ -396,6 +396,7 @@ void ExpressionMatrix::addCellMetaData(const string& cellMetaDataFileName)
 
 // SEPTEMBER 2017, 10X GENOMICS DATA: addCellsFromBioHub2
 // See the beginning of this file for more information.
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
 void ExpressionMatrix::addCellsFromBioHub2(
     const string& plateFileName,
     double totalExpressionCountThreshold
@@ -502,6 +503,7 @@ void ExpressionMatrix::addCellsFromBioHub2(
     }
     cout << timestamp << "Processed " << plateCount << " plates." << endl;
 }
+#endif
 
 
 

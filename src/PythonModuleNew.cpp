@@ -138,6 +138,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellMetaDataFileName"),
            arg("cellMetaDataFileSeparators") = ","
        )
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
        .def("addCellsFromHdf5",
            &ExpressionMatrix::addCellsFromHdf5,
            "Adds cells to the system, reading expression counts "
@@ -148,6 +149,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellMetaData"),
            arg("totalExpressionCountThreshold")
        )
+#endif
        .def("addCellsFromBioHub1",
            &ExpressionMatrix::addCellsFromBioHub1,
            "Add to the system cells created by the BioHub pipeline "
@@ -158,6 +160,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("finalMetaDataCount"),
            arg("plateMetaDataFileName")
        )
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
        .def("addCellsFromBioHub2",
            &ExpressionMatrix::addCellsFromBioHub2,
            "Add to the system cells created by the BioHub pipeline "
@@ -166,7 +169,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("plateFileName"),
            arg("totalExpressionCountThreshold")
        )
-       .def("addCellsFromBioHub3",
+#endif
+	   .def("addCellsFromBioHub3",
            &ExpressionMatrix::addCellsFromBioHub3,
            "Add to the system cells created by the BioHub pipeline "
            "(November 2017 version, for Illumina data). "

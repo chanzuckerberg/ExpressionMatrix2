@@ -1,5 +1,6 @@
 // Functionality to read expression matrix data from an hdf5 file created
 // by the 10X Genomics pipeline.
+#ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
 
 #include "ExpressionMatrix.hpp"
 #include "hdf5.hpp"
@@ -215,3 +216,4 @@ void ExpressionMatrix::addCellsFromHdf5(
 
     cout << "There are " << cellCount() << " cells and " << geneCount() << " genes." << endl;
 }
+#endif
