@@ -11,7 +11,8 @@
 <h1>Building from source</h1>
 
 <p>
-The ExpressionMatrix2 code currently supports the following platforms:
+A release version of the <code>ExpressionMatrix2</code>
+comes with pre-built version for the following platforms:
 
 <ul>
 <li>Ubuntu 16.0, for use with Python 3.5.
@@ -19,12 +20,12 @@ The ExpressionMatrix2 code currently supports the following platforms:
 </ul>
 
 <p>
-To run in one of the above platforms, you can use one of the ExpressionMatrix2 releases 
-from GitHub. However,you will need to build the code from source if you want to do one of the following:
+To run in one of the above platforms, you can use one of the <code>ExpressionMatrix2</code> releases 
+available from GitHub. However,you will need to build the code from source if you want to do one of the following:
 
 <ul>
 <li>
-Modify the code, for example to add functionality, fix bugs, or port it to other systems.
+Modify the code, for example to add functionality, fix bugs, or port it to other platforms.
 <li>
 Debug the code.
 <li>
@@ -32,25 +33,50 @@ Run the code on an unsupported platform.
 </ul>
 
 
+<h2>Build options</h2>
+<p>
+The <code>ExpressionMatrix2</code> can be built in a few different ways.
+Choose the one that is best for your needs:
+<ul>
+<li>Using the Eclipse software development IDE.
+<li>Using the Eclipse makefiles, outside of the Eclipse IDE.
+<li>Using CMake.
+</ul>
 
-<h2>Building on a supported platform</h2>
+
+
+<h2>Prerequisites</h2>
 
 <p>
-The table below describes the prerequisites necessary to build from source on 
-the supported platforms. See <a href=GettingStarted.html>here</a>
-for information of the prerequisites necessary to run.
+A small number of prerequisites are necessary to build the 
+<code>ExpressionMatrix2</code>:
+<ul>
+<li>The Boost libraries, including development files.
+<li>A version of Python, including development files.
+<li>pybind11, in a version consistent with the Python version to be used.
+<li>HDF5 libraries (but HDF5 functionality can be disabled when building using <code>CMake</code>).
+</ul>
+This list does not include prerequisites, such as the <code>gcc</code> compiler,
+which are available on most Linux distributions.
+
+
+
+<p>
+The table below describes details of the prerequisites for 
+ubuntu16 (with Python3) and CentOs7 (with Python 2). See <a href=GettingStarted.html>here</a>
+for information on the prerequisites necessary to run.
 
 <table>
-<tr><th class=left>Operating system<td class=centered>Ubuntu 16.04<td class=centered>CentOS 7
+<tr><th class=left>Operating system<td class=centered>Ubuntu 16.04<td class=centered>CentOs 7
 <tr><th class=left>Python version<td class=centered>3.5<td class=centered>2.7
 <tr><th class=left>Name of Eclipse configurations<td class=centered>Release-ubuntu16-python3,<br>Debug-ubuntu16-python3<td class=centered>Release-centos7-python2
 <tr><th class=left>Boost libraries version<td class=centered>1.58.0<td class=centered>1.53.0
 <tr><th class=left>Boost libraries package<br>required to build<br>(and sufficient to run)<td class=centered>libboost-all-dev<td class=centered>boost-devel-1.53.0
 <tr><th class=left>Boost libraries package<br>required to run<td class=centered>libboost-all-dev<td class=centered>boost-1.53.0
-<tr><th class=left>Python package<br>required to build<br>(and sufficient to run)<td class=centered>python3-all-dev<td class=centered>python-devel-2.7.5-48
-<tr><th class=left>Python package<br>required to run<td class=centered>python3<td class=centered>python-devel-2.7.5-48
+<tr><th class=left>Python package<br>required to build<br>(and sufficient to run)<td class=centered>python3-all-dev<td class=centered>python-devel-2.7.5
+<tr><th class=left>Python package<br>required to run<td class=centered>python3<td class=centered>python-devel-2.7.5
 <tr><th class=left>HDF5 packages<br>required to build<br>(and sufficient to run)<td class=centered>libhdf5-dev, libhdf5-cpp-11<td class=centered>hdf5-devel-1.8.12-8
-<tr><th class=left>HDF5 packages<br>required to run<td class=centered>libhdf5-10, libhdf5-cpp-11<td class=centered>hdf5-1.8.12-8
+<tr><th class=left>HDF5 packages<br>required to run<td class=centered>libhdf5-10, libhdf5-cpp-11<td class=centered>hdf5
 
 <tr><th class=left>pybind11
 <td>Install using <code>"pip3 install pybind11"</code>. If <code>pip3</code>
@@ -60,22 +86,103 @@ command is not available, install CentOs 7 package <code>python-pip</code>.
 </table>
 
 
+<br><br><h2>Building in the Eclipse IDE</h2>
 <p>
-Once the prerequisites listed above have been installed and you have a local copy of the repository, you have two choices to build from source:
+This requires a working version of the <code>Eclipse</code> IDE to be installed.
+Eclipse project files <code>.project</code> and <code>.cproject</code> are provided in the top directory of the repository. 
+After opening the project files in Eclipse, you can use Eclipse commands to build the Eclipse configuration 
+listed in the table above that corresponds to your platform
+(<code>Release-ubuntu16-python3</code> or <code>Release-centos7-python2</code>).
+A successful build will create shared library <code>ExpressionMatrix.so</code> 
+that can be directly imported by Python code.
+You can also use <code>Eclipse</code> to create a new build configuration
+appropriate for a different platform.
+
+
+
+<br><br><h2>Building using the Eclipse makefiles</h2>
+<p>
+The makefiles created by the Eclipse IDE are included in the GitHub repository,
+so this does not require a working version of the <code>Eclipse</code> IDE to be installed.
+You can simply use the <code>make</code> command from the 
+<code>Release-ubuntu16-python3</code> or <code>Release-centos7-python2</code>
+directory.
+A successful build will create shared library <code>ExpressionMatrix.so</code> 
+that can be directly imported by Python code.
+
+<p>
+If your build machine has multiple processors and sufficient memory,
+you can use the <code>-j</code> option of the <code>make</code> command
+to speed up the build. See the <code>man</code> page for 
+the <code>make</code> command for more information.
+
+
+
+<br><br><h2>Building using <code>CMake</code></h2>
+<p>
+The <code>ExpressionMatrix2/src</code> directory contains
+file <code>CMakeLists.txt</code> which can be used for 
+building using <code>CMake</code>.
+This provides some amount of customization that can be used
+to build on other Linux platforms. 
+To build in this way:
 
 <ul>
 <li>
-Use the Eclipse C++ IDE. Eclipse project files .project and .cproject are provided in the top directory of the repository. 
-After opening the project files in Eclipse, you can use Eclipse commands to build the Eclipse configuration, listed in the table above, that corresponds to your platform.
-
+Create a new empty directory to contain the build and <code>cd</code> to it.
+This directory can be anywhere - it does not have to
+be in the <code>ExpressionMatrix2</code> source tree.
 <li>
-Use a <code>make</code> command in the directory with name equal to the name of the Eclipse configuration, 
-listed in the table above, that corresponds to your platform.
+Run command "<code>cmake .../ExpressionMatrix2/src</code>",
+making sure to enter the correct local path for the <code>ExpressionMatrix2/src</code>
+directory. 
+This will create a <code>Makefile</code>.
+<li>
+Run command <code>make</code>. 
+This will create <code>ExpressionMatrix2.so</code>.
 </ul>
 
-In both cases, a successful build will create shared library <code>ExpressionMatrix.so</code> 
-that can be directly imported by Python code.
+<p>
+If your build machine has multiple processors and sufficient memory,
+you can use the <code>-j</code> option of the <code>make</code> command
+to speed up the build. See the <code>man</code> page for 
+the <code>make</code> command for more information.
 
+
+<p>
+You can use <code>cmake</code> option <code>-D</code> to override
+default values for one or more of the following 
+configuration variables, listed here with their
+default values suitable for ubuntu16 and Python 3:
+<ul>
+<li><code>PYTHON_INCLUDE_PATH</code>, default value <code>/usr/include/python3.5m</code>:
+The include path for the Python version you want your shared library to work with.
+<li><code>PYBIND11_INCLUDE_PATH</code>, default value <code>/usr/local/include/python3.5</code>:
+The directory where <code>pybind11</code> include files are installed.
+<li><code>HDF5_INCLUDE_PATH</code>, default value <code>/usr/include/hdf5/serial</code>:
+The directory where Hdf5 include files are located.
+<li><code>HDF5_LIBRARIES</code>, default value <code>hdf5_cpp hdf5_serial</code>:
+The names of the HDF5 libraries to link with.
+<li><code>BUILD_WITH_HDF5</code>, default value <code>ON</code>:
+if set to <code>OFF</code>, disables HDF5 functionality
+and eliminates the dependency on HDF5 include files and libraries.
+</ul>
+
+
+<p>
+Here are examples of <code>-D</code> options:
+<ul>
+<li>Ubuntu 16, Python 3: 
+    <ul>
+    <li>No option needed.
+    </ul>
+<li>Ubuntu 16, Python 2: 
+   <ul>
+   <li><code>-DPYTHON_INCLUDE_PATH=/usr/include/python2.7</code> 
+   <li><code>-DPYBIND11_INCLUDE_PATH=/usr/local/include/python2.7</code>
+   </ul>
+</ul>
+  
 
 
  <h2>Generating documentation for the C++ code</h2>
