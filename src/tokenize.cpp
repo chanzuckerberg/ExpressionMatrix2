@@ -4,6 +4,7 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include "boost_lexical_cast.hpp"
 
 #include "stdexcept.hpp"
@@ -152,5 +153,33 @@ size_t ChanZuckerberg::ExpressionMatrix2::countTokensInSecondLine(
 
     // Return the number of tokens.
     return tokens.size();
+
+}
+
+
+
+// If the given string is prefix+middle+suffix,
+// return true and strip out the prefix and suffix.
+// Otherwise, return false and leave the string unchanged.
+bool ChanZuckerberg::ExpressionMatrix2::stripPrefixAndSuffix(
+    const string& prefix,
+    const string& suffix,
+    string& s
+)
+{
+    // If it does not begin with the prefix, return false.
+    if(!boost::starts_with(s, prefix)) {
+        return false;
+    }
+
+    // If it does not end with the suffix, return false.
+    if(!boost::ends_with(s, suffix)) {
+        return false;
+    }
+
+    // Strip the prefix and the suffix, then return true.
+    s.erase(0, prefix.size());
+    s.erase(s.size()-suffix.size(), string::npos);
+    return true;
 
 }

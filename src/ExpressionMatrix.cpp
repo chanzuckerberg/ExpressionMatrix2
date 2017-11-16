@@ -128,15 +128,14 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
     // Access the gene sets.
     using boost::filesystem::directory_iterator;
     std::regex regex(directoryName + "/GeneSet-(.*)-GlobalIds");
+    const string fileNamePrefix = directoryName + "/GeneSet-";
+    const string fileNameSuffix = "-GlobalIds";
     for(auto it = directory_iterator(directoryName); it != directory_iterator(); ++it) {
-        const string fileName = it->path().string();
-        std::smatch regexMatchResults;
-        if(!std::regex_match(fileName, regexMatchResults, regex)) {
-            continue;
+        string name = it->path().string();  // This is the entire file name.
+        if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
+            // name now contains just the gene set name.
+            geneSets[name].accessExisting(directoryName + "/GeneSet-" + name, allowReadOnly);
         }
-        CZI_ASSERT(regexMatchResults.size() == 2);
-        const string& geneSetName = regexMatchResults[1];
-        geneSets[geneSetName].accessExisting(directoryName + "/GeneSet-" + geneSetName, allowReadOnly);
     }
     if(geneSets.find("AllGenes") == geneSets.end()) {
         throw runtime_error("Gene set \"AllGenes\" is missing.");

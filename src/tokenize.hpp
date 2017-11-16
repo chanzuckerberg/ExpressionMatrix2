@@ -45,6 +45,17 @@ namespace ChanZuckerberg {
             }
         }
 
+
+
+        // If the given string is prefix+middle+suffix,
+        // return true and strip out the prefix and suffix.
+        // Otherwise, return false and leave the string unchanged.
+        bool stripPrefixAndSuffix(
+            const string& prefix,
+            const string& suffix,
+            string&
+        );
+
     }
 }
 
