@@ -97,7 +97,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <ol class="arabic simple">
 <li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, geneCapacity: int, cellCapacity: int, cellMetaDataNameCapacity: int, cellMetaDataValueCapacity: int) -&gt; None</li>
 </ol>
-<p>This constructor creates a new (empty) ExpressionMatrix object in the specified directory. The directory must not exists.</p>
+<p>This constructor creates a new (empty) ExpressionMatrix object in the specified directory. The directory must not exists. See <a class="reference external" href="../../../Running.html#creationParameters">here</a> for more information</p>
 <ol class="arabic simple" start="2">
 <li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, allowReadOnly: bool=False) -&gt; None</li>
 </ol>
@@ -312,6 +312,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3">
 <code class="descname">findSimilarPairs3</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) with lshCount LSH hashes to speed up the computation of the similar pairs. Like findSimilarPairs0, this still loops over all possible cell pairs with both cells in cellSetName and therefore the computational cost still grows asymptotically with the square of the number of cells. However the computation is orders of magnitudes faster. The computation is approximate, and the error decreases as lshCount increases. For the suggested value lshCount=1024, the standard deviation of the pair similarity computed in this way is 0.05 or less. Improved LSH functionality that avoids the loop over cell pairs will be provided by findSimilarPairs2 but is not yet available. More documentation for findSimilarPairs3 will become available at a later time. The two functions findSimilarPairs1 and findSimilarPairs3 have identical functionality, but findSimilarPairs1 is prototype code that will become obsolete, while findSimilarPairs3 is faster and uses better organized code. Therefore, new scripts should use findSimilarPairs3. Old scripts that use findSimilarPairs1 should be converted to use findSimilarPairs3 instead.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3Benchmark">
+<code class="descname">findSimilarPairs3Benchmark</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Like findSimilarPairs3, but does not store anything. Used for benchmarks.</p>
 </dd></dl>
 
 <dl class="method">

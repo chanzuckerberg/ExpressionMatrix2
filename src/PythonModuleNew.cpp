@@ -48,7 +48,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        .def(init<string, uint64_t, uint64_t, uint64_t, uint64_t>(),
            "This constructor creates a new (empty) ExpressionMatrix object "
            "in the specified directory. "
-           "The directory must not exists. ",
+           "The directory must not exists. "
+           "See `here <../../../Running.html#creationParameters>`__ for more information",
            arg("directoryName"),
            arg("geneCapacity"),
            arg("cellCapacity"),
