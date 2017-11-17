@@ -31,6 +31,8 @@ PROCEDURE TO CREATE A NEW RELEASE
   * Strip ExpressionMatrix2.so.
   * Check that all the tests work.
   * Copy ExpressionMatrix2.so to the ExpressionMatrix2 tree where makeRelease.py will run.
+- Remove dox/doxygen/html if present. 
+- Create updated Python documentation and push it to GitHub.
 - Run makeRelease.py passing the release number (e. g. 0.1.0) as the argument.
   This creates the tar file for the release.
 - Verify that the size of the tar file is reasonable.
