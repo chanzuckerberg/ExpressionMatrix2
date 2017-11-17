@@ -4,6 +4,7 @@
 #include "randIndex.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
+#include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -852,16 +853,15 @@ void ExpressionMatrix::getAvailableSimilarPairs(
     vector<string>& availableSimilarPairs) const
 {
 
-    std::regex regex(directoryName + "/SimilarPairs-(.*)-Info");
     using boost::filesystem::directory_iterator;
+    const string fileNamePrefix = directoryName + "/SimilarPairs-";
+    const string fileNameSuffix = "-Info";
     for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
-        const string fileName = it->path().string();
-        std::smatch matches;
-        if(!std::regex_match(fileName, matches, regex)) {
-            continue;
+        string name = it->path().string();    // This is the entire file name.
+        if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
+            // name now contains just the similar pairs set name.
+            availableSimilarPairs.push_back(name);
         }
-        CZI_ASSERT(matches.size() == 2);
-        availableSimilarPairs.push_back(matches[1]);
     }
 
 }
