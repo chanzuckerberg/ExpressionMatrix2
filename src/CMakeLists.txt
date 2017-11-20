@@ -84,6 +84,8 @@ set_target_properties(ExpressionMatrix2 PROPERTIES PREFIX "")
 set_target_properties(ExpressionMatrix2 PROPERTIES  DEFINE_SYMBOL "")
 
 # Boost libraries.
+# All runtime dependencies on boost libraries have been eliminated,
+# so this is commented out.
 # target_link_libraries(ExpressionMatrix2 boost_filesystem)
 
 

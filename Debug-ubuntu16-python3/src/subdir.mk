@@ -29,6 +29,7 @@ CPP_SRCS += \
 ../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
+../src/errorCode.cpp \
 ../src/filesystem.cpp \
 ../src/hdf5.cpp \
 ../src/regressionCoefficient.cpp \
@@ -61,6 +62,7 @@ OBJS += \
 ./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
+./src/errorCode.o \
 ./src/filesystem.o \
 ./src/hdf5.o \
 ./src/regressionCoefficient.o \
@@ -93,6 +95,7 @@ CPP_DEPS += \
 ./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
+./src/errorCode.d \
 ./src/filesystem.d \
 ./src/hdf5.d \
 ./src/regressionCoefficient.d \

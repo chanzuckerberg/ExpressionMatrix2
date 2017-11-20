@@ -52,7 +52,6 @@
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1321912182" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.1592010278" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.libs.127345371" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="boost_filesystem"/>
 									<listOptionValue builtIn="false" value="hdf5_cpp"/>
 									<listOptionValue builtIn="false" value="hdf5_serial"/>
 								</option>
@@ -129,7 +128,6 @@
 							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.854851280" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1549810456" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.libs.338262998" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="boost_filesystem"/>
 									<listOptionValue builtIn="false" value="hdf5_cpp"/>
 									<listOptionValue builtIn="false" value="hdf5_serial"/>
 								</option>
@@ -205,9 +203,8 @@
 							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.835681546" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1263979237" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.libs.1175354984" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
-									<listOptionValue builtIn="false" value="boost_filesystem"/>
-									<listOptionValue builtIn="false" value="hdf5_hl_cpp"/>
-									<listOptionValue builtIn="false" value="hdf5_hl"/>
+									<listOptionValue builtIn="false" value="hdf5_cpp"/>
+									<listOptionValue builtIn="false" value="hdf5_serial"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1175560965" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.320776220" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

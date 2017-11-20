@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lboost_filesystem -lhdf5_cpp -lhdf5_serial
+LIBS := -lhdf5_cpp -lhdf5_serial
 
