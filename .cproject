@@ -39,10 +39,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.45825771" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
 								<option id="gnu.cpp.compiler.option.other.other.403877977" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-unused-result" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.2082429514" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="BOOST_SYSTEM_NO_DEPRECATED"/>
-									<listOptionValue builtIn="false" value="BOOST_ERROR_CODE_HEADER_ONLY"/>
-								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.2082429514" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1086298445" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.269164854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -120,10 +117,7 @@
 								<option id="gnu.cpp.compiler.option.optimization.flags.955945568" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-msse4.2" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.debugging.other.748177729" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-ggdb3" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.files.981806943" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1828983028" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="BOOST_SYSTEM_NO_DEPRECATED"/>
-									<listOptionValue builtIn="false" value="BOOST_ERROR_CODE_HEADER_ONLY"/>
-								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1828983028" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1396589168" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.13926179" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">

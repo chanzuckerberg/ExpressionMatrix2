@@ -71,8 +71,10 @@ add_definitions(-Wall -Wconversion -Wno-unused-result)
 
 # Definition needed to eliminate the dependency 
 # on the Boost.System library.
-add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
-add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
+# This does not work with all Boost versions we want to support.
+# Try using some hacky code in ErrorCode.cpp instead.
+# add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
+# add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 
 
 
