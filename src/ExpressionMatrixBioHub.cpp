@@ -90,13 +90,12 @@ Suffix to be added to a plate name to obtain the name of the corresponding per-c
 
 
 #include "ExpressionMatrix.hpp"
-#include "Aws.hpp"
+#include "filesystem.hpp"
 #include "timestamp.hpp"
 #include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
-#include <boost/filesystem.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -189,7 +188,7 @@ void ExpressionMatrix::addCellsFromBioHub1(
 
     // Extract the plate name from the name of the expression counts file.
     // It is the portion before the period in the file name.
-    const string expressionCountsFileNameOnly = boost::filesystem::path(expressionCountsFileName).filename().string();
+    const string expressionCountsFileNameOnly = filesystem::fileName(expressionCountsFileName);
     const string plateName = expressionCountsFileNameOnly.substr(0, expressionCountsFileNameOnly.find_first_of('.'));
     cout << "Plate name is " << plateName << endl;
 
@@ -498,7 +497,7 @@ void ExpressionMatrix::addCellsFromBioHub2(
 
 
         // Remove the local copy.
-        boost::filesystem::remove(localPath);
+        filesystem::remove(localPath);
 
     }
     cout << timestamp << "Processed " << plateCount << " plates." << endl;

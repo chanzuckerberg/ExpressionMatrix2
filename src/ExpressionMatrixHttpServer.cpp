@@ -1,6 +1,7 @@
 #include "CellGraph.hpp"
-#include "ExpressionMatrix.hpp"
 #include "ClusterGraph.hpp"
+#include "ExpressionMatrix.hpp"
+#include "filesystem.hpp"
 #include "randIndex.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -9,7 +10,6 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/graph/iteration_macros.hpp>
 
 #include "fstream.hpp"
@@ -123,12 +123,11 @@ void ExpressionMatrix::processRequest(
         // Note that this gives the client access to all files in the
         // current directory.
         if(keyword.size()>1 && keyword[0]=='/') {
-            using namespace boost::filesystem;
             const string fileName = keyword.substr(1);  // Remove the initial slash
             if(fileName.find('/') == string::npos) {    // Make sure there are no other slashes
                 ifstream file(fileName);
                 if (file) {
-                    const string fileExtension = boost::filesystem::extension(fileName);
+                    const string fileExtension = filesystem::extension(fileName);
                     if(fileExtension == "pdf") {
                         html << "Content-Type: application/pdf\r\n";
                     }
@@ -281,7 +280,7 @@ void ExpressionMatrix::exploreSummary(
 
 
     // If the run directory contains a README.html file, copy it to html.
-    if(boost::filesystem::exists("README.html") && boost::filesystem::is_regular_file("README.html")) {
+    if(filesystem::exists("README.html") && filesystem::isRegularFile("README.html")) {
         ifstream readMeFile("README.html");
         html << "<h1>README.html file</h1>";
         html << readMeFile.rdbuf();
@@ -290,7 +289,7 @@ void ExpressionMatrix::exploreSummary(
 
 
     // If the run directory contains a README file, copy it to html (enclosed in a <pre> element).
-    if(boost::filesystem::exists("README") && boost::filesystem::is_regular_file("README")) {
+    if(filesystem::exists("README") && filesystem::isRegularFile("README")) {
         ifstream readMeFile("README");
         html << "<h1>README file</h1><pre>";
         html << readMeFile.rdbuf();
@@ -853,13 +852,13 @@ void ExpressionMatrix::getAvailableSimilarPairs(
     vector<string>& availableSimilarPairs) const
 {
 
-    using boost::filesystem::directory_iterator;
     const string fileNamePrefix = directoryName + "/SimilarPairs-";
     const string fileNameSuffix = "-Info";
-    for(auto it=directory_iterator(directoryName); it!=directory_iterator(); ++it) {
-        string name = it->path().string();    // This is the entire file name.
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(string name: directoryContents) {
+        // Here, name contains the entire file name.
         if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
-            // name now contains just the similar pairs set name.
+            // Here, now contains just the similar pairs set name.
             availableSimilarPairs.push_back(name);
         }
     }

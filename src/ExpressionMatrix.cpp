@@ -1,6 +1,7 @@
 #include "ExpressionMatrix.hpp"
 #include "CellGraph.hpp"
 #include "ClusterGraph.hpp"
+#include "filesystem.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
@@ -9,7 +10,6 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -39,14 +39,12 @@ ExpressionMatrix::ExpressionMatrix(
     // If directory already exists, don't do anything.
     // This ensures that we don't delete or overwrite anything,
     // and that the directory does not contain stale data.
-    if(boost::filesystem::exists(directoryName)) {
+    if(filesystem::exists(directoryName)) {
         throw runtime_error("Directory " + directoryName + " already exists.");
     }
 
     // Create the directory. This guarantees that we start with an empty directory.
-    if(!boost::filesystem::create_directory(directoryName)) {
-        throw runtime_error("Unable to create directory " + directoryName);
-    }
+    filesystem::createDirectory(directoryName);
 
     geneNames.createNew(directoryName + "/" + "GeneNames", parameters.geneCapacity);
     cells.createNew(directoryName + "/" + "Cells");
@@ -126,14 +124,13 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
 
 
     // Access the gene sets.
-    using boost::filesystem::directory_iterator;
-    std::regex regex(directoryName + "/GeneSet-(.*)-GlobalIds");
     const string fileNamePrefix = directoryName + "/GeneSet-";
     const string fileNameSuffix = "-GlobalIds";
-    for(auto it = directory_iterator(directoryName); it != directory_iterator(); ++it) {
-        string name = it->path().string();  // This is the entire file name.
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(string name: directoryContents) {
+        // Here, name is the entire file name.
         if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
-            // name now contains just the gene set name.
+            // Here, name contains just the gene set name.
             geneSets[name].accessExisting(directoryName + "/GeneSet-" + name, allowReadOnly);
         }
     }

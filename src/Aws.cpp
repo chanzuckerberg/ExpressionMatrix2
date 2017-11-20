@@ -1,15 +1,16 @@
 #include "Aws.hpp"
+#include "filesystem.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include "boost_lexical_cast.hpp"
-#include <boost/filesystem.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include "iostream.hpp"
 #include "stdexcept.hpp"
+
 
 // Implementation of class AwsS3InputFile.
 // See Aws.hpp for more information.
@@ -40,5 +41,5 @@ AwsS3InputFile::AwsS3InputFile(const string& path)
 
 AwsS3InputFile::~AwsS3InputFile()
 {
-    boost::filesystem::remove(localPath);
+    filesystem::remove(localPath);
 }

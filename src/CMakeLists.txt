@@ -69,6 +69,8 @@ add_definitions(-O3 -msse4.2)
 # Options to control compilation warnings.
 add_definitions(-Wall -Wconversion -Wno-unused-result)
 
+add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
+
 
 
 # Define our shared library.
@@ -82,7 +84,7 @@ set_target_properties(ExpressionMatrix2 PROPERTIES PREFIX "")
 set_target_properties(ExpressionMatrix2 PROPERTIES  DEFINE_SYMBOL "")
 
 # Boost libraries.
-target_link_libraries(ExpressionMatrix2 boost_filesystem)
+# target_link_libraries(ExpressionMatrix2 boost_filesystem)
 
 
 # Definition of configuration variables begins here.
