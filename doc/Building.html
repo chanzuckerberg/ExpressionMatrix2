@@ -38,8 +38,8 @@ Run the code on an unsupported platform.
 The <code>ExpressionMatrix2</code> can be built in a few different ways.
 Choose the one that is best for your needs:
 <ul>
-<li>Using the Eclipse software development IDE.
-<li>Using the Eclipse makefiles, outside of the Eclipse IDE.
+<li>Using the Eclipse software development IDE (Ubuntu 16, Python 3 only).
+<li>Using the Eclipse makefiles, outside of the Eclipse IDE (Ubuntu 16, Python 3 only).
 <li>Using CMake.
 </ul>
 
@@ -69,7 +69,7 @@ for information on the prerequisites necessary to run.
 <table>
 <tr><th class=left>Operating system<td class=centered>Ubuntu 16.04<td class=centered>CentOs 7
 <tr><th class=left>Python version<td class=centered>3.5<td class=centered>2.7
-<tr><th class=left>Name of Eclipse configurations<td class=centered>Release-ubuntu16-python3,<br>Debug-ubuntu16-python3<td class=centered>Release-centos7-python2
+<tr><th class=left>Name of Eclipse configurations<td class=centered>Release-ubuntu16-python3,<br>Debug-ubuntu16-python3<td class=centered>
 <tr><th class=left>Boost libraries version<td class=centered>1.58.0<td class=centered>1.53.0
 <tr><th class=left>Boost libraries package<br>required to build<br>(and sufficient to run)<td class=centered>libboost-all-dev<td class=centered>boost-devel-1.53.0
 <tr><th class=left>Boost libraries package<br>required to run<td class=centered>libboost-all-dev<td class=centered>boost-1.53.0
@@ -180,6 +180,11 @@ Here are examples of <code>-D</code> options:
    <ul>
    <li><code>-DPYTHON_INCLUDE_PATH=/usr/include/python2.7</code> 
    <li><code>-DPYBIND11_INCLUDE_PATH=/usr/local/include/python2.7</code>
+   </ul>
+<li>Centos 7, Python 2: 
+   <ul>
+   <li><code>-DPYTHON_INCLUDE_PATH=/usr/include/python2.7</code> 
+   <li><code>-DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages</code>
    </ul>
 </ul>
   
