@@ -29,7 +29,6 @@ CPP_SRCS += \
 ../src/PythonModuleNew.cpp \
 ../src/SimilarPairs.cpp \
 ../src/color.cpp \
-../src/errorCode.cpp \
 ../src/filesystem.cpp \
 ../src/hdf5.cpp \
 ../src/regressionCoefficient.cpp \
@@ -62,7 +61,6 @@ OBJS += \
 ./src/PythonModuleNew.o \
 ./src/SimilarPairs.o \
 ./src/color.o \
-./src/errorCode.o \
 ./src/filesystem.o \
 ./src/hdf5.o \
 ./src/regressionCoefficient.o \
@@ -95,7 +93,6 @@ CPP_DEPS += \
 ./src/PythonModuleNew.d \
 ./src/SimilarPairs.d \
 ./src/color.d \
-./src/errorCode.d \
 ./src/filesystem.d \
 ./src/hdf5.d \
 ./src/regressionCoefficient.d \
@@ -107,7 +104,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -I/usr/include/python3.5m -I/usr/local/include/python3.5 -I/usr/include/hdf5/serial -O0 -g3 -Wall -Wconversion -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -std=c++0x -DBOOST_SYSTEM_NO_DEPRECATED -DBOOST_ERROR_CODE_HEADER_ONLY -I/usr/include/python3.5m -I/usr/local/include/python3.5 -I/usr/include/hdf5/serial -O0 -g3 -Wall -Wconversion -c -fmessage-length=0 -Wno-unused-result -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

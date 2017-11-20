@@ -69,7 +69,10 @@ add_definitions(-O3 -msse4.2)
 # Options to control compilation warnings.
 add_definitions(-Wall -Wconversion -Wno-unused-result)
 
+# Definition needed to eliminate the dependency 
+# on the Boost.System library.
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 
 
 
