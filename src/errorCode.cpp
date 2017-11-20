@@ -8,15 +8,24 @@
 
 
 
+// Not sure whewn this change happened (between 1.53 and 1.58).
+#if BOOST_VERSION >= 105800
+#define CZI_ERROR_CATEGORY_EXCEPTION
+#else
+#define CZI_ERROR_CATEGORY_EXCEPTION noexcept
+#endif
+
+
+
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         class ErrorCategory : public boost::system::error_category
         {
         public:
-          const char * name() const BOOST_SYSTEM_NOEXCEPT {return "ErrorCategoryy";}
-          std::string message(int) const BOOST_SYSTEM_NOEXCEPT {return "ErrorCategory";}
+          const char * name() const CZI_ERROR_CATEGORY_EXCEPTION {return "ErrorCategoryy";}
+          std::string message(int) const CZI_ERROR_CATEGORY_EXCEPTION {return "ErrorCategory";}
         };
-        }
+    }
 }
 
 
