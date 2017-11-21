@@ -5,6 +5,7 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include <chrono>
 #include "fstream.hpp"
 
 
@@ -53,6 +54,8 @@ void ExpressionMatrix::findSimilarPairs0(
 
 
     // Loop over all pairs.
+    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId0=0; localCellId0!=similarPairs.cellCount()-1; localCellId0++) {
         if(localCellId0>0 && ((localCellId0%100) == 0)) {
             cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
@@ -70,10 +73,17 @@ void ExpressionMatrix::findSimilarPairs0(
             }
         }
     }
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
 
 
     // Sort the similar pairs for each cell by decreasing similarity.
     similarPairs.sort();
+
+
+    cout << "Time for all pairs: " << t01 << " s." << endl;
+    const CellId cellCount = CellId(cellSet.size());
+    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
 }
 
 
