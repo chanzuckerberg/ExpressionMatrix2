@@ -60,7 +60,23 @@ void SimilarPairs::add(CellId cellId0, CellId cellId1, double similarity)
     add(cellId0, make_pair(cellId1, similarity));
     add(cellId1, make_pair(cellId0, similarity));
 }
+void SimilarPairs::addNoDuplicateCheck(CellId cellId0, CellId cellId1, double similarity)
+{
+    addNoDuplicateCheck(cellId0, make_pair(cellId1, similarity));
+    addNoDuplicateCheck(cellId1, make_pair(cellId0, similarity));
+}
 
+
+
+// This only adds to the list for cellId0.
+void SimilarPairs::addUnsymmetric(CellId cellId0, CellId cellId1, double similarity)
+{
+    add(cellId0, make_pair(cellId1, similarity));
+}
+void SimilarPairs::addUnsymmetricNoDuplicateCheck(CellId cellId0, CellId cellId1, double similarity)
+{
+    addNoDuplicateCheck(cellId0, make_pair(cellId1, similarity));
+}
 
 
 // Low level version of function to add a pair.
@@ -72,7 +88,7 @@ void SimilarPairs::add(CellId cellId0, CellId cellId1, double similarity)
 void SimilarPairs::add(CellId cellId, Pair pair)
 {
     const CellId otherCellId = pair.first;
-    uint32_t& n = usedCount[cellId];
+    const uint32_t n = usedCount[cellId];
     Pair* pairs = begin(cellId);
     auto& lowestInfo = lowestStoredSimilarityInfo[cellId];
     if(n < k()) {
@@ -90,7 +106,8 @@ void SimilarPairs::add(CellId cellId, Pair pair)
         }
 
         // Add it to one of the unused slots.
-        pairs[n++] = pair;
+        pairs[n] = pair;
+        ++usedCount[cellId];
 
         return;
 
@@ -115,6 +132,55 @@ void SimilarPairs::add(CellId cellId, Pair pair)
         }
 
         // Store the pair in the slot containing the pair with the lowest similarity.
+        pairs[lowestInfo.first] = pair;
+
+        // Update the lowest similarity.
+        lowestInfo.first = std::numeric_limits<uint32_t>::max();
+        lowestInfo.second = std::numeric_limits<CellSimilarity>::max();
+        for(uint32_t i=0; i<n; i++) {
+            const Pair& existingPair = pairs[i];
+            if(existingPair.second < lowestInfo.second) {
+               lowestInfo.first = i;
+               lowestInfo.second = existingPair.second;
+            }
+        }
+
+        return;
+    }
+}
+void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
+{
+    auto& lowestInfo = lowestStoredSimilarityInfo[cellId];
+    const uint32_t n = usedCount[cellId];
+    if(n < k()) {
+
+        // Update the lowest stored similarity info for this cell.
+        if(pair.second < lowestInfo.second) {
+            lowestInfo.first = n;
+            lowestInfo.second = pair.second;
+        }
+
+        // Add it to one of the unused slots.
+        Pair* pairs = begin(cellId);
+        pairs[n] = pair;
+        ++usedCount[cellId];
+
+        return;
+
+    } else {
+
+        // There are no unused slots.
+
+        // If the similarity of this pair is less than the lowest stored
+        // similarity for this cell, do nothing.
+        // This way we avoid a scan of the stored pairs for this cell.
+        if(pair.second <= lowestInfo.second) {
+            return;
+        }
+
+
+        // Store the pair in the slot containing the pair with the lowest similarity.
+        Pair* pairs = begin(cellId);
         pairs[lowestInfo.first] = pair;
 
         // Update the lowest similarity.

@@ -1279,38 +1279,50 @@ void ExpressionMatrix::findSimilarPairs3(
     // Create the Lsh object that will do the computation.
     Lsh lsh(expressionMatrixSubset, lshCount, seed);
 
+
+
     // Loop over all pairs. This is much faster than findSimilarPairs0
     // (around 15 ns per pair when using LSH vectors of 1024 bits), but
     // still scales like the square of the number of cells in the cell set.
+    // This loops in blocks of cells for better memory locality than a simple
+    // loop over cell pairs.
     cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
     const auto t0 = std::chrono::steady_clock::now();
-    for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
-        if(localCellId0>0 && ((localCellId0%10000) == 0)) {
-            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
-        }
-        for(CellId localCellId1=localCellId0+1; localCellId1!=cellCount; localCellId1++) {
+    const CellId blockSize = 64;
+    size_t pairCount = 0;
+    for(CellId begin0=0; begin0<cellCount; begin0+=blockSize) {
+        const CellId end0 = min(begin0+blockSize, cellCount);
+        for(CellId begin1=0; begin1<=begin0; begin1+=blockSize) {
+            const CellId end1 = min(begin1+blockSize, end0);
+            for(CellId cell0=begin0; cell0!=end0; ++cell0) {
+                for(CellId cell1=begin1; cell1!=end1 && cell1<cell0; ++cell1) {
+                    ++pairCount;
 
-            // Compute the LSH similarity between these two cells.
-            const double similarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
+                    // Compute the LSH similarity between these two cells.
+                    const double similarity = lsh.computeCellSimilarity(cell0, cell1);
 
-            // If the similarity is sufficient, pass it to the SimilarPairs container,
-            // which will make the decision whether to store it, depending on the
-            // number of pairs already stored for cellId0 and cellId1.
-            if(similarity > similarityThreshold) {
-                similarPairs.add(localCellId0, localCellId1, similarity);
+                    // If the similarity is sufficient, pass it to the SimilarPairs container,
+                    // which will make the decision whether to store it, depending on the
+                    // number of pairs already stored for cellId0 and cellId1.
+                    if(similarity > similarityThreshold) {
+                        similarPairs.addNoDuplicateCheck(cell0, cell1, similarity);
+                    }
+                }
             }
         }
     }
     const auto t1 = std::chrono::steady_clock::now();
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    CZI_ASSERT(pairCount == size_t(cellCount)*(size_t(cellCount-1))/2);
+    cout << "Time for all pairs: " << t01 << " s." << endl;
+    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+
 
     // Sort the similar pairs for each cell by decreasing similarity.
     cout << timestamp << "Sorting similar pairs." << endl;
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs3 ends." << endl;
 
-    cout << "Time for all pairs: " << t01 << " s." << endl;
-    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
 }
 
 
@@ -1357,21 +1369,28 @@ void ExpressionMatrix::findSimilarPairs3Benchmark(
     // Create the Lsh object that will do the computation.
     Lsh lsh(expressionMatrixSubset, lshCount, seed);
 
-    // Loop over all pairs. This is much faster than findSimilarPairs0
-    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
-    // still scales like the square of the number of cells in the cell set.
-    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+
+
     const auto t0 = std::chrono::steady_clock::now();
+    const CellId blockSize = 64;
+    size_t pairCount = 0;
     double sum = 0.;
-    for(CellId localCellId0=0; localCellId0!=cellCount-1; localCellId0++) {
-        for(CellId localCellId1=localCellId0+1; localCellId1!=cellCount; localCellId1++) {
-            // Compute the LSH similarity between these two cells.
-            const double similarity = lsh.computeCellSimilarity(localCellId0, localCellId1);
-            sum += similarity;
+    for(CellId begin0=0; begin0<cellCount; begin0+=blockSize) {
+        const CellId end0 = min(begin0+blockSize, cellCount);
+        for(CellId begin1=0; begin1<=begin0; begin1+=blockSize) {
+            const CellId end1 = min(begin1+blockSize, end0);
+            for(CellId cell0=begin0; cell0!=end0; ++cell0) {
+                for(CellId cell1=begin1; cell1!=end1 && cell1<cell0; ++cell1) {
+                    ++pairCount;
+                    const double similarity = lsh.computeCellSimilarity(cell0, cell1);
+                    sum += similarity;
+                }
+            }
         }
     }
     const auto t1 = std::chrono::steady_clock::now();
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    CZI_ASSERT(pairCount == size_t(cellCount)*(size_t(cellCount-1))/2);
 
 
     cout << "Time for all pairs: " << t01 << " s." << endl;
