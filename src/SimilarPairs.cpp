@@ -19,16 +19,15 @@ SimilarPairs::SimilarPairs(
     info->k = k;
     info->cellCount = cellCount;
 
-    similarPairs.createNew(name + "-Pairs", k*cellSetArgument.size());
+    similarPairs.createNew(name + "-Pairs", k*size_t(cellCount));
 
-    // Initialize the usedCount for each cell to zero.
-    usedCount.createNew(name + "-UsedCounts", cellCount);
-    fill(usedCount.begin(), usedCount.end(), 0);
-
-    // Initialized the lowestStoredSimilarity for each cell to its maximum possible value..
-    lowestStoredSimilarityInfo.createNew(name + "-LowestStoredSimilarityInfo", cellCount);
-    fill(lowestStoredSimilarityInfo.begin(), lowestStoredSimilarityInfo.end(),
-        make_pair(std::numeric_limits<uint32_t>::max(), std::numeric_limits<CellSimilarity>::max()));
+    // Initialize the cellInfo vector.
+    cellInfo.createNew(name + "-CellInfo", cellCount);
+    for(CellInfo& info: cellInfo) {
+        info.usedCount = 0;
+        info.lowestSimilarityIndex = std::numeric_limits<uint32_t>::max();
+        info.lowestSimilarity = std::numeric_limits<CellSimilarity>::max();
+    }
 
     // Make copies of the gene set and cell set. The copies are owned by the SimilarPairs object.
     geneSetArgument.makeCopy(geneSet, name + "-GeneSet");
@@ -43,8 +42,7 @@ SimilarPairs::SimilarPairs(const string& name, bool allowReadOnly)
 {
     info.accessExistingReadOnly(name + "-Info");
     similarPairs.accessExistingReadOnly(name + "-Pairs");
-    usedCount.accessExistingReadOnly(name + "-UsedCounts");
-    lowestStoredSimilarityInfo.accessExistingReadOnly(name + "-LowestStoredSimilarityInfo");
+    cellInfo.accessExistingReadOnly(name + "-CellInfo");
     geneSet.accessExisting(name + "-GeneSet", allowReadOnly);
     cellSet.accessExistingReadOnly(name + "-CellSet");
 }
@@ -87,10 +85,10 @@ void SimilarPairs::addUnsymmetricNoDuplicateCheck(CellId cellId0, CellId cellId1
 // to check for existence.
 void SimilarPairs::add(CellId cellId, Pair pair)
 {
+    CellInfo& info = cellInfo[cellId];
     const CellId otherCellId = pair.first;
-    const uint32_t n = usedCount[cellId];
+    const uint32_t n = info.usedCount;
     Pair* pairs = begin(cellId);
-    auto& lowestInfo = lowestStoredSimilarityInfo[cellId];
     if(n < k()) {
 
         // There are unused slots. Just check if this pair already exists.
@@ -100,70 +98,14 @@ void SimilarPairs::add(CellId cellId, Pair pair)
             }
         }
         // Update the lowest stored similarity info for this cell.
-        if(pair.second < lowestInfo.second) {
-        	lowestInfo.first = n;
-        	lowestInfo.second = pair.second;
+        if(pair.second < info.lowestSimilarity) {
+            info.lowestSimilarityIndex = n;
+            info.lowestSimilarity = pair.second;
         }
 
         // Add it to one of the unused slots.
         pairs[n] = pair;
-        ++usedCount[cellId];
-
-        return;
-
-    } else {
-
-        // There are no unused slots.
-
-    	// If the similarity of this pair is less than the lowest stored
-    	// similarity for this cell, do nothing.
-    	// This way we avoid a scan of the stored pairs for this cell.
-    	if(pair.second <= lowestInfo.second) {
-    		return;
-    	}
-
-
-    	// Check if this pair already exists.
-        for(uint32_t i=0; i<n; i++) {
-            const Pair& existingPair = pairs[i];
-            if(existingPair.first == otherCellId) {
-               return;  // Already exists.
-            }
-        }
-
-        // Store the pair in the slot containing the pair with the lowest similarity.
-        pairs[lowestInfo.first] = pair;
-
-        // Update the lowest similarity.
-        lowestInfo.first = std::numeric_limits<uint32_t>::max();
-        lowestInfo.second = std::numeric_limits<CellSimilarity>::max();
-        for(uint32_t i=0; i<n; i++) {
-            const Pair& existingPair = pairs[i];
-            if(existingPair.second < lowestInfo.second) {
-               lowestInfo.first = i;
-               lowestInfo.second = existingPair.second;
-            }
-        }
-
-        return;
-    }
-}
-void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
-{
-    auto& lowestInfo = lowestStoredSimilarityInfo[cellId];
-    const uint32_t n = usedCount[cellId];
-    if(n < k()) {
-
-        // Update the lowest stored similarity info for this cell.
-        if(pair.second < lowestInfo.second) {
-            lowestInfo.first = n;
-            lowestInfo.second = pair.second;
-        }
-
-        // Add it to one of the unused slots.
-        Pair* pairs = begin(cellId);
-        pairs[n] = pair;
-        ++usedCount[cellId];
+        ++info.usedCount;
 
         return;
 
@@ -174,23 +116,85 @@ void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
         // If the similarity of this pair is less than the lowest stored
         // similarity for this cell, do nothing.
         // This way we avoid a scan of the stored pairs for this cell.
-        if(pair.second <= lowestInfo.second) {
+        if(pair.second <= info.lowestSimilarity) {
+            return;
+        }
+
+
+        // Check if this pair already exists.
+        for(uint32_t i = 0; i < n; i++) {
+            const Pair& existingPair = pairs[i];
+            if(existingPair.first == otherCellId) {
+                return;  // Already exists.
+            }
+        }
+
+        // Store the pair in the slot containing the pair with the lowest similarity.
+        pairs[info.lowestSimilarityIndex] = pair;
+
+        // Update the lowest similarity.
+        info.lowestSimilarityIndex = std::numeric_limits<uint32_t>::max();
+        info.lowestSimilarity = std::numeric_limits<CellSimilarity>::max();
+        for(uint32_t i=0; i<n; i++) {
+            const Pair& existingPair = pairs[i];
+            if(existingPair.second < info.lowestSimilarity) {
+                info.lowestSimilarityIndex = i;
+                info.lowestSimilarity = existingPair.second;
+            }
+        }
+
+        return;
+    }
+}
+
+
+
+//It is likely that there woukld not be much benefit to using
+// a heap instead of a linear search, except for very large k.
+// Cost is dominated by cache misses.
+void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
+{
+    CellInfo& info = cellInfo[cellId];
+    const uint32_t n = info.usedCount;
+    if(n < k()) {
+
+        // Update the lowest stored similarity info for this cell.
+        if(pair.second < info.lowestSimilarity) {
+            info.lowestSimilarityIndex = n;
+            info.lowestSimilarity = pair.second;
+        }
+
+        // Add it to one of the unused slots.
+        Pair* pairs = begin(cellId);
+        pairs[n] = pair;
+        ++info.usedCount;
+
+        return;
+
+    } else {
+
+        // There are no unused slots.
+
+        // If the similarity of this pair is less than the lowest stored
+        // similarity for this cell, do nothing.
+        // This way we avoid a scan of the stored pairs for this cell.
+        if(pair.second <= info.lowestSimilarity) {
             return;
         }
 
 
         // Store the pair in the slot containing the pair with the lowest similarity.
         Pair* pairs = begin(cellId);
-        pairs[lowestInfo.first] = pair;
+        pairs[info.lowestSimilarityIndex] = pair;
 
         // Update the lowest similarity.
-        lowestInfo.first = std::numeric_limits<uint32_t>::max();
-        lowestInfo.second = std::numeric_limits<CellSimilarity>::max();
+        info.lowestSimilarityIndex = std::numeric_limits<uint32_t>::max();
+        info.lowestSimilarity = std::numeric_limits<CellSimilarity>::max();
         for(uint32_t i=0; i<n; i++) {
             const Pair& existingPair = pairs[i];
-            if(existingPair.second < lowestInfo.second) {
-               lowestInfo.first = i;
-               lowestInfo.second = existingPair.second;
+            if(existingPair.second < info.lowestSimilarity) {
+                info.lowestSimilarityIndex = i;
+                info.lowestSimilarity = existingPair.second;
             }
         }
 

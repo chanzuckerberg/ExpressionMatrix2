@@ -55,7 +55,7 @@ public:
     MemoryAsContainer<const Pair>operator[](CellId cellId) const
     {
         const Pair* begin = similarPairs.begin() + cellId * k();
-        const Pair* end = begin + usedCount[cellId];
+        const Pair* end = begin + cellInfo[cellId].usedCount;
         return  MemoryAsContainer<const Pair>(begin, end);
     }
 
@@ -79,7 +79,7 @@ public:
 
     size_t size(CellId cellId) const
     {
-        return usedCount[cellId];
+        return cellInfo[cellId].usedCount;
     }
 
     // Return k, the maximum number of pairs stored for each cell.
@@ -151,20 +151,29 @@ private:
     // and so on.
     MemoryMapped::Vector<Pair> similarPairs;
 
-    // Vector to hold the number of pairs actually stored for each cell.
-    MemoryMapped::Vector<uint32_t> usedCount;
 
-    // We also store, for each cell, a pair containing:
-    // - The index, relative to begin() for this cell, of the pair with lowest similarity
-    //   currently stored for this cell.
-    // - The value of the lowest similarity currently stored for this cell.
-    // If no pairs are stored for this cell, this stores a pair containing
-    // (std::numeric_limits<uint32_t>::max() std::numeric_limits<CellSimilarity>::max()).
-    MemoryMapped::Vector< pair<uint32_t, CellSimilarity> > lowestStoredSimilarityInfo;
+
+    // Some information stored for each cell.
+    class CellInfo {
+    public:
+
+        // The number of pairs stored so far for this cell (can be up to k).
+        uint32_t usedCount;
+
+        // The position of the stored pair with the lowest similarity for this cell.
+        // This is relative to begin(cellId) for this cell.
+        uint32_t lowestSimilarityIndex;
+
+        // The similarity of the stored pair with the lowest similarity for this cell.
+        CellSimilarity lowestSimilarity;
+    };
+    MemoryMapped::Vector<CellInfo> cellInfo;
+
+
+
 
     // Small size information about this table of similar pairs is stored
     // in a memory mapped object.
-
     class Info {
     public:
         // The maximum number of similar cells stored for each cell.
@@ -174,6 +183,8 @@ private:
         CellId cellCount;
     };
     MemoryMapped::Object<Info> info;
+
+
 
     // The gene set and cell set used by this SimilarPairs object.
     // Tese are copies of the gene set and cell set passed to the constructor
