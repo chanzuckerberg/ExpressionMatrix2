@@ -1,5 +1,6 @@
 #include "SimilarPairs.hpp"
 #include "algorithm.hpp"
+#include "heap.hpp"
 #include "orderPairs.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -62,6 +63,11 @@ void SimilarPairs::addNoDuplicateCheck(CellId cellId0, CellId cellId1, double si
 {
     addNoDuplicateCheck(cellId0, make_pair(cellId1, similarity));
     addNoDuplicateCheck(cellId1, make_pair(cellId0, similarity));
+}
+void SimilarPairs::addNoDuplicateCheckUsingHeap(CellId cellId0, CellId cellId1, double similarity)
+{
+    addNoDuplicateCheckUsingHeap(cellId0, make_pair(cellId1, similarity));
+    addNoDuplicateCheckUsingHeap(cellId1, make_pair(cellId0, similarity));
 }
 
 
@@ -149,9 +155,8 @@ void SimilarPairs::add(CellId cellId, Pair pair)
 
 
 
-//It is likely that there woukld not be much benefit to using
-// a heap instead of a linear search, except for very large k.
-// Cost is dominated by cache misses.
+// This version does a linear search to update the position of lowest
+// similarity item.
 void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
 {
     CellInfo& info = cellInfo[cellId];
@@ -198,6 +203,70 @@ void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
             }
         }
 
+        return;
+    }
+}
+
+
+
+// Version that uses a heap to avoid linear searches.
+void SimilarPairs::addNoDuplicateCheckUsingHeap(CellId cellId, Pair pair)
+{
+    CellInfo& info = cellInfo[cellId];
+    const uint32_t n = info.usedCount;
+    const size_t kk = k();
+    if(n < kk) {
+
+        // Store it in the next unused slot.
+        Pair* pairs = begin(cellId);
+        pairs[n] = pair;
+        ++info.usedCount;
+
+        // If we filled up all the slots, turn it into a heap,
+        // so the next insertions will work.
+        if(info.usedCount == kk) {
+            std::make_heap(pairs, pairs+kk, OrderPairsBySecondGreater<Pair>());
+        }
+
+        return;
+
+    } else {
+
+#if 0
+        cout << "Adding " << pair.first << " " << pair.second << endl;
+        cout << "Heap is: " << endl;
+        for(auto it=begin(cellId); it!=end(cellId); ++it) {
+            cout << it->first << " " << it->second << endl;
+        }
+#endif
+
+        // The pair with the lowest similarity is the first one in the heap.
+        // If the pair passed as an argument has lower similarity than that,
+        // don't store it.
+        Pair* b = begin(cellId);
+        if(pair.second <= b->second) {
+            // cout << "Skipped." << endl;
+            return;
+        }
+
+        // The pair passed as an argument has higher similarity
+        // than the lowest similarity currently stored for this cell.
+        // Update the heap.
+        Pair* e = b + kk;
+#if 1
+        std::pop_heap(b, e, OrderPairsBySecondGreater<Pair>());
+        *(e-1) = pair;  // Store in the last slot. push_head will move it as required.
+        std::push_heap(b, e, OrderPairsBySecondGreater<Pair>());
+#else
+        popAndPushHeap(b, e, pair, OrderPairsBySecondGreater<Pair>());
+#endif
+
+#if 0
+        cout << "After adding, heap is: " << endl;
+        for(auto it=begin(cellId); it!=end(cellId); ++it) {
+            cout << it->first << " " << it->second << endl;
+        }
+#endif
         return;
     }
 }

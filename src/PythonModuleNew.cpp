@@ -13,6 +13,7 @@
 // CZI.
 #include "ClusterGraph.hpp"
 #include "ExpressionMatrix.hpp"
+#include "heap.hpp"
 #include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
 using namespace ChanZuckerberg;
@@ -830,6 +831,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         );
     module.def("testMemoryMappedStringTable",
         testMemoryMappedStringTable,
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
+        );
+    module.def("testHeap",
+        testHeap,
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );

@@ -94,6 +94,7 @@ public:
     // If could be stored or not for one or both of cellId0 and cellId1.
     void add(CellId cellId0, CellId cellId1, double similarity);
     void addNoDuplicateCheck(CellId cellId0, CellId cellId1, double similarity);
+    void addNoDuplicateCheckUsingHeap(CellId cellId0, CellId cellId1, double similarity);
 
     // This only adds to the list for cellId0.
     void addUnsymmetric(CellId cellId0, CellId cellId1, double similarity);
@@ -196,6 +197,7 @@ private:
     // Add a pair (low level version).
     void add(CellId, Pair);
     void addNoDuplicateCheck(CellId, Pair);
+    void addNoDuplicateCheckUsingHeap(CellId, Pair);
 };
 
 
