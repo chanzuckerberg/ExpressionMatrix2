@@ -1415,9 +1415,6 @@ void ExpressionMatrix::findSimilarPairs4(
 {
     cout << timestamp << "ExpressionMatrix::findSimilarPairs4 begins." << endl;
 
-    // Sanity check.
-    CZI_ASSERT(similarityThreshold <= 1.);
-
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
     if(itGeneSet == geneSets.end()) {
