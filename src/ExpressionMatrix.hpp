@@ -463,6 +463,17 @@ public:
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 
+    // Used to test improvements to findSimilarPairs3.
+    void findSimilarPairs4(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& name,             // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
+
     // Analyze the quality of the LSH computation of cell similarity.
     void analyzeLsh(
         const string& geneSetName,      // The name of the gene set to be used.

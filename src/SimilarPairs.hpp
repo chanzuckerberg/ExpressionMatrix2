@@ -99,11 +99,15 @@ public:
     // This only adds to the list for cellId0.
     void addUnsymmetric(CellId cellId0, CellId cellId1, double similarity);
     void addUnsymmetricNoDuplicateCheck(CellId cellId0, CellId cellId1, double similarity);
+    void addUnsymmetricNoDuplicateCheckUsingHeap(CellId cellId0, CellId cellId1, double similarity);
 
     // Return true if CellId1 is currently listed among the pairs
     // similar to CellId0.
     // Note that this function is not symmetric under a swap of cellId0 and cellid1.
     bool exists(CellId cellId0, CellId cellId1) const;
+
+    // Copy the pairs from the argument.
+    void copy(const vector< vector<Pair> >&);
 
     // Sort the similar pairs for each cell by decreasing similarity.
     void sort();

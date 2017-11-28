@@ -81,6 +81,10 @@ void SimilarPairs::addUnsymmetricNoDuplicateCheck(CellId cellId0, CellId cellId1
 {
     addNoDuplicateCheck(cellId0, make_pair(cellId1, similarity));
 }
+void SimilarPairs::addUnsymmetricNoDuplicateCheckUsingHeap(CellId cellId0, CellId cellId1, double similarity)
+{
+    addNoDuplicateCheckUsingHeap(cellId0, make_pair(cellId1, similarity));
+}
 
 
 // Low level version of function to add a pair.
@@ -269,6 +273,21 @@ void SimilarPairs::addNoDuplicateCheckUsingHeap(CellId cellId, Pair pair)
 #endif
         return;
     }
+}
+
+
+
+// Copy the pairs from the argument.
+void SimilarPairs::copy(const vector< vector<Pair> >& v)
+{
+    CZI_ASSERT(v.size() == size_t(cellCount()));
+    for(CellId cellId=0; cellId<cellCount(); cellId++) {
+        const vector<Pair>& x = v[cellId];
+        CZI_ASSERT(x.size() <= k());
+        std::copy(x.begin(), x.end(), begin(cellId));
+        cellInfo[cellId].usedCount = CellId(x.size());
+    }
+
 }
 
 

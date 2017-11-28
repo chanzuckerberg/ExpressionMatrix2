@@ -557,7 +557,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "The required computing time will typically be a few minutes "
            "for a few thousand cells or several hours for a few tens of thousands cells. "
            "When the number of cells exceeds a few thousands, "
-           "it is more practical to perform an approximate computation using findSimilarPairs3. ",
+           "it is more practical to perform an approximate computation using findSimilarPairs4. ",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
@@ -566,7 +566,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("findSimilarPairs1",
            &ExpressionMatrix::findSimilarPairs1,
-           "Obsolete. Use findSimilarPairs3 instead."
+           "Obsolete. Use findSimilarPairs4 instead."
        )
        .def("findSimilarPairs2",
            &ExpressionMatrix::findSimilarPairs2,
@@ -576,23 +576,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("findSimilarPairs3",
            &ExpressionMatrix::findSimilarPairs3,
-           "Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) "
-           "with lshCount LSH hashes to speed up the computation of the similar pairs. "
-           "Like findSimilarPairs0, this still loops over all possible cell pairs "
-           "with both cells in cellSetName and therefore the computational cost "
-           "still grows asymptotically with the square of the number of cells. "
-           "However the computation is orders of magnitudes faster. "
-           "The computation is approximate, and the error decreases as lshCount increases. "
-           "For the suggested value lshCount=1024, "
-           "the standard deviation of the pair similarity computed in this way is 0.05 or less. "
-           "Improved LSH functionality that avoids the loop over cell pairs "
-           "will be provided by findSimilarPairs2 but is not yet available. "
-           "More documentation for findSimilarPairs3 will become available at a later time. "
-           "The two functions findSimilarPairs1 and findSimilarPairs3 have identical functionality, "
-           "but findSimilarPairs1 is prototype code that will become obsolete, "
-           "while findSimilarPairs3 is faster and uses better organized code. "
-           "Therefore, new scripts should use findSimilarPairs3. "
-           "Old scripts that use findSimilarPairs1 should be converted to use findSimilarPairs3 instead. ",
+           "Obsolete. Use findSimilarPairs4 instead.",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
@@ -606,6 +590,25 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "Like findSimilarPairs3, but does not store anything. Used for benchmarks.",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
+           arg("lshCount") = 1024,
+           arg("seed") = 231
+       )
+       .def("findSimilarPairs4",
+           &ExpressionMatrix::findSimilarPairs4,
+           "Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) "
+           "with lshCount LSH hashes to speed up the computation of the similar pairs. "
+           "Like findSimilarPairs0, this still loops over all possible cell pairs "
+           "with both cells in cellSetName and therefore the computational cost "
+           "still grows asymptotically with the square of the number of cells. "
+           "However the computation is orders of magnitudes faster. "
+           "The computation is approximate, and the error decreases as lshCount increases. "
+           "For the suggested value lshCount=1024, "
+           "the standard deviation of the pair similarity computed in this way is 0.05 or less.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("similarPairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2,
            arg("lshCount") = 1024,
            arg("seed") = 231
        )
@@ -836,6 +839,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         );
     module.def("testHeap",
         testHeap,
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
+        );
+    module.def("testKeepBest",
+        testKeepBest,
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );

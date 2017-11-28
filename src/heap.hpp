@@ -10,7 +10,9 @@
 
 #include "cstddef.hpp"
 // #include "iostream.hpp"
+#include <algorithm>
 #include <utility>
+#include "vector.hpp"
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
@@ -30,8 +32,13 @@ namespace ChanZuckerberg {
             Iterator end,
             const Comparator&);
 
-        // Unit test.
+        // Given a vector, keep only the k best items in no particular order.
+        // Best is defined by the given comparator.
+        template<class T, class Comparator> void keepBest(vector<T>&, size_t k, const Comparator&);
+
+        // Unit tests.
         void testHeap();
+        void testKeepBest();
     }
 }
 
@@ -100,6 +107,20 @@ template<class Iterator, class T, class Comparator>
             break;
         }
   }
+}
+
+
+
+// Given a vector, keep only the k best items in no particular order.
+// "Best" is as defined by the given comparator.
+template<class T, class Comparator>
+    void ChanZuckerberg::ExpressionMatrix2::keepBest(
+    vector<T>& v,
+    size_t k,
+    const Comparator& comparator)
+{
+    std::nth_element(v.begin(), v.begin()+k, v.end(), comparator);
+    v.resize(k);
 }
 
 

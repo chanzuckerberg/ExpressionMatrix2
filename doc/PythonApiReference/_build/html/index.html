@@ -293,13 +293,13 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs0">
 <code class="descname">findSimilarPairs0</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Creates and stores a new object similarPairsName containing pairs of similar cells from cellSetName. The computation is done by directly looping over all possible cell pairs with both cells in cellSetName and performing for each pair an exact computation of the cell similarity, taking into account only genes in geneSetName. For each cell, only the best (most similar) k or fewer similar cells are stored, among those that exceed the specified similarityThreshold. This computational cost of this function grows with the square of the number of cells in cellSetName. The required computing time will typically be a few minutes for a few thousand cells or several hours for a few tens of thousands cells. When the number of cells exceeds a few thousands, it is more practical to perform an approximate computation using findSimilarPairs3.</p>
+<dd><p>Creates and stores a new object similarPairsName containing pairs of similar cells from cellSetName. The computation is done by directly looping over all possible cell pairs with both cells in cellSetName and performing for each pair an exact computation of the cell similarity, taking into account only genes in geneSetName. For each cell, only the best (most similar) k or fewer similar cells are stored, among those that exceed the specified similarityThreshold. This computational cost of this function grows with the square of the number of cells in cellSetName. The required computing time will typically be a few minutes for a few thousand cells or several hours for a few tens of thousands cells. When the number of cells exceeds a few thousands, it is more practical to perform an approximate computation using findSimilarPairs4.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs1">
 <code class="descname">findSimilarPairs1</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em>, <em>arg1: str</em>, <em>arg2: str</em>, <em>arg3: int</em>, <em>arg4: float</em>, <em>arg5: int</em>, <em>arg6: int</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Obsolete. Use findSimilarPairs3 instead.</p>
+<dd><p>Obsolete. Use findSimilarPairs4 instead.</p>
 </dd></dl>
 
 <dl class="method">
@@ -311,13 +311,19 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3">
 <code class="descname">findSimilarPairs3</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) with lshCount LSH hashes to speed up the computation of the similar pairs. Like findSimilarPairs0, this still loops over all possible cell pairs with both cells in cellSetName and therefore the computational cost still grows asymptotically with the square of the number of cells. However the computation is orders of magnitudes faster. The computation is approximate, and the error decreases as lshCount increases. For the suggested value lshCount=1024, the standard deviation of the pair similarity computed in this way is 0.05 or less. Improved LSH functionality that avoids the loop over cell pairs will be provided by findSimilarPairs2 but is not yet available. More documentation for findSimilarPairs3 will become available at a later time. The two functions findSimilarPairs1 and findSimilarPairs3 have identical functionality, but findSimilarPairs1 is prototype code that will become obsolete, while findSimilarPairs3 is faster and uses better organized code. Therefore, new scripts should use findSimilarPairs3. Old scripts that use findSimilarPairs1 should be converted to use findSimilarPairs3 instead.</p>
+<dd><p>Obsolete. Use findSimilarPairs4 instead.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3Benchmark">
 <code class="descname">findSimilarPairs3Benchmark</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Like findSimilarPairs3, but does not store anything. Used for benchmarks.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs4">
+<code class="descname">findSimilarPairs4</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) with lshCount LSH hashes to speed up the computation of the similar pairs. Like findSimilarPairs0, this still loops over all possible cell pairs with both cells in cellSetName and therefore the computational cost still grows asymptotically with the square of the number of cells. However the computation is orders of magnitudes faster. The computation is approximate, and the error decreases as lshCount increases. For the suggested value lshCount=1024, the standard deviation of the pair similarity computed in this way is 0.05 or less.</p>
 </dd></dl>
 
 <dl class="method">

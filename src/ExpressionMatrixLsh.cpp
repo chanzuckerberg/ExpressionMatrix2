@@ -24,8 +24,10 @@
 #include "ExpressionMatrix.hpp"
 #include "BitSet.hpp"
 #include "ExpressionMatrixSubset.hpp"
+#include "heap.hpp"
 #include "Lsh.hpp"
 #include "nextPowerOfTwo.hpp"
+#include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
@@ -1396,6 +1398,145 @@ void ExpressionMatrix::findSimilarPairs3Benchmark(
     cout << "Time for all pairs: " << t01 << " s." << endl;
     cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
     cout << "Average similarity: " << sum / (0.5*double(cellCount)*double(cellCount-1)) << endl;
+
+}
+
+
+// Used to test improvements to findSimilarPairs3.
+void ExpressionMatrix::findSimilarPairs4(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold,     // The minimum similarity for a pair to be stored.
+    size_t lshCount,                // The number of LSH vectors to use.
+    unsigned int seed               // The seed used to generate the LSH vectors.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs4 begins." << endl;
+
+    // Sanity check.
+    CZI_ASSERT(similarityThreshold <= 1.);
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+
+    // Temporary storage of pairs for each cell.
+    vector< vector< pair<CellId, float> > > tmp(cellCount);
+    const size_t tmpStore = 2 * k;
+    for(auto& v: tmp) {
+        v.reserve(tmpStore);
+    }
+
+    // Current similarity threshold for each cell.
+    vector<float> cellThreshold(cellCount, float(similarityThreshold));
+
+
+
+    // Loop over all pairs. This is much faster than findSimilarPairs0
+    // (around 15 ns per pair when using LSH vectors of 1024 bits), but
+    // still scales like the square of the number of cells in the cell set.
+    // This loops in blocks of cells for better memory locality than a simple
+    // loop over cell pairs.
+    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
+    const CellId blockSize = 64;
+    size_t pairCount = 0;
+    size_t totalPairCount = size_t(cellCount)*(size_t(cellCount-1))/2;
+    size_t blockCount = 0;
+    for(CellId begin0=0; begin0<cellCount; begin0+=blockSize) {
+        const CellId end0 = min(begin0+blockSize, cellCount);
+        for(CellId begin1=0; begin1<=begin0; begin1+=blockSize) {
+            if(blockCount>0 && ((blockCount%1000000)==0)) {
+                cout << timestamp << "Pair computation ";
+                cout << 100.*double(pairCount)/double(totalPairCount);
+                cout << "% complete." << endl;
+            }
+            ++blockCount;
+            const CellId end1 = min(begin1+blockSize, end0);
+            for(CellId cell0=begin0; cell0!=end0; ++cell0) {
+                auto& tmp0 = tmp[cell0];
+                for(CellId cell1=begin1; cell1!=end1 && cell1<cell0; ++cell1) {
+                    auto& tmp1 = tmp[cell1];
+                    ++pairCount;
+
+                    // Compute the LSH similarity between these two cells.
+                    const double similarity = lsh.computeCellSimilarity(cell0, cell1);
+
+                    // If the similarity is sufficient, pass it to the SimilarPairs container,
+                    // which will make the decision whether to store it, depending on the
+                    // number of pairs already stored for cellId0 and cellId1.
+                    if(similarity > similarityThreshold) {
+                        if(similarity > cellThreshold[cell0]) {
+                            tmp0.push_back(make_pair(cell1, similarity));
+                            if(tmp0.size() == tmpStore) {
+                                keepBest(tmp0, k, OrderPairsBySecondGreater< pair<CellId, float> >());
+                                cellThreshold[cell0] = tmp0.back().second;
+                            }
+                        }
+                        if(similarity > cellThreshold[cell1]) {
+                            tmp1.push_back(make_pair(cell0, similarity));
+                            if(tmp1.size() == tmpStore) {
+                                keepBest(tmp1, k, OrderPairsBySecondGreater< pair<CellId, float> >());
+                                cellThreshold[cell1] = tmp1.back().second;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Keep at most k of each.
+    for(auto& tmp0: tmp) {
+        if(tmp0.size() > k) {
+            keepBest(tmp0, k, OrderPairsBySecondGreater< pair<CellId, float> >());
+        }
+    }
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    CZI_ASSERT(pairCount == totalPairCount);
+    cout << "Time for all pairs: " << t01 << " s." << endl;
+    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+
+    // Store the pairs in a SimilarPairs object.
+    cout << timestamp << "Initializing SimilarPairs object." << endl;
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    cout << timestamp << "Copying similar pairs." << endl;
+    similarPairs.copy(tmp);
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    cout << timestamp << "Sorting similar pairs." << endl;
+    similarPairs.sort();
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs4 ends." << endl;
 
 }
 

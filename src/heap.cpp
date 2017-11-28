@@ -27,3 +27,12 @@ void ChanZuckerberg::ExpressionMatrix2::testHeap()
     popAndPushHeap(v.begin(), v.end(), 20, std::greater<int>());
     dumpMinHeap(v, "After popAndPush:");
 }
+
+
+void ChanZuckerberg::ExpressionMatrix2::testKeepBest()
+{
+    vector<int> v = {35, 9, 14, 39, 17, 10, 18, 28, 19, 36, 7, 43, 16};
+    keepBest(v, 6, std::greater<int>());
+    copy(v.begin(), v.end(), ostream_iterator<int>(cout, " "));
+    cout << endl;
+}
