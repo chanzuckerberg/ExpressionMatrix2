@@ -628,6 +628,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "Only intended to be used for testing. "
            "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
+       .def("analyzeLshSignatures",
+           &ExpressionMatrix::analyzeLshSignatures,
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. ",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshCount") = 1024,
+           arg("seed") = 231
+       )
 
 
 

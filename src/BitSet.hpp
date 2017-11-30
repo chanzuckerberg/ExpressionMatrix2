@@ -6,6 +6,7 @@
 // on LSH signatures. Similar to boost::dynamic_bitset.
 
 #include "CZI_ASSERT.hpp"
+#include "string.hpp"
 #include "vector.hpp"
 
 namespace ChanZuckerberg {
@@ -78,6 +79,25 @@ public:
             const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
             return (word >> firstBitPositionInWord) & bitMask;
         }
+    }
+
+    bool operator<(const BitSet& that) const
+    {
+        return data < that.data;
+    }
+
+    string getString(uint64_t bitCount) const
+    {
+        string s;
+        for(uint64_t i=0; i<bitCount; i++) {
+            if(get(i)) {
+                s += 'x';
+            } else {
+                s += '_';
+            }
+        }
+        return s;
+
     }
 
     vector<uint64_t> data;

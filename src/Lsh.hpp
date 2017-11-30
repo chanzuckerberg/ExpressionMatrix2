@@ -35,6 +35,17 @@ public:
     // specified by their ids local to the cell set used by this Lsh object.
     double computeCellSimilarity(CellId localCellId0, CellId localCellId1) const;
 
+    // Get the signature corresponding to a given CellId (local to the cell set).
+    const BitSet& getSignature(CellId cellId) const
+    {
+        return signatures[cellId];
+    }
+
+    const vector<BitSet>& getSignatures() const
+    {
+        return signatures;
+    }
+
 private:
 
     // The LSH vectors.
