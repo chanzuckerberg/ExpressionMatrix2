@@ -321,6 +321,13 @@ public:
         StringId metaDataNameId,
         vector< pair<string, size_t> >& sortedHistogram) const;
 
+    // Compute Rand Index and Adjusted Rand Index for two
+    // meta data fields.
+    pair<double, double> computeMetaDataRandIndex(
+        const string& cellSetName,
+        const string& metaDataName0,
+        const string& metaDataName1);
+
     // Compute the similarity between two cells given their CellId.
     // The similarity is the correlation coefficient of their
     // expression counts.

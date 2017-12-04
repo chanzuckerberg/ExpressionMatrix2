@@ -3,6 +3,7 @@
 #include "ClusterGraph.hpp"
 #include "filesystem.hpp"
 #include "orderPairs.hpp"
+#include "randIndex.hpp"
 #include "SimilarPairs.hpp"
 #include "timestamp.hpp"
 #include "tokenize.hpp"
@@ -1285,6 +1286,74 @@ void ExpressionMatrix::histogramMetaData(
     copy(histogram.begin(), histogram.end(), back_inserter(sortedHistogram));
     sort(sortedHistogram.begin(), sortedHistogram.end(), OrderPairsBySecondGreaterThenByFirstLess< pair<string, size_t> >());
 }
+
+
+
+// Compute Rand Index and Adjusted Rand Index of two meta data fields.
+pair<double, double> ExpressionMatrix::computeMetaDataRandIndex(
+    const string& cellSetName,
+    const string& metaDataName0,
+    const string& metaDataName1)
+{
+    // Locate the cell set.
+    const auto it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " not found.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+
+    // Find the StringId's corresponding to the specified meta data names.
+    const StringId metaDataNameId0 = cellMetaDataNames(metaDataName0);
+    if(metaDataNameId0 == cellMetaDataNames.invalidStringId) {
+        throw runtime_error("Meta data field " + metaDataName0 + " not found.");
+    }
+    const StringId metaDataNameId1 = cellMetaDataNames(metaDataName1);
+    if(metaDataNameId1 == cellMetaDataNames.invalidStringId) {
+        throw runtime_error("Meta data field " + metaDataName1 + " not found.");
+    }
+
+    // Create histograms for the two meta data fields..
+    vector< pair<string, size_t> > sortedHistogram0;
+    vector< pair<string, size_t> > sortedHistogram1;
+    histogramMetaData(cellSet, metaDataNameId0, sortedHistogram0);
+    histogramMetaData(cellSet, metaDataNameId1, sortedHistogram1);
+    const size_t n0 = sortedHistogram0.size();
+    const size_t n1 = sortedHistogram1.size();
+
+    // Create maps that, given a meta data value, give its index in
+    // sortedHistogram0 or sortedHistogram1.
+    map<string, size_t> map0;
+    for(size_t i=0; i<sortedHistogram0.size(); i++) {
+        map0.insert(make_pair(sortedHistogram0[i].first, i));
+    }
+    map<string, size_t> map1;
+    for(size_t i=0; i<sortedHistogram1.size(); i++) {
+        map1.insert(make_pair(sortedHistogram1[i].first, i));
+    }
+
+    // Prepare the contincency table.
+    vector< vector<size_t> > matrix(n0, vector<size_t>(n1, 0));
+
+    // Fill in the contingency table.
+    for(const CellId cellId: cellSet) {
+        const string metaDataValue0 = getCellMetaData(cellId, metaDataNameId0);
+        const string metaDataValue1 = getCellMetaData(cellId, metaDataNameId1);
+        const size_t i0 = map0[metaDataValue0];
+        const size_t i1 = map1[metaDataValue1];
+        CZI_ASSERT(i0 < n0);
+        CZI_ASSERT(i1 < n1);
+        ++(matrix[i0][i1]);
+    }
+
+
+    // Compute the Rand Index and Adjusted Rand Index and write them out.
+    double randIndex;
+    double adjustedRandIndex;
+    computeRandIndex(matrix, randIndex, adjustedRandIndex);
+
+    return make_pair(randIndex, adjustedRandIndex);
+}
+
 
 
 

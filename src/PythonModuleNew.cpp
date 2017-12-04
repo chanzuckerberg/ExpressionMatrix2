@@ -239,6 +239,14 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "or invalidCellId if no cell with the given name exists. ",
            arg("cellString")
        )
+       .def("computeMetaDataRandIndex",
+           &ExpressionMatrix::computeMetaDataRandIndex,
+           "Returns the Rand Index and Adjusted Rand Index "
+           "of the contingency table created using two given meta data fields. ",
+           arg("cellSetName") = "AllCells",
+           arg("metaDataName0"),
+           arg("metaDataName1")
+       )
 
 
 
