@@ -43,6 +43,7 @@ using namespace ExpressionMatrix2;
 #include <cmath>
 #include "fstream.hpp"
 #include <chrono>
+#include <numeric>
 
 
 // Generate the random unit LSH vectors.

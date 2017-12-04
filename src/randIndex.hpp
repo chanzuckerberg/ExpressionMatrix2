@@ -16,6 +16,7 @@
 #include "algorithm.hpp"
 #include "CZI_ASSERT.hpp"
 #include "vector.hpp"
+#include <numeric>
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
