@@ -119,8 +119,10 @@ template<class T, class Comparator>
     size_t k,
     const Comparator& comparator)
 {
-    std::nth_element(v.begin(), v.begin()+k, v.end(), comparator);
-    v.resize(k);
+    if(v.size() > k) {
+        std::nth_element(v.begin(), v.begin()+k, v.end(), comparator);
+        v.resize(k);
+    }
 }
 
 

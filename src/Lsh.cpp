@@ -120,7 +120,7 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
     cout << timestamp << "Computation of cell LSH signatures begins." << endl;
     const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId=0; localCellId<cellCount; localCellId++) {
-        if((localCellId % 1000) == 0) {
+        if((localCellId % 10000) == 0) {
             cout << timestamp << "Working on cell " << localCellId << " of " << cellCount << endl;
         }
 

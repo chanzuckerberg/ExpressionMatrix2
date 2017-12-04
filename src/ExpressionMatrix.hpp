@@ -424,6 +424,7 @@ public:
 
 
 
+    // Obsolete - do not use.
     // Find similar cell pairs using LSH, without looping over all pairs.
     // See the beginning of ExpressionMatrixLsh.cpp for more information.
     // This implementation requires lshRowCount to be a power of 2 not greater than 64.
@@ -463,7 +464,7 @@ public:
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 
-    // Used to test improvements to findSimilarPairs3.
+    // Faster version of findSimilarPairs3.
     void findSimilarPairs4(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
@@ -473,6 +474,21 @@ public:
         size_t lshCount,                // The number of LSH vectors to use.
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
+
+    // Replacement for findSimilarPairs2.
+    // Find similar cell pairs using LSH, without looping over all pairs.
+    void findSimilarPairs5(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& name,             // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        size_t lshSliceLength,          // The number of bits in each LSH signature slice, or 0 for automatic selection.
+        size_t bucketOverflow,          // If not zero, ignore buckets larger than this.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
+
 
     // Analyze the quality of the LSH computation of cell similarity.
     void analyzeLsh(
@@ -498,6 +514,13 @@ public:
     void analyzeSimilarPairs(
         const string& name,
         double csvDownsample) const;
+
+    // Compare two SimilarPairs objects computed using LSH,
+    // assuming that the first one was computed using a complete
+    // loop on all pairs (findSimilarPairs4).
+    void compareSimilarPairs(
+        const string& similarPairsName0,
+        const string& similarPairsName1);
 
     // Create a new cell graph.
     // Graphs are not persistent (they are stored in memory only).

@@ -96,11 +96,12 @@ void ExpressionMatrix::writeSimilarPairs(const string& name) const
     csvOut << "Cell0,Cell1,Computed,Exact\n";
 
     for(CellId cellId0=0; cellId0<cellCount(); cellId0++) {
-        for(const auto& pairs0: similarPairs[cellId0]) {
+        for(size_t i=0; i<similarPairs.size(cellId0); i++) {
+            const auto& p = similarPairs.begin(cellId0)[i];
             csvOut << cellId0 << ",";
-            csvOut << pairs0.first << ",";
-            csvOut << pairs0.second << ",";
-            csvOut << computeCellSimilarity(cellId0, pairs0.first) << "\n";
+            csvOut << p.first << ",";
+            csvOut << p.second << ",";
+            csvOut << computeCellSimilarity(cellId0, p.first) << "\n";
         }
     }
 

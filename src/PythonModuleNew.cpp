@@ -16,6 +16,7 @@
 #include "heap.hpp"
 #include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
+#include "multipleSetUnion.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -570,7 +571,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("findSimilarPairs2",
            &ExpressionMatrix::findSimilarPairs2,
-           "Development of this functionality is in progress. "
+           "Obsolete. Replaced by findSimilarPairs5."
            "It will provide LSH-based computation of similar cell pairs "
            "without looping over all possible pairs of cells."
        )
@@ -612,6 +613,20 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("lshCount") = 1024,
            arg("seed") = 231
        )
+       .def("findSimilarPairs5",
+           &ExpressionMatrix::findSimilarPairs5,
+           "LSH-based computation of similar cell pairs "
+           "without looping over all possible pairs of cells.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("similarPairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2,
+           arg("lshCount") = 1024,
+           arg("lshSliceLength"),
+           arg("bucketOverflow") = 1000,
+           arg("seed") = 231
+       )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
            "Only intended to be used for testing. "
@@ -620,6 +635,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("analyzeSimilarPairs",
            &ExpressionMatrix::analyzeSimilarPairs,
+           "Only intended to be used for testing. "
+           "See the source code in the ExpressionMatrix2/src directory for more information. "
+       )
+       .def("compareSimilarPairs",
+           &ExpressionMatrix::compareSimilarPairs,
            "Only intended to be used for testing. "
            "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
@@ -853,6 +873,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         );
     module.def("testKeepBest",
         testKeepBest,
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
+        );
+    module.def("multipleSetUnionTest",
+        multipleSetUnionTest,
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );

@@ -25,7 +25,9 @@
 #include "BitSet.hpp"
 #include "ExpressionMatrixSubset.hpp"
 #include "heap.hpp"
+#include "iterator.hpp"
 #include "Lsh.hpp"
+#include "multipleSetUnion.hpp"
 #include "nextPowerOfTwo.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
@@ -1539,6 +1541,240 @@ void ExpressionMatrix::findSimilarPairs4(
 
 
 
+// Replacement for findSimilarPairs2.
+// Find similar cell pairs using LSH, without looping over all pairs.
+// This uses slices of each LSH signature.
+// The number of bits in each slice is lshSliceLength.
+// If lshSliceLength is 0, it is set to the base 2 log of the number of cells
+// (rounded up).
+// For each slice we store the cells with each possible value of the signature slice.
+void ExpressionMatrix::findSimilarPairs5(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold,     // The minimum similarity for a pair to be stored.
+    size_t lshCount,                // The number of LSH vectors to use.
+    size_t lshSliceLength,          // The number of bits in each LSH signature slice.
+    size_t bucketOverflow,          // If not zero, ignore buckets larger than this.
+    unsigned int seed               // The seed used to generate the LSH vectors.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs5 begins." << endl;
+    cout << "Signature slice length is " << lshSliceLength << " bits." << endl;
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+
+
+    // Find the signature bits corresponding to each slice.
+    const size_t sliceCount = lshCount / lshSliceLength;
+    vector< vector<size_t> > allSlicesBits(sliceCount);
+    for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
+        vector<size_t>& sliceBits = allSlicesBits[sliceId];
+        const size_t sliceBegin = sliceId * lshSliceLength;
+        const size_t sliceEnd = sliceBegin + lshSliceLength;
+        for(size_t bit=sliceBegin; bit!=sliceEnd; bit++) {
+            sliceBits.push_back(bit);
+        }
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+
+#if 0
+    ofstream signatureOut("Signatures.txt");
+    for(CellId cellId=0; cellId<cellCount; cellId++) {
+        signatureOut << lsh.getSignature(cellId).getString(lshCount) << " " << cellId << "\n";
+    }
+    signatureOut << flush;
+#endif
+
+    // Table to contain, for each signature slice,
+    // the cells with each of possible value of the slice.
+    // Indexed by [sliceId][sliceValue].
+    // All cell ids are local to the cell set we are using.
+    vector< vector < vector<CellId> > > tables(sliceCount);
+
+
+
+    // Loop over the signature slices.
+    // Each generates a new table of cells.
+    for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
+        cout << timestamp << "Computing cell table for signature slice " << sliceId << " of " << sliceCount << endl;
+        vector < vector<CellId> >& table = tables[sliceId];
+        table.resize(1ULL << lshSliceLength);
+        const vector<size_t>& sliceBits = allSlicesBits[sliceId];
+
+        // Store each cell id based on the value of this signature slice.
+        for(CellId cellId=0; cellId<cellCount; cellId++) {
+            const uint64_t signatureSlice = lsh.getSignature(cellId).getBits(sliceBits);
+            CZI_ASSERT(signatureSlice < table.size());
+            table[signatureSlice].push_back(cellId);
+        }
+    }
+    cout << timestamp << "Computation of cell table completed." << endl;
+
+    // Temporary storage of pairs for each cell.
+    vector< vector< pair<CellId, float> > > tmp(cellCount);
+
+
+    // Loop over cells.
+    // For each cell, compute the union of all the table vectors
+    // this cell belongs to. This is the set of candidate neighbors
+    // for this cell.
+    vector<CellId> candidates;
+    vector< const vector<CellId>* > setsToUnion;
+    vector< pair<CellId, float> > cellNeighbors;    // The neighbors of a single cell.
+    size_t totalCandidateCount = 0;
+    for(CellId cellId0=0; cellId0<cellCount; cellId0++) {
+        if((cellId0 % 10000)==0) {
+            cout << timestamp << "Find neighbors for cell " << cellId0 << " begins." << endl;
+        }
+
+        // Find the candidates.
+        // This can be made faster using a heap
+        // to compute the union.
+        candidates.clear();
+        setsToUnion.clear();
+        for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
+            const uint64_t signatureSlice = lsh.getSignature(cellId0).getBits(allSlicesBits[sliceId]);
+            const auto& bucket = tables[sliceId][signatureSlice];
+            if(bucketOverflow==0 || bucket.size()<=bucketOverflow) {
+                setsToUnion.push_back(&tables[sliceId][signatureSlice]);
+            }
+#if 0
+            cout << "Bucket for cell " << cellId0 << " slice " << sliceId << ": ";
+            copy(tables[sliceId][signatureSlice].begin(), tables[sliceId][signatureSlice].end(),
+                ostream_iterator<CellId>(cout, " "));
+            cout << endl;
+#endif
+        }
+        multipleSetUnion(setsToUnion, candidates);
+        totalCandidateCount += candidates.size();
+
+        // Check each of the candidates.
+        cellNeighbors.clear();
+        for(const CellId cellId1: candidates) {
+            if(cellId1 == cellId0) {
+                continue;
+            }
+            const double similarity = lsh.computeCellSimilarity(cellId0, cellId1);
+            if(similarity > similarityThreshold) {
+                cellNeighbors.push_back(make_pair(cellId1, float(similarity)));
+            }
+        }
+
+#if 0
+        cout << "cellNeighbors before keepBest " << cellId0 << endl;
+        for(const auto& p: cellNeighbors) {
+            cout << p.first << " " << p.second << "\n";
+        }
+#endif
+
+        // Store the pairs we found, keeping only the k best.
+        keepBest(cellNeighbors, k, OrderPairsBySecondGreater< pair<CellId, float> >());
+#if 0
+        cout << "cellNeighbors after keepBest" << cellId0  << endl;
+        for(const auto& p: cellNeighbors) {
+            cout << p.first << " " << p.second << "\n";
+        }
+#endif
+        tmp[cellId0] = cellNeighbors;
+
+        // break;  // ********************************************** TAKE OUT!!!!!!!
+    }
+    cout << "Average number of candidates per cell is " << double(totalCandidateCount)/cellCount << endl;
+
+    // Store the pairs in a SimilarPairs object.
+    cout << timestamp << "Initializing SimilarPairs object." << endl;
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    cout << timestamp << "Copying similar pairs." << endl;
+    similarPairs.copy(tmp);
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    cout << timestamp << "Sorting similar pairs." << endl;
+    similarPairs.sort();
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs5 ends." << endl;
+
+}
+
+
+
+// Compare two SimilarPairs objects computed using LSH,
+// assuming that the first one was computed using a complete
+// loop on all pairs (findSimilarPairs4).
+void ExpressionMatrix::compareSimilarPairs(
+    const string& similarPairsName0,
+    const string& similarPairsName1)
+{
+    // Access the SimilarPairs objects.
+    const SimilarPairs similarPairs0(directoryName + "/SimilarPairs-" + similarPairsName0, true);
+    const SimilarPairs similarPairs1(directoryName + "/SimilarPairs-" + similarPairsName1, true);
+
+    // Sanity check that the two use the same gene sets and cell sets.
+    CZI_ASSERT(similarPairs0.getGeneSet() == similarPairs1.getGeneSet());
+    CZI_ASSERT(similarPairs0.getCellSet() == similarPairs1.getCellSet());
+
+    // Loop over cells.
+    ofstream csvOut("CompareSimilarPairs.csv");
+    csvOut << "CellId,Stored0,Stored1,Lowest0,Lowest1,\n";
+    const CellId cellCount = CellId(similarPairs0.getCellSet().size());
+    for(CellId cellId=0; cellId<cellCount; cellId++) {
+        const auto n0 = similarPairs0.size(cellId);
+        const auto n1 = similarPairs1.size(cellId);
+        const auto lowest0 = n0 ? ((similarPairs0.end(cellId)-1)->second) : 1.;
+        const auto lowest1 = n1 ? ((similarPairs1.end(cellId)-1)->second) : 1.;
+        if(n0==n1 && lowest0==lowest1) {
+            continue;
+        }
+        csvOut << cellId << ",";
+        csvOut << n0 << ",";
+        csvOut << n1 << ",";
+        if(n0) {
+            csvOut << lowest0;
+        }
+        csvOut << ",";
+        if(n1) {
+            csvOut << lowest1;
+        }
+        csvOut << ",";
+        csvOut << "\n";
+
+
+    }
+
+
+}
+
+
 // Analyze the quality of the LSH computation of cell similarity.
 void ExpressionMatrix::analyzeLsh(
     const string& geneSetName,      // The name of the gene set to be used.
@@ -1720,8 +1956,10 @@ void ExpressionMatrix::analyzeLshSignatures(
         const size_t size = p.second.size();
         signatureTable.push_back(make_pair(signature, size));
     }
+#if 0
     sort(signatureTable.begin(), signatureTable.end(),
         OrderPairsBySecondGreater< pair<BitSet, size_t> >());
+#endif
 
 
 

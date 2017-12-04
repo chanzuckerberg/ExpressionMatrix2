@@ -81,6 +81,19 @@ public:
         }
     }
 
+    // Same, but the bits are specified in a vector and can be anywhere.
+    // The last specified bit goes in the least significant position
+    // of the return value.
+    uint64_t getBits(const vector<size_t>& bitPositions) const
+    {
+        uint64_t bits = 0;
+        for(const size_t bitPosition: bitPositions) {
+            bits <<= 1;
+            bits += get(bitPosition);
+        }
+        return bits;
+    }
+
     bool operator<(const BitSet& that) const
     {
         return data < that.data;
