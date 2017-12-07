@@ -233,6 +233,14 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "Each element in the returned list corresponds to the cell id at the same position in list cellIds. ",
            arg("cellIds")
        )
+       .def
+       (
+           "removeCellMetaData",
+           &ExpressionMatrix::removeCellMetaData,
+           "Removes a meta data field for all cells of a given cell set.",
+           arg("cellSetName"),
+           arg("metaDataName")
+       )
        .def("cellIdFromString",
            &ExpressionMatrix::cellIdFromString,
            "Returns the cell id corresponding to a given name, "

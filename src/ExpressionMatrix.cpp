@@ -995,6 +995,42 @@ void ExpressionMatrix::decrementCellMetaDataNameUsageCount(StringId nameId)
 
 
 
+// Remove a meta data field for all cells of a given cell set.
+void ExpressionMatrix::removeCellMetaData(
+    const string& cellSetName,
+    const string& metaDataName)
+{
+    // Locate the cell set.
+    const auto it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " not found.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+
+    // Find the StringId corresponding to the specified meta data name.
+    const StringId metaDataNameId = cellMetaDataNames(metaDataName);
+    if(metaDataNameId == cellMetaDataNames.invalidStringId) {
+        // This meta data name does not exist.
+        // We don't need to do anything.
+        return;
+    }
+
+
+    // Loop over all cells in the cell set.
+    for(const CellId cellId: cellSet) {
+        for(auto it=cellMetaData.begin(cellId); it!=cellMetaData.end(cellId); ++it) {
+            if((*it).first == metaDataNameId) {
+                decrementCellMetaDataNameUsageCount(metaDataNameId);
+                cellMetaData.erase(it);
+                break;
+            }
+        }
+    }
+
+}
+
+
+
 // Get the expression count for a given cell and gene.
 // This can be zero.
 float ExpressionMatrix::getCellExpressionCount(CellId cellId, GeneId geneId) const

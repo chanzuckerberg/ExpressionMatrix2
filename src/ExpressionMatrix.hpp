@@ -315,6 +315,9 @@ public:
     void setCellMetaData(CellId, StringId nameId, const string& value);
     void setCellMetaData(CellId, StringId nameId, StringId valueId);
 
+    // Remove a meta data field for all cells of a given cell set.
+    void removeCellMetaData(const string& cellSetName, const string& metaDataName);
+
     // Compute a sorted histogram of a given meta data field.
     void histogramMetaData(
         const CellSet& cellSet,
