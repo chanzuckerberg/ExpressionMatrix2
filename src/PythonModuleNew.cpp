@@ -398,6 +398,18 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("inputSetName1"),
            arg("oututSetName")
        )
+       .def
+       (
+           "createGeneSetFromGeneNames",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const vector<string>&)
+           )
+           &ExpressionMatrix::createGeneSetFromGeneNames,
+           "Creates a new gene set given a list of gene names.",
+           arg("geneSetName"),
+           arg("geneNames")
+       )
 
 
 

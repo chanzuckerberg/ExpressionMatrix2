@@ -934,6 +934,11 @@ public:
         const vector<string>& geneNames,
         int& ignoredCount,
         int& emptyCount);
+    // Same as above, but throw an exception if any of the gene names are empty
+    // or do not correspond to any gene.
+    void createGeneSetFromGeneNames(
+        const string& geneSetName,
+        const vector<string>& geneNames);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field is identical to a given string

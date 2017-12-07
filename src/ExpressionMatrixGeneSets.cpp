@@ -71,6 +71,36 @@ bool ExpressionMatrix::createGeneSetFromGeneNames(
 
 
 
+// Same as above, but throw an exception if any of the gene names are empty
+// or do not correspond to any gene.
+void ExpressionMatrix::createGeneSetFromGeneNames(
+    const string& geneSetName,
+    const vector<string>& geneNamesVector)
+{
+    // Check if a gene set with this name already exists.
+    if(geneSets.find(geneSetName) != geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " already exists.");
+    }
+
+    // Create the new gene set.
+    GeneSet& geneSet = geneSets[geneSetName];
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
+    for(const string& geneName: geneNamesVector) {
+        if(geneName.empty()) {
+            throw runtime_error("Empty gene name while creating gene set " + geneSetName);
+        }
+        const StringId stringId = geneNames(geneName);
+        if(stringId == geneNames.invalidStringId) {
+            throw runtime_error("Unknown gene name name " + geneName + " while creating gene set " + geneSetName);
+        } else {
+            geneSet.addGene(GeneId(stringId));
+        }
+    }
+    geneSet.sort();
+
+}
+
+
 bool ExpressionMatrix::createGeneSetIntersection(const string& inputSetsNames, const string& outputSetName)
 {
     return createGeneSetIntersectionOrUnion(inputSetsNames, outputSetName, false);

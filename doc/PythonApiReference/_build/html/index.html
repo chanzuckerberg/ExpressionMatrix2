@@ -279,6 +279,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetFromGeneNames">
+<code class="descname">createGeneSetFromGeneNames</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, geneSetName: str, geneNames: List[str]</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Creates a new gene set given a list of gene names.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetIntersection">
 <code class="descname">createGeneSetIntersection</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetsNames: str</em>, <em>outputSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
 <dd><p>Creates a new gene set as the intersection of two or more gene sets. The names of the input gene sets specified as the first argument must be separated by commas. Returns False if the operation failed because one of the input gene sets does not exist or the output gene set already exists, True otherwise.</p>
