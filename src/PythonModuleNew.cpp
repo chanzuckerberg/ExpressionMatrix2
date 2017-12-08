@@ -647,13 +647,12 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "without looping over all possible pairs of cells.",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
+           arg("lshName"),
            arg("similarPairsName"),
            arg("k") = 100,
            arg("similarityThreshold") = 0.2,
-           arg("lshCount") = 1024,
            arg("lshSliceLength"),
-           arg("bucketOverflow") = 1000,
-           arg("seed") = 231
+           arg("bucketOverflow") = 1000
        )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
@@ -675,6 +674,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::analyzeLsh,
            "Only intended to be used for testing. "
            "See the source code in the ExpressionMatrix2/src directory for more information. "
+       )
+       .def("computeLshSignatures",
+           &ExpressionMatrix::computeLshSignatures,
+           "Compute cell LSH signatures and store them.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshName"),
+           arg("lshCount") = 1024,
+           arg("seed") = 231
        )
        .def("analyzeLshSignatures",
            &ExpressionMatrix::analyzeLshSignatures,

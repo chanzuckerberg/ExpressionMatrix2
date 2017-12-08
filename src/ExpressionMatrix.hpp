@@ -490,12 +490,20 @@ public:
     void findSimilarPairs5(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
-        const string& name,             // The name of the SimilarPairs object to be created.
+        const string& lshName,          // The name of the Lsh object to be used.
+        const string& similarPairsName, // The name of the SimilarPairs object to be created.
         size_t k,                       // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
-        size_t lshCount,                // The number of LSH vectors to use.
         size_t lshSliceLength,          // The number of bits in each LSH signature slice, or 0 for automatic selection.
-        size_t bucketOverflow,          // If not zero, ignore buckets larger than this.
+        size_t bucketOverflow           // If not zero, ignore buckets larger than this.
+        );
+
+    // Compute cell LSH signatures and store them.
+    void computeLshSignatures(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& lshName,          // The name of the Lsh object to be created.
+        size_t lshCount,                // The number of LSH vectors to use.
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 

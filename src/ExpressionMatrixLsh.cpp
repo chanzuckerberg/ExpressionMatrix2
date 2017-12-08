@@ -1558,17 +1558,15 @@ void ExpressionMatrix::findSimilarPairs4(
 void ExpressionMatrix::findSimilarPairs5(
     const string& geneSetName,      // The name of the gene set to be used.
     const string& cellSetName,      // The name of the cell set to be used.
+    const string& lshName,          // The name of the Lsh object to be used.
     const string& similarPairsName, // The name of the SimilarPairs object to be created.
     size_t k,                       // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold,     // The minimum similarity for a pair to be stored.
-    size_t lshCount,                // The number of LSH vectors to use.
-    size_t lshSliceLength,          // The number of bits in each LSH signature slice.
-    size_t bucketOverflow,          // If not zero, ignore buckets larger than this.
-    unsigned int seed               // The seed used to generate the LSH vectors.
+    size_t lshSliceLength,          // The number of bits in each LSH signature slice, or 0 for automatic selection.
+    size_t bucketOverflow           // If not zero, ignore buckets larger than this.
     )
 {
     cout << timestamp << "ExpressionMatrix::findSimilarPairs5 begins." << endl;
-    cout << "Signature slice length is " << lshSliceLength << " bits." << endl;
 
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
@@ -1591,10 +1589,15 @@ void ExpressionMatrix::findSimilarPairs5(
         throw runtime_error("Cell set " + cellSetName + " is empty.");
     }
 
+    // Access the Lsh object that will do the computation.
+    Lsh lsh(directoryName + "/Lsh-" + lshName);
+    if(lsh.cellCount() != cellSet.size()) {
+        throw runtime_error("LSH object " + lshName + " has a number of cells inconsistent with cell set " + cellSetName);
+    }
 
 
     // Find the signature bits corresponding to each slice.
-    const size_t sliceCount = lshCount / lshSliceLength;
+    const size_t sliceCount = lsh.lshCount() / lshSliceLength;
     vector< vector<size_t> > allSlicesBits(sliceCount);
     for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
         vector<size_t>& sliceBits = allSlicesBits[sliceId];
@@ -1605,23 +1608,6 @@ void ExpressionMatrix::findSimilarPairs5(
         }
     }
 
-    // Create the expression matrix subset for this gene set and cell set.
-    cout << timestamp << "Creating expression matrix subset." << endl;
-    const string expressionMatrixSubsetName =
-        directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
-    ExpressionMatrixSubset expressionMatrixSubset(
-        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
-
-    // Create the Lsh object that will do the computation.
-    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
-
-#if 0
-    ofstream signatureOut("Signatures.txt");
-    for(CellId cellId=0; cellId<cellCount; cellId++) {
-        signatureOut << lsh.getSignature(cellId).getString(lshCount) << " " << cellId << "\n";
-    }
-    signatureOut << flush;
-#endif
 
     // Table to contain, for each signature slice,
     // the cells with each of possible value of the slice.
@@ -1731,8 +1717,53 @@ void ExpressionMatrix::findSimilarPairs5(
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs5 ends." << endl;
 
-    lsh.remove();
+}
 
+
+
+// Compute cell LSH signatures and store them.
+void ExpressionMatrix::computeLshSignatures(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& lshName,          // The name of the Lsh object to be created.
+    size_t lshCount,                // The number of LSH vectors to use.
+    unsigned int seed               // The seed used to generate the LSH vectors.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::computeLshSignatures begins." << endl;
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    cout << timestamp << "Creating expression matrix subset." << endl;
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + lshName;
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the Lsh object that will do the computation.
+    Lsh lsh(directoryName + "/Lsh-" + lshName, expressionMatrixSubset, lshCount, seed);
+
+    cout << timestamp << "ExpressionMatrix::computeLshSignatures ends." << endl;
 }
 
 

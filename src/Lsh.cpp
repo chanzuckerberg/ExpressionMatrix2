@@ -44,6 +44,26 @@ Lsh::Lsh(
 
 
 
+// Access an existing Lsh object.
+Lsh::Lsh(
+    const string& name              // Name prefix for memory mapped files.
+    )
+{
+    // Access the memory mapped data.
+    info.accessExistingReadOnly(name + "-Info");
+    signatures.accessExistingReadOnly(name + "-Signatures");
+
+    // Compute the number of 64 bit words in each cell signature.
+    signatureWordCount = (lshCount()-1)/64 + 1;
+
+    // Compute the similarity table.
+    // This is a look up table indexed by the number of mismatching bits.
+    // Each entry contgains the similarity corresponding to that number
+    // of mismatching bits.
+    computeSimilarityTable();
+}
+
+
 // Generate the LSH vectors.
 void Lsh::generateLshVectors(
     size_t geneCount,
@@ -208,17 +228,16 @@ void Lsh::computeCellLshSignatures(
 void Lsh::computeSimilarityTable()
 {
     // Initialize the similarity table.
-    const size_t lshCount = lshVectors.front().size();
-    similarityTable.resize(lshCount + 1);
+    similarityTable.resize(lshCount() + 1);
 
     // Loop over all possible numbers of mismatching bits.
     for(size_t mismatchingBitCount = 0;
-        mismatchingBitCount <= lshCount; mismatchingBitCount++) {
+        mismatchingBitCount <= lshCount(); mismatchingBitCount++) {
 
         // Compute the angle between the vectors corresponding to
         // this number of mismatching bits.
         const double angle = double(mismatchingBitCount) *
-            boost::math::double_constants::pi / double(lshCount);
+            boost::math::double_constants::pi / double(lshCount());
 
         // The cosine of the angle is the similarity for
         // this number of mismatcning bits.

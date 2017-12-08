@@ -40,8 +40,7 @@ public:
 
     // Access an existing Lsh object.
     Lsh(
-        const string& name,             // Name prefix for memory mapped files.
-        const ExpressionMatrixSubset&   // For a subset of genes and cells.
+        const string& name              // Name prefix for memory mapped files.
         );
 
     // Remove the memory mapped files.
@@ -61,6 +60,15 @@ public:
 
     void writeSignatureStatistics(const string& csvFileName);
     void writeSignatureStatistics(ostream&);
+
+    size_t cellCount() const
+    {
+        return info->cellCount;
+    }
+    size_t lshCount() const
+    {
+        return info->lshCount;
+    }
 
 private:
 
