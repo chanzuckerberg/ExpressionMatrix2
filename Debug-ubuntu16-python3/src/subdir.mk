@@ -32,6 +32,8 @@ CPP_SRCS += \
 ../src/errorCode.cpp \
 ../src/filesystem.cpp \
 ../src/hdf5.cpp \
+../src/heap.cpp \
+../src/multipleSetUnion.cpp \
 ../src/regressionCoefficient.cpp \
 ../src/tokenize.cpp \
 ../src/touchMemory.cpp 
@@ -65,6 +67,8 @@ OBJS += \
 ./src/errorCode.o \
 ./src/filesystem.o \
 ./src/hdf5.o \
+./src/heap.o \
+./src/multipleSetUnion.o \
 ./src/regressionCoefficient.o \
 ./src/tokenize.o \
 ./src/touchMemory.o 
@@ -98,6 +102,8 @@ CPP_DEPS += \
 ./src/errorCode.d \
 ./src/filesystem.d \
 ./src/hdf5.d \
+./src/heap.d \
+./src/multipleSetUnion.d \
 ./src/regressionCoefficient.d \
 ./src/tokenize.d \
 ./src/touchMemory.d 

@@ -9,6 +9,8 @@
 
 #include "BitSet.hpp"
 #include "Ids.hpp"
+#include "MemoryMappedObject.hpp"
+#include "MemoryMappedVector.hpp"
 
 #include "cstddef.hpp"
 #include "cstdint.hpp"
@@ -25,26 +27,40 @@ namespace ChanZuckerberg {
 
 class ChanZuckerberg::ExpressionMatrix2::Lsh {
 public:
+
+    // Create a new Lsh object and store it on disk.
+    // This can be expensive as it requires creating LSH signatures
+    // for all cells in the specified cell set.
     Lsh(
+        const string& name,             // Name prefix for memory mapped files.
         const ExpressionMatrixSubset&,  // For a subset of genes and cells.
         size_t lshCount,                // Number of LSH hyperplanes
         uint32_t seed                   // Seed to generate LSH hyperplanes.
         );
 
+    // Access an existing Lsh object.
+    Lsh(
+        const string& name,             // Name prefix for memory mapped files.
+        const ExpressionMatrixSubset&   // For a subset of genes and cells.
+        );
+
+    // Remove the memory mapped files.
+    void remove();
+
     // Compute the LSH similarity between two cells,
     // specified by their ids local to the cell set used by this Lsh object.
-    double computeCellSimilarity(CellId localCellId0, CellId localCellId1) const;
+    double computeCellSimilarity(CellId localCellId0, CellId localCellId1);
 
     // Get the signature corresponding to a given CellId (local to the cell set).
-    const BitSet& getSignature(CellId cellId) const
+    BitSetInMemory getSignature(CellId cellId)
     {
-        return signatures[cellId];
+        const size_t offset = cellId*signatureWordCount;    // Offset of the signature of this cell (in 64 bit words)
+        size_t* pointer = &(signatures[offset]);            // Pointer to the signature of this cell (as uint64_t words)
+        return BitSetInMemory(pointer);
     }
 
-    const vector<BitSet>& getSignatures() const
-    {
-        return signatures;
-    }
+    void writeSignatureStatistics(const string& csvFileName);
+    void writeSignatureStatistics(ostream&);
 
 private:
 
@@ -64,17 +80,29 @@ private:
         uint32_t seed                   // Seed to generate LSH hyperplanes.
     );
 
+    // The number of 64 bit words in each cell signature.
+    size_t signatureWordCount;
+
     // The LSH signatures of all cells in the cell set we are using.
     // Each cell signature is a vector of bits.
     // The bit is 1 if the scalar product of the cell shifted expression vector
     // with the LSH vector corresponding to the bit position is positive,
     // and negative otherwise.
-    vector<BitSet> signatures;
-    void computeCellLshSignatures(const ExpressionMatrixSubset&);
+    MemoryMapped::Vector<uint64_t> signatures;
+    void computeCellLshSignatures(const string& name, const ExpressionMatrixSubset&);
 
     // The similarity (cosine of the angle) corresponding to each number of mismatching bits.
     vector<double> similarityTable;
     void computeSimilarityTable();
+
+    // Other information for this Lsh object.
+    class Info {
+    public:
+        size_t cellCount;
+        size_t lshCount;
+    };
+    MemoryMapped::Object<Info> info;
+
 };
 
 #endif

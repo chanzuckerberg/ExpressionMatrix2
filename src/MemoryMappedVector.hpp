@@ -564,7 +564,7 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
     unmap();
 }
 
-// Close it and remove thge supporting file.
+// Close it and remove the supporting file.
 template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::remove()
 {
     const string savedFileName = fileName;

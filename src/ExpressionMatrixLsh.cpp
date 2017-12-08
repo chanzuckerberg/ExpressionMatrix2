@@ -1282,7 +1282,7 @@ void ExpressionMatrix::findSimilarPairs3(
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
 
 
@@ -1328,6 +1328,8 @@ void ExpressionMatrix::findSimilarPairs3(
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs3 ends." << endl;
 
+    lsh.remove();
+
 }
 
 
@@ -1372,7 +1374,7 @@ void ExpressionMatrix::findSimilarPairs3Benchmark(
         expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
 
 
@@ -1401,6 +1403,8 @@ void ExpressionMatrix::findSimilarPairs3Benchmark(
     cout << "Time for all pairs: " << t01 << " s." << endl;
     cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
     cout << "Average similarity: " << sum / (0.5*double(cellCount)*double(cellCount-1)) << endl;
+
+    lsh.remove();
 
 }
 
@@ -1447,7 +1451,7 @@ void ExpressionMatrix::findSimilarPairs4(
         expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
     // Temporary storage of pairs for each cell.
     vector< vector< pair<CellId, float> > > tmp(cellCount);
@@ -1538,6 +1542,8 @@ void ExpressionMatrix::findSimilarPairs4(
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs4 ends." << endl;
 
+    lsh.remove();
+
 }
 
 
@@ -1607,7 +1613,7 @@ void ExpressionMatrix::findSimilarPairs5(
         expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
 #if 0
     ofstream signatureOut("Signatures.txt");
@@ -1725,6 +1731,8 @@ void ExpressionMatrix::findSimilarPairs5(
     similarPairs.sort();
     cout << timestamp << "ExpressionMatrix::findSimilarPairs5 ends." << endl;
 
+    lsh.remove();
+
 }
 
 
@@ -1816,7 +1824,7 @@ void ExpressionMatrix::analyzeLsh(
 
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
     // Random number generator used for downsampling
     using RandomSource = boost::mt19937;
@@ -1898,6 +1906,8 @@ void ExpressionMatrix::analyzeLsh(
         statsOut << sigma << ",";
         statsOut << theoreticalSigma << "\n";
     }
+
+    lsh.remove();
 }
 
 
@@ -1940,13 +1950,13 @@ void ExpressionMatrix::analyzeLshSignatures(
 
 
     // Create the Lsh object that will do the computation.
-    Lsh lsh(expressionMatrixSubset, lshCount, seed);
+    Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
 
     // Create a map that gives the cells with a given signature.
     map<BitSet, vector<CellId> > signatureMap;
     for(CellId cellId=0; cellId<cellCount; cellId++) {
-        const BitSet signature = lsh.getSignature(cellId);
+        const BitSet signature(lsh.getSignature(cellId), lshCount);
         signatureMap[signature].push_back(cellId);
     }
 
@@ -1996,6 +2006,7 @@ void ExpressionMatrix::analyzeLshSignatures(
     cout << flush;
 
 
-    writeLshSignatureStatistics(lshCount, lsh.getSignatures());
+    lsh.writeSignatureStatistics("LshSignatureStatistics.csv");
+    lsh.remove();
 
 }

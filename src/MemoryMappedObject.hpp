@@ -5,6 +5,7 @@
 
 // CZI.
 #include "CZI_ASSERT.hpp"
+#include "filesystem.hpp"
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
 #include "boost_array.hpp"
@@ -62,6 +63,9 @@ public:
     // Sync the mapped memory to disk, then unmap it.
     // This is automatically called by the destructor.
     void close();
+
+    // Close and remove the supporting file.
+    void remove();
 
     // Return a pointer to the stored object.
     T* operator->();
@@ -397,6 +401,14 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::O
     CZI_ASSERT(isOpen);
     syncToDisk();
     unmap();
+}
+
+// Close it and remove the supporting file.
+template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Object<T>::remove()
+{
+    const string savedFileName = fileName;
+    close();    // This forgets the fileName.
+    filesystem::remove(savedFileName);
 }
 
 

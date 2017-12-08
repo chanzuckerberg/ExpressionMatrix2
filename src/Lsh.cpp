@@ -14,18 +14,31 @@ using namespace ExpressionMatrix2;
 #include "fstream.hpp"
 
 
+
 Lsh::Lsh(
+    const string& name,             // Name prefix for memory mapped files.
     const ExpressionMatrixSubset& expressionMatrixSubset,
     size_t lshCount,                // Number of LSH hyperplanes
     uint32_t seed                   // Seed to generate LSH hyperplanes.
     )
 {
+    // Store the Info object.
+    info.createNew(name + "-Info");
+    info->lshCount = lshCount;
+    info->cellCount = expressionMatrixSubset.cellCount();
+
+    // Generate the LSH vectors.
     cout << timestamp << "Generating LSH vectors." << endl;
     generateLshVectors(expressionMatrixSubset.geneCount(), lshCount, seed);
 
+    // Compute cell signatures.
     cout << timestamp << "Computing cell LSH signatures." << endl;
-    computeCellLshSignatures(expressionMatrixSubset);
+    computeCellLshSignatures(name, expressionMatrixSubset);
 
+    // Compute the similarity table.
+    // This is a look up table indexed by the number of mismatching bits.
+    // Each entry contgains the similarity corresponding to that number
+    // of mismatching bits.
     computeSimilarityTable();
 }
 
@@ -82,11 +95,16 @@ void Lsh::generateLshVectors(
 
 
 // Compute the LSH signatures of all cells in the cell set we are using.
-void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatrixSubset)
+void Lsh::computeCellLshSignatures(
+    const string& name,             // Name prefix for memory mapped files.
+    const ExpressionMatrixSubset& expressionMatrixSubset)
 {
     // Get the number of LSH vectors.
     CZI_ASSERT(!lshVectors.empty());
-    const size_t lshCount = lshVectors.front().size();
+    const size_t lshCount = info->lshCount;
+
+    // Compute the number of 64 bit words in each cell signature.
+    signatureWordCount = (lshCount-1)/64 + 1;
 
     // Get the number of genes and cells in the gene set and cell set we are using.
     const auto geneCount = expressionMatrixSubset.geneCount();
@@ -107,7 +125,7 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
 
     // Initialize the cell signatures.
     cout << timestamp << "Initializing cell LSH signatures." << endl;
-    signatures.resize(cellCount, BitSet(lshCount));
+    signatures.createNew(name + "-Signatures", cellCount*signatureWordCount);
 
     // Vector to contain, for a single cell, the scalar products of the shifted
     // expression vector for the cell with all of the LSH vectors.
@@ -159,7 +177,7 @@ void Lsh::computeCellLshSignatures(const ExpressionMatrixSubset& expressionMatri
         }
 
         // Set to 1 the signature bits corresponding to positive scalar products.
-        auto& cellSignature = signatures[localCellId];
+        BitSetInMemory cellSignature = getSignature(localCellId);
         for(size_t i=0; i<lshCount; i++) {
             if(scalarProducts[i]>0.) {
                 cellSignature.set(i);
@@ -213,16 +231,52 @@ void Lsh::computeSimilarityTable()
 
 // Compute the LSH similarity between two cells,
 // specified by their ids local to the cell set used by this Lsh object.
-double Lsh::computeCellSimilarity(CellId localCellId0, CellId localCellId1) const
+double Lsh::computeCellSimilarity(CellId localCellId0, CellId localCellId1)
 {
     // Access the LSH signatures for the two cells.
-    const BitSet& signature0 = signatures[localCellId0];
-    const BitSet& signature1 = signatures[localCellId1];
+    const BitSetInMemory signature0 = getSignature(localCellId0);
+    const BitSetInMemory signature1 = getSignature(localCellId1);
 
     // Count the number of bits where the signatures of these two cells disagree.
-    const size_t mismatchingBitCount = countMismatches(signature0, signature1);
+    const size_t mismatchingBitCount = countMismatches(signatureWordCount, signature0, signature1);
 
     // Return the similarity corresponding to this number of mismatching bits.
     return similarityTable[mismatchingBitCount];
+}
+
+
+
+// Write to a csv file statistics of the cell LSH signatures..
+void Lsh::writeSignatureStatistics(const string& csvFileName)
+{
+    ofstream csv(csvFileName);
+    writeSignatureStatistics(csv);
+}
+void Lsh::writeSignatureStatistics(ostream& csv)
+{
+    csv << "Bit,Set,Unset,Total\n";
+
+    for(size_t i = 0; i < info->lshCount; i++) {
+
+        // Count the number of cells that have this bit set.
+        size_t setCount = 0;
+        for(CellId cellId = 0; cellId < info->cellCount; cellId++) {
+            if(getSignature(cellId).get(i)) {
+                ++setCount;
+            }
+        }
+        const size_t unsetCount = info->cellCount - setCount;
+
+        csv << i << "," << setCount << "," << unsetCount << "," << info->cellCount << "\n";
+
+    }
+
+}
+
+
+void Lsh::remove()
+{
+    signatures.remove();
+    info.remove();
 }
 
