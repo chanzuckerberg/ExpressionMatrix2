@@ -50,7 +50,7 @@ void ExpressionMatrix::exploreCellGraphs(
         html << "<td class=centered>" << info.maxConnectivity;
         html << "<td class=centered>" << info.vertexCount;
         html << "<td class=centered>" << info.edgeCount;
-        html << "<td class=centered>" << info.isolatedVertexCount;
+        html << "<td class=centered>" << info.isolatedRemovedVertexCount;
         html << "<td class=centered><form action=removeCellGraph><input type=text hidden name=graphName value='" << graphName << "'><input type=submit value='Remove graph " << graphName << "'></form>";
     }
 
@@ -268,10 +268,10 @@ void ExpressionMatrix::compareCellGraphs(
         html << checkMark;
     }
 
-    // Number of isolated vertices.
-    const size_t isolatedVertexCount0 = graphCreationParameters0.isolatedVertexCount;
-    const size_t isolatedVertexCount1 = graphCreationParameters1.isolatedVertexCount;
-    html << "<tr><td>Number of isolated vertices (cells);";
+    // Number of isolated vertices removed.
+    const size_t isolatedVertexCount0 = graphCreationParameters0.isolatedRemovedVertexCount;
+    const size_t isolatedVertexCount1 = graphCreationParameters1.isolatedRemovedVertexCount;
+    html << "<tr><td>Number of isolated vertices (cells) removed";
     html << "<td class=centered>" << isolatedVertexCount0;
     html << "<td class=centered>" << isolatedVertexCount1;
     html << "<td class=centered>";
@@ -400,7 +400,8 @@ void ExpressionMatrix::exploreCellGraph(
     html << "<tr><td>Maximum connectivity<td class=centered>" << graphInformation.maxConnectivity;
     html << "<tr><td>Number of vertices (cells)<td class=centered>" << boost::num_vertices(graph);
     html << "<tr><td>Number of edges<td class=centered>" << boost::num_edges(graph);
-    html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>" << graphInformation.isolatedVertexCount;
+    html << "<tr><td>Number of isolated vertices (cells) removed<td class=centered>"
+        << graphInformation.isolatedRemovedVertexCount;
     html << "</table>";
     html << "</div>";
 

@@ -80,7 +80,7 @@ public:
     size_t maxConnectivity;
     size_t vertexCount;
     size_t edgeCount;
-    size_t isolatedVertexCount;     // The number of isolated vertices that were removed.
+    size_t isolatedRemovedVertexCount;     // The number of isolated vertices that were removed.
     CellGraphInformation() {}
 };
 
@@ -539,7 +539,8 @@ public:
         const string& cellSetName,          // The cell set to be used.
         const string& similarPairsName,     // The name of the SimilarPairs object to be used to create the graph.
         double similarityThreshold,         // The minimum similarity to create an edge.
-        size_t k                           // The maximum number of neighbors (k of the k-NN graph).
+        size_t k,                           // The maximum number of neighbors (k of the k-NN graph).
+        bool keepIsolatedVertices
      );
 
     // Unit test for class ExpressionMatrixSubset.

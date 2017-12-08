@@ -808,12 +808,12 @@ void ExpressionMatrix::createCellGraph(
     // Create the graph.
     html << "<div style='font-family:courier'>";
     html << timestamp << "Cell graph creation begins.";
-    createCellGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity);
+    createCellGraph(graphName, cellSetName, similarPairsName, similarityThreshold, maxConnectivity, false);
     const CellGraphInformation& graphInfo = cellGraphs[graphName].first;
     html <<
         "<br>" << timestamp << "New graph " << graphName << " was created. It has " << graphInfo.vertexCount <<
         " vertices and " << graphInfo.edgeCount << " edges"
-        " after " << graphInfo.isolatedVertexCount << " isolated vertices were removed.";
+        " after " << graphInfo.isolatedRemovedVertexCount << " isolated vertices were removed.";
     html << "</div>";
 
     // Add a button to continue.

@@ -1812,8 +1812,9 @@ void ExpressionMatrix::createCellGraph(
     const string& cellSetName,          // The cell set to be used.
     const string& similarPairsName,     // The name of the SimilarPairs object to be used to create the graph.
     double similarityThreshold,         // The minimum similarity to create an edge.
-    size_t maxConnectivity              // The maximum number of neighbors (k of the k-NN graph).
- )
+    size_t maxConnectivity,             // The maximum number of neighbors (k of the k-NN graph).
+    bool keepIsolatedVertices
+    )
 {
     // A graph with this name should not already exist.
     if(cellGraphs.find(graphName) != cellGraphs.end()) {
@@ -1843,8 +1844,12 @@ void ExpressionMatrix::createCellGraph(
     graphInformation.similarityThreshold = similarityThreshold;
     graphInformation.maxConnectivity = maxConnectivity;
 
-    // Remove isolated vertices.
-    graphInformation.isolatedVertexCount = graph->removeIsolatedVertices();
+    // Remove isolated vertices, if requested.
+    if(keepIsolatedVertices) {
+        graphInformation.isolatedRemovedVertexCount = 0;
+    } else {
+        graphInformation.isolatedRemovedVertexCount = graph->removeIsolatedVertices();
+    }
     graphInformation.vertexCount = num_vertices(*graph);
     graphInformation.edgeCount = num_edges(*graph);
 

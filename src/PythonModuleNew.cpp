@@ -698,7 +698,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "createCellGraph",
            (
                void (ExpressionMatrix::*)
-               (const string&, const string&, const string&, double, size_t)
+               (const string&, const string&, const string&, double, size_t, bool)
            )
            &ExpressionMatrix::createCellGraph,
            "Create a new cell similarity graph. "
@@ -714,7 +714,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellSetName") = "AllCells",
            arg("similarPairsName"),
            arg("similarityThreshold") = 0.5,
-           arg("k") = 20
+           arg("k") = 20,
+           arg("keepIsolatedVertices") = false
        )
        .def("computeCellGraphLayout",
            &ExpressionMatrix::computeCellGraphLayout,
