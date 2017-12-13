@@ -315,6 +315,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.downsampleCellSet">
+<code class="descname">downsampleCellSet</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputCellSetName: str='AllCells'</em>, <em>newCellSetName: str</em>, <em>probability: float</em>, <em>seed: int</em><span class="sig-paren">)</span> &rarr; bool</dt>
+<dd><p>Create a new cell set by downsampling an existing cell set. Return true if successful, false if the input cell set does not exist.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.explore">
 <code class="descname">explore</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>port: int=17100</em>, <em>docDirectory: str=''</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Starts an http server that can be used, in conjunction with a Web browser, to interact with the ExpressionMatrix object.</p>

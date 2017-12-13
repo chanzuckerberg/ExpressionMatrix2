@@ -509,6 +509,26 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("inputSetName1"),
            arg("outputSetName")
        )
+       // Create a new cell set by downsampling an existing cell set
+       // Return true if successful, false if the input cell set does not exist.
+       .def
+       (
+           "downsampleCellSet",
+           (
+               bool (ExpressionMatrix::*)(
+                   const string& inputCellSetName,
+                   const string& newCellSetName,
+                   double probability,
+                   int seed)
+            )
+            &ExpressionMatrix::downsampleCellSet,
+            "Create a new cell set by downsampling an existing cell set. "
+            "Return true if successful, false if the input cell set does not exist.",
+            arg("inputCellSetName") = "AllCells",
+            arg("newCellSetName"),
+            arg("probability"),
+            arg("seed")
+       )
        .def("getCellSetNames",
            &ExpressionMatrix::getCellSetNames,
            "Returns a list containing the names of all currently defined cell sets. "
