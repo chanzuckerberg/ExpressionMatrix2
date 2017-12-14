@@ -19,6 +19,7 @@ namespace ChanZuckerberg {
         class ClusterGraphVertex;
         class ClusterGraphEdge;
         class ClusterGraphCreationParameters;
+        class ExpressionMatrix;
 
         // The base class for class ClusterGraph.
         using ClusterGraphBaseClass = boost::adjacency_list<
@@ -49,7 +50,8 @@ public:
     size_t seed = 231;                  // To initialize label propagation algorithm.
     size_t minClusterSize = 100;        // Minimum number of cells for a cluster to be retained.
     size_t maxConnectivity = 3;
-    double similarityThreshold = 0.5;   // For edges of the cluster graph.
+    double similarityThreshold = 0.5;           // Cluster graph with similarity lower than this are removed.
+    double similarityThresholdForMerge = 0.9;   // Cluster graph vertices joined by an edge with similarity higher than this are merged.
 
     ClusterGraphCreationParameters() {}
     ClusterGraphCreationParameters(
@@ -58,7 +60,8 @@ public:
         size_t seed,
         size_t minClusterSize,
         size_t maxConnectivity,
-        double similarityThreshold);
+        double similarityThreshold,
+        double similarityThresholdForMerge);
 
 };
 
@@ -67,25 +70,24 @@ public:
 class ChanZuckerberg::ExpressionMatrix2::ClusterGraphVertex {
 public:
 
-	// The clusterId of the cluster represented by this vertex.
-	// This is the same as the clusterId for all the CellGraph
-	// vertices that correspond to this ClusterGraphVertex.
-	uint32_t clusterId;
+    // The clusterId of the cluster represented by this vertex.
+    uint32_t clusterId;
 
-	// The cells in the cluster represented by this vertex.
-	vector<CellId> cells;
+    // The cells in the cluster represented by this vertex.
+    vector<CellId> cells;
 
-	// The average gene expression for these cells.
-	// This is a vector of size equal to the number of genes
-	// in the gene set used to create the cell graph.
-	vector<double> averageGeneExpression;
+    // The average gene expression for these cells.
+    // This is a vector of size equal to the number of genes
+    // in the gene set used to create the cell graph.
+    vector<double> averageGeneExpression;
+    void computeAverageGeneExpression(const ExpressionMatrix&, const GeneSet&);
 };
 
 
 
 class ChanZuckerberg::ExpressionMatrix2::ClusterGraphEdge {
 public:
-	double similarity;
+    double similarity;
 };
 
 
@@ -97,12 +99,23 @@ public:
     // This uses the clusterId stored in each CellGraphVertex.
     ClusterGraph(const CellGraph&, const GeneSet& geneSet);
 
+    // Compute the average gene expression vector of each vertex.
+    void computeAverageGeneExpression(const ExpressionMatrix&, const GeneSet&);
+
     // Store in each edge the similarity of the two clusters, computed using the clusters
     // average expression stored in each vertex.
     void computeSimilarities();
 
+    // Merge groups of vertices connected by edges with high similarity.
+    void mergeVertices(
+        const ExpressionMatrix&, const GeneSet&, double similarityThreshold);
+
     // Remove the vertices that correspond to small clusters.
     void removeSmallVertices(size_t clusterSizeThreshold);
+
+    // Renumber clusters in such a way that clusters are number contiguously,
+    // starting at 0, and in order of decreasing size.
+    void renumberClusters();
 
     // Remove edges with low similarity.
     void removeWeakEdges(double similarityThreshold);
@@ -182,6 +195,27 @@ private:
         // Compute font size for an edge  given numbers of cells of the two vertices.
         static int fontSize(size_t cellCount0, size_t cellCount1);
     };
+
+
+
+    // Predicate that returns true if an edge has similarity greater than a threshold.
+    class IsHighSimilarityEdge {
+    public:
+        IsHighSimilarityEdge(
+            const ClusterGraph& graph,
+            double similarityThreshold) :
+            graph(&graph), similarityThreshold(similarityThreshold) {}
+        IsHighSimilarityEdge() : graph(0), similarityThreshold(0.) {}
+        const ClusterGraph* graph;
+        double similarityThreshold;
+        bool operator()(const edge_descriptor& e) const
+        {
+            return (*graph)[e].similarity > similarityThreshold;
+        }
+    };
+
+    // Merge a set of vertices.
+    void mergeVertices(const vector<vertex_descriptor>&);
 };
 
 

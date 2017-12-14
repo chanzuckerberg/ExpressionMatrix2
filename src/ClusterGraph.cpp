@@ -7,15 +7,21 @@
 #include "color.hpp"
 #include "CZI_ASSERT.hpp"
 #include "deduplicate.hpp"
+#include "ExpressionMatrix.hpp"
 #include "GeneSet.hpp"
 #include "MemoryMappedStringTable.hpp"
+#include "NormalizationMethod.hpp"
 #include "orderPairs.hpp"
 #include "regressionCoefficient.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include <boost/property_map/property_map.hpp>
+#include <boost/graph/connected_components.hpp>
+#include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/graph/named_function_params.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -33,14 +39,16 @@ ClusterGraphCreationParameters::ClusterGraphCreationParameters(
     size_t seed,                            // To initialize label propagation algorithm.
     size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
     size_t maxConnectivity,
-    double similarityThreshold              // For edges of the cluster graph.
+    double similarityThreshold,             // To remove edges of the cluster graph.
+    double similarityThresholdForMerge      // To merge vertices of the cluster graph.
     ) :
     stableIterationCount(stableIterationCount),
     maxIterationCount(maxIterationCount),
     seed(seed),
     minClusterSize(minClusterSize),
     maxConnectivity(maxConnectivity),
-    similarityThreshold(similarityThreshold)
+    similarityThreshold(similarityThreshold),
+    similarityThresholdForMerge(similarityThresholdForMerge)
 
 {
 
@@ -113,6 +121,34 @@ ClusterGraph::ClusterGraph(
 
 
 
+// Compute the average expression vector of each vertex.
+void ClusterGraph::computeAverageGeneExpression(
+    const ExpressionMatrix& expressionMatrix,
+    const GeneSet& geneSet)
+{
+    ClusterGraph& graph = *this;
+    BGL_FORALL_VERTICES(v, graph, ClusterGraph) {
+        graph[v].computeAverageGeneExpression(expressionMatrix, geneSet);
+    }
+
+}
+void ClusterGraphVertex::computeAverageGeneExpression(
+    const ExpressionMatrix& expressionMatrix,
+    const GeneSet& geneSet)
+{
+    // Use L2 normalization. We might need to make this configurable.
+    const NormalizationMethod normalizationMethod = NormalizationMethod::L2;
+
+    // Let the expression matrix object do the computation.
+    expressionMatrix.computeAverageExpression(
+        geneSet,
+        cells,
+        averageGeneExpression,
+        normalizationMethod);
+}
+
+
+
 // Store in each edge the similarity of the two clusters, computed using the clusters
 // average expression stored in each vertex.
 void ClusterGraph::computeSimilarities()
@@ -131,6 +167,137 @@ void ClusterGraph::computeSimilarities()
             vertex1.averageGeneExpression);
     }
 }
+
+
+
+// Merge groups of vertices connected by edges with high similarity.
+void ClusterGraph::mergeVertices(
+    const ExpressionMatrix& expressionMatrix,
+    const GeneSet& geneSet,
+    double similarityThreshold)
+{
+    ClusterGraph& graph = *this;
+
+
+    computeAverageGeneExpression(expressionMatrix, geneSet);
+    computeSimilarities();
+
+    /*
+    cout << "High similarity edges:" << endl;
+    BGL_FORALL_EDGES(e, graph, ClusterGraph) {
+        if(graph[e].similarity > similarityThreshold) {
+            const vertex_descriptor v0 = source(e, graph);
+            const vertex_descriptor v1 = target(e, graph);
+            cout << graph[v0].clusterId << " " << graph[v1].clusterId << " " << graph[e].similarity << endl;
+        }
+    }
+    */
+
+    // Create a filtered graph that only has the high similarity edges.
+    boost::filtered_graph<ClusterGraph, IsHighSimilarityEdge>
+        filteredGraph(graph, IsHighSimilarityEdge(graph, similarityThreshold));
+
+    // Compute connected components of the filtered graph.
+    // The vertexIndexMap is required by boost::connected_components.
+    // It maps vertex descriptors to contiguous indexes starting at zero.
+    map<vertex_descriptor, int> vertexIndexMap;
+    int vertexIndex = 0;
+    BGL_FORALL_VERTICES(v, graph, ClusterGraph) {
+        vertexIndexMap.insert(make_pair(v, vertexIndex++));
+    }
+    map<vertex_descriptor, int> componentMap;
+    using boost::make_assoc_property_map;
+    using boost::vertex_index_map;
+    const size_t componentCount = boost::connected_components(
+        filteredGraph,
+        make_assoc_property_map(componentMap),
+        vertex_index_map(make_assoc_property_map(vertexIndexMap))
+        );
+
+    // Gather the vertices of each connected component.
+    vector< vector<vertex_descriptor> > componentVertices(componentCount);
+    BGL_FORALL_VERTICES(v, graph, ClusterGraph) {
+        const size_t component = componentMap[v];
+        CZI_ASSERT(component < componentCount);
+        componentVertices[component].push_back(v);
+    }
+
+    // Write out the components.
+    /*
+    for(size_t componentId=0; componentId<componentCount; componentId++) {
+        const vector<vertex_descriptor>& vertices =  componentVertices[componentId];
+        if(vertices.size() < 2) {
+            continue;
+        }
+        cout << componentId << ":";
+        for(const vertex_descriptor v: vertices) {
+            cout << " " << graph[v].clusterId;
+        }
+        cout << endl;
+
+    }
+    */
+
+    for(size_t componentId=0; componentId<componentCount; componentId++) {
+        const vector<vertex_descriptor>& verticesToMerge =  componentVertices[componentId];
+        if(verticesToMerge.size() > 1) {
+            mergeVertices(verticesToMerge);
+        }
+    }
+
+}
+
+
+
+// Merge a set of vertices.
+void ClusterGraph::mergeVertices(const vector<vertex_descriptor>& verticesToMerge)
+{
+    CZI_ASSERT(verticesToMerge.size() > 1);
+    ClusterGraph& graph = *this;
+
+    // We keep the first vertex in the list, and merge all the other ones into it.
+    const vertex_descriptor v0 = verticesToMerge.front();
+    ClusterGraphVertex& vertex0 = graph[v0];
+
+    for(size_t i=1; i<verticesToMerge.size(); i++) {
+        const vertex_descriptor v1 = verticesToMerge[i];
+        ClusterGraphVertex& vertex1 = graph[v1];
+        copy(vertex1.cells.begin(), vertex1.cells.end(), back_inserter(vertex0.cells));
+        vertexMap.erase(vertex1.clusterId);
+        clear_vertex(v1, graph);
+        remove_vertex(v1, graph);
+    }
+}
+
+
+
+// Renumber clusters in such a way that clusters are number contiguously,
+// starting at 0, and in order of decreasing size.
+void ClusterGraph::renumberClusters()
+{
+    ClusterGraph& graph = *this;
+    CZI_ASSERT(vertexMap.size() == num_vertices(graph));
+
+    // Create a table of vertices and their numbers of cells.
+    vector< pair<vertex_descriptor, CellId> > vertexTable;
+    BGL_FORALL_VERTICES(v, graph, ClusterGraph) {
+        vertexTable.push_back(make_pair(v, graph[v].cells.size()));
+    }
+
+    // Sort by decreasing number of cells.
+    sort(vertexTable.begin(), vertexTable.end(),
+        OrderPairsBySecondGreater< pair<vertex_descriptor, CellId> >());
+
+    // Update the cluster ids of the vertices to reflect this ordering.
+    vertexMap.clear();
+    for(CellId clusterId=0; clusterId<CellId(vertexTable.size()); clusterId++) {
+        const vertex_descriptor v = vertexTable[clusterId].first;
+        graph[v].clusterId = clusterId;
+        vertexMap.insert(make_pair(clusterId, v));
+    }
+
+}
+
 
 
 // Remove the vertices that correspond to small clusters.

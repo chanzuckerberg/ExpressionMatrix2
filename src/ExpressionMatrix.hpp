@@ -1060,7 +1060,8 @@ public:
         size_t seed,                            // To initialize label propagation algorithm.
         size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
         size_t maxConnectivity,
-        double similarityThreshold              // For edges of the cluster graph.
+        double similarityThreshold,             // To remove edges of the cluster graph.
+        double similarityThresholdForMerge      // To merge vertices of the cluster graph.
      );
 
     // Compute layouts for a named cluster graph.

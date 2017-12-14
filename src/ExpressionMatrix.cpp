@@ -2101,11 +2101,18 @@ void ExpressionMatrix::createClusterGraph(
     size_t seed,                            // To initialize label propagation algorithm.
     size_t minClusterSize,                  // Minimum number of cells for a cluster to be retained.
     size_t maxConnectivity,
-    double similarityThreshold              // For edges of the cluster graph.
+    double similarityThreshold,             // To remove edges of the cluster graph.
+    double similarityThresholdForMerge      // For merge vertices of the cluster graph.
  )
 {
     ClusterGraphCreationParameters parameters(
-        stableIterationCount, maxIterationCount, seed, minClusterSize, maxConnectivity, similarityThreshold);
+        stableIterationCount,
+        maxIterationCount,
+        seed,
+        minClusterSize,
+        maxConnectivity,
+        similarityThreshold,
+        similarityThresholdForMerge);
     createClusterGraph(cellGraphName, parameters, clusterGraphName);
 }
 void ExpressionMatrix::createClusterGraph(
@@ -2158,20 +2165,15 @@ void ExpressionMatrix::createClusterGraph(
     clusterGraphs.insert(make_pair(clusterGraphName, clusterGraphPointer));
     ClusterGraph& clusterGraph = *clusterGraphPointer;
 
+    // Merge groups of vertices connected by edges with high similarity.
+    clusterGraph.mergeVertices(*this, geneSet, clusterGraphCreationParameters.similarityThresholdForMerge);
+
     // Remove the vertices that correspond to small clusters.
     clusterGraph.removeSmallVertices(clusterGraphCreationParameters.minClusterSize);
 
     // Compute the average expression for each cluster - that is, for each vertex
     // of the cluster graph.
-    BGL_FORALL_VERTICES(v, clusterGraph, ClusterGraph) {
-        ClusterGraphVertex& vertex = clusterGraph[v];
-        const NormalizationMethod normalizationMethod = NormalizationMethod::L2;    // Use L2 normalization. We might need to make this configurable.
-        computeAverageExpression(
-            geneSet,
-            vertex.cells,
-            vertex.averageGeneExpression,
-            normalizationMethod);
-    }
+    clusterGraph.computeAverageGeneExpression(*this, geneSet);
 
     // Store in each edge the similarity of the two clusters, computed using the clusters
     // average expression stored in each vertex.
@@ -2182,6 +2184,10 @@ void ExpressionMatrix::createClusterGraph(
 
     // Make it a k-nn graph.
     clusterGraph.makeKnn(clusterGraphCreationParameters.maxConnectivity);
+
+    // Renumber clusters in such a way that clusters are number contiguously,
+    // starting at 0, and in order of decreasing size.
+    clusterGraph.renumberClusters();
 
     out << "Cluster graph " << clusterGraphName << " has " << num_vertices(clusterGraph);
     out << " vertices and " << num_edges(clusterGraph) << " edges." << endl;

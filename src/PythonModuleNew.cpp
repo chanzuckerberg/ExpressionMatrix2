@@ -780,7 +780,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "createClusterGraph",
            (
                void (ExpressionMatrix::*)
-               (const string&, const string&, size_t, size_t, size_t, size_t, size_t, double)
+               (const string&, const string&, size_t, size_t, size_t, size_t, size_t, double, double)
            )
            &ExpressionMatrix::createClusterGraph,
            "Creates a new cluster graph by running label propagation clustering "
@@ -798,7 +798,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("seed") = 231,
            arg("minClusterSize") = 100,
            arg("k") = 3,
-           arg("similarityThreshold") = 0.5
+           arg("similarityThreshold") = 0.5,
+           arg("similarityThresholdForMerge") = 0.9
        )
        .def("getClusterGraphVertices",
            &ExpressionMatrix::getClusterGraphVertices,

@@ -88,9 +88,13 @@ void ExpressionMatrix::createClusterGraphDialog(
         "<td><input type=text name=minClusterSize value='" <<
         clusterGraphCreationParameters.minClusterSize << "'>"
 
-        "<tr><th class=left>Similarity threshold for cluster graph edges"
+        "<tr><th class=left>Similarity threshold to remove cluster graph edges"
         "<td><input type=text name=similarityThreshold value='" <<
         clusterGraphCreationParameters.similarityThreshold << "'>"
+
+        "<tr><th class=left>Similarity threshold to merge cluster graph vertices"
+        "<td><input type=text name=similarityThresholdForMerge value='" <<
+        clusterGraphCreationParameters.similarityThresholdForMerge << "'>"
 
         "<tr><th class=left>Maximum connectivity"
         "<td><input type=text name=maxConnectivity value='" <<
@@ -129,6 +133,7 @@ void ExpressionMatrix::createClusterGraph(
     getParameterValue(request, "maxIterationCount", clusterGraphCreationParameters.maxIterationCount);
     getParameterValue(request, "minClusterSize", clusterGraphCreationParameters.minClusterSize);
     getParameterValue(request, "similarityThreshold", clusterGraphCreationParameters.similarityThreshold);
+    getParameterValue(request, "similarityThresholdForMerge", clusterGraphCreationParameters.similarityThresholdForMerge);
     getParameterValue(request, "maxConnectivity", clusterGraphCreationParameters.maxConnectivity);
     double timeout;
     getParameterValue(request, "timeout", timeout);
