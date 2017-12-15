@@ -93,5 +93,6 @@ void CellSets::removeCellSet(const string& cellSetName)
     }
 
     it->second->remove();
+    cellSets.erase(it);
 }
 
