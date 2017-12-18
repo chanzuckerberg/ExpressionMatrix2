@@ -1567,6 +1567,7 @@ void ExpressionMatrix::findSimilarPairs5(
     )
 {
     cout << timestamp << "ExpressionMatrix::findSimilarPairs5 begins." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
 
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
@@ -1715,7 +1716,9 @@ void ExpressionMatrix::findSimilarPairs5(
     // Sort the similar pairs for each cell by decreasing similarity.
     cout << timestamp << "Sorting similar pairs." << endl;
     similarPairs.sort();
-    cout << timestamp << "ExpressionMatrix::findSimilarPairs5 ends." << endl;
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs5 ends. Took " << t01 << " s." << endl;
 
 }
 
