@@ -13,6 +13,7 @@
 // CZI.
 #include "ClusterGraph.hpp"
 #include "ExpressionMatrix.hpp"
+#include "ExpressionMatrixSubset.hpp"
 #include "heap.hpp"
 #include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
@@ -26,8 +27,106 @@ using namespace ExpressionMatrix2;
 
 // Pybind11.
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 using namespace pybind11;
+
+
+// Test: a function that returns a matrix as a numpy array.
+// The matrix has 3 rows and 4 columns and is stored in row-major order (C-style layout).
+array_t<double> testNumpy()
+{
+    // The data we want to return.
+    const size_t n = 3;
+    const size_t m = 4;
+    vector<double> data = {
+        100., 101., 102., 103.,
+        110., 111., 112., 113.,
+        120., 121., 122., 123.
+        };
+    CZI_ASSERT(data.size() == m*n);
+
+    // The python buffer information for the matrix we want to return.
+    const size_t ndim = 2;
+    std::vector<size_t> shape = {3, 4};
+    std::vector<size_t> strides = {m*sizeof(double), sizeof(double)};
+    buffer_info bufferInfo(
+        data.data(),
+        sizeof(double),
+        format_descriptor<double>::format(),
+        ndim, shape, strides);
+
+    // Return an array constructed using this buffer descriptor.
+    return pybind11::array(bufferInfo);
+
+}
+
+
+// Get a dense representation of a subset of the expression matrix
+// corresponding to a given gene set and cell set.
+// The returned matrix is a numpy array with row-major memory layout (C-style),
+// with a number of rows equal to the number of cells in the specified cell set,
+// and a number of columns equal to the number of genes in the specified gene set.
+// This means that, because of C-style layout, the returned matrix
+// is indexed in python as m[cellId][geneId], where cellId and geneId
+// are ids local to the cell set and gene set respectively
+// (that is, they only equal global cell ids and gene ids
+// if the function is called for the AllCells and AllGenes sets).
+pybind11::array ExpressionMatrix::getDenseExpressionMatrix(
+    const string& geneSetName,
+    const string& cellSetName)
+{
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Create the expression matrix subset for this gene set and cell set.
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset";
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create the data for the dense representation of this expression matrix subset.
+    vector<double> data(geneSet.size() * cellSet.size(), 0.);
+    for(CellId cellId=0; cellId<cellSet.size(); cellId++) {
+        const size_t offset = cellId * geneSet.size();
+        for(const pair<GeneId, float>& p: expressionMatrixSubset.cellExpressionCounts[cellId]) {
+            const GeneId geneId = p.first;
+            const float count = p.second;
+            data[offset + geneId] = double(count);
+        }
+    }
+
+    // The python buffer information for the matrix we want to return.
+    const size_t ndim = 2;
+    std::vector<size_t> shape = {cellSet.size(), geneSet.size()};
+    std::vector<size_t> strides = {geneSet.size() * sizeof(double), sizeof(double)};
+    buffer_info bufferInfo(
+        data.data(),
+        sizeof(double),
+        format_descriptor<double>::format(),
+        ndim, shape, strides);
+
+    // Return an array constructed using this buffer descriptor.
+    return pybind11::array(bufferInfo);
+}
 
 
 
@@ -333,7 +432,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellIds"),
            arg("geneIds")
        )
-
+       .def("getDenseExpressionMatrix",
+           &ExpressionMatrix::getDenseExpressionMatrix,
+           "Get a dense representation of a subset of the expression matrix "
+           "corresponding to a given gene set and cell set. "
+           "The returned matrix is a numpy array with row-major memory layout (C-style), "
+           "with a number of rows equal to the number of cells in the specified cell set, "
+           "and a number of columns equal to the number of genes in the specified gene set. "
+           "This means that, because of C-style layout, the returned matrix "
+           "is indexed in python as m[cellId][geneId], where cellId and geneId "
+           "are ids local to the cell set and gene set respectively "
+           "(that is, they only equal global cell ids and gene ids "
+           "if the function is called for the AllCells and AllGenes sets).",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells"
+       )
 
 
        // Gene sets.
@@ -936,6 +1049,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         );
     module.def("multipleSetUnionTest",
         multipleSetUnionTest,
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
+        );
+    module.def("testNumpy",
+        testNumpy,
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );

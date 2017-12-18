@@ -41,6 +41,13 @@ namespace ChanZuckerberg {
     }
 }
 
+// Forward declarations necessary for functions that return a numpy array,
+// or that take numpy arrays as arguments.
+namespace pybind11 {
+    class array;
+    class buffer;
+}
+
 
 
 // Class used to store various parameters that control the initial creation of
@@ -644,6 +651,20 @@ public:
     vector< vector< pair<GeneId, float> > > getCellsExpressionCountsForGenes(
         const vector<CellId>&,
         const vector<GeneId>&) const;
+
+    // Get a dense representation of a subset of the expression matrix
+    // corresponding to a given gene set and cell set.
+    // The returned matrix is a numpy array with row-major memory layout (C-style),
+    // with a number of rows equal to the number of cells in the specified cell set,
+    // and a number of columns equal to the number of genes in the specified gene set.
+    // This means that, because of C-style layout, the returned matrix
+    // is indexed in python as m[cellId][geneId], where cellId and geneId
+    // are ids local to the cell set and gene set respectively
+    // (that is, they only equal global cell ids and gene ids
+    // if the function is called for the AllCells and AllGenes sets).
+    pybind11::array getDenseExpressionMatrix(
+        const string& geneSetName,
+        const string& cellSetName);
 
 private:
 
