@@ -1651,17 +1651,20 @@ void ExpressionMatrix::findSimilarPairs5(
         if((cellId0 % 10000)==0) {
             cout << timestamp << "Find neighbors for cell " << cellId0 << " begins." << endl;
         }
+        // const auto t0 = std::chrono::steady_clock::now();
 
         // Find the candidates.
         // This can be made faster using a heap
         // to compute the union.
         candidates.clear();
         setsToUnion.clear();
+        // size_t totalCountToUnion = 0;
         for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
             const uint64_t signatureSlice = lsh.getSignature(cellId0).getBits(allSlicesBits[sliceId]);
             const auto& bucket = tables[sliceId][signatureSlice];
             if(bucketOverflow==0 || bucket.size()<=bucketOverflow) {
                 setsToUnion.push_back(&tables[sliceId][signatureSlice]);
+                // totalCountToUnion += tables[sliceId][signatureSlice].size();
             }
 #if 0
             cout << "Bucket for cell " << cellId0 << " slice " << sliceId << ": ";
@@ -1672,6 +1675,7 @@ void ExpressionMatrix::findSimilarPairs5(
         }
         multipleSetUnion(setsToUnion, candidates);
         totalCandidateCount += candidates.size();
+        // const auto t1 = std::chrono::steady_clock::now();
 
         // Check each of the candidates.
         cellNeighbors.clear();
@@ -1684,6 +1688,7 @@ void ExpressionMatrix::findSimilarPairs5(
                 cellNeighbors.push_back(make_pair(cellId1, float(similarity)));
             }
         }
+        // const auto t2 = std::chrono::steady_clock::now();
 
 #if 0
         cout << "cellNeighbors before keepBest " << cellId0 << endl;
@@ -1693,7 +1698,9 @@ void ExpressionMatrix::findSimilarPairs5(
 #endif
 
         // Store the pairs we found, keeping only the k best.
+        // const size_t goodCandidatesCount = cellNeighbors.size();
         keepBest(cellNeighbors, k, OrderPairsBySecondGreater< pair<CellId, float> >());
+        // const auto t3 = std::chrono::steady_clock::now();
 #if 0
         cout << "cellNeighbors after keepBest" << cellId0  << endl;
         for(const auto& p: cellNeighbors) {
@@ -1701,8 +1708,19 @@ void ExpressionMatrix::findSimilarPairs5(
         }
 #endif
         tmp[cellId0] = cellNeighbors;
+        // const auto t4 = std::chrono::steady_clock::now();
 
-        // break;  // ********************************************** TAKE OUT!!!!!!!
+#if 0
+        if(cellId0 > 10000) {
+            cout << cellId0 << " ";
+            cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count()) << " ";
+            cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)).count()) << " ";
+            cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2)).count()) << " ";
+            cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3)).count()) << " ";
+            cout << setsToUnion.size() << " " << totalCountToUnion << " ";
+            cout << candidates.size() << " " << goodCandidatesCount << " " << cellNeighbors.size() << "\n";
+        }
+#endif
     }
     cout << "Average number of candidates per cell is " << double(totalCandidateCount)/cellCount << endl;
 
