@@ -1643,6 +1643,7 @@ void ExpressionMatrix::findSimilarPairs5(
     // For each cell, compute the union of all the table vectors
     // this cell belongs to. This is the set of candidate neighbors
     // for this cell.
+    size_t fullCellCount = 0;
     vector<CellId> candidates;
     vector< const vector<CellId>* > setsToUnion;
     vector< pair<CellId, float> > cellNeighbors;    // The neighbors of a single cell.
@@ -1710,6 +1711,10 @@ void ExpressionMatrix::findSimilarPairs5(
         tmp[cellId0] = cellNeighbors;
         // const auto t4 = std::chrono::steady_clock::now();
 
+        if(cellNeighbors.size() == k) {
+            ++fullCellCount;
+        }
+
 #if 0
         if(cellId0 > 10000) {
             cout << cellId0 << " ";
@@ -1723,6 +1728,7 @@ void ExpressionMatrix::findSimilarPairs5(
 #endif
     }
     cout << "Average number of candidates per cell is " << double(totalCandidateCount)/cellCount << endl;
+    cout << "Number of cells with " << k << " neighbors  is " << fullCellCount << endl;
 
     // Store the pairs in a SimilarPairs object.
     cout << timestamp << "Initializing SimilarPairs object." << endl;
