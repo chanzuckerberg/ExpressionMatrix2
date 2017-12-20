@@ -35,7 +35,10 @@ public:
         const uint64_t& word = data[wordIndex];
 
         // Find the position of this bit in the word.
-        const uint64_t bitPositionInWord = bitPosition & 63ULL;
+        // The first bit is in the most significant position,
+        // so sorting the bitset using integer compariso
+        // does a lexicographic ordering.
+        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
 
         // Test the bit.
         const uint64_t mask = 1ULL << bitPositionInWord;
@@ -51,13 +54,16 @@ public:
         uint64_t& word = data[wordIndex];
 
         // Find the position of this bit in the word.
-        const uint64_t bitPositionInWord = bitPosition & 63ULL;
+        // The first bit is in the most significant position,
+        // so sorting the bitset using integer compariso
+        // does a lexicographic ordering.
+        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
 
         // Set the bit.
         word |= 1ULL << bitPositionInWord;
 
     }
-
+#if 0
     // Get a uint64_t containing the bits in a specified bit range.
     // This range must be entirely contained in one word (it cannot cross word boundaries).
     uint64_t getBits(uint64_t firstBitPosition, uint64_t bitCount) const
@@ -80,8 +86,10 @@ public:
             return (word >> firstBitPositionInWord) & bitMask;
         }
     }
+#endif
 
-    // Same, but the bits are specified in a vector and can be anywhere.
+    // Get a uint64_t containing bits at specified positions.
+    // The bits are specified in a vector.
     // The last specified bit goes in the least significant position
     // of the return value.
     uint64_t getBits(const vector<size_t>& bitPositions) const
@@ -140,7 +148,10 @@ public:
         const uint64_t& word = data[wordIndex];
 
         // Find the position of this bit in the word.
-        const uint64_t bitPositionInWord = bitPosition & 63ULL;
+        // The first bit is in the most significant position,
+        // so sorting the bitset using integer compariso
+        // does a lexicographic ordering.
+        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
 
         // Test the bit.
         const uint64_t mask = 1ULL << bitPositionInWord;
@@ -156,13 +167,17 @@ public:
         uint64_t& word = data[wordIndex];
 
         // Find the position of this bit in the word.
-        const uint64_t bitPositionInWord = bitPosition & 63ULL;
+        // The first bit is in the most significant position,
+        // so sorting the bitset using integer comparison
+        // does a lexicographic ordering.
+        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
 
         // Set the bit.
         word |= 1ULL << bitPositionInWord;
 
     }
 
+#if 0
     // Get a uint64_t containing the bits in a specified bit range.
     // This range must be entirely contained in one word (it cannot cross word boundaries).
     uint64_t getBits(uint64_t firstBitPosition, uint64_t bitCount) const
@@ -185,8 +200,10 @@ public:
             return (word >> firstBitPositionInWord) & bitMask;
         }
     }
+#endif
 
-    // Same, but the bits are specified in a vector and can be anywhere.
+    // Get a uint64_t containing bits at specified positions.
+    // The bits are specified in a vector.
     // The last specified bit goes in the least significant position
     // of the return value.
     uint64_t getBits(const vector<size_t>& bitPositions) const

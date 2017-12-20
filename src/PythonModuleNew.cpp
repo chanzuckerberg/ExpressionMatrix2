@@ -730,12 +730,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::findSimilarPairs1,
            "Obsolete. Use findSimilarPairs4 instead."
        )
-       .def("findSimilarPairs2",
-           &ExpressionMatrix::findSimilarPairs2,
-           "Obsolete. Replaced by findSimilarPairs5."
-           "It will provide LSH-based computation of similar cell pairs "
-           "without looping over all possible pairs of cells."
-       )
        .def("findSimilarPairs3",
            &ExpressionMatrix::findSimilarPairs3,
            "Obsolete. Use findSimilarPairs4 instead.",
@@ -777,7 +771,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        .def("findSimilarPairs5",
            &ExpressionMatrix::findSimilarPairs5,
            "LSH-based computation of similar cell pairs "
-           "without looping over all possible pairs of cells.",
+           "without looping over all possible pairs of cells."
+           "Prototype code. Use findSimilarPairs4 instead.",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("lshName"),

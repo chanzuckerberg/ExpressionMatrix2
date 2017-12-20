@@ -339,12 +339,6 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
-<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs2">
-<code class="descname">findSimilarPairs2</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>arg0: str</em>, <em>arg1: str</em>, <em>arg2: int</em>, <em>arg3: float</em>, <em>arg4: int</em>, <em>arg5: int</em>, <em>arg6: int</em>, <em>arg7: float</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>Obsolete. Replaced by findSimilarPairs5.It will provide LSH-based computation of similar cell pairs without looping over all possible pairs of cells.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3">
 <code class="descname">findSimilarPairs3</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Obsolete. Use findSimilarPairs4 instead.</p>
@@ -365,7 +359,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs5">
 <code class="descname">findSimilarPairs5</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>lshName: str</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshSliceLength: int</em>, <em>bucketOverflow: int=1000</em><span class="sig-paren">)</span> &rarr; None</dt>
-<dd><p>LSH-based computation of similar cell pairs without looping over all possible pairs of cells.</p>
+<dd><p>LSH-based computation of similar cell pairs without looping over all possible pairs of cells.Prototype code. Use findSimilarPairs4 instead.</p>
 </dd></dl>
 
 <dl class="method">

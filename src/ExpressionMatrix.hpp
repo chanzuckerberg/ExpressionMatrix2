@@ -441,23 +441,6 @@ public:
 
 
 
-    // Obsolete - do not use.
-    // Find similar cell pairs using LSH, without looping over all pairs.
-    // See the beginning of ExpressionMatrixLsh.cpp for more information.
-    // This implementation requires lshRowCount to be a power of 2 not greater than 64.
-    void findSimilarPairs2(
-        const string& cellSetName,  // The name of the cell set to be used.
-        const string& name,         // The name of the SimilarPairs object to be created.
-        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold, // The minimum similarity for a pair to be stored.
-        size_t lshBandCount,        // The number of LSH bands, each generated using lshRowCount LSH vectors.
-        size_t lshRowCount,         // The number of LSH vectors in each of the lshBandCount LSH bands.
-        unsigned int seed,          // The seed used to generate the LSH vectors.
-        double loadFactor           // Of the hash table used to assign cells to bucket.
-        );
-
-
-
     // Find similar cell pairs by looping over all pairs
     // and using an LSH approximation to compute the similarity between two cells.
     // This is a newer replacement for findSimilarPairs1.
