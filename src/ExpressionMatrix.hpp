@@ -809,7 +809,7 @@ public:
     // and throw an exception if it does exist.
     void checkCellSetDoesNotExist(const string&) const;
 
-    // Remove an existing cell set.
+    // Removes an existing cell set.
     void removeCellSet(const string&);
 
 
@@ -823,6 +823,9 @@ public:
     // Note that there could be zero, one, or multiple gene sets
     // that satisfy this condition.
     vector<string> geneSetNamesFromSimilarPairsName(const string& similarPairsName) const;
+
+    // Removes an existing gene set.
+    void removeGeneSet(const string&);
 
 
     // Compute gene information content in bits for a given gene set and cell set,

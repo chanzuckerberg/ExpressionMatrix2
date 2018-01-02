@@ -8,6 +8,31 @@ using namespace ExpressionMatrix2;
 #include <regex>
 
 
+
+void ExpressionMatrix::removeGeneSet(
+    const string& geneSetName)
+{
+    // Sanity check: prevent removal of the AllGenes gene set.
+    if(geneSetName == "AllGenes") {
+        throw runtime_error("Gene set AllGenes cannot be removed.");
+    }
+
+    // Locate the gene set to be removed.
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    GeneSet& geneSet = it->second;
+
+    // Remove it from disk.
+    geneSet.remove();
+
+    // Remove it from our table of gene sets.
+    geneSets.erase(it);
+}
+
+
+
 // Create a new gene set consisting of genes whose name matches a given regular expression.
 bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const string& regexString)
 {

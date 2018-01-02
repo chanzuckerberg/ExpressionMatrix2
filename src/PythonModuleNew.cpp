@@ -531,6 +531,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("geneSetName"),
            arg("geneNames")
        )
+       .def("removeGeneSet",
+           (
+               void (ExpressionMatrix::*)
+               (const string&)
+           )
+           &ExpressionMatrix::removeGeneSet,
+           "Removes an existing gene set.",
+           arg("geneSetName")
+       )
 
 
 
