@@ -2,100 +2,91 @@
 #define CZI_EXPRESSION_MATRIX2_BIT_SET_HPP
 
 
-// A bare bone bitset class with just the functionality needed for operations
+// A bare bone bit set class with just the functionality needed for operations
 // on LSH signatures. Similar to boost::dynamic_bitset.
 
 #include "CZI_ASSERT.hpp"
+
+#include "algorithm.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
-        class BitSet;           // Owns the memory.
-        class BitSetInMemory;   // Does not own the memory.
-        class BitSetsInMemory;  // Many bit sets, stored contiguously in owned memory.
-        uint64_t countMismatches(const BitSet&, const BitSet&);
-        uint64_t countMismatches(size_t wordCount, const BitSetInMemory&, const BitSetInMemory&);
+        class BitSetPointer;
+        class BitSet;
+        uint64_t countMismatches(const BitSetPointer&, const BitSetPointer&);
     }
 }
 
 
-// Bit set that does not own its memory.
-class ChanZuckerberg::ExpressionMatrix2::BitSetInMemory {
+
+// Class that stores pointers to the begin and end of a bit set.
+// Does not own the memory, and copies are shallow copies.
+// Implements low level operations on bit sets.
+class ChanZuckerberg::ExpressionMatrix2::BitSetPointer {
 public:
 
-    BitSetInMemory(uint64_t* data, size_t wordCount) : data(data), wordCount(wordCount)
+    // Begin and and pointers of the bit set.
+    uint64_t* begin;
+    uint64_t* end;
+
+    // Constructors.
+    BitSetPointer(uint64_t* begin=0, uint64_t* end=0) : begin(begin), end(end) {}
+    BitSetPointer(uint64_t* begin, uint64_t wordCount) : begin(begin), end(begin+wordCount) {}
+
+    // Return the number of 64-bit words in the bit set.
+    uint64_t wordCount() const
     {
+        return end - begin;
     }
 
-    // The assignment operator copies the data.
-    BitSetInMemory& operator=(const BitSetInMemory& that)
+    // Get the index of the word that contains the bit
+    // corresponding to a given bit position.
+    uint64_t getWordIndex(uint64_t bitPosition) const
     {
-        CZI_ASSERT(wordCount == that.wordCount);
-        copy(that.data, that.data+wordCount, data);
-        return *this;
+        const uint64_t wordIndex = bitPosition >> 6;
+        CZI_ASSERT(wordIndex < wordCount()); // Skip this check, for speed.
+        return wordIndex;
+    }
+
+    // Get the position in its word of the bit corresponding to a given bit position.
+    uint64_t getBitPosition(uint64_t bitPosition) const
+    {
+        // The first bit is in the most significant position,
+        // so sorting the bit set using integer comparison
+        // does a lexicographical ordering of the bit set.
+        return 63ULL - (bitPosition & 63ULL);
     }
 
     // Get the bit at a given position.
     bool get(uint64_t bitPosition) const
-        {
+    {
         // Find the word containing the bit.
-        const uint64_t wordIndex = bitPosition >> 6ULL;
-        const uint64_t& word = data[wordIndex];
+        const uint64_t wordIndex = getWordIndex(bitPosition);
+        const uint64_t& word = begin[wordIndex];
 
         // Find the position of this bit in the word.
-        // The first bit is in the most significant position,
-        // so sorting the bitset using integer compariso
-        // does a lexicographic ordering.
-        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
+        const uint64_t bitPositionInWord = getBitPosition(bitPosition);
 
         // Test the bit.
         const uint64_t mask = 1ULL << bitPositionInWord;
         return (word & mask) != 0ULL;
-
     }
 
-    // Set a bit at a given position.
+    // Set the bit at a given position.
     void set(uint64_t bitPosition)
     {
         // Find the word containing the bit.
-        const uint64_t wordIndex = bitPosition >> 6ULL;
-        uint64_t& word = data[wordIndex];
+        const uint64_t wordIndex = getWordIndex(bitPosition);
+        uint64_t& word = begin[wordIndex];
 
         // Find the position of this bit in the word.
-        // The first bit is in the most significant position,
-        // so sorting the bitset using integer compariso
-        // does a lexicographic ordering.
-        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
+        const uint64_t bitPositionInWord = getBitPosition(bitPosition);
 
         // Set the bit.
         word |= 1ULL << bitPositionInWord;
-
     }
-#if 0
-    // Get a uint64_t containing the bits in a specified bit range.
-    // This range must be entirely contained in one word (it cannot cross word boundaries).
-    uint64_t getBits(uint64_t firstBitPosition, uint64_t bitCount) const
-        {
-        // Find the word containing the bit.
-        const uint64_t firstBitWordIndex = firstBitPosition >> 6ULL;
-        const uint64_t& word = data[firstBitWordIndex];
-
-        // Find the position of the first bit in the word.
-        const uint64_t firstBitPositionInWord = firstBitPosition & 63ULL;
-
-        // Check that the entire range is contained in this word.
-        CZI_ASSERT(firstBitPositionInWord + bitCount <= 64ULL);
-
-        // Extract the bits.
-        if(bitCount == 64) {
-            return word;
-        } else {
-            const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
-            return (word >> firstBitPositionInWord) & bitMask;
-        }
-    }
-#endif
 
     // Get a uint64_t containing bits at specified positions.
     // The bits are specified in a vector.
@@ -111,6 +102,9 @@ public:
         return bits;
     }
 
+    // Get a string representing a specified number of bits of the bit set.
+    // The string contains an underscore for each zero bit
+    // and an x for each one bit.
     string getString(uint64_t bitCount) const
     {
         string s;
@@ -125,205 +119,104 @@ public:
 
     }
 
-    void permuteBits(
+    // Fill the bits of this bit set using a permutation
+    // of the bits of another bit set.
+    void fillUsingPermutation(
         const vector<int>& permutation,
-        BitSetInMemory& that) const
+        BitSetPointer& that)
     {
-        that.clear();
+        clear();
         for(size_t i=0; i<permutation.size(); i++) {
-            if(get(permutation[i])) {
-                that.set(i);
+            if(that.get(permutation[i])) {
+                set(i);
             }
         }
     }
 
     void clear()
     {
-        fill(data, data+wordCount, 0ULL);
+        fill(begin, end, 0ULL);
     }
 
-    uint64_t* data;
-    size_t wordCount;
-
+    bool operator<(const BitSetPointer& that) const
+    {
+        return std::lexicographical_compare(begin, end, that.begin, that.end);
+    }
 };
 
 
 
 // Bit set that owns its memory.
-class ChanZuckerberg::ExpressionMatrix2::BitSet {
+class ChanZuckerberg::ExpressionMatrix2::BitSet : public BitSetPointer {
 public:
 
+
+    // Create a bit set with all bits set to zero.
     BitSet(uint64_t bitCount)
     {
         CZI_ASSERT(bitCount > 0);
-        data.resize(((bitCount - 1ULL) >> 6ULL) + 1ULL, 0ULL);
-    }
-
-    BitSet(BitSetInMemory bitSetInMemory, uint64_t bitCount)
-    {
-        CZI_ASSERT(bitCount > 0);
         const uint64_t wordCount = ((bitCount - 1ULL) >> 6ULL) + 1ULL;
-        data.resize(wordCount);
-        copy(bitSetInMemory.data, bitSetInMemory.data+wordCount, data.begin());
+        begin = new uint64_t(wordCount);
+        end = begin + wordCount;
+        clear();
     }
 
-    // Get the bit at a given position.
-    bool get(uint64_t bitPosition) const
-        {
-        // Find the word containing the bit.
-        const uint64_t wordIndex = bitPosition >> 6ULL;
-        const uint64_t& word = data[wordIndex];
-
-        // Find the position of this bit in the word.
-        // The first bit is in the most significant position,
-        // so sorting the bitset using integer compariso
-        // does a lexicographic ordering.
-        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
-
-        // Test the bit.
-        const uint64_t mask = 1ULL << bitPositionInWord;
-        return (word & mask) != 0ULL;
-
-    }
-
-    // Set a bit at a given position.
-    void set(uint64_t bitPosition)
+    // Create a bit set as a copy of the bit set described by a BitSetPointer.
+    BitSet(const BitSetPointer& that)
     {
-        // Find the word containing the bit.
-        const uint64_t wordIndex = bitPosition >> 6ULL;
-        uint64_t& word = data[wordIndex];
-
-        // Find the position of this bit in the word.
-        // The first bit is in the most significant position,
-        // so sorting the bitset using integer comparison
-        // does a lexicographic ordering.
-        const uint64_t bitPositionInWord = 63ULL - (bitPosition & 63ULL);
-
-        // Set the bit.
-        word |= 1ULL << bitPositionInWord;
-
+        const uint64_t wordCount = that.wordCount();
+        begin = new uint64_t(wordCount);
+        end = begin + wordCount;
+        copy(that.begin, that.end, begin);
     }
 
-#if 0
-    // Get a uint64_t containing the bits in a specified bit range.
-    // This range must be entirely contained in one word (it cannot cross word boundaries).
-    uint64_t getBits(uint64_t firstBitPosition, uint64_t bitCount) const
-        {
-        // Find the word containing the bit.
-        const uint64_t firstBitWordIndex = firstBitPosition >> 6ULL;
-        const uint64_t& word = data[firstBitWordIndex];
-
-        // Find the position of the first bit in the word.
-        const uint64_t firstBitPositionInWord = firstBitPosition & 63ULL;
-
-        // Check that the entire range is contained in this word.
-        CZI_ASSERT(firstBitPositionInWord + bitCount <= 64ULL);
-
-        // Extract the bits.
-        if(bitCount == 64) {
-            return word;
-        } else {
-            const uint64_t bitMask = (1ULL << bitCount) - 1ULL;
-            return (word >> firstBitPositionInWord) & bitMask;
-        }
-    }
-#endif
-
-    // Get a uint64_t containing bits at specified positions.
-    // The bits are specified in a vector.
-    // The last specified bit goes in the least significant position
-    // of the return value.
-    uint64_t getBits(const vector<size_t>& bitPositions) const
+    // The BitSet owns its memory, so we must provide
+    // a destructor, copy constructor, and assignment operator.
+    ~BitSet()
     {
-        uint64_t bits = 0;
-        for(const size_t bitPosition: bitPositions) {
-            bits <<= 1;
-            bits += get(bitPosition);
-        }
-        return bits;
+        delete[] begin;
+    }
+    BitSet(const BitSet& that) : BitSet(BitSetPointer(that)) {}
+    BitSet& operator=(const BitSet& that)
+    {
+        delete[] begin;
+        const uint64_t wordCount = that.wordCount();
+        begin = new uint64_t(wordCount);
+        end = begin + wordCount;
+        copy(that.begin, that.end, begin);
+        return *this;
     }
 
-    bool operator<(const BitSet& that) const
+    // We also provide a move constructor, which makes it faster
+    // to pass or return a BitSet by value.
+    BitSet(BitSet&& that)
     {
-        return data < that.data;
+        begin = that.begin;
+        end = that.end;
+        that.begin = 0;
+        that.end = 0;
     }
 
-    string getString(uint64_t bitCount) const
+    bool operator<(const BitSetPointer& that) const
     {
-        string s;
-        for(uint64_t i=0; i<bitCount; i++) {
-            if(get(i)) {
-                s += 'x';
-            } else {
-                s += '_';
-            }
-        }
-        return s;
-
-    }
-
-    vector<uint64_t> data;
-
-    // Create a BitSetInMemory for this data.
-    BitSetInMemory get()
-    {
-        return BitSetInMemory(data.data(), data.size());
+        return (*this) < that;
     }
 
 };
 
 
-
-// Class to represent many bit sets, stored contiguously in owned memory.
-class ChanZuckerberg::ExpressionMatrix2::BitSetsInMemory {
-public:
-    BitSetsInMemory(
-        size_t bitSetCount,             // The number of bit sets.
-        size_t wordCount,               // The number of 64-bit words in each bit set.
-        const uint64_t* inputData       // Data are copied from here.
-        ) :
-        bitSetCount(bitSetCount),
-        wordCount(wordCount)
-        {
-            const size_t n = bitSetCount*wordCount;
-            data.resize(n);
-            std::copy(inputData, inputData + n, data.begin());
-        }
-
-    size_t bitSetCount;   // The number of bit sets.
-    size_t wordCount;     // The number of 64-bit words in each bit set.
-    vector<uint64_t> data;  // Of size n*m.
-
-    // Get the i-th BitVector in memory.
-    BitSetInMemory get(size_t i)
-    {
-        CZI_ASSERT(i < bitSetCount);
-        return BitSetInMemory(data.data() + i*wordCount, wordCount);
-    }
-
-};
 
 
 
 // Count the number of mismatching bits between two bit vectors.
-// The two bit vectors should have the same length, but we don't check this for performance.
-inline uint64_t ChanZuckerberg::ExpressionMatrix2::countMismatches(const BitSet& x, const BitSet& y)
-{
-    uint64_t mismatchCount = 0;
-    const uint64_t blockCount = x.data.size();
-    for(uint64_t i = 0; i < blockCount; i++) {
-        mismatchCount += __builtin_popcountll(x.data[i] ^ y.data[i]);
-    }
-    return mismatchCount;
-}
 inline uint64_t ChanZuckerberg::ExpressionMatrix2::countMismatches(
-    size_t wordCount,
-    const BitSetInMemory& x,
-    const BitSetInMemory& y)
+    const BitSetPointer& x,
+    const BitSetPointer& y)
 {
+    const uint64_t wordCount = x.wordCount();
     uint64_t mismatchCount = 0;
     for(uint64_t i = 0; i < wordCount; i++) {
-        mismatchCount += __builtin_popcountll(x.data[i] ^ y.data[i]);
+        mismatchCount += __builtin_popcountll(x.begin[i] ^ y.begin[i]);
     }
     return mismatchCount;
 }

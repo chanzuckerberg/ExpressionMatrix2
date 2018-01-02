@@ -1588,6 +1588,7 @@ void ExpressionMatrix::findSimilarPairs5(
 }
 
 
+
 // Find similar cell pairs using LSH and the Charikar algorithm.
 // See M. Charikar, "Similarity Estimation Techniques from Rounding Algorithms", 2002,
 // section "5. Approximate Nearest neighbor Search in Hamming Space.".
@@ -1607,6 +1608,7 @@ void ExpressionMatrix::findSimilarPairs6(
     int seed                        // The seed used to randomly generate the bit permutations.
     )
 {
+#if 0
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 begins." << endl;
     const bool debug = true;
     const auto t0 = std::chrono::steady_clock::now();
@@ -1717,6 +1719,8 @@ void ExpressionMatrix::findSimilarPairs6(
     const auto t1 = std::chrono::steady_clock::now();
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t01 << " s." << endl;
+
+#endif
     CZI_ASSERT(0);
 }
 
@@ -1988,7 +1992,7 @@ void ExpressionMatrix::analyzeLshSignatures(
     // Create a map that gives the cells with a given signature.
     map<BitSet, vector<CellId> > signatureMap;
     for(CellId cellId=0; cellId<cellCount; cellId++) {
-        const BitSet signature(lsh.getSignature(cellId), lshCount);
+        const BitSet signature(lsh.getSignature(cellId));
         signatureMap[signature].push_back(cellId);
     }
 

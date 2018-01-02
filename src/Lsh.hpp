@@ -51,11 +51,11 @@ public:
     double computeCellSimilarity(CellId localCellId0, CellId localCellId1);
 
     // Get the signature corresponding to a given CellId (local to the cell set).
-    BitSetInMemory getSignature(CellId cellId)
+    BitSetPointer getSignature(CellId cellId)
     {
         const size_t offset = cellId*signatureWordCount;    // Offset of the signature of this cell (in 64 bit words)
         size_t* pointer = &(signatures[offset]);            // Pointer to the signature of this cell (as uint64_t words)
-        return BitSetInMemory(pointer, signatureWordCount);
+        return BitSetPointer(pointer, signatureWordCount);
     }
 
     void writeSignatureStatistics(const string& csvFileName);

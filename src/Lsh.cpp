@@ -197,7 +197,7 @@ void Lsh::computeCellLshSignatures(
         }
 
         // Set to 1 the signature bits corresponding to positive scalar products.
-        BitSetInMemory cellSignature = getSignature(localCellId);
+        BitSetPointer cellSignature = getSignature(localCellId);
         for(size_t i=0; i<lshCount; i++) {
             if(scalarProducts[i]>0.) {
                 cellSignature.set(i);
@@ -253,11 +253,11 @@ void Lsh::computeSimilarityTable()
 double Lsh::computeCellSimilarity(CellId localCellId0, CellId localCellId1)
 {
     // Access the LSH signatures for the two cells.
-    const BitSetInMemory signature0 = getSignature(localCellId0);
-    const BitSetInMemory signature1 = getSignature(localCellId1);
+    const BitSetPointer signature0 = getSignature(localCellId0);
+    const BitSetPointer signature1 = getSignature(localCellId1);
 
     // Count the number of bits where the signatures of these two cells disagree.
-    const size_t mismatchingBitCount = countMismatches(signatureWordCount, signature0, signature1);
+    const size_t mismatchingBitCount = countMismatches(signature0, signature1);
 
     // Return the similarity corresponding to this number of mismatching bits.
     return similarityTable[mismatchingBitCount];
