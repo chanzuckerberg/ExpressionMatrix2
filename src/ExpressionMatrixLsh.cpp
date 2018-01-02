@@ -1608,7 +1608,6 @@ void ExpressionMatrix::findSimilarPairs6(
     int seed                        // The seed used to randomly generate the bit permutations.
     )
 {
-#if 0
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 begins." << endl;
     const bool debug = true;
     const auto t0 = std::chrono::steady_clock::now();
@@ -1660,31 +1659,23 @@ void ExpressionMatrix::findSimilarPairs6(
     // the random permutations of the signature bits.
     std::mt19937 randomGenerator(seed);
 
-    // Create a vector of unpermuted cell ids.
-    vector<CellId> unpermutedCellIds(cellCount);
-    std::iota(unpermutedCellIds.begin(), unpermutedCellIds.end(), 0);
 
-
-    // For each of the permutations, we store:
+    // For each of the permutations, we will store:
     // - The permuted signatures, in sorted order.
-    // - The corresponding cell ids.
-    // Initialize this with the unpermuted, unsorted signatures, and
-    // the local cell ids starting at zero and up to cellCount-1.
-    vector< pair<BitSetsInMemory, vector<CellId> > > permutationData(permutationCount, make_pair(
-        BitSetsInMemory(lsh.cellCount(), lsh.wordCount(), lsh.getSignature(0).data),
-        unpermutedCellIds
+    // - The corresponding cell ids, in order consistent with the permuted signatures.
+    vector< pair<BitSets, vector<CellId> > > permutationData(permutationCount, make_pair(
+        BitSets(lsh.cellCount(), lsh.wordCount()),
+        vector<CellId>(cellCount)
         ));
 
-    // Some work areas we allocate once and use repeatedly.
-    vector<int> bitPermutation(lshCount);
-    BitSet permutedSignature(lshCount);
 
 
     // For each of the permutations, compute permuted/sorted signatures.
     for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
 
         // Generate a random permutation of the signature bits.
-        std::iota(bitPermutation.begin(), bitPermutation.end(), 0);
+        vector<uint64_t> bitPermutation(lshCount);
+        std::iota(bitPermutation.begin(), bitPermutation.end(), 0ULL);
         std::shuffle(bitPermutation.begin(), bitPermutation.end(), randomGenerator);
 
         if(debug) {
@@ -1695,22 +1686,67 @@ void ExpressionMatrix::findSimilarPairs6(
             }
         }
 
-        // Permute the bits in the signatures.
-        BitSetsInMemory& permutedSignatures = permutationData[permutationId].first;
+        // Compute the permuted signatures for this permutation.
+        BitSets permutedSignatures(cellCount, lsh.wordCount());
         for(CellId cellId=0; cellId<cellCount; cellId++) {
-            BitSetInMemory signature = permutedSignatures.get(cellId);
-            BitSetInMemory permutedSignatureInMemory = permutedSignature.get();
-            signature.permuteBits(bitPermutation, permutedSignatureInMemory);
-            signature = permutedSignatureInMemory;
+            BitSetPointer signature = lsh.getSignature(cellId);
+            BitSetPointer permutedSignature = permutedSignatures[cellId];
+            permutedSignature.fillUsingPermutation(bitPermutation, signature);
         }
 
         // Write the permuted signatures.
         if(debug) {
             for(CellId cellId=0; cellId<cellCount; cellId++) {
-                cout << permutedSignatures.get(cellId).getString(lshCount) << " " << cellId << "\n";
+                cout << permutedSignatures[cellId].getString(lshCount) << " " << cellId << "\n";
             }
         }
 
+        // Sort the permuted signatures lexicographically,
+        // Keeping track of the cell ids as they get reordered.
+        vector< pair<BitSetPointer, CellId> > table(cellCount);
+        for(CellId cellId=0; cellId<cellCount; cellId++) {
+            pair<BitSetPointer, CellId>& p = table[cellId];
+            p.first = permutedSignatures[cellId];
+            p.second = cellId;
+        }
+        if(debug) {
+            cout << "Table before sorting:" << endl;
+            for(CellId cellId=0; cellId<cellCount; cellId++) {
+                pair<BitSetPointer, CellId>& p = table[cellId];
+                cout << p.first.getString(lshCount) << " " << p.second << "\n";
+            }
+        }
+        sort(table.begin(), table.end());
+        if(debug) {
+            cout << "Table after sorting:" << endl;
+            for(CellId i=0; i<cellCount; i++) {
+                pair<BitSetPointer, CellId>& p = table[i];
+                cout << p.first.getString(lshCount) << " " << p.second << "\n";
+            }
+        }
+
+        // Store the sorted signatures and corresponding cell ids for this permutation.
+        BitSets& thisPermutationBitSets = permutationData[permutationId].first;
+        vector<CellId>& thisPermutationCellIds = permutationData[permutationId].second;
+        CZI_ASSERT(thisPermutationBitSets.bitSetCount == cellCount);
+        CZI_ASSERT(thisPermutationBitSets.wordCount == lsh.wordCount());
+        CZI_ASSERT(thisPermutationCellIds.size() == cellCount);
+        for(CellId i=0; i<cellCount; i++) {
+            cout << "***A " << i << endl;
+            pair<BitSetPointer, CellId>& p = table[i];
+            cout << "***B " << i << endl;
+            thisPermutationBitSets.set(i, p.first);
+            cout << "***C " << i << endl;
+            thisPermutationCellIds[i] = p.second;
+            cout << "***D " << i << endl;
+        }
+
+        if(debug) {
+            cout << "Permutation data for permutation " << permutationId << ":" << endl;
+            for(CellId i=0; i<cellCount; i++) {
+                cout << thisPermutationBitSets[i].getString(lshCount) << " " << thisPermutationCellIds[i] << "\n";
+            }
+        }
     }
 
 
@@ -1720,7 +1756,6 @@ void ExpressionMatrix::findSimilarPairs6(
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t01 << " s." << endl;
 
-#endif
     CZI_ASSERT(0);
 }
 

@@ -15,6 +15,7 @@ namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         class BitSetPointer;
         class BitSet;
+        class BitSets;
         uint64_t countMismatches(const BitSetPointer&, const BitSetPointer&);
     }
 }
@@ -122,11 +123,11 @@ public:
     // Fill the bits of this bit set using a permutation
     // of the bits of another bit set.
     void fillUsingPermutation(
-        const vector<int>& permutation,
+        const vector<uint64_t>& permutation,
         BitSetPointer& that)
     {
         clear();
-        for(size_t i=0; i<permutation.size(); i++) {
+        for(uint64_t i=0; i<permutation.size(); i++) {
             if(that.get(permutation[i])) {
                 set(i);
             }
@@ -206,6 +207,55 @@ public:
 
 
 
+// Class that stores a number of bit sets contiguously in memory.
+class ChanZuckerberg::ExpressionMatrix2::BitSets {
+public:
+
+    // The number of bit sets we are storing.
+    uint64_t bitSetCount;
+
+    // The number of 64 bit words in each bit set.
+    uint64_t wordCount;
+
+    // The data for all the bit sets, stored contiguously.
+    vector<uint64_t> data;
+
+    // Constructor.
+    // If the third argument is not a null pointer,
+    // the bit sets are filled from data beginning at that location.
+    BitSets(
+        uint64_t bitSetCount,
+        uint64_t wordCount,
+        uint64_t* dataArgument = 0  // If not 0, copy from here.
+        ) :
+        bitSetCount(bitSetCount),
+        wordCount(wordCount),
+        data(bitSetCount*wordCount)
+    {
+        if(dataArgument) {
+            copy(dataArgument, dataArgument+data.size(), data.begin());
+        } else {
+            fill(data.begin(), data.end(), 0ULL);
+        }
+    }
+
+    // Return a BitSetPointer for the i-th bit set.
+    BitSetPointer operator[](uint64_t i)
+    {
+        CZI_ASSERT(i < bitSetCount);
+        return BitSetPointer(&data[i*wordCount], wordCount);
+    }
+
+    // Set the i-th bit set.
+    void set(uint64_t i, BitSetPointer that)
+    {
+        CZI_ASSERT(i < bitSetCount);
+        CZI_ASSERT(that.wordCount() == wordCount);
+        copy(that.begin, that.end, data.begin() + i * wordCount);
+    }
+};
+
+
 
 
 // Count the number of mismatching bits between two bit vectors.
@@ -214,6 +264,7 @@ inline uint64_t ChanZuckerberg::ExpressionMatrix2::countMismatches(
     const BitSetPointer& y)
 {
     const uint64_t wordCount = x.wordCount();
+    CZI_ASSERT(y.wordCount() == wordCount); // ********************* REMOVE FOR PERFORMANCE!
     uint64_t mismatchCount = 0;
     for(uint64_t i = 0; i < wordCount; i++) {
         mismatchCount += __builtin_popcountll(x.begin[i] ^ y.begin[i]);
