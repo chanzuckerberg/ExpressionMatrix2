@@ -782,6 +782,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("lshSliceLength"),
            arg("bucketOverflow") = 1000
        )
+       .def("findSimilarPairs6",
+           &ExpressionMatrix::findSimilarPairs6,
+           "Computation of similar cell pairs using LSH and the Charikar algorithm "
+           "to avoid looping over all possible pairs of cells."
+           "Prototype code, see the code for details. Use findSimilarPairs4 instead.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshName"),
+           arg("similarPairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2,
+           arg("permutationCount"),
+           arg("searchCount"),
+           arg("seed") =231
+       )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
            "Only intended to be used for testing. "

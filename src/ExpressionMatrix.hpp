@@ -475,7 +475,6 @@ public:
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 
-    // Replacement for findSimilarPairs2.
     // Find similar cell pairs using LSH, without looping over all pairs.
     void findSimilarPairs5(
         const string& geneSetName,      // The name of the gene set to be used.
@@ -486,6 +485,25 @@ public:
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
         size_t lshSliceLength,          // The number of bits in each LSH signature slice, or 0 for automatic selection.
         size_t bucketOverflow           // If not zero, ignore buckets larger than this.
+        );
+
+    // Find similar cell pairs using LSH and the Charikar algorithm.
+    // See M. Charikar, "Similarity Estimation Techniques from Rounding Algorithms", 2002,
+    // section "5. Approximate Nearest neighbor Search in Hamming Space.".
+    // The Charikar algorithm is for approximate nearest neighbor, but with appropriate
+    // choices of the algorithm parameters permutationCount and searchCount
+    // can be used for approximate k nearest neighbors.
+    // In the Charikar paper, permutationCount is N and searchCount is 2N.
+    void findSimilarPairs6(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& lshName,          // The name of the Lsh object to be used.
+        const string& similarPairsName, // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t permutationCount,        // The number of bit permutations for the Charikar algorithm.
+        size_t searchCount,             // The number of cells checked for each cell, in the Charikar algorithm.
+        int seed                        // The seed used to randomly generate the bit permutations.
         );
 
     // Compute cell LSH signatures and store them.

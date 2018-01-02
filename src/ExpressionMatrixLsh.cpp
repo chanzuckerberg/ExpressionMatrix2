@@ -1588,6 +1588,139 @@ void ExpressionMatrix::findSimilarPairs5(
 }
 
 
+// Find similar cell pairs using LSH and the Charikar algorithm.
+// See M. Charikar, "Similarity Estimation Techniques from Rounding Algorithms", 2002,
+// section "5. Approximate Nearest neighbor Search in Hamming Space.".
+// The Charikar algorithm is for approximate nearest neighbor, but with appropriate
+// choices of the algorithm parameters permutationCount and searchCount
+// can be used for approximate k nearest neighbors.
+// In the Charikar paper, permutationCount is N and searchCount is 2N.
+void ExpressionMatrix::findSimilarPairs6(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& lshName,          // The name of the Lsh object to be used.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold,     // The minimum similarity for a pair to be stored.
+    size_t permutationCount,        // The number of bit permutations for the Charikar algorithm.
+    size_t searchCount,             // The number of cells checked for each cell, in the Charikar algorithm.
+    int seed                        // The seed used to randomly generate the bit permutations.
+    )
+{
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs6 begins." << endl;
+    const bool debug = true;
+    const auto t0 = std::chrono::steady_clock::now();
+
+    // Locate the gene set and verify that it is not empty.
+    const auto itGeneSet = geneSets.find(geneSetName);
+    if(itGeneSet == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    const GeneSet& geneSet = itGeneSet->second;
+    if(geneSet.size() == 0) {
+        throw runtime_error("Gene set " + geneSetName + " is empty.");
+    }
+
+    // Locate the cell set and verify that it is not empty.
+    const auto& it = cellSets.cellSets.find(cellSetName);
+    if(it == cellSets.cellSets.end()) {
+        throw runtime_error("Cell set " + cellSetName + " does not exist.");
+    }
+    const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
+    const CellId cellCount = CellId(cellSet.size());
+    if(cellCount == 0) {
+        throw runtime_error("Cell set " + cellSetName + " is empty.");
+    }
+
+    // Access the Lsh object that will do the computation.
+    Lsh lsh(directoryName + "/Lsh-" + lshName);
+    if(lsh.cellCount() != cellSet.size()) {
+        throw runtime_error("LSH object " + lshName + " has a number of cells inconsistent with cell set " + cellSetName);
+    }
+    const size_t lshCount = lsh.lshCount();
+
+
+    // Write out the signatures.
+    if(debug) {
+        cout << "Cell signatures:\n";
+        for(size_t i=0; i<lshCount; i++) {
+            cout << (i%10);
+        }
+        cout << "\n";
+        for(CellId cellId=0; cellId<cellCount; cellId++) {
+            cout << lsh.getSignature(cellId).getString(lshCount) << " " << cellId << "\n";
+        }
+    }
+
+
+
+    // Create the random number generator that will be used to generate
+    // the random permutations of the signature bits.
+    std::mt19937 randomGenerator(seed);
+
+    // Create a vector of unpermuted cell ids.
+    vector<CellId> unpermutedCellIds(cellCount);
+    std::iota(unpermutedCellIds.begin(), unpermutedCellIds.end(), 0);
+
+
+    // For each of the permutations, we store:
+    // - The permuted signatures, in sorted order.
+    // - The corresponding cell ids.
+    // Initialize this with the unpermuted, unsorted signatures, and
+    // the local cell ids starting at zero and up to cellCount-1.
+    vector< pair<BitSetsInMemory, vector<CellId> > > permutationData(permutationCount, make_pair(
+        BitSetsInMemory(lsh.cellCount(), lsh.wordCount(), lsh.getSignature(0).data),
+        unpermutedCellIds
+        ));
+
+    // Some work areas we allocate once and use repeatedly.
+    vector<int> bitPermutation(lshCount);
+    BitSet permutedSignature(lshCount);
+
+
+    // For each of the permutations, compute permuted/sorted signatures.
+    for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
+
+        // Generate a random permutation of the signature bits.
+        std::iota(bitPermutation.begin(), bitPermutation.end(), 0);
+        std::shuffle(bitPermutation.begin(), bitPermutation.end(), randomGenerator);
+
+        if(debug) {
+            cout << "Creating permutation data for permutation " << permutationId << ".\n";
+            cout << "Bit permutation:\n";
+            for(size_t i=0; i<lshCount; i++) {
+                cout << i << " " << bitPermutation[i] << "\n";
+            }
+        }
+
+        // Permute the bits in the signatures.
+        BitSetsInMemory& permutedSignatures = permutationData[permutationId].first;
+        for(CellId cellId=0; cellId<cellCount; cellId++) {
+            BitSetInMemory signature = permutedSignatures.get(cellId);
+            BitSetInMemory permutedSignatureInMemory = permutedSignature.get();
+            signature.permuteBits(bitPermutation, permutedSignatureInMemory);
+            signature = permutedSignatureInMemory;
+        }
+
+        // Write the permuted signatures.
+        if(debug) {
+            for(CellId cellId=0; cellId<cellCount; cellId++) {
+                cout << permutedSignatures.get(cellId).getString(lshCount) << " " << cellId << "\n";
+            }
+        }
+
+    }
+
+
+
+    // The rest is not done.
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t01 << " s." << endl;
+    CZI_ASSERT(0);
+}
+
+
 
 // Compute cell LSH signatures and store them.
 void ExpressionMatrix::computeLshSignatures(

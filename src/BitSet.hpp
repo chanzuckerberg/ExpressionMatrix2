@@ -12,7 +12,8 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         class BitSet;           // Owns the memory.
-        class BitSetInMemory;   // Does not own the memory
+        class BitSetInMemory;   // Does not own the memory.
+        class BitSetsInMemory;  // Many bit sets, stored contiguously in owned memory.
         uint64_t countMismatches(const BitSet&, const BitSet&);
         uint64_t countMismatches(size_t wordCount, const BitSetInMemory&, const BitSetInMemory&);
     }
@@ -23,8 +24,16 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::BitSetInMemory {
 public:
 
-    BitSetInMemory(uint64_t* data) : data(data)
+    BitSetInMemory(uint64_t* data, size_t wordCount) : data(data), wordCount(wordCount)
     {
+    }
+
+    // The assignment operator copies the data.
+    BitSetInMemory& operator=(const BitSetInMemory& that)
+    {
+        CZI_ASSERT(wordCount == that.wordCount);
+        copy(that.data, that.data+wordCount, data);
+        return *this;
     }
 
     // Get the bit at a given position.
@@ -116,7 +125,25 @@ public:
 
     }
 
+    void permuteBits(
+        const vector<int>& permutation,
+        BitSetInMemory& that) const
+    {
+        that.clear();
+        for(size_t i=0; i<permutation.size(); i++) {
+            if(get(permutation[i])) {
+                that.set(i);
+            }
+        }
+    }
+
+    void clear()
+    {
+        fill(data, data+wordCount, 0ULL);
+    }
+
     uint64_t* data;
+    size_t wordCount;
 
 };
 
@@ -236,6 +263,43 @@ public:
     }
 
     vector<uint64_t> data;
+
+    // Create a BitSetInMemory for this data.
+    BitSetInMemory get()
+    {
+        return BitSetInMemory(data.data(), data.size());
+    }
+
+};
+
+
+
+// Class to represent many bit sets, stored contiguously in owned memory.
+class ChanZuckerberg::ExpressionMatrix2::BitSetsInMemory {
+public:
+    BitSetsInMemory(
+        size_t bitSetCount,             // The number of bit sets.
+        size_t wordCount,               // The number of 64-bit words in each bit set.
+        const uint64_t* inputData       // Data are copied from here.
+        ) :
+        bitSetCount(bitSetCount),
+        wordCount(wordCount)
+        {
+            const size_t n = bitSetCount*wordCount;
+            data.resize(n);
+            std::copy(inputData, inputData + n, data.begin());
+        }
+
+    size_t bitSetCount;   // The number of bit sets.
+    size_t wordCount;     // The number of 64-bit words in each bit set.
+    vector<uint64_t> data;  // Of size n*m.
+
+    // Get the i-th BitVector in memory.
+    BitSetInMemory get(size_t i)
+    {
+        CZI_ASSERT(i < bitSetCount);
+        return BitSetInMemory(data.data() + i*wordCount, wordCount);
+    }
 
 };
 

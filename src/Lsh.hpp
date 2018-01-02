@@ -55,7 +55,7 @@ public:
     {
         const size_t offset = cellId*signatureWordCount;    // Offset of the signature of this cell (in 64 bit words)
         size_t* pointer = &(signatures[offset]);            // Pointer to the signature of this cell (as uint64_t words)
-        return BitSetInMemory(pointer);
+        return BitSetInMemory(pointer, signatureWordCount);
     }
 
     void writeSignatureStatistics(const string& csvFileName);
@@ -68,6 +68,10 @@ public:
     size_t lshCount() const
     {
         return info->lshCount;
+    }
+    size_t wordCount() const
+    {
+        return signatureWordCount;
     }
 
 private:
