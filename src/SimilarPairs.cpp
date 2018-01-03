@@ -311,7 +311,7 @@ bool SimilarPairs::exists(CellId cellId0, CellId cellId1) const
 void SimilarPairs::sort()
 {
     for(CellId cellId=0; cellId<info->cellCount; cellId++) {
-        std::sort(begin(cellId), end(cellId), OrderPairsBySecondGreater<Pair>());
+        std::sort(begin(cellId), end(cellId), OrderPairsBySecondGreaterThenByFirstLess<Pair>());
     }
 
 }

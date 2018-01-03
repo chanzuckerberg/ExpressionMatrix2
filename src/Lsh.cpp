@@ -262,6 +262,15 @@ double Lsh::computeCellSimilarity(CellId localCellId0, CellId localCellId1)
     // Return the similarity corresponding to this number of mismatching bits.
     return similarityTable[mismatchingBitCount];
 }
+size_t Lsh::computeMismatchCount(CellId localCellId0, CellId localCellId1)
+{
+    // Access the LSH signatures for the two cells.
+    const BitSetPointer signature0 = getSignature(localCellId0);
+    const BitSetPointer signature1 = getSignature(localCellId1);
+
+    // Count the number of bits where the signatures of these two cells disagree.
+    return countMismatches(signature0, signature1);
+}
 
 
 

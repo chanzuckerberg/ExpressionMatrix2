@@ -23,6 +23,7 @@
 
 #include "ExpressionMatrix.hpp"
 #include "BitSet.hpp"
+#include "charikar.hpp"
 #include "ExpressionMatrixSubset.hpp"
 #include "heap.hpp"
 #include "iterator.hpp"
@@ -44,6 +45,7 @@ using namespace ExpressionMatrix2;
 #include "fstream.hpp"
 #include <chrono>
 #include <numeric>
+#include <queue>
 
 
 // Generate the random unit LSH vectors.
@@ -1589,6 +1591,9 @@ void ExpressionMatrix::findSimilarPairs5(
 
 
 
+
+
+
 // Find similar cell pairs using LSH and the Charikar algorithm.
 // See M. Charikar, "Similarity Estimation Techniques from Rounding Algorithms", 2002,
 // section "5. Approximate Nearest neighbor Search in Hamming Space.".
@@ -1609,7 +1614,7 @@ void ExpressionMatrix::findSimilarPairs6(
     )
 {
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 begins." << endl;
-    const bool debug = true;
+    bool debug = false;
     const auto t0 = std::chrono::steady_clock::now();
 
     // Locate the gene set and verify that it is not empty.
@@ -1663,10 +1668,9 @@ void ExpressionMatrix::findSimilarPairs6(
     // For each of the permutations, we will store:
     // - The permuted signatures, in sorted order.
     // - The corresponding cell ids, in order consistent with the permuted signatures.
-    vector< pair<BitSets, vector<CellId> > > permutationData(permutationCount, make_pair(
-        BitSets(lsh.cellCount(), lsh.wordCount()),
-        vector<CellId>(cellCount)
-        ));
+    vector<Charikar::PermutationData> permutationData(
+        permutationCount,
+        Charikar::PermutationData(lsh.cellCount(), lsh.wordCount()));
 
 
 
@@ -1726,20 +1730,17 @@ void ExpressionMatrix::findSimilarPairs6(
         }
 
         // Store the sorted signatures and corresponding cell ids for this permutation.
-        BitSets& thisPermutationBitSets = permutationData[permutationId].first;
-        vector<CellId>& thisPermutationCellIds = permutationData[permutationId].second;
+        BitSets& thisPermutationBitSets = permutationData[permutationId].signatures;
+        vector<CellId>& thisPermutationCellIds = permutationData[permutationId].cellIds;
         CZI_ASSERT(thisPermutationBitSets.bitSetCount == cellCount);
         CZI_ASSERT(thisPermutationBitSets.wordCount == lsh.wordCount());
         CZI_ASSERT(thisPermutationCellIds.size() == cellCount);
         for(CellId i=0; i<cellCount; i++) {
-            cout << "***A " << i << endl;
             pair<BitSetPointer, CellId>& p = table[i];
-            cout << "***B " << i << endl;
             thisPermutationBitSets.set(i, p.first);
-            cout << "***C " << i << endl;
             thisPermutationCellIds[i] = p.second;
-            cout << "***D " << i << endl;
         }
+        permutationData[permutationId].computeCellPositions();
 
         if(debug) {
             cout << "Permutation data for permutation " << permutationId << ":" << endl;
@@ -1749,14 +1750,134 @@ void ExpressionMatrix::findSimilarPairs6(
         }
     }
 
+    // Temporary storage of pairs for each cell.
+    vector< vector< pair<CellId, float> > > pairs(cellCount);
+    vector< pair<CellId, float> > cellNeighbors;
 
 
-    // The rest is not done.
+    // At this point the necessary data structures are in place and we can use the Charikar algorithm
+    // to find the neighbors of each cell.
+    debug = true;
+    for(CellId cellId0=0; cellId0<cellCount; cellId0++) {
+        if(false) {
+            cout << "Working on cell " << cellId0 << endl;
+        }
+
+        // Extract the permuted signatures for this cell.
+        vector<BitSetPointer> signatures0(permutationCount);
+        for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
+           Charikar::PermutationData& p = permutationData[permutationId];
+           const size_t i = p.cellPositions[cellId0];
+           CZI_ASSERT(p.cellIds[i] == cellId0);
+           signatures0[permutationId] = p.signatures[i];
+        }
+
+
+        // Create the priority queue of Charikar pointers.
+        std::priority_queue<Charikar::Pointer> priorityQueue;
+        for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
+            Charikar::PermutationData& pd = permutationData[permutationId];
+            const size_t i = pd.cellPositions[cellId0];
+            CZI_ASSERT(pd.cellIds[i] == cellId0);
+
+            // Add the forward moving pointer.
+            if(i < cellCount-1) {
+                Charikar::Pointer pointer;
+                pointer.permutationId = permutationId;
+                pointer.index = i+1;
+                pointer.movesForward = true;
+                pointer.prefixLength = commonPrefixLength(
+                    signatures0[permutationId], pd.signatures[i+1]);
+                priorityQueue.push(pointer);
+            }
+
+            // Add the backward moving pointer.
+            if(i > 1) {
+                Charikar::Pointer pointer;
+                pointer.permutationId = permutationId;
+                pointer.index = i-1;
+                pointer.movesForward = false;
+                pointer.prefixLength = commonPrefixLength(
+                    signatures0[permutationId], pd.signatures[i-1]);
+                priorityQueue.push(pointer);
+            }
+
+        }
+
+
+
+        // The heart of the Charikar algorithm begins here.
+        // At each iteration we get the pointer with the best prefix.
+        cellNeighbors.clear();
+        for(size_t iteration=0; iteration<searchCount; iteration++) {
+
+            // Get the pointer with the best prefix.
+            if(priorityQueue.empty()) {
+                break;
+            }
+            Charikar::Pointer pointer = priorityQueue.top();
+            priorityQueue.pop();
+
+            // Compute the number of mismatches.
+            Charikar::PermutationData& pd = permutationData[pointer.permutationId];
+            const CellId cellId1 = pd.cellIds[pointer.index];
+            CZI_ASSERT(cellId1 != cellId0); // By construction.
+            const double similarity = lsh.computeCellSimilarity(cellId0, cellId1);
+            if(similarity > similarityThreshold) {
+                cellNeighbors.push_back(make_pair(cellId1, similarity));
+                if(false) {
+                    cout << cellId0 << " " << cellId1 << " " << pointer.prefixLength << " " << similarity << endl;
+                }
+            }
+
+            // Update the pointer and requeue it.
+            if(pointer.movesForward) {
+                if(pointer.index < cellCount-1) {
+                    ++pointer.index;
+                    pointer.prefixLength = commonPrefixLength(
+                        signatures0[pointer.permutationId], pd.signatures[pointer.index]);
+                    priorityQueue.push(pointer);
+                }
+            } else {
+                if(pointer.index > 0) {
+                    --pointer.index;
+                    pointer.prefixLength = commonPrefixLength(
+                        signatures0[pointer.permutationId], pd.signatures[pointer.index]);
+                    priorityQueue.push(pointer);
+                }
+            }
+
+        }
+
+        // Sort, deduplicate, keep the best k.
+        sort(cellNeighbors.begin(), cellNeighbors.end(),
+            OrderPairsBySecondGreaterThenByFirstLess< pair<CellId, float> >());
+        cellNeighbors.resize(unique(cellNeighbors.begin(), cellNeighbors.end()) - cellNeighbors.begin());
+        if(cellNeighbors.size() > k) {
+            cellNeighbors.resize(k);
+        }
+
+        // Store.
+        pairs[cellId0] = cellNeighbors;
+    }
+
+
+
+    // Store the pairs in a SimilarPairs object.
+    cout << timestamp << "Initializing SimilarPairs object." << endl;
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    cout << timestamp << "Copying similar pairs." << endl;
+    similarPairs.copy(pairs);
+
+
+    // Sort the similar pairs for each cell by decreasing similarity.
+    // (This should not be necessary - consider removing).
+    cout << timestamp << "Sorting similar pairs." << endl;
+    similarPairs.sort();
+
     const auto t1 = std::chrono::steady_clock::now();
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
     cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t01 << " s." << endl;
-
-    CZI_ASSERT(0);
 }
 
 

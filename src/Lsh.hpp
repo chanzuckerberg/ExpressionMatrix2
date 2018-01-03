@@ -49,6 +49,8 @@ public:
     // Compute the LSH similarity between two cells,
     // specified by their ids local to the cell set used by this Lsh object.
     double computeCellSimilarity(CellId localCellId0, CellId localCellId1);
+    size_t computeMismatchCount(CellId localCellId0, CellId localCellId1);
+
 
     // Get the signature corresponding to a given CellId (local to the cell set).
     BitSetPointer getSignature(CellId cellId)
@@ -61,9 +63,9 @@ public:
     void writeSignatureStatistics(const string& csvFileName);
     void writeSignatureStatistics(ostream&);
 
-    size_t cellCount() const
+    CellId cellCount() const
     {
-        return info->cellCount;
+        return CellId(info->cellCount);
     }
     size_t lshCount() const
     {

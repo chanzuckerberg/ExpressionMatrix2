@@ -17,6 +17,7 @@ namespace ChanZuckerberg {
         class BitSet;
         class BitSets;
         uint64_t countMismatches(const BitSetPointer&, const BitSetPointer&);
+        uint64_t commonPrefixLength(const BitSetPointer&, const BitSetPointer&);
     }
 }
 
@@ -271,6 +272,31 @@ inline uint64_t ChanZuckerberg::ExpressionMatrix2::countMismatches(
     }
     return mismatchCount;
 }
+
+
+// Return the number of bits in the common prefix of two bit vectors.
+// This is the number of bits, starting at zero, that are identical
+// between the two bit vectors.
+inline uint64_t ChanZuckerberg::ExpressionMatrix2::commonPrefixLength(
+    const BitSetPointer& x,
+    const BitSetPointer& y)
+{
+    const uint64_t wordCount = x.wordCount();
+    CZI_ASSERT(y.wordCount() == wordCount); // ********************* REMOVE FOR PERFORMANCE!
+    uint64_t prefixLength = 0;
+    for(uint64_t i = 0; i < wordCount; i++) {
+        const uint64_t xWord = x.begin[i];
+        const uint64_t yWord = y.begin[i];
+        if(xWord == yWord) {
+            prefixLength += 64;
+        } else {
+            prefixLength +=  __builtin_clzl(xWord ^ yWord);
+            break;
+        }
+    }
+    return prefixLength;
+}
+
 
 
 #endif
