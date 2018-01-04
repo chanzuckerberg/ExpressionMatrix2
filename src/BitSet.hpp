@@ -48,7 +48,7 @@ public:
     uint64_t getWordIndex(uint64_t bitPosition) const
     {
         const uint64_t wordIndex = bitPosition >> 6;
-        CZI_ASSERT(wordIndex < wordCount()); // Skip this check, for speed.
+        // CZI_ASSERT(wordIndex < wordCount()); // Skip this check, for speed.
         return wordIndex;
     }
 
@@ -265,7 +265,7 @@ inline uint64_t ChanZuckerberg::ExpressionMatrix2::countMismatches(
     const BitSetPointer& y)
 {
     const uint64_t wordCount = x.wordCount();
-    CZI_ASSERT(y.wordCount() == wordCount); // ********************* REMOVE FOR PERFORMANCE!
+    // CZI_ASSERT(y.wordCount() == wordCount); // Skip for speed.
     uint64_t mismatchCount = 0;
     for(uint64_t i = 0; i < wordCount; i++) {
         mismatchCount += __builtin_popcountll(x.begin[i] ^ y.begin[i]);
@@ -282,7 +282,7 @@ inline uint64_t ChanZuckerberg::ExpressionMatrix2::commonPrefixLength(
     const BitSetPointer& y)
 {
     const uint64_t wordCount = x.wordCount();
-    CZI_ASSERT(y.wordCount() == wordCount); // ********************* REMOVE FOR PERFORMANCE!
+    // CZI_ASSERT(y.wordCount() == wordCount); // Skip for speed.
     uint64_t prefixLength = 0;
     for(uint64_t i = 0; i < wordCount; i++) {
         const uint64_t xWord = x.begin[i];
