@@ -983,7 +983,7 @@ public:
     // or matches a given regular expression.
     // Return true if successful, false if a cell set with
     // the specified name already exists.
-    bool createCellSetUsingMetaData(
+    void createCellSetUsingMetaData(
         const string& cellSetName,          // The name of the cell set to be created.
         const string& metaDataFieldName,    // The name of the meta data field to be used.
         const string&,                      // The string or regular expression that must be matched.
@@ -991,7 +991,7 @@ public:
         );
 
     // Create a new cell set directly, using a vector CellIds.
-    bool createCellSet(
+    void createCellSet(
         const string& cellSetName,
         vector<CellId>& cellIds
         );
@@ -1022,20 +1022,17 @@ public:
 
     // Create a new cell set as the intersection or union of two or more existing cell sets.
     // The input cell sets are specified comma separated in the first argument.
-    // Return true if successful, false if one of the input cell sets does not exist
-    // or the output cell set already exists.
-    bool createCellSetIntersection(const string& inputSets, const string& outputSet);
-    bool createCellSetUnion(const string& inputSets, const string& outputSet);
-    bool createCellSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
+    void createCellSetIntersection(const string& inputSets, const string& outputSet);
+    void createCellSetUnion(const string& inputSets, const string& outputSet);
+    void createCellSetIntersectionOrUnion(const string& inputSets, const string& outputSet, bool doUnion);
 
     // Create a new cell set as the difference between two existing cell sets.
     // Return true if successful, false if one of the input cell sets does not exist
     // or the output cell set already exists.
-    bool createCellSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
+    void createCellSetDifference(const string& inputSet0, const string& inputSet1, const string& outputSet);
 
-    // Create a new cell set by downsampling an existing cell set
-    // Return true if successful, false if the input cell set does not exist.
-    bool downsampleCellSet(
+    // Create a new cell set by downsampling an existing cell set.
+    void downsampleCellSet(
         const string& inputCellSetName,
         const string& newCellSetName,
         double probability,

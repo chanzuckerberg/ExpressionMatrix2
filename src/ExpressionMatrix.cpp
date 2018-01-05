@@ -1558,7 +1558,7 @@ vector<string> ExpressionMatrix::getCellSetNames() const
 // or matches a given regular expression.
 // Return true if successful, false if a cell set with
 // the specified name already exists.
-bool ExpressionMatrix::createCellSetUsingMetaData(
+void ExpressionMatrix::createCellSetUsingMetaData(
     const string& cellSetName,          // The name of the cell set to be created.
     const string& metaDataFieldName,    // The name of the meta data field to be used.
     const string& matchString,          // The string or regular expression that must be matched.
@@ -1567,8 +1567,7 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
 {
     // See if a cell set with this name already exists.
     if(cellSets.exists(cellSetName)) {
-        cout << "Cell set " << cellSetName << " already exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + cellSetName + " already exists.");
     }
 
     // If regular expression matching was requested, create the regular expression we are going to match.
@@ -1621,20 +1620,17 @@ bool ExpressionMatrix::createCellSetUsingMetaData(
 
     // Store this cell set.
     cellSets.addCellSet(cellSetName, cellSet);
-    // cout << "New cell set " << cellSetName << " contains " << cellSet.size() << " cells." << endl;
-
-    return true;
 }
 
+
+
 // Create a new cell set using a vector of cellIds.
-bool ExpressionMatrix::createCellSet(const string& cellSetName, vector<CellId>& cellIds)
+void ExpressionMatrix::createCellSet(const string& cellSetName, vector<CellId>& cellIds)
 {
     if(cellSets.exists(cellSetName)) {
-        cout << "Cell set " << cellSetName << " already exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + cellSetName + " already exists.");
     }
     cellSets.addCellSet(cellSetName, cellIds);
-    return true;
 };
 
 
@@ -1644,20 +1640,19 @@ bool ExpressionMatrix::createCellSet(const string& cellSetName, vector<CellId>& 
 // Return true if successful, false if one of the input cell sets does not exist
 // or the output cell set already exists.
 // All sets are stored sorted.
-bool ExpressionMatrix::createCellSetIntersection(const string& inputSetsNames, const string& outputSetName)
+void ExpressionMatrix::createCellSetIntersection(const string& inputSetsNames, const string& outputSetName)
 {
     return createCellSetIntersectionOrUnion(inputSetsNames, outputSetName, false);
 }
-bool ExpressionMatrix::createCellSetUnion(const string& inputSetsNames, const string& outputSetName)
+void ExpressionMatrix::createCellSetUnion(const string& inputSetsNames, const string& outputSetName)
 {
     return createCellSetIntersectionOrUnion(inputSetsNames, outputSetName, true);
 }
-bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSeparatedInputSetsNames, const string& outputSetName, bool doUnion)
+void ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSeparatedInputSetsNames, const string& outputSetName, bool doUnion)
 {
     // See if a cell set with the name of the output cell set already exists.
     if(cellSets.exists(outputSetName)) {
-        cout << "Cell set " << outputSetName << " already exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + outputSetName + " already exists.");
     }
 
     // Parse the input cell sets.
@@ -1667,8 +1662,7 @@ bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSepar
     // Check that all input cell sets exist.
     for(const string& inputSetName: inputSetsNames) {
         if(!cellSets.exists(inputSetName)) {
-            cout << "Cell set " << inputSetName << " does not exists." << endl;
-            return false;
+            throw runtime_error("Cell set " + inputSetName + " does not exist.");
         }
     }
 
@@ -1700,22 +1694,18 @@ bool ExpressionMatrix::createCellSetIntersectionOrUnion(const string& commaSepar
 
     // Store this cell set.
     cellSets.addCellSet(outputSetName, outputSet);
-    // cout << "New cell set " << outputSetName << " contains " << outputSet.size() << " cells." << endl;
-
-    return true;
 }
 
 
 
-bool ExpressionMatrix::createCellSetDifference(
+void ExpressionMatrix::createCellSetDifference(
     const string& inputSetName0,
     const string& inputSetName1,
     const string& outputSetName)
 {
     // See if a cell set with the name of the output cell set already exists.
     if(cellSets.exists(outputSetName)) {
-        cout << "Cell set " << outputSetName << " already exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + outputSetName + " already exists.");
     }
 
 
@@ -1723,14 +1713,12 @@ bool ExpressionMatrix::createCellSetDifference(
     // Locate the input cell sets.
     const auto it0 = cellSets.cellSets.find(inputSetName0);
     if(it0 == cellSets.cellSets.end()) {
-        cout << "Cell set " << inputSetName0 << " does not exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + inputSetName0 + " does not exists.");
     }
     const CellSet& inputSet0 = *(it0->second);
     const auto it1 = cellSets.cellSets.find(inputSetName1);
     if(it1 == cellSets.cellSets.end()) {
-        cout << "Cell set " << inputSetName1 << " does not exists." << endl;
-        return false;
+        throw runtime_error("Cell set " + inputSetName1 + " does not exists.");
     }
     const CellSet& inputSet1 = *(it1->second);
 
@@ -1747,13 +1735,12 @@ bool ExpressionMatrix::createCellSetDifference(
 
     // Store this cell set.
     cellSets.addCellSet(outputSetName, outputSet);
-    return true;
 }
 
 
 
 // Create a new cell set by downsampling an existing cell set.
-bool ExpressionMatrix::downsampleCellSet(
+void ExpressionMatrix::downsampleCellSet(
     const string& inputCellSetName,
     const string& outputCellSetName,
     double probability,
@@ -1763,7 +1750,7 @@ bool ExpressionMatrix::downsampleCellSet(
     // Locate the input cell set.
     const auto it = cellSets.cellSets.find(inputCellSetName);
     if(it == cellSets.cellSets.end()) {
-        return false;
+        throw runtime_error("Cell set " + inputCellSetName + " does not exists.");
     }
     const CellSet& inputCellSet = *(it->second);
 
@@ -1788,7 +1775,6 @@ bool ExpressionMatrix::downsampleCellSet(
     // Store the new cell set.
     cellSets.addCellSet(outputCellSetName, outputCellSet);
 
-    return true;
 }
 
 

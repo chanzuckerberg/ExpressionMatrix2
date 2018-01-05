@@ -584,7 +584,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        (
            "createCellSetUsingMetaData",
            (
-               bool (ExpressionMatrix::*)
+               void (ExpressionMatrix::*)
                (const string&, const string&, const string&, bool)
            )
            &ExpressionMatrix::createCellSetUsingMetaData,
@@ -654,7 +654,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        (
            "createCellSetDifference",
            (
-               bool (ExpressionMatrix::*)
+               void (ExpressionMatrix::*)
                (const string&, const string&, const string&)
            )
            &ExpressionMatrix::createCellSetDifference,
@@ -673,7 +673,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        (
            "downsampleCellSet",
            (
-               bool (ExpressionMatrix::*)(
+               void (ExpressionMatrix::*)(
                    const string& inputCellSetName,
                    const string& newCellSetName,
                    double probability,

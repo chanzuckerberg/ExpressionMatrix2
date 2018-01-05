@@ -791,12 +791,9 @@ void ExpressionMatrix::createCellSetUsingMetaData(const vector<string>& request,
     getParameterValue(request, "matchType", matchType);
     const bool useRegex = (matchType == "regexMatch");
 
-    if(createCellSetUsingMetaData(cellSetName, metaData, decodedMatchTarget, useRegex)) {
-        html << "<p>Newly created cell set " << cellSetName << " has ";
-        html << cellSets.cellSets[cellSetName]->size() << " cells.";
-    } else {
-        html << "<p>Unable to create cell set " << cellSetName << ".";
-    }
+    createCellSetUsingMetaData(cellSetName, metaData, decodedMatchTarget, useRegex);
+    html << "<p>Newly created cell set " << cellSetName << " has ";
+    html << cellSets.cellSets[cellSetName]->size() << " cells.";
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
 }
@@ -906,12 +903,9 @@ void ExpressionMatrix::createCellSetIntersectionOrUnion(const vector<string>& re
 
 
     // Do the intersection or union.
-    if(createCellSetIntersectionOrUnion(inputCellSetsString, cellSetName, doUnion)) {
-        html << "<p>Newly created cell set " << cellSetName << " has ";
-        html << cellSets.cellSets[cellSetName]->size() << " cells.";
-    } else {
-        html << "<p>Unable to create cell set " << cellSetName << ".";
-    }
+    createCellSetIntersectionOrUnion(inputCellSetsString, cellSetName, doUnion);
+    html << "<p>Newly created cell set " << cellSetName << " has ";
+    html << cellSets.cellSets[cellSetName]->size() << " cells.";
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
 }
@@ -938,12 +932,9 @@ void ExpressionMatrix::createCellSetDifference(const vector<string>& request, os
 
 
     // Do the difference.
-    if(createCellSetDifference(inputCellSet0, inputCellSet1, cellSetName)) {
-        html << "<p>Newly created cell set " << cellSetName << " has ";
-        html << cellSets.cellSets[cellSetName]->size() << " cells.";
-    } else {
-        html << "<p>Unable to create cell set " << cellSetName << ".";
-    }
+    createCellSetDifference(inputCellSet0, inputCellSet1, cellSetName);
+    html << "<p>Newly created cell set " << cellSetName << " has ";
+    html << cellSets.cellSets[cellSetName]->size() << " cells.";
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
 }
@@ -973,14 +964,11 @@ void ExpressionMatrix::downsampleCellSet(const vector<string>& request, ostream&
 
 
     // Do the downsampling.
-    if(downsampleCellSet(inputCellSet, cellSetName, probability, seed)) {
-        html << "<p>Newly created cell set " << cellSetName << " has ";
-        html << cellSets.cellSets[cellSetName]->size() << " cells.";
-        html << "<p>Downsampling probability was " << probability;
-        html << "<p>Actual downsampling rate was " << double(cellSets.cellSets[cellSetName]->size()) / double(cellSets.cellSets[inputCellSet]->size());
-    } else {
-        html << "<p>Unable to create cell set " << cellSetName << ".";
-    }
+    downsampleCellSet(inputCellSet, cellSetName, probability, seed);
+    html << "<p>Newly created cell set " << cellSetName << " has ";
+    html << cellSets.cellSets[cellSetName]->size() << " cells.";
+    html << "<p>Downsampling probability was " << probability;
+    html << "<p>Actual downsampling rate was " << double(cellSets.cellSets[cellSetName]->size()) / double(cellSets.cellSets[inputCellSet]->size());
 
 
     // The button to continue goes back to the cell sets page.
