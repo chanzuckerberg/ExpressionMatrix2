@@ -430,7 +430,172 @@ void CellGraph::writeSvg(
 }
 
 
+#if 1
+// Clustering using the label propagation algorithm.
+// The cluster each vertex is assigned to is stored in the clusterId data member of the vertex.
+void CellGraph::labelPropagationClustering(
+    ostream& out,
+    size_t seed,                            // Seed for random number generator.
+    size_t stableIterationCountThreshold,   // Stop after this many iterations without changes.
+    size_t maxIterationCount                // Stop after this many iterations no matter what.
+    )
+{
+    out << timestamp << "Clustering by label propagation begins." << endl;
+    out << "Seed for random number generator is " << seed << "." << endl;
+    out << "Will stop after " << stableIterationCountThreshold << " iterations without changes." << endl;
+    out << "Maximum number of iterations is " << maxIterationCount << "." << endl;
 
+    // Set the cluster of each vertex equal to its cell id.
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
+        CellGraphVertex& vertex = graph()[v];
+        vertex.clusterId = vertex.cellId;
+    }
+
+    // Initialize the ClusterTable of each vertex.
+    BGL_FORALL_VERTICES(v0, graph(), CellGraph) {
+        CellGraphVertex& vertex0 = graph()[v0];
+        ClusterTable& clusterTable0 = vertex0.clusterTable;
+        clusterTable0.clear();
+        BGL_FORALL_OUTEDGES(v0, e, graph(), CellGraph) {
+            const vertex_descriptor v1 = target(e, graph());
+            const CellGraphVertex& vertex1 = graph()[v1];
+            const CellGraphEdge& edge = graph()[e];
+            clusterTable0.addWeight(vertex1.clusterId, edge.similarity);
+        }
+    }
+
+
+    // Create the random number generator using the specified seed.
+    std::mt19937 randomGenerator(seed);
+
+    // Vector with all the vertices in the graph, in the same order as in the vertex table.
+    vector<vertex_descriptor> allVertices;
+    for(const auto& p : vertexTable) {
+        const vertex_descriptor v = p.second;
+        if(v != null_vertex()) {
+            allVertices.push_back(p.second);
+        }
+    }
+
+
+    // Vector to contain the vertices in the random order to be used at each iteration.
+    vector<vertex_descriptor> shuffledVertices;
+
+    // Counter of the number of stable iterations
+    // (iterations without changes).
+    size_t stableIterationCount = 0;
+
+
+
+    // Iterate.
+    for(size_t iteration=0; iteration<maxIterationCount; iteration++) {
+        size_t changeCount = 0;
+
+        // Create a random shuffle of the vertices, to be used for this iteration.
+        shuffledVertices = allVertices;
+        std::shuffle(shuffledVertices.begin(), shuffledVertices.end(), randomGenerator);
+
+        // Process the vertices in the order determined by the random shuffle.
+        for(const vertex_descriptor v0: shuffledVertices) {
+            CZI_ASSERT(v0 != CellGraph::null_vertex());
+            CellGraphVertex& vertex0 = graph()[v0];
+            if(vertex0.clusterTable.isEmpty()) {
+                continue;
+            }
+
+
+            // If the cluster is already consistent with the cluster table,
+            // we don't need to do anything.
+            const uint32_t bestClusterId = vertex0.clusterTable.bestCluster();
+            if(vertex0.clusterId == bestClusterId) {
+                continue;
+            }
+
+            // Change the cluster id of vertex0.
+            const uint32_t oldClusterId = vertex0.clusterId;
+            vertex0.clusterId = bestClusterId;
+            ++changeCount;
+
+            // Update the cluster table of its neighbors.
+            BGL_FORALL_OUTEDGES(v0, e, graph(), CellGraph) {
+                const vertex_descriptor v1 = target(e, graph());
+                CellGraphVertex& vertex1 = graph()[v1];
+                ClusterTable& clusterTable1 = vertex1.clusterTable;
+                const CellGraphEdge& edge = graph()[e];
+                clusterTable1.addWeight(bestClusterId, edge.similarity);
+                clusterTable1.addWeight(oldClusterId, -edge.similarity);
+            }
+        }
+        out << "Iteration " << iteration << ": " << changeCount << " changes." << endl;
+
+        // Update the number of stable iterations (iterations without changes).
+        if(changeCount) {
+            stableIterationCount = 0;
+        } else {
+            ++stableIterationCount;
+        }
+
+        // If we have done enough stable iterations, stop.
+        if(stableIterationCount == stableIterationCountThreshold) {
+            break;
+        }
+    }
+
+
+    if(stableIterationCount == stableIterationCountThreshold) {
+        out << "Terminating because the specified number of stable iterations was achieved." << endl;
+    } else {
+        out << "Terminating because the maximum number of iterations was reached." << endl;
+    }
+
+
+
+    // Compute the size of each cluster.
+    map<uint32_t, size_t> clusterSize;    // Key=clusterId, Value=cluster size
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
+        const uint32_t clusterId = graph()[v].clusterId;
+        const auto it = clusterSize.find(clusterId);
+        if(it == clusterSize.end()) {
+            clusterSize.insert(make_pair(clusterId, 1));
+        } else {
+            ++(it->second);
+        }
+    }
+
+
+
+    // Renumber the clusters beginning at 0 and in order of decreasing cluster size.
+    vector< pair<size_t, uint32_t> > clusterSizeVector;   // first:cluster size, second: clusterId
+    for(const auto& p: clusterSize) {
+        clusterSizeVector.push_back(make_pair(p.second, p.first));
+    }
+    sort(clusterSizeVector.begin(), clusterSizeVector.end(), std::greater< pair<size_t, size_t> >());
+    out << "Cluster sizes:";
+    for(size_t newClusterId=0; newClusterId<clusterSizeVector.size(); newClusterId++) {
+        const auto& p = clusterSizeVector[newClusterId];
+        out << " " << p.first;
+    }
+    out << endl;
+    map<uint32_t, uint32_t> clusterMap; // Key: old clusterId. Value: new clustyerId.
+    for(uint32_t newClusterId=0; newClusterId<clusterSizeVector.size(); newClusterId++) {
+        const uint32_t oldClusterId = clusterSizeVector[newClusterId].second;
+        clusterMap.insert(make_pair(oldClusterId, newClusterId));
+    }
+
+    // Update the vertices to reflect the new cluster numbering.
+    BGL_FORALL_VERTICES(v, graph(), CellGraph) {
+        CellGraphVertex& vertex = graph()[v];
+        vertex.clusterId = clusterMap[vertex.clusterId];
+    }
+
+
+
+    out << timestamp << "Clustering by label propagation ends." << endl;
+}
+
+
+
+#else
 // Clustering using the label propagation algorithm.
 // The cluster each vertex is assigned to is stored in the clusterId data member of the vertex.
 void CellGraph::labelPropagationClustering(
@@ -599,7 +764,7 @@ void CellGraph::labelPropagationClustering(
 
     out << timestamp << "Clustering by label propagation ends." << endl;
 }
-
+#endif
 
 
 // Assign integer colors to groups.

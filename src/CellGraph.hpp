@@ -7,6 +7,7 @@
 #ifndef CZI_EXPRESSION_MATRIX2_CELL_GRAPH_HPP
 #define CZI_EXPRESSION_MATRIX2_CELL_GRAPH_HPP
 
+#include "CZI_ASSERT.hpp"
 #include "Ids.hpp"
 
 #include "boost_array.hpp"
@@ -15,6 +16,7 @@
 #include "iosfwd.hpp"
 #include "map.hpp"
 #include "string.hpp"
+#include "utility.hpp"
 #include "vector.hpp"
 
 
@@ -26,6 +28,7 @@ namespace ChanZuckerberg {
         class CellGraphVertex;
         class CellGraphVertexInfo;
         class CellGraphEdge;
+        class ClusterTable;
 
         // The base class for class CellGraph.
         typedef boost::adjacency_list<
@@ -43,12 +46,66 @@ namespace ChanZuckerberg {
 
 
 
+// A class used by label propagation algorithm to keep track
+// of the total weight of each cluster for each vertex.
+class ChanZuckerberg::ExpressionMatrix2::ClusterTable {
+public:
+    void addWeight(uint32_t clusterId, float weight);
+    uint32_t bestCluster();
+    void clear();
+    bool isEmpty() const;
+
+private:
+
+
+
+    // Implementation with an std::map.
+    // An implementation with an std::vector may also be possible.
+    map<uint32_t, float> data;
+};
+
+inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::addWeight(uint32_t clusterId, float weight)
+{
+    const auto it = data.find(clusterId);
+    if(it == data.end()) {
+        data.insert(make_pair(clusterId, weight));
+    } else {
+        it->second += weight;
+        if(it->second < 0.01) {
+            data.erase(it);
+        }
+    }
+}
+inline uint32_t ChanZuckerberg::ExpressionMatrix2::ClusterTable::bestCluster()
+{
+    uint32_t bestClusterId = std::numeric_limits<uint32_t>::max();
+    float bestWeight = 0.;
+    for (const auto& p: data) {
+        if(p.second > bestWeight) {
+            bestClusterId = p.first;
+            bestWeight = p.second;
+        }
+    }
+    CZI_ASSERT(bestClusterId != std::numeric_limits<uint32_t>::max());
+    return bestClusterId;
+}
+inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::clear()
+{
+    data.clear();
+}
+inline bool ChanZuckerberg::ExpressionMatrix2::ClusterTable::isEmpty() const
+{
+    return data.empty();
+}
+
+
 // A vertex of the cell graph.
 // The base class CellGraphVertexInfo is used to communicate with Python.
 class ChanZuckerberg::ExpressionMatrix2::CellGraphVertexInfo {
 public:
     CellId cellId = invalidCellId;
     array<double, 2> position;
+    ClusterTable clusterTable;
     double x() const
     {
         return position[0];
