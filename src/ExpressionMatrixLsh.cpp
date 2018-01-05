@@ -1668,6 +1668,7 @@ void ExpressionMatrix::findSimilarPairs6(
     // For each of the permutations, we will store:
     // - The permuted signatures, in sorted order.
     // - The corresponding cell ids, in order consistent with the permuted signatures.
+    cout << "Allocating " << ((8*permutationCount*size_t(lsh.cellCount())*lsh.wordCount()) >> 30) << " GB for permutation data." << endl;
     vector<Charikar::PermutationData> permutationData(
         permutationCount,
         Charikar::PermutationData(lsh.cellCount(), lsh.wordCount()));
@@ -1675,7 +1676,10 @@ void ExpressionMatrix::findSimilarPairs6(
 
 
     // For each of the permutations, compute permuted/sorted signatures.
+    cout << timestamp << "Phase 1 of Charikar algorithm begins." << endl;
+    const auto t1 = std::chrono::steady_clock::now();
     for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
+        cout << timestamp << "Working on permutation " << permutationId << " of " << permutationCount << endl;
 
         // Generate a random permutation of the signature bits.
         vector<uint64_t> bitPermutation(lshCount);
@@ -1749,6 +1753,9 @@ void ExpressionMatrix::findSimilarPairs6(
             }
         }
     }
+    const auto t2 = std::chrono::steady_clock::now();
+    cout << timestamp << "Phase 1 of Charikar algorithm took ";
+    cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1)).count()) << " s." << endl;
 
     // Temporary storage of pairs for each cell.
     vector< vector< pair<CellId, float> > > pairs(cellCount);
@@ -1757,10 +1764,12 @@ void ExpressionMatrix::findSimilarPairs6(
 
     // At this point the necessary data structures are in place and we can use the Charikar algorithm
     // to find the neighbors of each cell.
-    debug = true;
+    debug = false;
+    cout << timestamp << "Phase 2 of Charikar algorithm begins." << endl;
+    const auto t3 = std::chrono::steady_clock::now();
     for(CellId cellId0=0; cellId0<cellCount; cellId0++) {
-        if(false) {
-            cout << "Working on cell " << cellId0 << endl;
+        if(cellId0!=0 && (cellId0%100000)==0) {
+            cout << timestamp << "Working on cell " << cellId0 << " of " << cellCount << endl;
         }
 
         // Extract the permuted signatures for this cell.
@@ -1860,6 +1869,9 @@ void ExpressionMatrix::findSimilarPairs6(
         // Store.
         pairs[cellId0] = cellNeighbors;
     }
+    const auto t4 = std::chrono::steady_clock::now();
+    cout << timestamp << "Phase 2 of Charikar algorithm took ";
+    cout << 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3)).count()) << " s." << endl;
 
 
 
@@ -1875,9 +1887,9 @@ void ExpressionMatrix::findSimilarPairs6(
     cout << timestamp << "Sorting similar pairs." << endl;
     similarPairs.sort();
 
-    const auto t1 = std::chrono::steady_clock::now();
-    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
-    cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t01 << " s." << endl;
+    const auto t5 = std::chrono::steady_clock::now();
+    const double t05 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t5 - t0)).count());
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs6 ends. Took " << t05 << " s." << endl;
 }
 
 
