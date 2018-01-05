@@ -580,6 +580,12 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
 
         // Cell sets.
+       .def("createCellSet",
+           &ExpressionMatrix::createCellSet,
+           "Creates a new cell set cellSetName including the cells with the specified ids.",
+           arg("cellSetName"),
+           arg("cellIds")
+       )
        .def
        (
            "createCellSetUsingMetaData",
