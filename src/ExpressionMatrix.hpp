@@ -665,7 +665,8 @@ public:
     // if the function is called for the AllCells and AllGenes sets).
     pybind11::array getDenseExpressionMatrix(
         const string& geneSetName,
-        const string& cellSetName);
+        const string& cellSetName,
+        NormalizationMethod);
 
 private:
 

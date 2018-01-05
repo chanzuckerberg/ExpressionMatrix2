@@ -1217,7 +1217,7 @@ void ExpressionMatrix::computeAverageExpression(
 
     // Normalize as requested.
     switch(normalizationMethod) {
-    case NormalizationMethod::None:
+    case NormalizationMethod::none:
         break;
     case NormalizationMethod::L1:
         {
@@ -1274,7 +1274,7 @@ void ExpressionMatrix::computeExpressionVector(
     float factor;
     double sum = 0.;
     switch(normalizationMethod) {
-    case NormalizationMethod::None:
+    case NormalizationMethod::none:
         return;
     case NormalizationMethod::L1:
         for(const auto& p: expressionVector) {

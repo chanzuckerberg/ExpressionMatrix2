@@ -74,7 +74,8 @@ array_t<double> testNumpy()
 // if the function is called for the AllCells and AllGenes sets).
 pybind11::array ExpressionMatrix::getDenseExpressionMatrix(
     const string& geneSetName,
-    const string& cellSetName)
+    const string& cellSetName,
+    NormalizationMethod normalizationMethod)
 {
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
@@ -103,16 +104,37 @@ pybind11::array ExpressionMatrix::getDenseExpressionMatrix(
     ExpressionMatrixSubset expressionMatrixSubset(
         expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
 
+
+
     // Create the data for the dense representation of this expression matrix subset.
     vector<double> data(geneSet.size() * cellSet.size(), 0.);
     for(CellId cellId=0; cellId<cellSet.size(); cellId++) {
+
+        // Compute the normalization factor to be used for this cell.
+        float normalizationFactor;
+        switch(normalizationMethod) {
+        case NormalizationMethod::none:
+            normalizationFactor = 1.;
+            break;
+        case NormalizationMethod::L1:
+            normalizationFactor = float(1. / expressionMatrixSubset.sums[cellId].sum1);
+            break;
+        case NormalizationMethod::L2:
+            normalizationFactor = float(1. / sqrt(expressionMatrixSubset.sums[cellId].sum2));
+            break;
+        default:
+            throw runtime_error("Invalid normalization method.");
+        }
+
         const size_t offset = cellId * geneSet.size();
         for(const pair<GeneId, float>& p: expressionMatrixSubset.cellExpressionCounts[cellId]) {
             const GeneId geneId = p.first;
-            const float count = p.second;
+            float count = normalizationFactor * p.second;
             data[offset + geneId] = double(count);
         }
     }
+
+
 
     // The python buffer information for the matrix we want to return.
     const size_t ndim = 2;
@@ -132,11 +154,24 @@ pybind11::array ExpressionMatrix::getDenseExpressionMatrix(
 
 PYBIND11_MODULE(ExpressionMatrix2, module)
 {
-    /*
-    module.doc() =
-        "Software for analysis, visualization, and clustering "
-        "of gene expression data from single-cell RNA sequencing.";
-    */
+    // Enum class NormalizationMethod.
+    enum_<NormalizationMethod>(
+        module,
+        "NormalizationMethod",
+        "Various ways to normalize gene expressions.\n\n"
+        "- none: no normalization.\n"
+        "- L1: L1 normalization (sum of values is 1).\n"
+        "- L2: L2 normalization (sum of squares of values is 1).\n"
+        "- Invalid: invalid normalization.\n"
+        )
+        .value(normalizationMethodToShortString(NormalizationMethod::none).c_str(),       NormalizationMethod::none)
+        .value(normalizationMethodToShortString(NormalizationMethod::L1).c_str(),         NormalizationMethod::L1)
+        .value(normalizationMethodToShortString(NormalizationMethod::L2).c_str(),         NormalizationMethod::L2)
+        .value(normalizationMethodToShortString(NormalizationMethod::Invalid).c_str(),    NormalizationMethod::Invalid)
+        .export_values()
+        ;
+
+
 
     // Class ExpressionMatrix.
     class_<ExpressionMatrix>(
@@ -445,7 +480,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "(that is, they only equal global cell ids and gene ids "
            "if the function is called for the AllCells and AllGenes sets).",
            arg("geneSetName") = "AllGenes",
-           arg("cellSetName") = "AllCells"
+           arg("cellSetName") = "AllCells",
+           arg("normalizationMethod") = NormalizationMethod::none
        )
 
 
@@ -1020,24 +1056,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
             "of the graph the vertex belongs to. ")
         ;
 
-
-
-    // Enum class NormalizationMethod.
-    enum_<NormalizationMethod>(
-        module,
-        "NormalizationMethod",
-        "Various ways to normalize gene expressions.\n\n"
-        "- none: no normalization.\n"
-        "- L1: L1 normalization (sum of values is 1).\n"
-        "- L2: L2 normalization (sum of squares of values is 1).\n"
-        "- Invalid: invalid normalization.\n"
-        )
-        .value(normalizationMethodToShortString(NormalizationMethod::None).c_str(),       NormalizationMethod::None)
-        .value(normalizationMethodToShortString(NormalizationMethod::L1).c_str(),         NormalizationMethod::L1)
-        .value(normalizationMethodToShortString(NormalizationMethod::L2).c_str(),         NormalizationMethod::L2)
-        .value(normalizationMethodToShortString(NormalizationMethod::Invalid).c_str(),    NormalizationMethod::Invalid)
-        .export_values()
-        ;
 
 
     // Some non-member functions used only for testing or debugging.

@@ -798,7 +798,7 @@ Thinner edge
         BGL_FORALL_VERTICES(v, graph, CellGraph) {
             CellGraphVertex& vertex = graph[v];
             const double rawCount = getCellExpressionCount(vertex.cellId, geneId);
-            if(normalizationMethod == NormalizationMethod::None) {
+            if(normalizationMethod == NormalizationMethod::none) {
                 vertex.value = rawCount;
             } else {
                 const Cell& cell = cells[vertex.cellId];

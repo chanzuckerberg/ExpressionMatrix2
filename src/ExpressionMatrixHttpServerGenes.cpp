@@ -714,7 +714,7 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
     vector<float> informationContent0;
     vector<float> informationContent1;
     vector<float> informationContent2;
-    computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::None, informationContent0);
+    computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::none, informationContent0);
     computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::L1  , informationContent1);
     computeGeneInformationContent(geneSet, cellSet, NormalizationMethod::L2  , informationContent2);
 

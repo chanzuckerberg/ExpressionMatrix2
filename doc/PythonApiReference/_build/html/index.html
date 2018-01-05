@@ -304,7 +304,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetUsingInformationContent">
-<code class="descname">createGeneSetUsingInformationContent</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>existingGeneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>normalizationMethod: ChanZuckerberg::ExpressionMatrix2::NormalizationMethod</em>, <em>geneInformationContentThreshold: float</em>, <em>newGeneSetName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
+<code class="descname">createGeneSetUsingInformationContent</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>existingGeneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>normalizationMethod: ExpressionMatrix2.NormalizationMethod</em>, <em>geneInformationContentThreshold: float</em>, <em>newGeneSetName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Creates a new gene set consisting of genes that pass an information content test. The information content, in bits, of each gene in existingGeneSetName is computed using cellSetName and the specified NormalizationMethod. The new gene set newGeneSetName is created, consisting of genes whose computed information content (in bits) exceeds the specified geneInformationContentThreshold. The information content is roughly related to the variability of the expression of that gene in the specified cell set. Genes that are widely expressed have a low information content. Genes that are very selectively expressed have a high information content. A gene that is equally expressed in all cells has zero information content. A gene that is expressed only in one cell has log2N bits of information content, where N is the number of cells in the cell set used to compute information content. A geneInformationContentThreshold of 2 bits is often effective in filtering out widely expressed genes.</p>
 </dd></dl>
 
@@ -502,7 +502,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.getDenseExpressionMatrix">
-<code class="descname">getDenseExpressionMatrix</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em><span class="sig-paren">)</span> &rarr; array</dt>
+<code class="descname">getDenseExpressionMatrix</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>normalizationMethod: ExpressionMatrix2.NormalizationMethod=NormalizationMethod.none</em><span class="sig-paren">)</span> &rarr; array</dt>
 <dd><p>Get a dense representation of a subset of the expression matrix corresponding to a given gene set and cell set. The returned matrix is a numpy array with row-major memory layout (C-style), with a number of rows equal to the number of cells in the specified cell set, and a number of columns equal to the number of genes in the specified gene set. This means that, because of C-style layout, the returned matrix is indexed in python as m[cellId][geneId], where cellId and geneId are ids local to the cell set and gene set respectively (that is, they only equal global cell ids and gene ids if the function is called for the AllCells and AllGenes sets).</p>
 </dd></dl>
 

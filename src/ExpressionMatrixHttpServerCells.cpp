@@ -194,7 +194,7 @@ void ExpressionMatrix::exploreCell(
 
         // Compute an unnormalized expression vector for this cell and gene set.
         vector< pair<GeneId, float> > expressionVector0;
-        computeExpressionVector(cellId, geneSet, NormalizationMethod::None, expressionVector0);
+        computeExpressionVector(cellId, geneSet, NormalizationMethod::none, expressionVector0);
 
         // Sort in decreasing order.
         sort(
