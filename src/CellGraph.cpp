@@ -19,6 +19,7 @@ using boost::algorithm::is_any_of;
 
 // Standard libraries.
 #include "algorithm.hpp"
+#include <chrono>
 #include "fstream.hpp"
 #include "set.hpp"
 #include "stdexcept.hpp"
@@ -444,6 +445,7 @@ void CellGraph::labelPropagationClustering(
     out << "Seed for random number generator is " << seed << "." << endl;
     out << "Will stop after " << stableIterationCountThreshold << " iterations without changes." << endl;
     out << "Maximum number of iterations is " << maxIterationCount << "." << endl;
+    const auto t0 = std::chrono::steady_clock::now();
 
     // Set the cluster of each vertex equal to its cell id.
     BGL_FORALL_VERTICES(v, graph(), CellGraph) {
@@ -460,8 +462,9 @@ void CellGraph::labelPropagationClustering(
             const vertex_descriptor v1 = target(e, graph());
             const CellGraphVertex& vertex1 = graph()[v1];
             const CellGraphEdge& edge = graph()[e];
-            clusterTable0.addWeight(vertex1.clusterId, edge.similarity);
+            clusterTable0.addWeightQuick(vertex1.clusterId, edge.similarity);
         }
+        clusterTable0.findBestCluster();
     }
 
 
@@ -488,7 +491,10 @@ void CellGraph::labelPropagationClustering(
 
 
     // Iterate.
+    out << timestamp << "Label propagation iteration begins." << endl;
     for(size_t iteration=0; iteration<maxIterationCount; iteration++) {
+        // cout << "Begin iteration " << iteration << endl;
+        const auto t0 = std::chrono::steady_clock::now();
         size_t changeCount = 0;
 
         // Create a random shuffle of the vertices, to be used for this iteration.
@@ -503,13 +509,13 @@ void CellGraph::labelPropagationClustering(
                 continue;
             }
 
-
             // If the cluster is already consistent with the cluster table,
             // we don't need to do anything.
             const uint32_t bestClusterId = vertex0.clusterTable.bestCluster();
             if(vertex0.clusterId == bestClusterId) {
                 continue;
             }
+
 
             // Change the cluster id of vertex0.
             const uint32_t oldClusterId = vertex0.clusterId;
@@ -526,7 +532,9 @@ void CellGraph::labelPropagationClustering(
                 clusterTable1.addWeight(oldClusterId, -edge.similarity);
             }
         }
-        out << "Iteration " << iteration << ": " << changeCount << " changes." << endl;
+        const auto t1 = std::chrono::steady_clock::now();
+        const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+        out << "Iteration " << iteration << " took " << t01 << " s, made " << changeCount << " changes." << endl;
 
         // Update the number of stable iterations (iterations without changes).
         if(changeCount) {
@@ -589,8 +597,9 @@ void CellGraph::labelPropagationClustering(
     }
 
 
-
-    out << timestamp << "Clustering by label propagation ends." << endl;
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    out << timestamp << "Clustering by label propagation completed in " << t01 << " s." << endl;
 }
 
 

@@ -6,6 +6,11 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
+        // Function object to order pairs in increasing order
+        // of the second item in the pair, breaking ties
+        // using the first item in the pair, in increasing order.
+        template<class Pair> class OrderPairsBySecondThenByFirst;
+
         // Function object to order pairs in decreasing order
         // of the second item in the pair, breaking ties
         // using the first item in the pair, in increasing order.
@@ -21,6 +26,18 @@ namespace ChanZuckerberg {
         template<class Pair> class OrderPairsByFirstOnly;
     }
 }
+
+
+
+template<class Pair> class ChanZuckerberg::ExpressionMatrix2::OrderPairsBySecondThenByFirst {
+public:
+    bool operator()(const Pair& x, const Pair& y) const
+    {
+        if(x.second < y.second) return true;
+        if(y.second < x.second) return false;
+        return x.first < y.first;
+    }
+};
 
 
 

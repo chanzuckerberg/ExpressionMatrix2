@@ -9,6 +9,7 @@
 
 #include "CZI_ASSERT.hpp"
 #include "Ids.hpp"
+#include "orderPairs.hpp"
 
 #include "boost_array.hpp"
 #include <boost/graph/adjacency_list.hpp>
@@ -51,43 +52,64 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::ClusterTable {
 public:
     void addWeight(uint32_t clusterId, float weight);
+    void addWeightQuick(uint32_t clusterId, float weight); // Does not check if already there. Does not update the best cluster.
     uint32_t bestCluster();
+    void findBestCluster();
     void clear();
     bool isEmpty() const;
 
 private:
 
+    vector< pair<uint32_t, float> > data;
 
-
-    // Implementation with an std::map.
-    // An implementation with an std::vector may also be possible.
-    map<uint32_t, float> data;
+    uint32_t bestClusterId = std::numeric_limits<uint32_t>::max();
+    float bestWeight = -1.;
 };
 
+inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::addWeightQuick(uint32_t clusterId, float weight)
+{
+    data.push_back(make_pair(clusterId, weight));
+}
 inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::addWeight(uint32_t clusterId, float weight)
 {
-    const auto it = data.find(clusterId);
-    if(it == data.end()) {
-        data.insert(make_pair(clusterId, weight));
-    } else {
-        it->second += weight;
-        if(it->second < 0.01) {
-            data.erase(it);
+    for(pair<uint32_t, float>& p: data) {
+        if(p.first == clusterId) {
+            p.second += weight;
+            if(clusterId == bestClusterId) {
+                if(weight < 0.) {
+                    findBestCluster();
+                } else {
+                    bestWeight = p.second;
+                }
+            } else {
+                if(p.second > bestWeight) {
+                    bestClusterId = clusterId;
+                    bestWeight = p.second;
+                }
+            }
+            return;
         }
+    }
+    data.push_back(make_pair(clusterId, weight));
+    if(weight > bestWeight) {
+        bestClusterId = clusterId;
+        bestWeight = weight;
     }
 }
 inline uint32_t ChanZuckerberg::ExpressionMatrix2::ClusterTable::bestCluster()
 {
-    uint32_t bestClusterId = std::numeric_limits<uint32_t>::max();
-    float bestWeight = 0.;
-    for (const auto& p: data) {
+    return bestClusterId;
+}
+inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::findBestCluster()
+{
+    bestClusterId = std::numeric_limits<uint32_t>::max();
+    bestWeight = -1.;
+    for(const pair<uint32_t, float>& p: data) {
         if(p.second > bestWeight) {
-            bestClusterId = p.first;
             bestWeight = p.second;
+            bestClusterId = p.first;
         }
     }
-    CZI_ASSERT(bestClusterId != std::numeric_limits<uint32_t>::max());
-    return bestClusterId;
 }
 inline void ChanZuckerberg::ExpressionMatrix2::ClusterTable::clear()
 {
@@ -97,6 +119,7 @@ inline bool ChanZuckerberg::ExpressionMatrix2::ClusterTable::isEmpty() const
 {
     return data.empty();
 }
+
 
 
 // A vertex of the cell graph.
