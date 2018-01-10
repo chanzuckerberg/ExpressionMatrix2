@@ -846,7 +846,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("similarityThreshold") = 0.2,
            arg("permutationCount"),
            arg("searchCount"),
-           arg("seed") =231
+           arg("permutedBitCount") = 64,
+           arg("seed") = 231
        )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,

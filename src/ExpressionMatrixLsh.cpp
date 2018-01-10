@@ -1601,6 +1601,10 @@ void ExpressionMatrix::findSimilarPairs5(
 // choices of the algorithm parameters permutationCount and searchCount
 // can be used for approximate k nearest neighbors.
 // In the Charikar paper, permutationCount is N and searchCount is 2N.
+// To reduce memory requirements, we don't store all bits all bits of
+// the permuted signatures - only the most significant permutedBitCount.
+// In practice it is best to set this to 64, so the permuted signatured
+// use only one 64-bit word each.
 void ExpressionMatrix::findSimilarPairs6(
     const string& geneSetName,      // The name of the gene set to be used.
     const string& cellSetName,      // The name of the cell set to be used.
@@ -1610,6 +1614,7 @@ void ExpressionMatrix::findSimilarPairs6(
     double similarityThreshold,     // The minimum similarity for a pair to be stored.
     size_t permutationCount,        // The number of bit permutations for the Charikar algorithm.
     size_t searchCount,             // The number of cells checked for each cell, in the Charikar algorithm.
+    size_t permutedBitCount,        // The number of most significant bits stored for each permuted signature.
     int seed                        // The seed used to randomly generate the bit permutations.
     )
 {
@@ -1645,6 +1650,16 @@ void ExpressionMatrix::findSimilarPairs6(
     }
     const size_t lshCount = lsh.lshCount();
 
+    // Sanity check on the number of most significant bits stored for
+    // each permuted signature.
+    if(permutedBitCount > lshCount) {
+        throw runtime_error(
+            "Argument permutationStoreBitCount " +
+            to_string(permutedBitCount) +
+            " exceeds number of signature bits " +
+            to_string(lshCount));
+    }
+
 
     // Write out the signatures.
     if(debug) {
@@ -1666,16 +1681,18 @@ void ExpressionMatrix::findSimilarPairs6(
 
 
     // For each of the permutations, we will store:
-    // - The permuted signatures, in sorted order.
+    // - The permuted signatures, in sorted order (first permutationStoreBitCount bits only).
     // - The corresponding cell ids, in order consistent with the permuted signatures.
-    cout << "Allocating " << ((8*permutationCount*size_t(lsh.cellCount())*lsh.wordCount()) >> 30) << " GB for permutation data." << endl;
+    const size_t permutedWordCount = ((permutedBitCount-1) >> 6) + 1;
+    cout << "Allocating " << ((8*permutationCount*size_t(lsh.cellCount())*permutedWordCount) >> 30) << " GB for permutation data." << endl;
     vector<Charikar::PermutationData> permutationData(
         permutationCount,
-        Charikar::PermutationData(lsh.cellCount(), lsh.wordCount()));
+        Charikar::PermutationData(lsh.cellCount(), permutedWordCount));
 
 
 
     // For each of the permutations, compute permuted/sorted signatures.
+    // We only compute and store the first permutedBitCount bits of each permuted signature.
     cout << timestamp << "Phase 1 of Charikar algorithm begins." << endl;
     const auto t1 = std::chrono::steady_clock::now();
     for(size_t permutationId=0; permutationId<permutationCount; permutationId++) {
@@ -1685,6 +1702,7 @@ void ExpressionMatrix::findSimilarPairs6(
         vector<uint64_t> bitPermutation(lshCount);
         std::iota(bitPermutation.begin(), bitPermutation.end(), 0ULL);
         std::shuffle(bitPermutation.begin(), bitPermutation.end(), randomGenerator);
+        bitPermutation.resize(permutedBitCount);    // Only keep the permutedBitCount most significant bits.
 
         if(debug) {
             cout << "Creating permutation data for permutation " << permutationId << ".\n";
@@ -1695,7 +1713,7 @@ void ExpressionMatrix::findSimilarPairs6(
         }
 
         // Compute the permuted signatures for this permutation.
-        BitSets permutedSignatures(cellCount, lsh.wordCount());
+        BitSets permutedSignatures(cellCount, permutedWordCount);
         for(CellId cellId=0; cellId<cellCount; cellId++) {
             BitSetPointer signature = lsh.getSignature(cellId);
             BitSetPointer permutedSignature = permutedSignatures[cellId];
@@ -1737,7 +1755,7 @@ void ExpressionMatrix::findSimilarPairs6(
         BitSets& thisPermutationBitSets = permutationData[permutationId].signatures;
         vector<CellId>& thisPermutationCellIds = permutationData[permutationId].cellIds;
         CZI_ASSERT(thisPermutationBitSets.bitSetCount == cellCount);
-        CZI_ASSERT(thisPermutationBitSets.wordCount == lsh.wordCount());
+        CZI_ASSERT(thisPermutationBitSets.wordCount == permutedWordCount);
         CZI_ASSERT(thisPermutationCellIds.size() == cellCount);
         for(CellId i=0; i<cellCount; i++) {
             pair<BitSetPointer, CellId>& p = table[i];

@@ -494,6 +494,10 @@ public:
     // choices of the algorithm parameters permutationCount and searchCount
     // can be used for approximate k nearest neighbors.
     // In the Charikar paper, permutationCount is N and searchCount is 2N.
+    // To reduce memory requirements, we don't store all bits all bits of
+    // the permuted signatures - only the most significant permutedBitCount.
+    // In practice it is best to set this to 64, so the permuted signatured
+    // use only one 64-bit word each.
     void findSimilarPairs6(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
@@ -503,6 +507,7 @@ public:
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
         size_t permutationCount,        // The number of bit permutations for the Charikar algorithm.
         size_t searchCount,             // The number of cells checked for each cell, in the Charikar algorithm.
+        size_t permutedBitCount,        // The number of most significant bits stored for each permuted signature.
         int seed                        // The seed used to randomly generate the bit permutations.
         );
 

@@ -7,6 +7,7 @@
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
+        using std::to_string;
         using std::string;
     }
 }

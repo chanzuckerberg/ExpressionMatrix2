@@ -34,6 +34,8 @@ public:
     // The signatures, with the bits shuffled according
     // to the bit permutation this data structure refers to,
     // and sorted in lexicographical order.
+    // We only store the most significant permutedBitCount bits
+    // of each signature.
     BitSets signatures;
 
     // The cell ids, in corresponding order.
@@ -41,8 +43,8 @@ public:
     vector<CellId> cellIds;
 
     // The constructor allocates the memory but does not fill it in.
-    PermutationData(CellId cellCount, size_t lshWordCount) :
-        signatures(cellCount, lshWordCount),
+    PermutationData(CellId cellCount, size_t permutedWordCount) :
+        signatures(cellCount, permutedWordCount),
         cellIds(cellCount),
         cellPositions(cellCount)
     {
