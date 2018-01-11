@@ -93,7 +93,7 @@ void ExpressionMatrix::writeSimilarPairs(const string& name) const
 {
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, true);
     ofstream csvOut("SimilarPairs-" + name + ".csv");
-    csvOut << "Cell0,Cell1,Computed,Exact\n";
+    csvOut << "Cell0,Cell1,Computed,Exact AllGenes\n";
 
     for(CellId cellId0=0; cellId0<cellCount(); cellId0++) {
         for(size_t i=0; i<similarPairs.size(cellId0); i++) {

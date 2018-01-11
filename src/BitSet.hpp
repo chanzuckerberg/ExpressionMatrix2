@@ -90,6 +90,20 @@ public:
         word |= 1ULL << bitPositionInWord;
     }
 
+    // Clear the bit at a given position.
+    void clear(uint64_t bitPosition)
+    {
+        // Find the word containing the bit.
+        const uint64_t wordIndex = getWordIndex(bitPosition);
+        uint64_t& word = begin[wordIndex];
+
+        // Find the position of this bit in the word.
+        const uint64_t bitPositionInWord = getBitPosition(bitPosition);
+
+        // Clear the bit.
+        word &= (~(1ULL << bitPositionInWord));
+    }
+
     // Get a uint64_t containing bits at specified positions.
     // The bits are specified in a vector.
     // The last specified bit goes in the least significant position
@@ -158,7 +172,7 @@ public:
     {
         CZI_ASSERT(bitCount > 0);
         const uint64_t wordCount = ((bitCount - 1ULL) >> 6ULL) + 1ULL;
-        begin = new uint64_t(wordCount);
+        begin = new uint64_t[wordCount];
         end = begin + wordCount;
         clear();
     }

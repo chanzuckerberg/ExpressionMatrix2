@@ -849,6 +849,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("permutedBitCount") = 64,
            arg("seed") = 231
        )
+       .def("findSimilarPairs7",
+           &ExpressionMatrix::findSimilarPairs7,
+           "LSH-based computation of similar cell pairs "
+           "without looping over all possible pairs of cells."
+           "Prototype code. Use findSimilarPairs4 instead.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshName"),
+           arg("similarPairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2,
+           arg("lshSliceLengths"),
+           arg("maxCheck"),
+           arg("log2BucketCount")
+       )
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
            "Only intended to be used for testing. "

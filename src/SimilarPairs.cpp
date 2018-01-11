@@ -213,6 +213,21 @@ void SimilarPairs::addNoDuplicateCheck(CellId cellId, Pair pair)
 
 
 
+void SimilarPairs::addUnsymmetricNoCheck(CellId cellId0, CellId cellId1, double similarity)
+{
+    CellInfo& info0 = cellInfo[cellId0];
+    uint32_t& n0 = info0.usedCount;
+    CZI_ASSERT(n0 < k());
+
+    Pair* pairs = begin(cellId0);
+    Pair& pair = pairs[n0];
+    pair.first = cellId1;
+    pair.second = float(similarity);
+    ++n0;
+
+}
+
+
 // Version that uses a heap to avoid linear searches.
 void SimilarPairs::addNoDuplicateCheckUsingHeap(CellId cellId, Pair pair)
 {
@@ -276,7 +291,6 @@ void SimilarPairs::addNoDuplicateCheckUsingHeap(CellId cellId, Pair pair)
 }
 
 
-
 // Copy the pairs from the argument.
 void SimilarPairs::copy(const vector< vector<Pair> >& v)
 {
@@ -315,4 +329,5 @@ void SimilarPairs::sort()
     }
 
 }
+
 

@@ -511,6 +511,20 @@ public:
         int seed                        // The seed used to randomly generate the bit permutations.
         );
 
+    // Find similar cell pairs using LSH, without looping over all pairs.
+    // Like findSimilarPairs5, but using variable lsh slice length.
+    void findSimilarPairs7(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& lshName,          // The name of the Lsh object to be used.
+        const string& similarPairsName, // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        const vector<int>& lshSliceLengths, // The number of bits in each LSH signature slice, in decreasing order.
+        size_t maxCheck,                // Maximum number of cells to consider for each cell.
+        size_t log2BucketCount
+    );
+
     // Compute cell LSH signatures and store them.
     void computeLshSignatures(
         const string& geneSetName,      // The name of the gene set to be used.

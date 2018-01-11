@@ -76,6 +76,22 @@ public:
         return signatureWordCount;
     }
 
+    size_t computeMismatchCountThresholdFromSimilarityThreshold(
+        double similarityThreshold)
+    {
+        for(size_t mismatchCount=0; mismatchCount<similarityTable.size(); mismatchCount++) {
+            if(similarityTable[mismatchCount] < similarityThreshold) {
+                return mismatchCount-1;
+            }
+        }
+        CZI_ASSERT(0);
+    }
+
+    double getSimilarity(size_t mismatchCount) const
+    {
+        return similarityTable[mismatchCount];
+    }
+
 private:
 
     // The LSH vectors.
