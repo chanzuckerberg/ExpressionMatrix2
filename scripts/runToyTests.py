@@ -58,7 +58,6 @@ for platform in glob.glob('*'):
         if os.path.exists('data'):
             shutil.rmtree('data')
         returnCode = os.system(pythonCommand + ' run.py')
-        print(returnCode)
         if returnCode:
             raise Exception('Test %s failed on %s.' % (test, platform))
         os.chdir('..')
