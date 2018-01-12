@@ -52,21 +52,12 @@ ubuntu16Platforms = {
     ],
     }
 centos7Platforms = {
-    'Release-centos7-python3' :
-    [
-    '-DHDF5_INCLUDE_PATH=/usr/include',
-    '-DHDF5_LIBRARIES="hdf5_cpp hdf5"',
-    ],
     'Release-centos7-python2' :
     [
     '-DPYTHON_INCLUDE_PATH=/usr/include/python2.7', 
     '-DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages',
     '-DHDF5_INCLUDE_PATH=/usr/include',
     '-DHDF5_LIBRARIES="hdf5_cpp hdf5"',
-    ],
-    'Release-centos7-nohdf5-python3' :
-    [
-    '-DBUILD_WITH_HDF5=OFF',
     ],
     'Release-centos7-nohdf5-python2' :
     [
