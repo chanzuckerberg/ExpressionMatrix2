@@ -5,4 +5,6 @@
 doc/PythonApiReference/_build/doctrees/
 doc/doxygen/html/
 
-/Release-centos7-python2/
+/Debug-ubuntu16-python3/
+/Release-ubuntu16-python3/
+
