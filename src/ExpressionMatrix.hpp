@@ -398,6 +398,8 @@ public:
     // Find similar cell pairs by looping over all pairs,
     // taking into account only genes in the specified gene set.
     // This is O(N**2) slow because it loops over cell pairs.
+    // It typically takes of the order of 20 microseconds per pair.
+
     void findSimilarPairs0(
         const string& geneSetName,  // The name of the gene set to be used.
         const string& cellSetName,  // The name of the cell set to be used.
@@ -410,61 +412,11 @@ public:
 
     // Find similar cell pairs by looping over all pairs
     // and using an LSH approximation to compute the similarity between two cells.
-    // See the beginning of ExpressionMatrixLsh.cpp for more information.
-    // Like findSimilarPairs0, this is also O(N**2) slow. However
-    // the coefficient of the N**2 term is much lower (around 15 ns/pair for lshCount=1024),
-    // at a cost of additional O(N) work (typically 40 ms per cell for lshCount=1024).
-    // As a result, this can be much faster for large numbers of cells.
-    // The error of the approximation is controlled by lshCount.
-    // The maximum standard deviation of the computed similarity is (pi/2)/sqrt(lshCount),
-    // or about 0.05 for lshCount=1024.
-    // The standard deviation decreases as the similarity increases. It becomes
-    // zero when the similarity is 1. For similarity 0.5, the standard deviation is 82%
-    // of the standard deviation at similarity 0.
-    void findSimilarPairs1Old(
-        const string& cellSetName,      // The name of the cell set to be used.
-        const string& name,             // The name of the SimilarPairs object to be created.
-        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold,     // The minimum similarity for a pair to be stored.
-        size_t lshCount,                // The number of LSH vectors to use.
-        unsigned int seed               // The seed used to generate the LSH vectors.
-        );
-    void findSimilarPairs1(
-        const string& geneSetName,      // The name of the gene set to be used.
-        const string& cellSetName,      // The name of the cell set to be used.
-        const string& name,             // The name of the SimilarPairs object to be created.
-        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold,     // The minimum similarity for a pair to be stored.
-        size_t lshCount,                // The number of LSH vectors to use.
-        unsigned int seed               // The seed used to generate the LSH vectors.
-        );
-
-
-
-    // Find similar cell pairs by looping over all pairs
-    // and using an LSH approximation to compute the similarity between two cells.
-    // This is a newer replacement for findSimilarPairs1.
-    // It is written using class Lsh.
-    void findSimilarPairs3(
-        const string& geneSetName,      // The name of the gene set to be used.
-        const string& cellSetName,      // The name of the cell set to be used.
-        const string& name,             // The name of the SimilarPairs object to be created.
-        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
-        double similarityThreshold,     // The minimum similarity for a pair to be stored.
-        size_t lshCount,                // The number of LSH vectors to use.
-        unsigned int seed               // The seed used to generate the LSH vectors.
-        );
-
-    // Same as findSimilarPairs3, but without storing anything.
-    // Used for benchmarking.
-    void findSimilarPairs3Benchmark(
-        const string& geneSetName,      // The name of the gene set to be used.
-        const string& cellSetName,      // The name of the cell set to be used.
-        size_t lshCount,                // The number of LSH vectors to use.
-        unsigned int seed               // The seed used to generate the LSH vectors.
-        );
-
-    // Faster version of findSimilarPairs3.
+    // This is also O(N**2) slow because it loops over cell pairs,
+    // but much faster than findSimilarPairs0.
+    // It typically takes of the order of 15 nanoseconds per pair
+    // (for lshCount=1024, which guarantees rms error 0.05 or better
+    // on computed similarities).
     void findSimilarPairs4(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
@@ -475,7 +427,8 @@ public:
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
 
-    // Find similar cell pairs using LSH, without looping over all pairs.
+    // Find similar cell pairs using the full LSH algorithm, without looping over all pairs.
+    // This is prototype code.
     void findSimilarPairs5(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
@@ -511,8 +464,9 @@ public:
         int seed                        // The seed used to randomly generate the bit permutations.
         );
 
-    // Find similar cell pairs using LSH, without looping over all pairs.
+    // Find similar cell pairs using the full LSH algorithm, without looping over all pairs.
     // Like findSimilarPairs5, but using variable lsh slice length.
+    // This is prototype code.
     void findSimilarPairs7(
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
@@ -861,124 +815,14 @@ public:
 
 
 
-    // Data and functions used for Locality Sensitive Hashing (LSH).
+    // Functions used for Locality Sensitive Hashing (LSH).
     // LSH is used for efficiently finding pairs of similar cells.
     // See Chapter 3 of Leskovec, Rajaraman, Ullman, Mining of Massive Datasets,
     // Cambridge University Press, 2014, also freely downloadable here:
     // http://www.mmds.org/#ver21
     // and in particular sections 3.4 through 3.7.
 
-    // Generate random unit vectors in gene space.
-    // These are vectors of dimension equal to the number of genes,
-    // and with unit L2-norm (the sum of the square if the components is 1).
-    // These vectors are organized by band and row (see section 3.4.1 of the
-    // book referenced above). There are lshBandCount bands and lshRowCount
-    // rows per band, for a total lshBandCount*lshRowCount random vectors.
-    // Each of these vectors defines an hyperplane orthogonal to it.
-    // As described in section 3.7.2 of the book referenced above,
-    // each hyperplane provides a function of a locality-sensitive function.
-    static void generateLshVectors(
-        GeneId geneCount,
-        size_t lshBandCount,
-        size_t lshRowCount,
-        unsigned int seed,
-        vector<vector<vector<double> > >& lshVectors	// Indexed by [band][row][geneId]
-        );
 
-
-#if 0
-    // Orthogonalize the LSH vectors in groups of k.
-    // Ji et al. (2012) have shown that orthogonalization of
-    // groups of LSH vectors can result in significant reduction of the
-    // variance of the distance estimate provided by LSH.
-    // See J. Ji, J. Li, S. Yan, B. Zhang, and Q. Tian,
-    // Super-Bit Locality-Sensitive Hashing, In NIPS, pages 108–116, 2012.
-    // https://pdfs.semanticscholar.org/64d8/3ccbcb1d87bfafee57f0c2d49043ee3f565b.pdf
-    // This did not seem to give any benefit, so I turned it off to eliminate the
-    // dependency on Lapack.
-    void orthogonalizeLshVectors(
-        vector< vector< vector<double> > >& lshVectors,
-        size_t k
-    ) const;
-#endif
-
-
-    // Compute the scalar product of an LSH vector with the normalized expression counts of a cell.
-    double computeExpressionCountScalarProduct(CellId, const vector<double>& v) const;
-
-    // Approximate computation of the angle between the expression vectors of two cells
-    // using Locality Sensitive Hashing (LSH).
-    // The approximate similarity can be computed as the cosine of this angle.
-    // This recomputes every time the scalar product of the normalized cell expression vector
-    // with the LSH vectors.
-    double computeApproximateLshCellAngle(
-        const vector<vector<vector<double> > >& lshVectors,
-        CellId,
-        CellId) const;
-
-    // Approximate computation of the angle between the expression vectors of two cells
-    // using Locality Sensitive Hashing (LSH).
-    double computeApproximateLshCellAngle(
-        const BitSet& signature0,
-        const BitSet& signature1,
-        double bitCountInverse) const;
-
-    // Given LSH vectors, compute the LSH signature of all cells.
-    // The LSH signature of a cell is a bit vector with one bit for each of the LSH vectors.
-    // Each bit is 1 if the scalar product of the cell expression vector
-    // (normalized to zero mean and unit variance) with the
-    // the LSH vector is positive, and 0 otherwise.
-    void computeCellLshSignatures(
-        const vector<vector<vector<double> > >& lshVectors,
-        vector<BitSet>& signatures
-        ) const;
-
-    // Same as above, but only for a set of cells given in a vector of cell ids (cell set).
-    void computeCellLshSignatures(
-        const vector<vector<vector<double> > >& lshVectors,
-        const MemoryMapped::Vector<CellId>& cellSet,
-        vector<BitSet>& signatures
-        ) const;
-
-    // Same as above, but using a subset of gene and cells.
-    static void computeCellLshSignatures(
-        const ExpressionMatrixSubset&,
-        const vector<vector<vector<double> > >& lshVectors,
-        vector<BitSet>& signatures
-        );
-
-    // Write to a csv file statistics of the LSH signatures.
-    void writeLshSignatureStatistics(size_t bitCount, const vector<BitSet>& signatures) const;
-
-public:
-    // Approximate computation of the similarity between two cells using
-    // Locality Sensitive Hashing (LSH).
-    // Not to be used for code where performance is important,
-    // because it recomputes the LSH vector every time.
-    double computeApproximateLshCellSimilarity(
-        size_t lshBandCount,
-        size_t lshRowCount,
-        unsigned int seed,
-        CellId,
-        CellId) const;
-
-    // Write a csv file containing, for every pair of cells,
-    // the exact similarity and the similarity computed using LSH.
-    void writeLshSimilarityComparisonSlow(
-        size_t lshBandCount,
-        size_t lshRowCount,
-        unsigned int seed
-        ) const;
-    void writeLshSimilarityComparison(
-        size_t lshBandCount,
-        size_t lshRowCount,
-        unsigned int seed
-        ) const;
-
-
-
-
-public:
 
     // Create a new gene set consisting of genes whose name matches a given regular expression.
     bool createGeneSetFromRegex(const string& geneSetName, const string& regex);

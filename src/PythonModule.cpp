@@ -736,21 +736,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellId0"),
            arg("cellId1")
        )
-       .def("computeApproximateLshCellSimilarity",
-           &ExpressionMatrix::computeApproximateLshCellSimilarity,
-           "Only intended to be used for testing. "
-           "See the source code in the ExpressionMatrix2/src directory for more information. "
-       )
-       .def("writeLshSimilarityComparison",
-           &ExpressionMatrix::writeLshSimilarityComparison,
-           "Only intended to be used for testing. "
-           "See the source code in the ExpressionMatrix2/src directory for more information. "
-       )
-       .def("writeLshSimilarityComparisonSlow",
-           &ExpressionMatrix::writeLshSimilarityComparisonSlow,
-           "Only intended to be used for testing. "
-           "See the source code in the ExpressionMatrix2/src directory for more information. "
-       )
 
 
 
@@ -776,29 +761,6 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("similarPairsName"),
            arg("k") = 100,
            arg("similarityThreshold") = 0.2
-       )
-       .def("findSimilarPairs1",
-           &ExpressionMatrix::findSimilarPairs1,
-           "Obsolete. Use findSimilarPairs4 instead."
-       )
-       .def("findSimilarPairs3",
-           &ExpressionMatrix::findSimilarPairs3,
-           "Obsolete. Use findSimilarPairs4 instead.",
-           arg("geneSetName") = "AllGenes",
-           arg("cellSetName") = "AllCells",
-           arg("similarPairsName"),
-           arg("k") = 100,
-           arg("similarityThreshold") = 0.2,
-           arg("lshCount") = 1024,
-           arg("seed") = 231
-       )
-       .def("findSimilarPairs3Benchmark",
-           &ExpressionMatrix::findSimilarPairs3Benchmark,
-           "Like findSimilarPairs3, but does not store anything. Used for benchmarks.",
-           arg("geneSetName") = "AllGenes",
-           arg("cellSetName") = "AllCells",
-           arg("lshCount") = 1024,
-           arg("seed") = 231
        )
        .def("findSimilarPairs4",
            &ExpressionMatrix::findSimilarPairs4,
