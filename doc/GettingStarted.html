@@ -11,48 +11,23 @@
 <h1>Getting started</h1>
 
 <p>
-Use the following directions to quickly get started and run ExpressionMatrix2 on a toy dataset distributed as part of the repository.
+The <code>ExpressionMatrix2 </code> software runs "out of the box" and with minimal set up
+on the following platforms. 
+For detailed information to get started using the <code>ExpressionMatrix2 </code> software, 
+follow the link for platform you are interested in.
 
 <ul>
-
-<li>
-Use a Linux machine running Ubuntu 16.04 (the current long term support release of Ubuntu). Other distributions using similar versions of the Linux kernel, such as Linux Mint 18, will also work.
-
-<li>
-Make sure the following packages, all available from the standard Ubuntu repositories, are installed:
-<ul>
-<li>The Boost libraries (package libboost-all-dev).
-<li>Python3 (package python3-all-dev).
-<li>Graphviz (package graphviz). 
-<li>Libraries needed to read HDF5 files (packages libhdf5-10 and libhdf5-cpp-11).
+<li><a href=GettingStartedOnUbuntu.html>Linux Ubuntu</a>
+<li><a href=GettingStartedOnCentOS.html>Linux CentOS</a>
+<li><a href=GettingStartedOnWindows.html>Windows</a>
 </ul>
-If one or more of these packages are not installed, you can install them using command "apt install packageName", where packageName is as indicated above. This requires root access.
 
-<li>Select one of the <a href='https://github.com/chanzuckerberg/ExpressionMatrix2/releases'>available releases</a> and download the tar file for the release you selected. 
+<p>
+You can also run on other platforms, but that will require either 
+<a href=Building.html>building the code from source</a>
+or using a virtualization tool such as 
+<a href=https://en.wikipedia.org/wiki/VirtualBox>VirtualBox</a>
+or <a href=https://en.wikipedia.org/wiki/Docker_(software)>Docker</a>.
 
-<li>Create an empty directory. In the rest of these directions we assume that the directory you created is ~/ExpressionMatrix2. If you use a different name, make sure to use the correct name instead of the one used in the rest of these directions.
-
-<li> Move the tar file you downloaded from the directory where your browser stores downloads (usually ~/Downloads) to the ~/ExpressionMatrix2 directory your just created, then cd to ~/ExpressionMatrix2.
-
-<li>Extract the files contained in the tar file you downloaded using command "tar -xvf file.tar", replacing the name of tar file
-with the name of the file you downloaded. This will create a doc directory, a test directory, and, most important, a shared library ExpressionMatrix2.so which works as a Python package.
-
-<li>To make ExpressionMatrix2.so visible as a Python package, set environment variable PYTHONPATH to the name of the directory you are using for your tests, ~/ExpressionMatrix2. 
-
-<li>Now cd to test directory tests/ToyTest1. It contains csv files with a sample expression matrix and cell meta data for a small toy test with just 3 cells and 3 genes. It also contains two small python scripts. 
-
-
-
-<li>
-Run command "./runServer.py". This starts the ExpressionMatrix2 code in a mode where if behaves as an http server that can be used for interactive visualization and analysis. This command continues running until you interrupt it.
-
-<li>
-While the server is running, start a web browser on the same machine, and point it to the following URL: http://localhost:17100.
-
-<li>
-Interactively explore the functionality offered by the server. You will need a more real test case to perform any interesting visualization or analysis, but if you made it here you are ready to run the ExpressionMatrix2 software on real data. 
-
-</ul>
-    
 </body>
 </html>

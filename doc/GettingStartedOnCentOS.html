@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Getting started on CentOS 7</h1>
+
+<p>
+Use the following directions to quickly get started and run on CentOS 7 the <code>ExpressionMatrix2</code> 
+software on a toy dataset distributed as part of the repository.
+
+<ul>
+
+<li>
+Make sure the following package, available from the CentOS software manager 
+in its default settings, is installed:
+<ul>
+<li>Graphviz (package <code>graphviz</code>). 
+</ul>
+
+
+<li>Select one of the 
+<a href='https://github.com/chanzuckerberg/ExpressionMatrix2/releases'>releases available on GitHub</a> 
+and download the tar file for the release you selected. 
+The information in this page applies to release 0.4.0 or later, and
+the commands below assume that you selected release 0.4.0.
+In that case the tar file will be named 
+<a href=https://github.com/chanzuckerberg/ExpressionMatrix2/releases/download/0.4.0/ExpressionMatrix2-0.4.0.tar><code>ExpressionMatrix2-0.4.0.tar</code></a>.
+
+<li>Create an empty directory. 
+In the rest of these directions we assume that the directory you created 
+is <code>~/ExpressionMatrix2</code>. 
+If you use a different name, make sure to use the correct name 
+instead of the one used in the rest of these directions.
+
+<li> Move the tar file you downloaded from the directory 
+where your browser stores downloads (usually <code>~/Downloads</code>) 
+to the <code>~/ExpressionMatrix2</code> directory your just created, 
+then <code>cd</code> to <code>~/ExpressionMatrix2</code>.
+
+<li>Extract the files contained in the tar file you downloaded 
+using command <code>tar -xvf ExpressionMatrix2-0.4.0.tar</code>. 
+This will create a new directory 
+<code>~/ExpressionMatrix2/ExpressionMatrix2-0.4.0</code>
+containing a <code>doc</code> directory, a <code>test</code> directory, 
+and a <code>build</code> directory containing 
+<code>ExpressionMatrix2</code> shared libraries for various platforms.
+
+<li>To get started on CentOS 7 in the simplest mode of operation,
+you will use shared library 
+<code>~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/build/Release-centos7-nohdf5-python2/ExpressionMatrix2.so</code>.
+To make this shared library visible as a Python package, 
+set environment variable <code>PYTHONPATH</code> to
+<code>~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/build/Release-centos7-nohdf5-python2</code>. 
+In the <code>bash</code> shell, you can do this using command
+<code>export PYTHONPATH=~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/build/Release-centos7-nohdf5-python2</code>.
+
+<li>Now <code>cd</code> to test directory 
+<code>~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/tests/ToyTest1</code>. 
+It contains input files with a sample expression matrix 
+and cell meta data for a small toy test with just 3 cells and 3 genes. 
+It also contains two small python scripts. 
+
+<li>
+Run command <code>python run.py</code>. 
+
+<li>
+Run command <code>python runServer.py</code>. 
+This starts the <code>ExpressionMatrix2</code> code in a mode 
+where if behaves as an http server that can be used 
+for interactive visualization and analysis. This command continues running until you interrupt it.
+
+<li>
+While the server is running, start a web browser on the same machine, and point it to the following URL: 
+<a>http://localhost:17100</a>.
+
+<li>
+Interactively explore the functionality offered by the server. 
+You will need a more real test case to perform any interesting visualization or analysis, 
+but if you made it here you are ready to run the <code>ExpressionMatrix2</code> software on real data. 
+See <a href=index.html>here</a> for more information.
+
+</ul>
+
+<p>
+For convenience, the list below summarizes the commands to run.
+This assumes that you start in directory <code>~/ExpressionMatrix2</code>
+containing the tar file <code><code>ExpressionMatrix2-0.4.0.tar</code>:
+
+<p>
+<code>
+tar -xvf ExpressionMatrix2-0.4.0.tar
+<br>cd ExpressionMatrix2-0.4.0/tests/ToyTest1
+<br>export PYTHONPATH=~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/build/Release-centos7-nohdf5-python2
+<br>python run.py
+<br>python runServer.py
+</code>
+
+
+</code>
+
+
+</body>
+</html>

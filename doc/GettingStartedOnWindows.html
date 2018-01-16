@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel=stylesheet href=style.css />
+<link rel=icon href="https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico" />
+</head>
+
+<body>
+
+<h1>Getting started on Windows</h1>
+
+<p>
+Use the following directions to quickly get started and run on Windows 10 the <code>ExpressionMatrix2</code> 
+software on a toy dataset distributed as part of the repository. 
+These directions apply to release 0.4.0 or later, and assume that 
+you choose to use release 0.4.0. 
+
+
+<ul>
+
+<li>
+The directions below use the Windows 10 <code>Ubuntu</code> application
+available on machines running Windows 10 with Fall Creators Update.
+There is no easy way to run on previous versions of Windows
+without using a virtualization tool such as 
+<a href=https://en.wikipedia.org/wiki/VirtualBox>VirtualBox</a>
+or <a href=https://en.wikipedia.org/wiki/Docker_(software)>Docker</a>.
+
+<li>
+From the Microsoft Store, install the Windows 10 <code>Ubuntu</code> application.
+
+<li>
+Enable the Windows Subsystem for Linux, as follows:
+<ul>
+<li>
+In Windows 10 search, type <code>Settings</code> to bring up the 
+<code>Settings</code> dialog.
+<li>In <code>Find a setting</code>, type <code>Windows features</code>,
+then click on <code>Turn Windows features on or off</code>.
+<li>Scroll down to <code>Windows Subsystem for Linux</code>
+and check it to enable.
+</ul>
+
+<li>
+In Windows 10 search, type <code>Ubuntu</code>
+to start the <code>Ubuntu</code> application.
+This creates an environment that can run Ubuntu applications.
+
+<li>
+Use commands <code>sudo apt-get install graphviz</code> 
+and <code>sudo apt-get install python3</code>
+to install two necessary packages. 
+This requires administrator privilege.
+
+<li>
+Use command <code>mkdir ExpressionMatrix2</code>
+to create a new directory in your Ubuntu home directory, then 
+<code>cd ExpressionMatrix2</code> to go to that directory.
+
+<li>
+Use the following command to download the tar file for a
+release of the <code>ExpressionMatrix2</code>:
+<code>
+wget https://github.com/chanzuckerberg/ExpressionMatrix2/releases/download/0.4.0/ExpressionMatrix2-0.4.0.tar
+</code>
+
+<li>
+At this point you can continue with the <i>Getting Started</i>
+directions for Ubuntu (<i><b>for Python 3</b></i>), beginning with <i>Extract the files...</i>
+<a href=GettingStartedOnUbuntu.html#Extract>here</a>.
+
+</ul>
+
+<p>
+For convenience, the list below summarizes the commands to run.
+This assumes that the <code>python3</code> and <code>graphviz</code> package are already installed.
+
+<p>
+<code>
+mkdir ExpressionMatrix2
+<br>cd ExpressionMatrix2
+<br>wget https://github.com/chanzuckerberg/ExpressionMatrix2/releases/download/0.4.0/ExpressionMatrix2-0.4.0.tar
+<br>tar -xvf ExpressionMatrix2-0.4.0.tar
+<br>cd ExpressionMatrix2-0.4.0/tests/ToyTest1
+<br>export PYTHONPATH=~/ExpressionMatrix2/ExpressionMatrix2-0.4.0/build/Release-ubuntu16-nohdf5-python3
+<br>python3 run.py
+<br>python3 runServer.py
+</code>
+
+</body>
+</html>
