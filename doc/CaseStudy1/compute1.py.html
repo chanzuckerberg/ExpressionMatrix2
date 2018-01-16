@@ -66,7 +66,7 @@ for reference information on the <code>ExpressionMatrix</code> constructors.
 # Find pairs of similar cells (approximate computation using LSH, 
 # while still looping over all pairs). 
 print("Finding pairs of similar cells.")
-e.findSimilarPairs3(similarPairsName = 'Lsh')
+e.findSimilarPairs4(similarPairsName = 'Lsh')
 </pre></div>
 <p>
 This finds pairs of similar cells using default parameters.
@@ -74,12 +74,12 @@ The pairs of similar cells are stored in a named
 <i>SimilarPairs</i> object stored in the <code>data</code>
 directory. 
 We chose the name <code>Lsh</code> as a reminder that these similar pairs
-were found using <code>findSimilarPairs3</code>, which
+were found using <code>findSimilarPairs4</code>, which
 uses Locality Sensitive Hashing (LSH).
-See <a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.findSimilarPairs3>here</a> 
-for reference information on <code>findSimilarPairs3</code>.
+See <a href=../PythonApiReference/_build/html/index.html#ExpressionMatrix2.ExpressionMatrix.findSimilarPairs4>here</a> 
+for reference information on <code>findSimilarPairs4</code>.
 <p>
-We used default parameters for <code>findSimilarPairs3</code>, which means
+We used default parameters for <code>findSimilarPairs4</code>, which means
 that the computation is done for all cells, using similarities
 computed taking all genes into account, and storing only pairs 
 for which the similarity is at least 0.2.

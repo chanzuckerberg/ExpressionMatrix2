@@ -9,7 +9,7 @@ e = ExpressionMatrix(directoryName = 'data')
 # Find pairs of similar cell (approximate computation using LSH, 
 # while still looping over all pairs). 
 print("Finding pairs of similar cells.")
-e.findSimilarPairs3(geneSetName='HighInformationGenes', similarPairsName = 'LshHighInfo')
+e.findSimilarPairs4(geneSetName='HighInformationGenes', similarPairsName = 'LshHighInfo')
 
 
 
