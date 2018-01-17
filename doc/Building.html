@@ -11,110 +11,73 @@
 <h1>Building from source</h1>
 
 <p>
-A release version of the <code>ExpressionMatrix2</code>
-comes with pre-built version for the following platforms:
-
-<ul>
-<li>Ubuntu 16.0, for use with Python 3.5.
-<li>CentOs 7, for use with Python 2.7 (beginning with Release 0.2.0).
-</ul>
-
-<p>
-To run in one of the above platforms, you can use one of the <code>ExpressionMatrix2</code> releases 
-available from GitHub. However,you will need to build the code from source if you want to do one of the following:
-
-<ul>
-<li>
-Modify the code, for example to add functionality, fix bugs, or port it to other platforms.
-<li>
-Debug the code.
-<li>
-Run the code on an unsupported platform. 
-</ul>
-
-
-<h2>Build options</h2>
-<p>
-The <code>ExpressionMatrix2</code> can be built in a few different ways.
-Choose the one that is best for your needs:
-<ul>
-<li>Using the Eclipse software development IDE (Ubuntu 16, Python 3 only).
-<li>Using the Eclipse makefiles, outside of the Eclipse IDE (Ubuntu 16, Python 3 only).
-<li>Using CMake.
-</ul>
-
-
-
-<h2>Prerequisites</h2>
+You only need to build from source if you have determined
+that none of the pre-built configurations
+are appropriate for your needs, or if you want to modify,
+test, or debug the code. 
+If none of the above applies, see 
+<a href=GettingStarted.html>here</a>
+for detailed information on how to get started quickly.
 
 <p>
-A small number of prerequisites are necessary to build the 
-<code>ExpressionMatrix2</code>:
-<ul>
-<li>The Boost libraries, including development files.
-<li>A version of Python, including development files.
-<li>pybind11, in a version consistent with the Python version to be used.
-<li>HDF5 libraries (but HDF5 functionality can be disabled when building using <code>CMake</code>).
-</ul>
-This list does not include prerequisites, such as the <code>gcc</code> compiler,
-which are available on most Linux distributions.
+A release version of the <code>ExpressionMatrix2</code> software
+comes with pre-built version for the following configurations
+for Ubuntu 16 and CentOs 7.
 
-
-
-<p>
-The table below describes details of the prerequisites for 
-ubuntu16 (with Python3) and CentOs7 (with Python 2). See <a href=GettingStarted.html>here</a>
-for information on the prerequisites necessary to run.
-
-<table>
-<tr><th class=left>Operating system<td class=centered>Ubuntu 16.04<td class=centered>CentOs 7
-<tr><th class=left>Python version<td class=centered>3.5<td class=centered>2.7
-<tr><th class=left>Name of Eclipse configurations<td class=centered>Release-ubuntu16-python3,<br>Debug-ubuntu16-python3<td class=centered>
-<tr><th class=left>Boost libraries version<td class=centered>1.58.0<td class=centered>1.53.0
-<tr><th class=left>Boost libraries package<br>required to build<br>(and sufficient to run)<td class=centered>libboost-all-dev<td class=centered>boost-devel-1.53.0
-<tr><th class=left>Boost libraries package<br>required to run<td class=centered>libboost-all-dev<td class=centered>boost-1.53.0
-<tr><th class=left>Python package<br>required to build<br>(and sufficient to run)<td class=centered>python3-all-dev<td class=centered>python-devel-2.7.5
-<tr><th class=left>Python package<br>required to run<td class=centered>python3<td class=centered>python-devel-2.7.5
-<tr><th class=left>HDF5 packages<br>required to build<br>(and sufficient to run)<td class=centered>libhdf5-dev, libhdf5-cpp-11<td class=centered>hdf5-devel-1.8.12-8
-<tr><th class=left>HDF5 packages<br>required to run<td class=centered>libhdf5-10, libhdf5-cpp-11<td class=centered>hdf5
-
-<tr><th class=left>pybind11
-<td>Install using <code>"pip3 install pybind11"</code>. If <code>pip3</code>
-command is not available, install ubuntu package <code>python3-pip</code>.
-<td>Install using <code>"pip install pybind11"</code>. If <code>pip</code>
-command is not available, install CentOs 7 package <code>python-pip</code>.
+<table style="margin-left:auto;margin-right:auto">
+<tr><th>Platform<th>Configuration<br>name<th>Python version<th>HDF5 support
+<tr><td>Ubuntu 16<td>Release-ubuntu16-python2<td class=centered>2<td class=centered>Yes
+<tr><td>Ubuntu 16<td>Release-ubuntu16-python3<td class=centered>3<td class=centered>Yes
+<tr><td>Ubuntu 16<td>Release-ubuntu16-nohdf5-python2<td class=centered>2<td class=centered>No
+<tr><td>Ubuntu 16<td>Release-ubuntu16-nohdf5-python3<td class=centered>3<td class=centered>No
+<tr><td>CentOS 7<td>Release-centos7-python2<td class=centered>2<td class=centered>Yes
+<tr><td>CentOS 7<td>Release-centos7-nohdf5-python2<td class=centered>2<td class=centered>No
 </table>
 
-
-<br><br><h2>Building in the Eclipse IDE</h2>
 <p>
-This requires a working version of the <code>Eclipse</code> IDE to be installed.
-Eclipse project files <code>.project</code> and <code>.cproject</code> are provided in the top directory of the repository. 
-After opening the project files in Eclipse, you can use Eclipse commands to build the Eclipse configuration 
-listed in the table above that corresponds to your platform
-(<code>Release-ubuntu16-python3</code> or <code>Release-centos7-python2</code>).
-A successful build will create shared library <code>ExpressionMatrix.so</code> 
-that can be directly imported by Python code.
-You can also use <code>Eclipse</code> to create a new build configuration
-appropriate for a different platform.
-
-
-
-<br><br><h2>Building using the Eclipse makefiles</h2>
-<p>
-The makefiles created by the Eclipse IDE are included in the GitHub repository,
-so this does not require a working version of the <code>Eclipse</code> IDE to be installed.
-You can simply use the <code>make</code> command from the 
-<code>Release-ubuntu16-python3</code> or <code>Release-centos7-python2</code>
-directory.
-A successful build will create shared library <code>ExpressionMatrix.so</code> 
-that can be directly imported by Python code.
+You can choose the version that is appropriate for you.
+HDF5 support is only necessary if you intend to use functions 
+<a href=PythonApiReference/_build/html/index.html?highlight=hdf5#ExpressionMatrix2.ExpressionMatrix.addCellsFromHdf5>
+ExpressionMatrix.addCellsFromHdf5</a>
+or
+<a href=PythonApiReference/_build/html/index.html?highlight=hdf5#ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub2>
+ExpressionMatrix.addCellsFromBioHub2</a>.
+If you don't need to use these functions, choose one of the versions without HDF5 
+support as they have fewer dependencies on installed packages.
 
 <p>
-If your build machine has multiple processors and sufficient memory,
-you can use the <code>-j</code> option of the <code>make</code> command
-to speed up the build. See the <code>man</code> page for 
-the <code>make</code> command for more information.
+The <code>Release-ubuntu16-nohdf5-python3</code> version can also be used on
+Windows 10 via Windows Subsystem for Linux and the Windows Ubuntu application.
+See <a href=GettingStartedOnWindows.html>here</a> for more information.
+
+<p>
+The <code>Release-ubuntu16-nohdf5-python3</code> version,
+because of its minimal set of dependencies,
+may also run on Linux platforms other than Ubuntu 16
+but running a similar Linux kernel.
+
+<p>
+To build the <code>ExpressionMatrix2</code> software from source,
+you can use Eclipse or CMake.
+
+
+<h2>Building from source using Eclipse</h2>
+<p>
+The repository includes at its top level Eclipse files <code>.project</code>
+and <code>.cproject</code> which can be used to load 
+the <code>ExpressionMatrix2</code> into Eclipse and build it.
+The build settings used in Eclipse are the ones for the 
+<code>Release-ubuntu16-python3</code> configuration.
+If you need to build with different settings,
+you can modify the settings in Eclipse, or use cmake as described below.
+A debug version of the same configuration is also provided in Eclipse,
+and can be used for debugging.
+
+
+
+
+
+
 
 
 
@@ -129,13 +92,19 @@ To build in this way:
 
 <ul>
 <li>
+Make sure the prerequisite packages necessary for the
+configuration you intend to build are installed.
+See <a href=#Prerequisites>here</a> for more information.
+<li>
 Create a new empty directory to contain the build and <code>cd</code> to it.
 This directory can be anywhere - it does not have to
 be in the <code>ExpressionMatrix2</code> source tree.
 <li>
-Run command "<code>cmake .../ExpressionMatrix2/src</code>",
+Run command <code>cmake .../ExpressionMatrix2/src</code>,
 making sure to enter the correct local path for the <code>ExpressionMatrix2/src</code>
 directory. 
+Also add the CMake <code>-D</code> options appropriate
+for the configuration you want to build, as described below.
 This will create a <code>Makefile</code>.
 <li>
 Run command <code>make</code>. 
@@ -150,53 +119,142 @@ the <code>make</code> command for more information.
 
 
 <p>
-You can use <code>cmake</code> option <code>-D</code> to override
+You can use CMake option <code>-D</code> to override
 default values for one or more of the following 
-configuration variables, listed here with their
-default values suitable for ubuntu16 and Python 3:
-<ul>
-<li><code>PYTHON_INCLUDE_PATH</code>, default value <code>/usr/include/python3.5m</code>:
-The include path for the Python version you want your shared library to work with.
-<li><code>PYBIND11_INCLUDE_PATH</code>, default value <code>/usr/local/include/python3.5</code>:
-The directory where <code>pybind11</code> include files are installed.
-<li><code>HDF5_INCLUDE_PATH</code>, default value <code>/usr/include/hdf5/serial</code>:
-The directory where Hdf5 include files are located.
-<li><code>HDF5_LIBRARIES</code>, default value <code>hdf5_cpp hdf5_serial</code>:
-The names of the HDF5 libraries to link with.
-<li><code>BUILD_WITH_HDF5</code>, default value <code>ON</code>:
-if set to <code>OFF</code>, disables HDF5 functionality
+configuration variables:
+<table>
+<tr><th>Variable<th>Default<br>value<th>Description
+<tr><td><code>PYTHON_INCLUDE_PATH</code><td><code>/usr/include/python3.5m</code>
+<td>The include path for the Python version you want your shared library to work with.
+<tr><td><code>PYBIND11_INCLUDE_PATH</code><td><code>/usr/local/include/python3.5</code>
+<td>The directory where <code>pybind11</code> include files are installed.
+This must be a version of <code>pybind11</code> consistent with the
+Python version you want to build for.
+<tr><td><code>BUILD_WITH_HDF5</code><td><code>ON</code>
+<td>If set to <code>OFF</code>, disables HDF5 functionality
+(functions 
+<a href=PythonApiReference/_build/html/index.html?highlight=hdf5#ExpressionMatrix2.ExpressionMatrix.addCellsFromHdf5>
+ExpressionMatrix.addCellsFromHdf5</a>
+or
+<a href=PythonApiReference/_build/html/index.html?highlight=hdf5#ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub2>
+ExpressionMatrix.addCellsFromBioHub2</a>)
 and eliminates the dependency on HDF5 include files and libraries.
-</ul>
+<tr><td><code>HDF5_INCLUDE_PATH</code><td><code>/usr/include/hdf5/serial</code>
+<td>The directory where HDF5 include files are located.
+Only used if <code>BUILD_WITH_HDF5</code> is <code>ON</code>.
+<tr><td><code>HDF5_LIBRARIES</code><td><code>hdf5_cpp hdf5_serial</code>
+<td>The names of the HDF5 libraries to link with.
+Only used if <code>BUILD_WITH_HDF5</code> is <code>ON</code>.
+</table>
+
 
 
 <p>
-Here are examples of <code>-D</code> options:
-<ul>
-<li>Ubuntu 16, Python 3: 
-    <ul>
-    <li>No option needed.
-    </ul>
-<li>Ubuntu 16, Python 2: 
-   <ul>
-   <li><code>-DPYTHON_INCLUDE_PATH=/usr/include/python2.7</code> 
-   <li><code>-DPYBIND11_INCLUDE_PATH=/usr/local/include/python2.7</code>
-   </ul>
-<li>Centos 7, Python 2: 
-   <ul>
-   <li><code>-DPYTHON_INCLUDE_PATH=/usr/include/python2.7</code> 
-   <li><code>-DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages</code>
-   <li><code>-DHDF5_INCLUDE_PATH=/usr/include</code>
-   <li><code>-DHDF5_LIBRARIES="hdf5_cpp hdf5"</code>
-   </ul>
-</ul>
+For convenience, the table below lists the CMake <code>-D</code>
+options used for each of the pre-built configurations.
+<table style="margin-left:auto;margin-right:auto">
+
+<tr><td>Release-ubuntu16-python2
+<td><code>
+-DPYTHON_INCLUDE_PATH=/usr/include/python2.7 
+-DPYBIND11_INCLUDE_PATH=/usr/local/include/python2.7
+</code>
+
+<tr><td>Release-ubuntu16-python3
+<td>(None)
+
+<tr><td>Release-ubuntu16-nohdf5-python2
+<td><code>
+-DPYTHON_INCLUDE_PATH=/usr/include/python2.7 
+-DPYBIND11_INCLUDE_PATH=/usr/local/include/python2.7
+-DBUILD_WITH_HDF5=OFF
+</code>
+
+<tr><td>Release-ubuntu16-nohdf5-python3
+<td><code>
+-DBUILD_WITH_HDF5=OFF
+</code>
+
+<tr><td>Release-centos7-python2
+<td><code>
+-DPYTHON_INCLUDE_PATH=/usr/include/python2.7 
+-DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages
+-DHDF5_INCLUDE_PATH=/usr/include
+-DHDF5_LIBRARIES="hdf5_cpp hdf5"
+</code>
+
+<tr><td>Release-centos7-nohdf5-python2
+<td><code>
+-DPYTHON_INCLUDE_PATH=/usr/include/python2.7 
+-DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages
+-DBUILD_WITH_HDF5=OFF
+</code>
+
+</table>
+
+
   
+<h2 id=Prerequisites>Prerequisites</h2>
+
+<h3 id=PrerequisitesForRunning>Prerequisites for running</h3>
+<p>
+Disregarding standard system libraries that are available on
+all Linux systems,
+the only prerequisite for running one of the configurations
+with HDF5 functionality turned off is Graphviz.
+<p>
+To run one of the configurations
+with HDF5 functionality you also need HDF5 libraries:
+<ul>
+<li>For Ubuntu 16, you need packages 
+<code>libhdf5-10</code> (or <code>libhdf5-10-dev</code>) 
+and <code>libhdf5-cpp-11</code>.
+<li>For CentOS 7, you need package  
+<code>hdf5</code>.
+</ul>
 
 
- <h2>Generating documentation for the C++ code</h2>
+
+<h3>Prerequisites for building from source</h3>
+
+<p>
+A small number of prerequisites are necessary to build the 
+<code>ExpressionMatrix2</code> code:
+<ul>
+<li>The Boost libraries, including development files.
+<li>A version of Python, including development files.
+<li>pybind11, in a version consistent with the Python version to be used.
+<li>HDF5 libraries, unless you are building with <code>-DBUILD_WITH_HDF5=OFF</code>.
+Package names are 
+</ul>
+This list does not include prerequisites, such as the <code>gcc</code> compiler,
+which are available on most Linux distributions.
+
+For convenience, package names for the above for Ubuntu 16 and CentOS 7
+are listed here:
+
+<p><table style="margin-left:auto;margin-right:auto">
+<tr><th>Package<th>Ubuntu 16<th>CentOS 7
+<tr><td>Boost libraries<td>libboost-all-dev<td>boost-devel
+<tr><td>Python 2<td>python-all-dev<td>python-devel
+<tr><td>Python 3<td>python3-all-dev<td>
+<tr><td>Pybind11<td>pybind11<td>pybind11
+<tr><td>HDF5 libraries<td>libhdf5-dev, libhdf5-cpp-11<td>hdf5-devel
+</table>
+<p>The <code>pybind11</code> package is installed using (as root)
+<code>pip install pybind11</code> for Python 2
+and <code>pip3 install pybind11</code> for Python 3.
+
+
+
+<h2>Generating documentation for the C++ code</h2>
+<p>
+Reference documentation for the Python API is
+<a href="PythonApiReference/_build/html/index.html">here</a>.
 <p>
 To generate Doxygen documentation for the C++ code,
 make sure you have Doxygen installed
-(ubuntu package name is <code>doxygen</code>),
+(Ubuntu package name is <code>doxygen</code>),
 cd to <code>ExpressionMatrix2/doc/doxygen</code>, then issue command 
 <code>doxygen</code> without arguments.
 
@@ -209,7 +267,7 @@ For readability, the C++ code does not contain
 any Doxygen directives, so the generated documentation
 will only contain what Doxygen can do with <code>EXTRACT_ALL=YES</code>
 and without relying on documentation directives in the code.
-Even with this limitation, this can be very useful to explore the C++ code.
+Even with this limitation, this can be useful to explore the C++ code.
 
 </body>
 </html>
