@@ -280,7 +280,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::addCellsFromHdf5,
            "Adds cells to the system, reading expression counts "
            "from a file in HDF5 format as created by the 10X Genomics pipeline. "
-           "See `here <../../../PythonApi.html#addCellsFromHdf5>`__ for more information. ",
+           "See `here <../../../PythonApi.html#addCellsFromHdf5>`__ for more information. "
+           "This functon is only available in a build that includes HDF5 support.",
            arg("fileName"),
            arg("cellNamePrefix"),
            arg("cellMetaData"),
@@ -302,7 +303,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::addCellsFromBioHub2,
            "Add to the system cells created by the BioHub pipeline "
            "(September 2017 version, for 10X data). "
-           "See `here <../../../PythonApi.html#addCellsFromBioHub2>`__ for more information. ",
+           "See `here <../../../PythonApi.html#addCellsFromBioHub2>`__ for more information. "
+           "This functon is only available in a build that includes HDF5 support.",
            arg("plateFileName"),
            arg("totalExpressionCountThreshold")
        )
