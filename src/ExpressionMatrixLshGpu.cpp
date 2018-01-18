@@ -85,12 +85,14 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
 
 
     // Loop over all cells.
-    lsh.setupGpuKernel0();
+    lsh.setupGpuKernel0(mismatchCounts);
     const auto t3 = std::chrono::steady_clock::now();
     for(CellId cellId0=0; cellId0!=cellCount; cellId0++) {
 
         // Use gpuKernel0 to compute the number of mismatches with all cells.
-        lsh.gpuKernel0(cellId0, mismatchCounts);
+        const auto tA = std::chrono::steady_clock::now();
+        lsh.gpuKernel0(cellId0);
+        const auto tB = std::chrono::steady_clock::now();
 
         // Candidate neighbors are the ones where the number of mismatches is small.
         neighbors.clear();
@@ -103,6 +105,7 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
                 neighbors.push_back(make_pair(mismatchCount, cellId1));
             }
         }
+        const auto tC = std::chrono::steady_clock::now();
 
         // Only keep the k best neighbors, then sort them.
         // This is faster than sorting, then keeping the k best,
@@ -110,6 +113,7 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
         // Instead, keepBest uses std::nth_element, which does a partial sorting.
         keepBest(neighbors, k, std::less< pair<uint16_t, CellId> >());
         sort(neighbors.begin(), neighbors.end());
+        const auto tD = std::chrono::steady_clock::now();
 
         // Store.
         for(const auto& neighbor: neighbors) {
@@ -118,6 +122,11 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
             const double similarity = lsh.getSimilarity(mismatchCount);
             similarPairs.addUnsymmetricNoCheck(cellId0, cellId1, similarity);
         }
+        const auto tE = std::chrono::steady_clock::now();
+        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tB - tA)).count() << " ";
+        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tC - tB)).count() << " ";
+        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tD - tC)).count() << " ";
+        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tE - tD)).count() << "\n";
     }
     const auto t4 = std::chrono::steady_clock::now();
     const double t34 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3)).count());

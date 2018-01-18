@@ -164,8 +164,9 @@ private:
 
         bool isInitialized = false;
 
-        // Buffer used by kernel0.
-        std::shared_ptr<cl::Buffer> kernel0MismatchBuffer;
+        std::shared_ptr<cl::Buffer> mismatchBuffer;
+        size_t mismatchBufferSize;
+        uint16_t* mismatchBufferHostPointer;
 
     private:
         void choosePlatform();
@@ -185,10 +186,8 @@ public:
     // This is a simple but working kernel.
     // It has high overhead and low performance
     // because of the small amount of work done by each instance.
-    void setupGpuKernel0();
-    void gpuKernel0(
-        CellId cellId0,
-        vector<uint16_t>& mismatchCounts);
+    void setupGpuKernel0(vector<uint16_t>& mismatchCounts);
+    void gpuKernel0(CellId cellId0);
     void cleanupGpuKernel0();
 #endif
 

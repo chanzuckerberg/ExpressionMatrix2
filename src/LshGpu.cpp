@@ -158,34 +158,38 @@ void Lsh::loadSignaturesToGpu()
 // This is a simple but working kernel.
 // It has high overhead and low performance
 // because of the small amount of work done by each instance.
-void Lsh::setupGpuKernel0()
+void Lsh::setupGpuKernel0(vector<uint16_t>& mismatchCounts)
 {
     CZI_ASSERT(gpu.isInitialized);
-    gpu.kernel0MismatchBuffer = std::make_shared<cl::Buffer>(
-        gpu.context, CL_MEM_READ_WRITE, cellCount() * sizeof(uint16_t));
+
+    // Set up the buffer to hold the computed number of mismatches
+    // for each cell.
+    mismatchCounts.resize(cellCount());
+    gpu.mismatchBufferSize = cellCount() * sizeof(uint16_t);
+    gpu.mismatchBufferHostPointer = mismatchCounts.data();
+    gpu.mismatchBuffer = std::make_shared<cl::Buffer>(
+        gpu.context, CL_MEM_READ_WRITE, gpu.mismatchBufferSize);
+
+    // Set the arguments that don't change.
+    gpu.kernel0.setArg(0, cellCount());
+    gpu.kernel0.setArg(1, wordCount());
+    gpu.kernel0.setArg(2, gpu.signatureBuffer);
+    gpu.kernel0.setArg(4, *gpu.mismatchBuffer);
 
 }
-void Lsh::gpuKernel0(
-    CellId cellId0,
-    vector<uint16_t>& mismatchCounts)
+void Lsh::gpuKernel0(CellId cellId0)
 {
 
     try {
-        // Resize the output vector.
-        mismatchCounts.resize(cellCount());
 
         // Run the kernel.
-        gpu.kernel0.setArg(0, cellCount());
-        gpu.kernel0.setArg(1, wordCount());
-        gpu.kernel0.setArg(2, gpu.signatureBuffer);
         gpu.kernel0.setArg(3, cellId0);
-        gpu.kernel0.setArg(4, *gpu.kernel0MismatchBuffer);
         gpu.queue.enqueueNDRangeKernel(gpu.kernel0,
             cl::NullRange, cl::NDRange(cellCount()), cl::NullRange);
 
         // Get back the results.
-        gpu.queue.enqueueReadBuffer(*(gpu.kernel0MismatchBuffer), CL_TRUE, 0,
-            cellCount() * sizeof(uint16_t), mismatchCounts.data());
+        gpu.queue.enqueueReadBuffer(*(gpu.mismatchBuffer), CL_TRUE, 0,
+            gpu.mismatchBufferSize, gpu.mismatchBufferHostPointer);
         gpu.queue.finish();
 
     } catch(cl::Error e) {
@@ -197,7 +201,7 @@ void Lsh::gpuKernel0(
 }
 void Lsh::cleanupGpuKernel0()
 {
-    gpu.kernel0MismatchBuffer.reset();
+    gpu.mismatchBuffer.reset();
 }
 
 
