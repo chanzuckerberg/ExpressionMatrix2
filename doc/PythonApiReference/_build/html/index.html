@@ -339,6 +339,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs4Gpu">
+<code class="descname">findSimilarPairs4Gpu</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>lshName: str</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshCount: int=1024</em>, <em>seed: int=231</em>, <em>kernel: int=1</em>, <em>blockSize: int=16</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Only available in a build with GPU functionality enabled.Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) with lshCount LSH hashes to speed up the computation of the similar pairs. Like findSimilarPairs0, this still loops over all possible cell pairs with both cells in cellSetName and therefore the computational cost still grows asymptotically with the square of the number of cells. However the computation is orders of magnitudes faster. The computation is approximate, and the error decreases as lshCount increases. For the suggested value lshCount=1024, the standard deviation of the pair similarity computed in this way is 0.05 or less.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs5">
 <code class="descname">findSimilarPairs5</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>lshName: str</em>, <em>similarPairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em>, <em>lshSliceLength: int</em>, <em>bucketOverflow: int=1000</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>LSH-based computation of similar cell pairs without looping over all possible pairs of cells.Prototype code. Use findSimilarPairs4 instead.</p>

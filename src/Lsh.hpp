@@ -84,7 +84,7 @@ public:
     }
 
     size_t computeMismatchCountThresholdFromSimilarityThreshold(
-        double similarityThreshold)
+        double similarityThreshold) const
     {
         for(size_t mismatchCount=0; mismatchCount<similarityTable.size(); mismatchCount++) {
             if(similarityTable[mismatchCount] < similarityThreshold) {
@@ -155,6 +155,7 @@ private:
         cl::Kernel loadSignaturesKernel;
         cl::Buffer signatureBuffer;
         cl::Kernel kernel0;
+        cl::Kernel kernel1;
 
         // Initialize the OpenCL platform, device, context, and queue.
         void initialize();
@@ -181,7 +182,7 @@ public:
     // Load the LSH signatures to the GPU.
     void loadSignaturesToGpu();
 
-    // Compute the number of mismatches between the signature
+    // Kernel 0: compute the number of mismatches between the signature
     // of cell cellId0 and the signatures of all other cells.
     // This is a simple but working kernel.
     // It has high overhead and low performance
@@ -189,6 +190,20 @@ public:
     void setupGpuKernel0(vector<uint16_t>& mismatchCounts);
     void gpuKernel0(CellId cellId0);
     void cleanupGpuKernel0();
+
+    // Kernel 1: compute the number of mismatches between the signature
+    // of cells in range [cellId0Begin, cellId0End]
+    // and the signatures of all other cells.
+    // This is parallelized over cellId1.
+    // This has lower overhead than kernel 0
+    // because each kernel instance does more work
+    // (processes n0 values of cellId0 instead of just one).
+    // For efficient memory access, the blockSize mismatch counts
+    // for each cellId1 are stored contiguously, with stride blockSize
+    // betwene successive values of cellId1.
+    void setupGpuKernel1(vector<uint16_t>& mismatchCounts, CellId blockSize);
+    void gpuKernel1(CellId cellId0Begin, CellId cellId0End);
+    void cleanupGpuKernel1();
 #endif
 
 

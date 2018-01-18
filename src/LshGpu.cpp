@@ -36,8 +36,10 @@ void Lsh::Gpu::initialize()
         isInitialized = true;
 
     } catch(cl::Error e) {
-        cout << "OpenCL error " << e.err() <<  " from " << e.what();
-        cout << " during GPU initialization." << endl;
+        const string message =
+            "OpenCL error " + std::to_string(e.err()) +
+            " from " + e.what() + " during GPU initialization.";
+        throw runtime_error(message);
     }
 }
 
@@ -130,6 +132,7 @@ void Lsh::Gpu::buildProgram()
 
     // Store our kernels.
     kernel0 = cl::Kernel(program, "kernel0");
+    kernel1 = cl::Kernel(program, "kernel1");
 
 }
 
@@ -204,6 +207,65 @@ void Lsh::cleanupGpuKernel0()
     gpu.mismatchBuffer.reset();
 }
 
+
+
+// Kernel 1: compute the number of mismatches between the signature
+// of cells in range [cellId0Begin, cellId0End]
+// and the signatures of all other cells.
+// This is parallelized over cellId1.
+// This has lower overhead than kernel 0
+// because each kernel instance does more work
+// (processes n0 values of cellId0 instead of just one).
+// For efficient memory access, the blockSize mismatch counts
+// for each cellId1 are stored contiguously, with stride blockSize
+// betwene successive values of cellId1.
+void Lsh::setupGpuKernel1(vector<uint16_t>& mismatchCounts, CellId blockSize)
+{
+    CZI_ASSERT(gpu.isInitialized);
+
+    // Set up the buffer to hold the computed number of mismatches
+    // for each cell.
+    mismatchCounts.resize(cellCount() * blockSize);
+    gpu.mismatchBufferSize = cellCount() * blockSize * sizeof(uint16_t);
+    gpu.mismatchBufferHostPointer = mismatchCounts.data();
+    gpu.mismatchBuffer = std::make_shared<cl::Buffer>(
+        gpu.context, CL_MEM_READ_WRITE, gpu.mismatchBufferSize);
+
+    // Set the arguments that don't change.
+    gpu.kernel1.setArg(0, cellCount());
+    gpu.kernel1.setArg(1, wordCount());
+    gpu.kernel1.setArg(2, gpu.signatureBuffer);
+    gpu.kernel1.setArg(5, blockSize);
+    gpu.kernel1.setArg(6, *gpu.mismatchBuffer);
+
+}
+void Lsh::gpuKernel1(CellId cellId0Begin, CellId cellId0End)
+{
+
+    try {
+
+        // Run the kernel.
+        gpu.kernel1.setArg(3, cellId0Begin);
+        gpu.kernel1.setArg(4, cellId0End);
+        gpu.queue.enqueueNDRangeKernel(gpu.kernel1,
+            cl::NullRange, cl::NDRange(cellCount()), cl::NullRange);
+
+        // Get back the results.
+        gpu.queue.enqueueReadBuffer(*(gpu.mismatchBuffer), CL_TRUE, 0,
+            gpu.mismatchBufferSize, gpu.mismatchBufferHostPointer);
+        gpu.queue.finish();
+
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " running GPU kernel 1.";
+        throw runtime_error(message);
+    }
+
+}
+void Lsh::cleanupGpuKernel1()
+{
+    gpu.mismatchBuffer.reset();
+}
 
 
 #endif

@@ -20,7 +20,9 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
     size_t k,                       // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold,     // The minimum similarity for a pair to be stored.
     size_t lshCount,                // The number of LSH vectors to use.
-    unsigned int seed               // The seed used to generate the LSH vectors.
+    unsigned int seed,              // The seed used to generate the LSH vectors.
+    unsigned int kernel,            // The GPU kernel (algorithm) to use.
+    CellId blockSize                // The number of cells processed by each kernel instance.
     )
 {
     cout << timestamp << "ExpressionMatrix::findSimilarPairs4Gpu begins." << endl;
@@ -74,6 +76,39 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
     // Create the SimilarPairs object that will store the results.
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
 
+    // Call the appropriate lower level function.
+    switch(kernel) {
+    case 0:
+        findSimilarPairs4GpuKernel0(k, similarityThreshold, lsh, similarPairs);
+        break;
+    case 1:
+        findSimilarPairs4GpuKernel1(k, similarityThreshold, lsh, similarPairs, blockSize);
+        break;
+    default:
+        throw runtime_error(
+            "Invalid kernel " + std::to_string(kernel) +
+            " specified in findSimilarPairs4Gpu call. ");
+    }
+
+    const auto t3 = std::chrono::steady_clock::now();
+    const double t03 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t0)).count());
+    cout << timestamp << "ExpressionMatrix::findSimilarPairs4Gpu ends. Took " << t03 << " s." << endl;
+}
+
+
+// Kernel 0: compute the number of mismatches between the signature
+// of cell cellId0 and the signatures of all other cells.
+// This is a simple but working kernel.
+// It has high overhead and low performance
+// because of the small amount of work done by each instance.
+void ExpressionMatrix::findSimilarPairs4GpuKernel0(
+    size_t k,
+    double similarityThreshold,
+    Lsh& lsh,
+    SimilarPairs& similarPairs)
+{
+    const CellId cellCount = lsh.cellCount();
+
     // Vectors reused for each cell in the loop over cells below.
     vector<uint16_t> mismatchCounts(cellCount);
     vector< pair<uint16_t, CellId> > neighbors; // pair(mismatchCount, cellId1)
@@ -83,16 +118,13 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
         lsh.computeMismatchCountThresholdFromSimilarityThreshold(similarityThreshold);
 
 
-
     // Loop over all cells.
     lsh.setupGpuKernel0(mismatchCounts);
-    const auto t3 = std::chrono::steady_clock::now();
+    const auto t0 = std::chrono::steady_clock::now();
     for(CellId cellId0=0; cellId0!=cellCount; cellId0++) {
 
         // Use gpuKernel0 to compute the number of mismatches with all cells.
-        const auto tA = std::chrono::steady_clock::now();
         lsh.gpuKernel0(cellId0);
-        const auto tB = std::chrono::steady_clock::now();
 
         // Candidate neighbors are the ones where the number of mismatches is small.
         neighbors.clear();
@@ -105,7 +137,6 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
                 neighbors.push_back(make_pair(mismatchCount, cellId1));
             }
         }
-        const auto tC = std::chrono::steady_clock::now();
 
         // Only keep the k best neighbors, then sort them.
         // This is faster than sorting, then keeping the k best,
@@ -113,7 +144,6 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
         // Instead, keepBest uses std::nth_element, which does a partial sorting.
         keepBest(neighbors, k, std::less< pair<uint16_t, CellId> >());
         sort(neighbors.begin(), neighbors.end());
-        const auto tD = std::chrono::steady_clock::now();
 
         // Store.
         for(const auto& neighbor: neighbors) {
@@ -122,22 +152,113 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
             const double similarity = lsh.getSimilarity(mismatchCount);
             similarPairs.addUnsymmetricNoCheck(cellId0, cellId1, similarity);
         }
-        const auto tE = std::chrono::steady_clock::now();
-        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tB - tA)).count() << " ";
-        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tC - tB)).count() << " ";
-        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tD - tC)).count() << " ";
-        cout << (std::chrono::duration_cast<std::chrono::nanoseconds>(tE - tD)).count() << "\n";
     }
-    const auto t4 = std::chrono::steady_clock::now();
-    const double t34 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3)).count());
-    cout << "Similar pairs computation on GPU took " << t34 << " s at ";
-    cout << 1.e9*t34/(double(cellCount)*double(cellCount)) << " ns/pair" << endl;
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    cout << "Similar pairs computation on GPU took " << t01 << " s at ";
+    cout << 1.e9*t01/(double(cellCount)*double(cellCount)) << " ns/pair" << endl;
     lsh.cleanupGpuKernel0();
+}
 
 
-    const auto t5 = std::chrono::steady_clock::now();
-    const double t05 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t5 - t0)).count());
-    cout << timestamp << "ExpressionMatrix::findSimilarPairs4Gpu ends. Took " << t05 << " s." << endl;
+
+// Kernel 1: compute the number of mismatches between the signature
+// of cells in range [cellId0Begin, cellId0End]
+// and the signatures of all other cells.
+// This is parallelized over cellId1.
+// This has lower overhead than kernel 0
+// because each kernel instance does more work
+// (processes n0 values of cellId0 instead of just one).
+// For efficient memory access, the blockSize mismatch counts
+// for each cellId1 are stored contiguously.
+void ExpressionMatrix::findSimilarPairs4GpuKernel1(
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold,     // The minimum similarity for a pair to be stored.
+    Lsh& lsh,
+    SimilarPairs& similarPairs,
+    CellId blockSize)
+{
+    const CellId cellCount = lsh.cellCount();
+
+    // Vectors reused for each cell in the loop over cells below.
+    vector<uint16_t> mismatchCounts(cellCount * blockSize);
+    vector< pair<uint16_t, CellId> > neighbors; // pair(mismatchCount, cellId1)
+
+    // Compute the threshold on the number of mismatches.
+    const size_t mismatchCountThreshold =
+        lsh.computeMismatchCountThresholdFromSimilarityThreshold(similarityThreshold);
+
+
+    // Loop over all cells.
+    lsh.setupGpuKernel1(mismatchCounts, blockSize);
+    const auto t0 = std::chrono::steady_clock::now();
+    uint64_t blockId = 0;
+    for(CellId cellId0Begin=0; cellId0Begin<cellCount; cellId0Begin+=blockSize, ++blockId) {
+        if((blockId%1000) == 0) {
+            cout << timestamp << " Working on cell " << cellId0Begin << " of " << cellCount << endl;
+        }
+        const CellId cellId0End = min(cellCount, cellId0Begin + blockSize);
+
+        // Use gpuKernel0 to compute the number of mismatches
+        // of cells in range [cellId0Begin, cellId0End) with all cells.
+        // For efficient memory access in the GPU, the mismatch counts
+        // for each cellId1 are stored contiguously,
+        // with stride blockSize between consecutive values of cellId1.
+        // const auto tA = std::chrono::steady_clock::now();
+        lsh.gpuKernel1(cellId0Begin, cellId0End);
+        // const auto tB = std::chrono::steady_clock::now();
+
+        // Process the results for all the cellId0 values in this block.
+        for(CellId cellId0=cellId0Begin; cellId0!=cellId0End; ++cellId0) {
+            // const auto tt0 = std::chrono::steady_clock::now();
+
+            // Candidate neighbors are the ones where the number of mismatches is small.
+            neighbors.clear();
+            // const auto tt1 = std::chrono::steady_clock::now();
+            for(CellId cellId1=0; cellId1!=cellCount; cellId1++) {
+                if(cellId1 == cellId0) {
+                    continue;
+                }
+                const uint16_t mismatchCount = mismatchCounts[cellId1*blockSize + (cellId0-cellId0Begin)];
+                if(mismatchCount <= mismatchCountThreshold) {
+                    neighbors.push_back(make_pair(mismatchCount, cellId1));
+                }
+            }
+            // const auto tt2 = std::chrono::steady_clock::now();
+
+            // Only keep the k best neighbors, then sort them.
+            // This is faster than sorting, then keeping the k best,
+            // because it avoids doing a complete sorting of all of the neighbors.
+            // Instead, keepBest uses std::nth_element, which does a partial sorting.
+            keepBest(neighbors, k, std::less< pair<uint16_t, CellId> >());
+            // const auto tt3 = std::chrono::steady_clock::now();
+            sort(neighbors.begin(), neighbors.end());
+            // const auto tt4 = std::chrono::steady_clock::now();
+
+            // Store.
+            for(const auto& neighbor: neighbors) {
+                const CellId cellId1 = neighbor.second;
+                const uint16_t mismatchCount = neighbor.first;
+                const double similarity = lsh.getSimilarity(mismatchCount);
+                similarPairs.addUnsymmetricNoCheck(cellId0, cellId1, similarity);
+            }
+            /*
+            const auto tt5 = std::chrono::steady_clock::now();
+            cout << (tt1-tt0).count() << " ";
+            cout << (tt2-tt1).count() << " ";
+            cout << (tt3-tt2).count() << " ";
+            cout << (tt4-tt3).count() << " ";
+            cout << (tt5-tt4).count() << "\n";
+            */
+        }
+        // const auto tC = std::chrono::steady_clock::now();
+        // cout << (tB-tA).count() << " " << (tC-tB).count() << "\n";
+    }
+    const auto t1 = std::chrono::steady_clock::now();
+    const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
+    cout << "Similar pairs computation on GPU took " << t01 << " s at ";
+    cout << 1.e9*t01/(double(cellCount)*double(cellCount)) << " ns/pair" << endl;
+    lsh.cleanupGpuKernel1();
 }
 
 #endif

@@ -30,13 +30,15 @@ namespace ChanZuckerberg {
 
         class BitSet;
         class CellGraph;
+        class CellGraphInformation;
         class ClusterGraph;
         class ClusterGraphCreationParameters;
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
         class ExpressionMatrixSubset;
-        class CellGraphInformation;
+        class Lsh;
         class ServerParameters;
+        class SimilarPairs;
 
     }
 }
@@ -435,8 +437,21 @@ public:
         size_t k,                       // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
         size_t lshCount,                // The number of LSH vectors to use.
-        unsigned int seed               // The seed used to generate the LSH vectors.
+        unsigned int seed,              // The seed used to generate the LSH vectors.
+        unsigned int kernel,            // The GPU kernel (algorithm) to use.
+        CellId blockSize                // The number of cells processed by each kernel instance.
         );
+    void findSimilarPairs4GpuKernel0(
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        Lsh& lsh,
+        SimilarPairs& similarPairs);
+    void findSimilarPairs4GpuKernel1(
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        Lsh& lsh,
+        SimilarPairs& similarPairs,
+        CellId blockSize);
 #endif
 
     // Find similar cell pairs using the full LSH algorithm, without looping over all pairs.
