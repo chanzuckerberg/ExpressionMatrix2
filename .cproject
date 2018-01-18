@@ -25,7 +25,7 @@
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1398629545" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.347992061" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
 							<builder buildPath="${workspace_loc:/ExpressionMatrix2}/Debug" id="cdt.managedbuild.target.gnu.builder.so.debug.1262008338" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="unlimited" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
-							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.archiver.base.2007155653" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.archiver.base.2007155653" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.666315966" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.1609378758" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.650120100" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
@@ -39,7 +39,12 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.45825771" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
 								<option id="gnu.cpp.compiler.option.other.other.403877977" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wno-unused-result" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.2082429514" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.2082429514" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU"/>
+									<listOptionValue builtIn="false" value="CL_HPP_MINIMUM_OPENCL_VERSION=120"/>
+									<listOptionValue builtIn="false" value="CL_HPP_TARGET_OPENCL_VERSION=120"/>
+									<listOptionValue builtIn="false" value="CL_HPP_ENABLE_EXCEPTIONS"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1086298445" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.269164854" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -48,10 +53,10 @@
 								<option id="gnu.c.compiler.option.dialect.std.1106618991" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1658163964" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.linker.so.debug.1342325339" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.c.linker.so.debug.1342325339" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
 								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.2047331296" name="Shared (-shared)" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
 							</tool>
-							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1321912182" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
+							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1321912182" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.1592010278" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.libs.127345371" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="hdf5_cpp"/>
@@ -101,7 +106,7 @@
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.release.135742672" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.1463979683" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
 							<builder buildPath="${workspace_loc:/ExpressionMatrix2}/Release" id="cdt.managedbuild.target.gnu.builder.so.release.1184892241" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="unlimited" superClass="cdt.managedbuild.target.gnu.builder.so.release"/>
-							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.archiver.base.1767932467" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.archiver.base.1767932467" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.42650874" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
 								<option id="gnu.cpp.compiler.so.release.option.optimization.level.1620503309" name="Optimization Level" superClass="gnu.cpp.compiler.so.release.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.release.option.debugging.level.123365536" name="Debug Level" superClass="gnu.cpp.compiler.so.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
@@ -117,7 +122,12 @@
 								<option id="gnu.cpp.compiler.option.optimization.flags.955945568" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-msse4.2" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.debugging.other.748177729" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-ggdb3" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.files.981806943" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1828983028" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1828983028" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU"/>
+									<listOptionValue builtIn="false" value="CL_HPP_MINIMUM_OPENCL_VERSION=120"/>
+									<listOptionValue builtIn="false" value="CL_HPP_TARGET_OPENCL_VERSION=120"/>
+									<listOptionValue builtIn="false" value="CL_HPP_ENABLE_EXCEPTIONS"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1396589168" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.13926179" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
@@ -125,10 +135,10 @@
 								<option id="gnu.c.compiler.so.release.option.debugging.level.291458475" name="Debug Level" superClass="gnu.c.compiler.so.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.840528032" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.linker.so.release.838118588" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.c.linker.so.release.838118588" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
 								<option defaultValue="true" id="gnu.c.link.so.release.option.shared.1068131918" name="Shared (-shared)" superClass="gnu.c.link.so.release.option.shared" valueType="boolean"/>
 							</tool>
-							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.854851280" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ExpressionMatrix2.so  ${INPUTS} /usr/lib/x86_64-linux-gnu/libOpenCL.so.1" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.854851280" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1549810456" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.libs.338262998" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="hdf5_cpp"/>

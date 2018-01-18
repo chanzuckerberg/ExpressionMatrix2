@@ -426,6 +426,18 @@ public:
         size_t lshCount,                // The number of LSH vectors to use.
         unsigned int seed               // The seed used to generate the LSH vectors.
         );
+#if CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU
+    void findSimilarPairs4Gpu(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& lshName,          // The name of the Lsh object to be used.
+        const string& similarPairsName, // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
+#endif
 
     // Find similar cell pairs using the full LSH algorithm, without looping over all pairs.
     // This is prototype code.

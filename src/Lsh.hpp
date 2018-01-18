@@ -12,8 +12,15 @@
 #include "MemoryMappedObject.hpp"
 #include "MemoryMappedVector.hpp"
 
+// OpenCL
+#if CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU
+#include <CL/cl2.hpp>
+#endif
+
+// Standard libraries.
 #include "cstddef.hpp"
 #include "cstdint.hpp"
+#include <memory>
 #include "vector.hpp"
 
 namespace ChanZuckerberg {
@@ -132,6 +139,60 @@ private:
         size_t lshCount;
     };
     MemoryMapped::Object<Info> info;
+
+
+
+    // Private data and functions used for computations on GPUs using OpenCL.
+#if CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU
+
+    class Gpu {
+    public:
+        cl::Platform platform;
+        cl::Device device;
+        cl::Context context;
+        cl::CommandQueue queue;
+        cl::Program program;
+        cl::Kernel loadSignaturesKernel;
+        cl::Buffer signatureBuffer;
+        cl::Kernel kernel0;
+
+        // Initialize the OpenCL platform, device, context, and queue.
+        void initialize();
+
+        void writeDeviceInformation(ostream&) const;
+        string deviceName() const;
+
+        bool isInitialized = false;
+
+        // Buffer used by kernel0.
+        std::shared_ptr<cl::Buffer> kernel0MismatchBuffer;
+
+    private:
+        void choosePlatform();
+        void chooseDevice();
+        void buildProgram();
+    };
+    Gpu gpu;
+public:
+    void initializeGpu();
+    string getGpuName() const;
+
+    // Load the LSH signatures to the GPU.
+    void loadSignaturesToGpu();
+
+    // Compute the number of mismatches between the signature
+    // of cell cellId0 and the signatures of all other cells.
+    // This is a simple but working kernel.
+    // It has high overhead and low performance
+    // because of the small amount of work done by each instance.
+    void setupGpuKernel0();
+    void gpuKernel0(
+        CellId cellId0,
+        vector<uint16_t>& mismatchCounts);
+    void cleanupGpuKernel0();
+#endif
+
+
 
 };
 
