@@ -156,6 +156,7 @@ private:
         cl::Buffer signatureBuffer;
         cl::Kernel kernel0;
         cl::Kernel kernel1;
+        cl::Kernel kernel2;
 
         // Initialize the OpenCL platform, device, context, and queue.
         void initialize();
@@ -168,6 +169,14 @@ private:
         std::shared_ptr<cl::Buffer> mismatchBuffer;
         size_t mismatchBufferSize;
         uint16_t* mismatchBufferHostPointer;
+
+        std::shared_ptr<cl::Buffer> neighborsBuffer;
+        size_t neighborsBufferSize;
+        uint32_t* neighborsBufferHostPointer;
+
+        std::shared_ptr<cl::Buffer> neighborCountsBuffer;
+        size_t neighborCountsBufferSize;
+        uint32_t* neighborCountsBufferHostPointer;
 
     private:
         void choosePlatform();
@@ -204,6 +213,16 @@ public:
     void setupGpuKernel1(vector<uint16_t>& mismatchCounts, CellId blockSize);
     void gpuKernel1(CellId cellId0Begin, CellId cellId0End);
     void cleanupGpuKernel1();
+
+    // Kernel2. See Lsh.cl for details.
+    void setupGpuKernel2(
+        vector<uint32_t>& neighbors,
+        vector<uint32_t>& neighborCounts,
+        CellId blockSize,
+        size_t k,
+        size_t mismatchCountThreshold);
+    void gpuKernel2(CellId cellId0Begin, CellId cellId0End);
+    void cleanupGpuKernel2();
 #endif
 
 

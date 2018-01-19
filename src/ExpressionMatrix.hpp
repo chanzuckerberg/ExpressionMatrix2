@@ -452,6 +452,12 @@ public:
         Lsh& lsh,
         SimilarPairs& similarPairs,
         CellId blockSize);
+    void findSimilarPairs4GpuKernel2(
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        Lsh& lsh,
+        SimilarPairs& similarPairs,
+        CellId blockSize);
 #endif
 
     // Find similar cell pairs using the full LSH algorithm, without looping over all pairs.
