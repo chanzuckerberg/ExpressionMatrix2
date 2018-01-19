@@ -3,7 +3,7 @@ import argparse
 import csv
 import os
 import shutil
-# from ExpressionMatrix2 import ExpressionMatrix, NormalizationMethod
+from ExpressionMatrix2 import ExpressionMatrix, NormalizationMethod
 
 def get_data_size(expression, metadata, separator):
 	"""
