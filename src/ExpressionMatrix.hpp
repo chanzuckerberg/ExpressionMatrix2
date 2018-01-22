@@ -779,6 +779,7 @@ private:
     void exploreClusterGraphPdfWithLabels(const vector<string>& request, ostream& html);
     void createClusterGraphDialog(const vector<string>& request, ostream& html);
     void createClusterGraph(const vector<string>& request, ostream& html);
+    void removeClusterGraph(const vector<string>& request, ostream& html);
     void exploreCluster(const vector<string>& request, ostream& html);
     void exploreClusterCells(const vector<string>& request, ostream& html);
     void compareClustersDialog(const vector<string>& request, ostream& html);

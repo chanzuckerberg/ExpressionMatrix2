@@ -24,12 +24,17 @@ void ExpressionMatrix::exploreClusterGraphs(
         "The similarity value is used to label the edge.";
 
     if(!clusterGraphs.empty()) {
-        html << "<p>The following cluster graphs exist:<ul>";
+        html << "<p>The following cluster graphs exist:<table>";
         for(const auto& p: clusterGraphs) {
             const string& clusterGraphName = p.first;
-            html << "<li><a href='exploreClusterGraph?timeout=30&clusterGraphName=" << urlEncode(clusterGraphName) << "'>" << clusterGraphName << "</a>";
+            html <<
+                "<tr><td><a href='exploreClusterGraph?timeout=30&clusterGraphName=" <<
+                urlEncode(clusterGraphName) << "'>" << clusterGraphName << "</a>"
+                "<td class=centered><form action=removeClusterGraph>"
+                "<input type=text hidden name=clusterGraphName value='" << clusterGraphName <<
+                "'><input type=submit value=Remove></form>";
         }
-        html << "</ul>";
+        html << "</table>";
     } else {
         html << "<p>No cluster graphs currently exists.";
         if(cellGraphs.empty()) {
@@ -207,6 +212,37 @@ void ExpressionMatrix::exploreClusterGraph(
     html << "<p>" << clusterGraph.svgLayoutWithoutLabels;
 
 }
+
+
+
+
+
+void ExpressionMatrix::removeClusterGraph(
+    const vector<string>& request,
+    ostream& html)
+{
+
+    // Locate the cluster graph.
+    string clusterGraphName;
+    if(!getParameterValue(request, "clusterGraphName", clusterGraphName)) {
+        html << "Missing cluster graph name.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+
+    const auto it = clusterGraphs.find(clusterGraphName);
+    if(it == clusterGraphs.end()) {
+        html << "Cluster graph " << clusterGraphName << " does not exist.";
+        html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+        return;
+    }
+
+    clusterGraphs.erase(it);
+    html << "Cluster graph " << clusterGraphName << " was removed.";
+    html << "<p><form action=exploreClusterGraphs><input type=submit value=Continue></form>";
+
+}
+
 
 
 void ExpressionMatrix::exploreClusterGraphPdfWithLabels(

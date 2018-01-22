@@ -80,6 +80,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     nonHtmlKeywords.insert("/exploreClusterGraphPdfWithLabels");
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraphDialog);
     CZI_ADD_TO_FUNCTION_TABLE(createClusterGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(removeClusterGraph);
     CZI_ADD_TO_FUNCTION_TABLE(exploreCluster);
     CZI_ADD_TO_FUNCTION_TABLE(exploreClusterCells);
     CZI_ADD_TO_FUNCTION_TABLE(compareClustersDialog);
