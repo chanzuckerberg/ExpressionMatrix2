@@ -14,6 +14,7 @@ using namespace ExpressionMatrix2;
 // taking into account only genes in the specified gene set.
 // This is O(N**2) slow because it loops over cell pairs.
 void ExpressionMatrix::findSimilarPairs0(
+    ostream& out,
     const string& geneSetName,      // The name of the gene set to be used.
     const string& cellSetName,      // The name of the cell set to be used.
     const string& similarPairsName, // The name of the SimilarPairs object to be created.
@@ -54,11 +55,11 @@ void ExpressionMatrix::findSimilarPairs0(
 
 
     // Loop over all pairs.
-    cout << timestamp << "Begin computing similarities for all cell pairs." << endl;
+    out << timestamp << "Begin computing similarities for all cell pairs." << endl;
     const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId0=0; localCellId0!=similarPairs.cellCount()-1; localCellId0++) {
         if(localCellId0>0 && ((localCellId0%100) == 0)) {
-            cout << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
+            out << timestamp << "Working on cell " << localCellId0 << " of " << cellSet.size() << endl;
         }
 
         // Find all cells with similarity better than the specified threshold.
@@ -81,9 +82,20 @@ void ExpressionMatrix::findSimilarPairs0(
     similarPairs.sort();
 
 
-    cout << "Time for all pairs: " << t01 << " s." << endl;
+    out << "Time for all pairs: " << t01 << " s." << endl;
     const CellId cellCount = CellId(cellSet.size());
-    cout << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+    out << "Time per pair: " << t01/(0.5*double(cellCount)*double(cellCount-1)) << " s." << endl;
+}
+
+void ExpressionMatrix::findSimilarPairs0(
+    const string& geneSetName,      // The name of the gene set to be used.
+    const string& cellSetName,      // The name of the cell set to be used.
+    const string& similarPairsName, // The name of the SimilarPairs object to be created.
+    size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+    double similarityThreshold
+    )
+{
+    findSimilarPairs0(cout, geneSetName, cellSetName, similarPairsName, k, similarityThreshold);
 }
 
 

@@ -150,6 +150,8 @@ public:
         return cellSet;
     }
 
+    void remove();
+
 private:
 
     // All the pairs we could possibly store (k of them for each cell).

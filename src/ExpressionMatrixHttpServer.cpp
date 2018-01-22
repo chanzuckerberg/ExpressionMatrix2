@@ -58,6 +58,11 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(metaDataContingencyTable);
     CZI_ADD_TO_FUNCTION_TABLE(removeMetaData);
 
+    // Similar pairs.
+    CZI_ADD_TO_FUNCTION_TABLE(similarPairs);
+    CZI_ADD_TO_FUNCTION_TABLE(createSimilarPairs);
+    CZI_ADD_TO_FUNCTION_TABLE(removeSimilarPairs);
+
     // Cell graphs.
     serverFunctionTable["/cellGraphs"]                      = &ExpressionMatrix::exploreCellGraphs;
     CZI_ADD_TO_FUNCTION_TABLE(compareCellGraphs);
@@ -228,6 +233,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Compare two cells", "compareTwoCells");
     writeNavigation(html, "Cell sets", "cellSets");
     writeNavigation(html, "Cell meta data", "metaData");
+    writeNavigation(html, "Find pairs of similar cells", "similarPairs");
     writeNavigation(html, "Cell graphs", "cellGraphs");
     writeNavigation(html, "Clustering", "exploreClusterGraphs");
 

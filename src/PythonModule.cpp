@@ -743,6 +743,10 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
        // Find similar pairs of cells.
        .def("findSimilarPairs0",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, size_t, double)
+           )
            &ExpressionMatrix::findSimilarPairs0,
            "Creates and stores a new object similarPairsName "
            "containing pairs of similar cells from cellSetName. "
@@ -765,6 +769,10 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("similarityThreshold") = 0.2
        )
        .def("findSimilarPairs4",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, size_t, double, size_t, unsigned int)
+           )
            &ExpressionMatrix::findSimilarPairs4,
            "Like findSimilarPairs0, but uses Locality-Sensitive Hashing (LSH) "
            "with lshCount LSH hashes to speed up the computation of the similar pairs. "

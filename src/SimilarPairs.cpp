@@ -50,6 +50,17 @@ SimilarPairs::SimilarPairs(const string& name, bool allowReadOnly)
 
 
 
+void SimilarPairs::remove()
+{
+    similarPairs.remove();
+    cellInfo.remove();
+    info.remove();
+    geneSet.remove();
+    cellSet.remove();
+}
+
+
+
 // Add a pair.
 // This might or might not be stored, depending on the number
 // of pairs already stored for cellId0 and cellId1.

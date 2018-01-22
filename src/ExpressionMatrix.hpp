@@ -409,6 +409,14 @@ public:
         size_t k,                   // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold
         );
+    void findSimilarPairs0(
+        ostream& out,
+        const string& geneSetName,  // The name of the gene set to be used.
+        const string& cellSetName,  // The name of the cell set to be used.
+        const string& name,         // The name of the SimilarPairs object to be created.
+        size_t k,                   // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold
+        );
 
 
 
@@ -420,6 +428,16 @@ public:
     // (for lshCount=1024, which guarantees rms error 0.05 or better
     // on computed similarities).
     void findSimilarPairs4(
+        const string& geneSetName,      // The name of the gene set to be used.
+        const string& cellSetName,      // The name of the cell set to be used.
+        const string& name,             // The name of the SimilarPairs object to be created.
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        size_t lshCount,                // The number of LSH vectors to use.
+        unsigned int seed               // The seed used to generate the LSH vectors.
+        );
+    void findSimilarPairs4(
+        ostream&,
         const string& geneSetName,      // The name of the gene set to be used.
         const string& cellSetName,      // The name of the cell set to be used.
         const string& name,             // The name of the SimilarPairs object to be created.
@@ -740,6 +758,9 @@ private:
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
     void removeCellSet(const vector<string>& request, ostream& html);
+    void similarPairs(const vector<string>& request, ostream& html);
+    void createSimilarPairs(const vector<string>& request, ostream& html);
+    void removeSimilarPairs(const vector<string>& request, ostream& html);
     void exploreCellGraphs(const vector<string>& request, ostream& html);
     void compareCellGraphs(const vector<string>& request, ostream& html);
     void exploreCellGraph(const vector<string>& request, ostream& html);

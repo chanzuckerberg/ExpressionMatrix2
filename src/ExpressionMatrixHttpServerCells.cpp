@@ -3,6 +3,7 @@
 
 #include "ExpressionMatrix.hpp"
 #include "orderPairs.hpp"
+#include "SimilarPairs.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -1008,4 +1009,112 @@ void ExpressionMatrix::removeCellSet(const vector<string>& request, ostream& htm
     }
     html << "<p><form action=cellSets><input type=submit value=Continue></form>";
 
+}
+
+
+void ExpressionMatrix::similarPairs(const vector<string>& request, ostream& html)
+{
+    html <<
+        "<h1>Pairs of similar cells</h1>"
+        "<p>When creating a cell graph, you need to specify one of the "
+        "sets of similar cell pairs specified here. "
+        "This information is used to create the graph edges."
+        "The gene set used to find similar cell pairs defines the similarity measure used.";
+
+    // Write the table of existing SimilarPairs object.
+    html << "<h2>Existing sets of similar cell pairs</h2>";
+    vector<string> existingSimilarPairs;
+    getAvailableSimilarPairs(existingSimilarPairs);
+    html << "<table>";
+    for(const string& similarPairsName: existingSimilarPairs) {
+        html <<
+            "<tr><td>" << similarPairsName << "<td>"
+            "<form action=removeSimilarPairs><input type=text hidden name=similarPairsName value='" <<
+            similarPairsName <<
+            "'><input type=submit value='Remove'></form>";
+    }
+    html << "</table>";
+
+
+    // Form to create a new SimilarPairs object.
+    html <<
+        "<h2>Create a new set of similar cell pairs</h2>"
+        "<form action=createSimilarPairs>"
+        "<table>"
+        "<tr><td>Gene set<td class=centered>";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << "<tr><td>Cell set<td class=centered>";
+    writeCellSetSelection(html, "cellSetName", false);
+    html <<
+        "<tr><td>Similar pairs name<td class=centered>"
+        "<input type=text size=8 required autofocus name=similarPairsName>"
+        "<tr><td>Similarity threshold<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
+        "<tr><td>Maximum connectivity<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=maxConnectivity value='20'>"
+        "<tr><td>Number of LSH bits<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=lshCount value='1024'>"
+        "<tr><td>Random seed<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=seed value='231'>"
+        "</table>"
+        "<p><input type=submit value='Create'>"
+        "<p>The computation will use Locality Sensitive Hashing (LSH), which "
+        "guarantees a standard deviation of 0.05 on computed similarities "
+        "when the number of LSH bits is 1024. "
+        "For exact computation, specify 0 for the number of LSH bits. "
+        "In that case, the computation will be exact but much slower."
+        "</form>";
+
+}
+
+
+
+void ExpressionMatrix::removeSimilarPairs(const vector<string>& request, ostream& html)
+{
+    string similarPairsName;
+    getParameterValue(request, "similarPairsName", similarPairsName);
+
+    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, false);
+    similarPairs.remove();
+
+    html <<
+        "<p>Removed similar pairs " << similarPairsName << "."
+        "<p><form action=similarPairs><input type=submit value=Continue></form>";
+}
+
+
+
+void ExpressionMatrix::createSimilarPairs(const vector<string>& request, ostream& html)
+{
+    html << "<h1>Create a new set of similar cell pairs</h1>";
+
+    // Get the parameters from the URL.
+    string geneSetName;
+    getParameterValue(request, "geneSetName", geneSetName);
+    string cellSetName;
+    getParameterValue(request, "cellSetName", cellSetName);
+    string similarPairsName;
+    getParameterValue(request, "similarPairsName", similarPairsName);
+    double similarityThreshold = 0.2;
+    getParameterValue(request, "similarityThreshold", similarityThreshold);
+    int maxConnectivity = 100;
+    getParameterValue(request, "maxConnectivity", maxConnectivity);
+    int lshCount = 1024;
+    getParameterValue(request, "lshCount", lshCount);
+    int seed = 231;
+    getParameterValue(request, "seed", seed);
+
+    html << "<pre>";
+    if(lshCount) {
+        findSimilarPairs4(html, geneSetName, cellSetName, similarPairsName,
+            maxConnectivity, similarityThreshold, lshCount, seed);
+    }  else {
+        findSimilarPairs0(html, geneSetName, cellSetName, similarPairsName,
+            maxConnectivity, similarityThreshold);
+    }
+    html << "</pre>";
+
+    html <<
+        "<p>New set of similar cell pairs " << similarPairsName << " was created."
+        "<p><form action=similarPairs><input type=submit value=Continue></form>";
 }
