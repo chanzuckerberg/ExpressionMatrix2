@@ -511,7 +511,7 @@ void ExpressionMatrix::findSimilarPairs7(
     size_t k,                       // The maximum number of similar pairs to be stored for each cell.
     double similarityThreshold,     // The minimum similarity for a pair to be stored.
     const vector<int>& lshSliceLengths, // The number of bits in each LSH signature slice, in decreasing order.
-    size_t maxCheck,                // Maximum number of cells to consider for each cell.
+    CellId maxCheck,                // Maximum number of cells to consider for each cell.
     size_t log2BucketCount
     )
 {
@@ -566,6 +566,7 @@ void ExpressionMatrix::findSimilarPairs7(
     SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
 
 
+
     // For each slice length and signature slice of that length,
     // each cell is assigned to a bucket
     // based on the value of its signature slice.
@@ -579,90 +580,16 @@ void ExpressionMatrix::findSimilarPairs7(
     //   to form lshBitCount/lshSliceLength possible signature
     //   slices each lshSliceLength bits in length).
     // - bucketId identifies the bucket.
-    vector< vector< vector< vector<CellId> > > > table4(sliceLengthCount);
-
-
+    vector< vector< vector< vector<CellId> > > > table4;
 
     // Vector to contain the signature bits of each signature slice.
     // Indexed by [sliceLengthId][sliceId].
-    vector< vector< vector< size_t > > > sliceBits3(sliceLengthCount);
-
-
-
-    // Initialize the table4 and sliceBits3 data structures.
-    cout << timestamp << "Initializing data structures for findSimilarPairs7." << endl;
-    const uint64_t bucketCount = (1ULL << log2BucketCount);
-    const uint64_t bucketMask = bucketCount - 1ULL;
-    for(size_t sliceLengthId=0; sliceLengthId<sliceLengthCount; sliceLengthId++) {
-        auto& table3 = table4[sliceLengthId];
-        auto& sliceBits2 = sliceBits3[sliceLengthId];
-
-        // Extract the slice length.
-        const size_t sliceLength = lshSliceLengths[sliceLengthId];
-
-        // Compute the number of possible slices for this length.
-        const size_t sliceCount = lshBitCount / sliceLength;
-        table3.resize(sliceCount);
-        sliceBits2.resize(sliceCount);
-        const uint64_t tableSize = std::min(uint64_t(1ULL<<sliceLength), bucketCount);
-        cout << "Number of slices of length " << sliceLength << " is " << sliceCount;
-        cout << ". Table size is " << tableSize << endl;
-
-        // Loop over all possible signature slices of this length.
-        for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
-            auto& table2 = table3[sliceId];
-            table2.resize(tableSize);
-
-            // Gather the signature bits.
-            auto& sliceBits1 = sliceBits2[sliceId];
-            sliceBits1.resize(sliceLength);
-            size_t bitPosition = sliceId * sliceLength;
-            for(size_t bitId=0; bitId<sliceLength; bitId++, ++bitPosition) {
-                sliceBits1[bitId] = bitPosition;
-            }
-        }
-    }
-
-
+    vector< vector< vector< size_t > > > sliceBits3;
 
     // Assign cells to buckets.
-    cout << timestamp << "Assigning cells to buckets." << endl;
-    for(CellId cellId=0; cellId<cellCount; cellId++) {
-        if(cellId!=0 && (cellId % 100000)==0) {
-            cout << timestamp << "Working on cell " << cellId << " of " << cellCount << endl;
-        }
-        const BitSetPointer signature = lsh.getSignature(cellId);
+    findSimilarPairs7AssignCellsToBuckets(lsh, lshSliceLengths, sliceBits3, table4, log2BucketCount);
 
-        // Loop over slice lengths.
-        for(size_t sliceLengthId=0; sliceLengthId<sliceLengthCount; sliceLengthId++) {
-            auto& table3 = table4[sliceLengthId];
-            const auto& sliceBits2 = sliceBits3[sliceLengthId];
 
-            // Extract the slice length.
-            const size_t sliceLength = lshSliceLengths[sliceLengthId];
-
-            // Compute the number of possible slices for this length.
-            const size_t sliceCount = lshBitCount / sliceLength;
-
-            // Loop over all possible signature slices of this length.
-            for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
-                auto& table2 = table3[sliceId];
-                const auto& sliceBits1 = sliceBits2[sliceId];
-
-                // Extract this signature slice for this cell.
-                const uint64_t signatureSlice = signature.getBits(sliceBits1);
-
-                // Add this cell to the bucket that corresponds to this signature slice.
-                const uint64_t bucketId =
-                    (sliceLength<log2BucketCount) ?
-                    signatureSlice :
-                    (MurmurHash64A(&signatureSlice, 8, 231) & bucketMask);
-                CZI_ASSERT(bucketId < table2.size());
-                table2[bucketId].push_back(cellId);
-            }
-        }
-
-    }
 
     // Bit set to keep track which cellId1 cells we have already
     // looked at, for a given cellId0.
@@ -681,6 +608,8 @@ void ExpressionMatrix::findSimilarPairs7(
     // For each cell, look at cells in the same bucket.
     // Stop when we found enough similar cells.
     cout << timestamp << "Finding similar cell pairs." << endl;
+    const uint64_t bucketCount = (1ULL << log2BucketCount);
+    const uint64_t bucketMask = bucketCount - 1ULL;
     for(CellId cellId0=0; cellId0<cellCount; cellId0++) {
         if(cellId0!=0 && (cellId0 % 1000)==0) {
             cout << timestamp << "Working on cell " << cellId0 << " of " << cellCount << endl;
@@ -769,6 +698,131 @@ void ExpressionMatrix::findSimilarPairs7(
     const auto t1 = std::chrono::steady_clock::now();
     const double t01 = 1.e-9 * double((std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0)).count());
     cout << timestamp << "ExpressionMatrix::findSimilarPairs7 ends. Took " << t01 << " s." << endl;
+}
+
+
+
+// In the initial phase of findSimilarPairs7, we assign cells to buckets.
+// For each slice length and signature slice of that length,
+// each cell is assigned to a bucket
+// based on the value of its signature slice.
+
+// The cells in each bucket are stored in
+// tables4[sliceLengthId][sliceId][bucketId],
+// where:
+// - sliceLengthId corresponds to the slice lengths to be used,
+//   stored in lshSliceLengths in decreasing order.
+// - sliceId identifies the particular slice of that length
+//   (we have a total lshBitCount bits, which can be used
+//   to form lshBitCount/lshSliceLength possible signature
+//   slices each lshSliceLength bits in length).
+// - bucketId identifies the bucket.
+
+// Vector sliceBits3 is used to store the signature bits of each signature slice.
+// Indexed by [sliceLengthId][sliceId].
+
+void ExpressionMatrix::findSimilarPairs7AssignCellsToBuckets(
+    Lsh& lsh,
+    const vector<int>& lshSliceLengths,                     // The number of signature slice bits, in decreasing order.
+    vector< vector< vector< size_t > > >& sliceBits3,       // The bits of each slice. See comments above.
+    vector< vector< vector< vector<CellId> > > >& table4,   // The cells in each bucket. See comments above.
+    size_t log2BucketCount
+    )
+{
+    // Check that the slice lengths are in decreasing order.
+    const size_t sliceLengthCount = lshSliceLengths.size();
+    for(size_t i=1; i<sliceLengthCount; i++) {
+        if(lshSliceLengths[i] >= lshSliceLengths[i-1]) {
+            throw runtime_error("The slice lengths are not in decreasing order.");
+        }
+    }
+
+    // Check that the slice lengths are no more than 64.
+    for(size_t i=0; i<sliceLengthCount; i++) {
+        if(lshSliceLengths[i] > 64) {
+            throw runtime_error("Each slice length can be at most 64 bits.");
+        }
+    }
+
+
+    // Initialize the table4 and sliceBits3 data structures.
+    cout << timestamp << "Initializing data structures for findSimilarPairs7." << endl;
+    table4.resize(sliceLengthCount);
+    sliceBits3.resize(sliceLengthCount);
+    const uint64_t bucketCount = (1ULL << log2BucketCount);
+    const uint64_t bucketMask = bucketCount - 1ULL;
+    const size_t lshBitCount = lsh.lshCount();
+    for(size_t sliceLengthId=0; sliceLengthId<sliceLengthCount; sliceLengthId++) {
+        auto& table3 = table4[sliceLengthId];
+        auto& sliceBits2 = sliceBits3[sliceLengthId];
+
+        // Extract the slice length.
+        const size_t sliceLength = lshSliceLengths[sliceLengthId];
+
+        // Compute the number of possible slices for this length.
+        const size_t sliceCount = lshBitCount / sliceLength;
+        table3.resize(sliceCount);
+        sliceBits2.resize(sliceCount);
+        const uint64_t tableSize = std::min(uint64_t(1ULL<<sliceLength), bucketCount);
+        cout << "Number of slices of length " << sliceLength << " is " << sliceCount;
+        cout << ". Table size is " << tableSize << endl;
+
+        // Loop over all possible signature slices of this length.
+        for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
+            auto& table2 = table3[sliceId];
+            table2.resize(tableSize);
+
+            // Gather the signature bits.
+            auto& sliceBits1 = sliceBits2[sliceId];
+            sliceBits1.resize(sliceLength);
+            size_t bitPosition = sliceId * sliceLength;
+            for(size_t bitId=0; bitId<sliceLength; bitId++, ++bitPosition) {
+                sliceBits1[bitId] = bitPosition;
+            }
+        }
+    }
+
+
+
+    // Assign cells to buckets.
+    cout << timestamp << "Assigning cells to buckets." << endl;
+    const CellId cellCount = lsh.cellCount();
+    for(CellId cellId=0; cellId<cellCount; cellId++) {
+        if(cellId!=0 && (cellId % 100000)==0) {
+            cout << timestamp << "Working on cell " << cellId << " of " << cellCount << endl;
+        }
+        const BitSetPointer signature = lsh.getSignature(cellId);
+
+        // Loop over slice lengths.
+        for(size_t sliceLengthId=0; sliceLengthId<sliceLengthCount; sliceLengthId++) {
+            auto& table3 = table4[sliceLengthId];
+            const auto& sliceBits2 = sliceBits3[sliceLengthId];
+
+            // Extract the slice length.
+            const size_t sliceLength = lshSliceLengths[sliceLengthId];
+
+            // Compute the number of possible slices for this length.
+            const size_t sliceCount = lshBitCount / sliceLength;
+
+            // Loop over all possible signature slices of this length.
+            for(size_t sliceId=0; sliceId<sliceCount; sliceId++) {
+                auto& table2 = table3[sliceId];
+                const auto& sliceBits1 = sliceBits2[sliceId];
+
+                // Extract this signature slice for this cell.
+                const uint64_t signatureSlice = signature.getBits(sliceBits1);
+
+                // Add this cell to the bucket that corresponds to this signature slice.
+                const uint64_t bucketId =
+                    (sliceLength<log2BucketCount) ?
+                    signatureSlice :
+                    (MurmurHash64A(&signatureSlice, 8, 231) & bucketMask);
+                CZI_ASSERT(bucketId < table2.size());
+                table2[bucketId].push_back(cellId);
+            }
+        }
+
+    }
 }
 
 
@@ -1353,25 +1407,31 @@ void ExpressionMatrix::analyzeLshSignatures(
     // Create the Lsh object that will do the computation.
     Lsh lsh(directoryName + "/tmp-Lsh", expressionMatrixSubset, lshCount, seed);
 
-
-    // Create a map that gives the cells with a given signature.
-    map<BitSet, vector<CellId> > signatureMap;
+    // Gather cells with the same signature.
+#if 0
+    vector< pair<BitSetPointer, CellId> > table;
+    table.reserve(cellCount);
     for(CellId cellId=0; cellId<cellCount; cellId++) {
-        const BitSet signature(lsh.getSignature(cellId));
-        signatureMap[signature].push_back(cellId);
+        table.push_back(make_pair(lsh.getSignature(cellId), cellId));
+    }
+    cout << timestamp << "Sorting by signature." << endl;
+    sort(table.begin(), table.end());
+#endif
+    map<BitSetPointer, vector<CellId> > signatureMap;
+    for(CellId cellId=0; cellId<cellCount; cellId++) {
+        signatureMap[lsh.getSignature(cellId)].push_back(cellId);
     }
 
+
     // Create a table of signatures ordered by decreasing number of cells.
-    vector< pair<BitSet, size_t> > signatureTable;
+    vector< pair<BitSetPointer, size_t> > signatureTable;
     for(const auto& p: signatureMap) {
-        const BitSet signature = p.first;
+        const BitSetPointer signature = p.first;
         const size_t size = p.second.size();
         signatureTable.push_back(make_pair(signature, size));
     }
-#if 0
     sort(signatureTable.begin(), signatureTable.end(),
         OrderPairsBySecondGreater< pair<BitSet, size_t> >());
-#endif
 
 
 
@@ -1379,7 +1439,7 @@ void ExpressionMatrix::analyzeLshSignatures(
     {
         ofstream csvOut("Signatures.csv");
         for(const auto& p: signatureTable) {
-            const BitSet signature = p.first;
+            const BitSetPointer signature = p.first;
             const size_t size = p.second;
             csvOut << signature.getString(lshCount) << "," << size << "\n";
         }

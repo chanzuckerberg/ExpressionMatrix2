@@ -526,10 +526,40 @@ public:
         size_t k,                       // The maximum number of similar pairs to be stored for each cell.
         double similarityThreshold,     // The minimum similarity for a pair to be stored.
         const vector<int>& lshSliceLengths, // The number of bits in each LSH signature slice, in decreasing order.
-        size_t maxCheck,                // Maximum number of cells to consider for each cell.
+        CellId maxCheck,                // Maximum number of cells to consider for each cell.
         size_t log2BucketCount
     );
-
+    void findSimilarPairs7AssignCellsToBuckets(
+        Lsh&,
+        const vector<int>& lshSliceLengths,                     // The number of signature slice bits, in decreasing order.
+        vector< vector< vector< size_t > > >& sliceBits3,       // The bits of each slice.
+        vector< vector< vector< vector<CellId> > > >& table4,   // The cells in each bucket.
+        size_t log2BucketCount
+        );
+#if CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU
+    // GPU version. See Lsh.cl for details.
+    void findSimilarPairs7Gpu(
+        const string& geneSetName,          // The name of the gene set to be used.
+        const string& cellSetName,          // The name of the cell set to be used.
+        const string& lshName,              // The name of the Lsh object to be used.
+        const string& similarPairsName,     // The name of the SimilarPairs object to be created.
+        size_t k,                           // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,         // The minimum similarity for a pair to be stored.
+        const vector<int>& lshSliceLengths, // The number of bits in each LSH signature slice, in decreasing order.
+        CellId maxCheck,                    // Maximum number of candidate neighbors to consider for each cell.
+        size_t log2BucketCount,
+        CellId blockSize                    // The number of cells processed by each kernel instance on the GPU.
+        );
+    void findSimilarPairs7GpuKernel3(
+        size_t k,                       // The maximum number of similar pairs to be stored for each cell.
+        double similarityThreshold,     // The minimum similarity for a pair to be stored.
+        Lsh& lsh,
+        SimilarPairs& similarPairs,
+        const vector<int>& lshSliceLengths, // The number of bits in each LSH signature slice, in decreasing order.
+        CellId maxCheck,
+        CellId blockSize,
+        size_t log2BucketCount);
+#endif
     // Compute cell LSH signatures and store them.
     void computeLshSignatures(
         const string& geneSetName,      // The name of the gene set to be used.

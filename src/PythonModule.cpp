@@ -863,6 +863,24 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("maxCheck"),
            arg("log2BucketCount")
        )
+#if CZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU
+       .def("findSimilarPairs7Gpu",
+           &ExpressionMatrix::findSimilarPairs7Gpu,
+           "LSH-based computation of similar cell pairs "
+           "without looping over all possible pairs of cells."
+           "Prototype code. Use findSimilarPairs4 instead.",
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("lshName"),
+           arg("similarPairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2,
+           arg("lshSliceLengths"),
+           arg("maxCheck"),
+           arg("log2BucketCount"),
+           arg("blockSize")
+       )
+#endif
        .def("writeSimilarPairs",
            &ExpressionMatrix::writeSimilarPairs,
            "Only intended to be used for testing. "

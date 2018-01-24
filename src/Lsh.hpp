@@ -157,6 +157,7 @@ private:
         cl::Kernel kernel0;
         cl::Kernel kernel1;
         cl::Kernel kernel2;
+        cl::Kernel kernel3;
 
         // Initialize the OpenCL platform, device, context, and queue.
         void initialize();
@@ -173,10 +174,36 @@ private:
         std::shared_ptr<cl::Buffer> neighborsBuffer;
         size_t neighborsBufferSize;
         uint32_t* neighborsBufferHostPointer;
+        void setupNeighborsBuffer (
+            vector<uint32_t>& neighbors,
+            size_t blockSize,
+            size_t k,
+            size_t mismatchCountThreshold);
 
         std::shared_ptr<cl::Buffer> neighborCountsBuffer;
         size_t neighborCountsBufferSize;
         uint32_t* neighborCountsBufferHostPointer;
+        void setupNeighborCountsBuffer (
+            vector<uint32_t>& neighbors,
+            size_t blockSize,
+            size_t mismatchCountThreshold);
+
+        std::shared_ptr<cl::Buffer> cellId1sBuffer;
+        size_t cellId1sBufferSize;
+        uint32_t* cellId1sBufferHostPointer;
+        void setupCellId1sBuffer(
+            vector<uint32_t>& cellId1s,
+            size_t blockSize,
+            size_t maxCheck
+            );
+
+        std::shared_ptr<cl::Buffer> cellId1CountsBuffer;
+        size_t cellId1CountsBufferSize;
+        uint32_t* cellId1CountsBufferHostPointer;
+        void setupCellId1CountsBuffer(
+            vector<uint32_t>& cellIds1,
+            size_t blockSize
+            );
 
     private:
         void choosePlatform();
@@ -223,6 +250,19 @@ public:
         size_t mismatchCountThreshold);
     void gpuKernel2(CellId cellId0Begin, CellId cellId0End);
     void cleanupGpuKernel2();
+
+    // Kernel3. See Lsh.cl for details.
+    void setupGpuKernel3(
+        size_t k,
+        size_t mismatchCountThreshold,
+        size_t maxCheck,
+        size_t blockSize,
+        vector<CellId>& cellIds1,
+        vector<CellId>& cellId1Counts,
+        vector<CellId>& neighbors,
+        vector<CellId>& neighborCounts);
+    void gpuKernel3(CellId cellId0Begin, CellId cellId0End);
+    void cleanupGpuKernel3();
 #endif
 
 

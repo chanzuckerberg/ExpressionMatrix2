@@ -134,6 +134,7 @@ void Lsh::Gpu::buildProgram()
     kernel0 = cl::Kernel(program, "kernel0");
     kernel1 = cl::Kernel(program, "kernel1");
     kernel2 = cl::Kernel(program, "kernel2");
+    kernel3 = cl::Kernel(program, "kernel3");
 
 }
 
@@ -270,6 +271,50 @@ void Lsh::cleanupGpuKernel1()
 
 
 
+// Set up the neighbors buffer on the host and on the GPU.
+void Lsh::Gpu::setupNeighborsBuffer(
+    vector<uint32_t>& neighbors,
+    size_t blockSize,
+    size_t k,
+    size_t mismatchCountThreshold)
+{
+    try {
+        neighbors.resize(k * blockSize * (mismatchCountThreshold+1));
+        neighborsBufferSize = neighbors.size() * sizeof(uint32_t);
+        // cout << "Neighbors buffer size is " << neighborsBufferSize << endl;
+        neighborsBufferHostPointer = neighbors.data();
+        neighborsBuffer = std::make_shared<cl::Buffer>(
+            context, CL_MEM_READ_WRITE, neighborsBufferSize);
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " setting up neighbors buffer.";
+        throw runtime_error(message);
+    }
+
+}
+
+// Set up the neighborCounts buffer on the host and on the GPU.
+void Lsh::Gpu::setupNeighborCountsBuffer (
+    vector<uint32_t>& neighborCounts,
+    size_t blockSize,
+    size_t mismatchCountThreshold)
+{
+    try {
+        neighborCounts.resize(blockSize * (mismatchCountThreshold+1));
+        neighborCountsBufferSize = neighborCounts.size() * sizeof(uint32_t);
+        // cout << "Neighbor counts buffer size is " << neighborCountsBufferSize << endl;
+        neighborCountsBufferHostPointer = neighborCounts.data();
+        neighborCountsBuffer = std::make_shared<cl::Buffer>(
+            context, CL_MEM_READ_WRITE, neighborCountsBufferSize);
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " setting up neighbor counts buffer.";
+        throw runtime_error(message);
+    }
+}
+
+
+
 // Kernel2. See Lsh.cl for details.
 void Lsh::setupGpuKernel2(
     vector<uint32_t>& neighbors,
@@ -279,19 +324,8 @@ void Lsh::setupGpuKernel2(
     size_t mismatchCountThreshold)
 {
     try {
-        // Set up the neighbors buffer on the host and on the GPU.
-        neighbors.resize(k * blockSize * (mismatchCountThreshold+1));
-        gpu.neighborsBufferSize = neighbors.size() * sizeof(uint32_t);
-        gpu.neighborsBufferHostPointer = neighbors.data();
-        gpu.neighborsBuffer = std::make_shared<cl::Buffer>(
-            gpu.context, CL_MEM_READ_WRITE, gpu.neighborsBufferSize);
-
-        // Set up the neighborCounts buffer on the host and on the GPU.
-        neighborCounts.resize(blockSize * (mismatchCountThreshold+1));
-        gpu.neighborCountsBufferSize = neighborCounts.size() * sizeof(uint32_t);
-        gpu.neighborCountsBufferHostPointer = neighborCounts.data();
-        gpu.neighborCountsBuffer = std::make_shared<cl::Buffer>(
-            gpu.context, CL_MEM_READ_WRITE, gpu.neighborCountsBufferSize);
+        gpu.setupNeighborsBuffer(neighbors, blockSize, k, mismatchCountThreshold);
+        gpu.setupNeighborCountsBuffer(neighborCounts, blockSize, mismatchCountThreshold);
 
         // Set the arguments that don't change.
         gpu.kernel2.setArg(0, uint64_t(cellCount()));
@@ -342,6 +376,132 @@ void Lsh::cleanupGpuKernel2()
     gpu.neighborCountsBuffer.reset();
 }
 
+
+
+// Set up the cellIds1 buffer on the host and on the GPU.
+void Lsh::Gpu::setupCellId1sBuffer(
+    vector<uint32_t>& cellId1s,
+    size_t blockSize,
+    size_t maxCheck
+    )
+{
+    try {
+        cellId1s.resize(blockSize * maxCheck);
+        cellId1sBufferSize = cellId1s.size() * sizeof(uint32_t);
+        // cout << "cellId1s buffer size is " << cellId1sBufferSize << endl;
+        cellId1sBufferHostPointer = cellId1s.data();
+        cellId1sBuffer = std::make_shared<cl::Buffer>(
+            context, CL_MEM_READ_WRITE, cellId1sBufferSize);
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " setting up cellIds1 buffer.";
+        throw runtime_error(message);
+    }
+
+}
+
+
+// Set up the cellId1Counts buffer on the host and on the GPU.
+void Lsh::Gpu::setupCellId1CountsBuffer(
+    vector<uint32_t>& cellId1Counts,
+    size_t blockSize
+    )
+{
+    try {
+        cellId1Counts.resize(blockSize);
+        cellId1CountsBufferSize = cellId1Counts.size() * sizeof(uint32_t);
+        // cout << "cellId1Counts buffer size is " << cellId1CountsBufferSize << endl;
+        cellId1CountsBufferHostPointer = cellId1Counts.data();
+        cellId1CountsBuffer = std::make_shared<cl::Buffer>(
+            context, CL_MEM_READ_WRITE, cellId1CountsBufferSize);
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " setting up cellId1Counts buffer.";
+        throw runtime_error(message);
+    }
+
+}
+
+
+// Kernel3. See Lsh.cl for details.
+void Lsh::setupGpuKernel3(
+    size_t k,
+    size_t mismatchCountThreshold,
+    size_t maxCheck,
+    size_t blockSize,
+    vector<CellId>& cellIds1,
+    vector<CellId>& cellId1Counts,
+    vector<CellId>& neighbors,
+    vector<CellId>& neighborCounts)
+{
+    try {
+        gpu.setupNeighborsBuffer(neighbors, blockSize, k, mismatchCountThreshold);
+        gpu.setupNeighborCountsBuffer(neighborCounts, blockSize, mismatchCountThreshold);
+        gpu.setupCellId1sBuffer(cellIds1, blockSize, maxCheck);
+        gpu.setupCellId1CountsBuffer(cellId1Counts, blockSize);
+
+        // Set the arguments that don't change.
+        gpu.kernel3.setArg(0, wordCount());
+        // gpu.kernel3.setArg(1, cellBegin0);   // This is set differently for each block, by gpuGpuKernel3.
+        gpu.kernel3.setArg(2, k);
+        gpu.kernel3.setArg(3, mismatchCountThreshold);
+        gpu.kernel3.setArg(4, maxCheck);
+        gpu.kernel3.setArg(5, gpu.signatureBuffer);
+        gpu.kernel3.setArg(6, *gpu.cellId1CountsBuffer);
+        gpu.kernel3.setArg(7, *gpu.cellId1sBuffer);
+        gpu.kernel3.setArg(8, *gpu.neighborCountsBuffer);
+        gpu.kernel3.setArg(9, *gpu.neighborsBuffer);
+
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " setting up GPU kernel 2.";
+        throw runtime_error(message);
+    }
+}
+
+
+
+// Kernel3. See Lsh.cl for details.
+void Lsh::gpuKernel3(CellId cellId0Begin, CellId cellId0End)
+{
+    // cout << "gpuKernel3 begins "<< cellId0Begin << " " << cellId0End << endl;
+    try {
+
+        // Copy the cellId1s and cellId1Counts to the GPU.
+        gpu.queue.enqueueWriteBuffer(*(gpu.cellId1CountsBuffer), CL_TRUE, 0,
+            gpu.cellId1CountsBufferSize, gpu.cellId1CountsBufferHostPointer);
+        gpu.queue.enqueueWriteBuffer(*(gpu.cellId1sBuffer), CL_TRUE, 0,
+            gpu.cellId1sBufferSize, gpu.cellId1sBufferHostPointer);
+
+        // Run the kernel.
+        gpu.kernel3.setArg(1, uint64_t(cellId0Begin));
+        gpu.queue.enqueueNDRangeKernel(gpu.kernel3,
+            cl::NullRange, cl::NDRange(cellId0End-cellId0Begin), cl::NullRange);
+
+        // Get back the results.
+        gpu.queue.enqueueReadBuffer(*(gpu.neighborsBuffer), CL_TRUE, 0,
+            gpu.neighborsBufferSize, gpu.neighborsBufferHostPointer);
+        gpu.queue.enqueueReadBuffer(*(gpu.neighborCountsBuffer), CL_TRUE, 0,
+            gpu.neighborCountsBufferSize, gpu.neighborCountsBufferHostPointer);
+        gpu.queue.finish();
+
+    } catch(cl::Error e) {
+        const string message = "OpenCL error " + std::to_string(e.err()) + " from " +
+            e.what() + " running GPU kernel 3.";
+        throw runtime_error(message);
+    }
+
+}
+
+
+
+void Lsh::cleanupGpuKernel3()
+{
+    gpu.neighborsBuffer.reset();
+    gpu.neighborCountsBuffer.reset();
+    gpu.cellId1sBuffer.reset();
+    gpu.cellId1CountsBuffer.reset();
+}
 
 #endif
 
