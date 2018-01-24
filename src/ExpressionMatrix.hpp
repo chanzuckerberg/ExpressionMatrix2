@@ -617,6 +617,16 @@ public:
     void testExpressionMatrixSubset(CellId, CellId) const;
 
 
+    // Signature graph experiments.
+    // All cells with the same signature are aggregated
+    // into a single vertex of the signature graph.
+    void createSignatureGraph(
+        const string& geneSetName,
+        const string& cellSetName,
+        const string& lshName,
+        size_t minCellCount);
+
+
 private:
 
     // The directory that contains the binary data for this Expression matrix.
