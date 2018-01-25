@@ -14,13 +14,14 @@ using namespace ExpressionMatrix2;
 // All cells with the same signature are aggregated
 // into a single vertex of the signature graph.
 void ExpressionMatrix::createSignatureGraph(
-    const string& geneSetName,
+    // const string& geneSetName,
     const string& cellSetName,
     const string& lshName,
     size_t minCellCount)
 {
     cout << timestamp << "createSignatureGraph begins." << endl;
 
+    /*
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
     if(itGeneSet == geneSets.end()) {
@@ -30,6 +31,7 @@ void ExpressionMatrix::createSignatureGraph(
     if(geneSet.size() == 0) {
         throw runtime_error("Gene set " + geneSetName + " is empty.");
     }
+    */
 
     // Locate the cell set and verify that it is not empty.
     const auto& it = cellSets.cellSets.find(cellSetName);
@@ -113,7 +115,13 @@ void ExpressionMatrix::createSignatureGraph(
         (2.*double(num_edges(signatureGraph)))/double(num_vertices(signatureGraph)) << endl;
 
     // Write out the signature graph in Graphviz format.
-    signatureGraph.write("SignatureGraph.dot");
+    // signatureGraph.writeGraphviz("SignatureGraph.dot");
+
+    // Write out the signature graph in svg format.
+    // This gives us more flexibility than using svg to create svg output.
+    SignatureGraph::SvgParameters svgParameters = signatureGraph.getDefaultSvgParameters();
+    // svgParameters.hideEdges = true;
+    signatureGraph.writeSvg("SignatureGraph.svg", svgParameters);
 
     cout << timestamp << "createSignatureGraph ends." << endl;
 }

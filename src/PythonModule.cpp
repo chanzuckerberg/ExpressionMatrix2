@@ -925,7 +925,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        .def("createSignatureGraph",
            &ExpressionMatrix::createSignatureGraph,
            "Prototype code. ",
-           arg("geneSetName") = "AllGenes",
+           // arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("lshName"),
            arg("minCellCount")

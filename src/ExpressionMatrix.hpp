@@ -621,7 +621,7 @@ public:
     // All cells with the same signature are aggregated
     // into a single vertex of the signature graph.
     void createSignatureGraph(
-        const string& geneSetName,
+        // const string& geneSetName,
         const string& cellSetName,
         const string& lshName,
         size_t minCellCount);

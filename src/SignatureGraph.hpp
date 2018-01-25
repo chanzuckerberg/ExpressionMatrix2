@@ -7,6 +7,7 @@
 #include "BitSet.hpp"
 #include "Ids.hpp"
 
+#include "boost_array.hpp"
 #include <boost/graph/adjacency_list.hpp>
 
 #include "iosfwd.hpp"
@@ -40,6 +41,9 @@ public:
 
     // Number of cells with this signature.
     CellId cellCount;
+
+    // The position of this vertex in the 2-D graph layout.
+    array<double, 2> position;
 };
 
 
@@ -61,8 +65,27 @@ public:
     void createEdges(size_t lshBitCount);
 
     // Write out the signature graph in Graphviz format.
-    void write(const string& fileName) const;
-    void write(ostream&) const;
+    void writeGraphviz(const string& fileName) const;
+    void writeGraphviz(ostream&) const;
+
+    // Write out the signature graph in Graphviz format.
+    class SvgParameters {
+    public:
+        bool hideEdges = false;
+        double svgSizePixels = 600;
+        double xViewBoxCenter = 0.;
+        double yViewBoxCenter= 0.;
+        double viewBoxHalfSize = 10.;
+        double vertexScalingFactor = 1.;
+        double edgeThickness = 1.e-3;
+    };
+    SvgParameters getDefaultSvgParameters();
+    void writeSvg(
+        const string& fileName,
+        const SvgParameters&);
+    void writeSvg(
+        ostream& s,
+        const SvgParameters&);
 
 
 private:
@@ -74,6 +97,10 @@ private:
         void operator()(ostream&, edge_descriptor) const;
         const SignatureGraph& graph;
     };
+
+    // Use Graphviz to compute the graph layout and store it in the vertex positions.
+    void computeLayout();
+    bool layoutWasComputed = false;
 };
 
 
