@@ -100,7 +100,7 @@ void ExpressionMatrix::createSignatureGraph(
 
     // Create the signature graph.
     const std::shared_ptr<SignatureGraph> signatureGraphPointer =
-        std::make_shared<SignatureGraph>(SignatureGraph());
+        std::make_shared<SignatureGraph>();
     signatureGraphs.insert(make_pair(signatureGraphName, signatureGraphPointer));
     SignatureGraph& signatureGraph = *signatureGraphPointer;
 
