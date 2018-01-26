@@ -923,9 +923,13 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
        // Signature graphs.
        .def("createSignatureGraph",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, size_t)
+           )
            &ExpressionMatrix::createSignatureGraph,
            "Prototype code. ",
-           // arg("geneSetName") = "AllGenes",
+           arg("signatureGraphName"),
            arg("cellSetName") = "AllCells",
            arg("lshName"),
            arg("minCellCount")

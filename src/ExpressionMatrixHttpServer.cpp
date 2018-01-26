@@ -86,6 +86,12 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(compareClustersDialog);
     CZI_ADD_TO_FUNCTION_TABLE(compareClusters);
     CZI_ADD_TO_FUNCTION_TABLE(createMetaDataFromClusterGraph);
+
+
+    // Signature graphs.
+    CZI_ADD_TO_FUNCTION_TABLE(exploreSignatureGraphs);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreSignatureGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(createSignatureGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 
@@ -237,6 +243,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Find pairs of similar cells", "similarPairs");
     writeNavigation(html, "Cell graphs", "cellGraphs");
     writeNavigation(html, "Clustering", "exploreClusterGraphs");
+    writeNavigation(html, "Signature graphs", "exploreSignatureGraphs");
 
     if(!serverParameters.docDirectory.empty()) {
         writeNavigation(html, "Help", "help/index.html");
@@ -257,8 +264,12 @@ void ExpressionMatrix::writeNavigation(ostream& html, const string& text, const 
         "background-color:LightBlue;"
         "width:100px;"
         "height:50px;"
-        "margin:3px;"
-        "border-radius:6px;"
+        // "box-shadow:0px 0px;"
+        // "margin: 0px 1px 0px 0px;"
+        // "border-radius:6px;"
+        "border-style: none solid solid none;"
+        "border-width: 1px;"
+        "border-color: White;"
         "text-align:center;"
         "vertical-align:middle;"
         "float:left;"
@@ -467,6 +478,29 @@ ostream& ExpressionMatrix::writeMetaDataSelection(
     html << "</select>";
 
     return html;
+}
+
+
+
+void ExpressionMatrix::removeCellGraph(
+    const vector<string>& request,
+    ostream& html)
+{
+    string graphName;
+    if(!getParameterValue(request, "graphName", graphName)) {
+        html << "<p>Missing graph name.";
+    } else {
+        const auto it = cellGraphs.find(graphName);
+        if(it == cellGraphs.end()) {
+            html << "<p>Graph " << graphName << " does not exist.";
+        } else {
+            cellGraphs.erase(it);
+            html << "<p>Graph " << graphName << " was removed.";
+        }
+    }
+
+
+    html << "<p><form action=cellGraphs><input type=submit autofocus value=Continue></form>";
 }
 
 
@@ -831,29 +865,6 @@ void ExpressionMatrix::createCellGraph(
 
 
 
-void ExpressionMatrix::removeCellGraph(
-    const vector<string>& request,
-    ostream& html)
-{
-    string graphName;
-    if(!getParameterValue(request, "graphName", graphName)) {
-        html << "<p>Missing graph name.";
-    } else {
-        const auto it = cellGraphs.find(graphName);
-        if(it == cellGraphs.end()) {
-            html << "<p>Graph " << graphName << " does not exist.";
-        } else {
-            cellGraphs.erase(it);
-            html << "<p>Graph " << graphName << " was removed.";
-        }
-    }
-
-
-    html << "<p><form action=cellGraphs><input type=submit autofocus value=Continue></form>";
-}
-
-
-
 // Get a list of the currently available sets of similar pairs.
 void ExpressionMatrix::getAvailableSimilarPairs(
     vector<string>& availableSimilarPairs) const
@@ -870,6 +881,27 @@ void ExpressionMatrix::getAvailableSimilarPairs(
         }
     }
 
+}
+
+
+// Get a list of the currently available sets of cell signatures
+// ( each corresponding to a possible Lsh objects).
+vector<string> ExpressionMatrix::getAvailableLsh() const
+{
+    vector<string> availableLshNames;
+
+    const string fileNamePrefix = directoryName + "/Lsh-";
+    const string fileNameSuffix = "-Info";
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(string name: directoryContents) {
+        // Here, name contains the entire file name.
+        if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
+            // Here, now contains just the similar pairs set name.
+            availableLshNames.push_back(name);
+        }
+    }
+
+    return availableLshNames;
 }
 
 

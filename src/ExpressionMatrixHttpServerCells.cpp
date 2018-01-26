@@ -76,6 +76,25 @@ ostream& ExpressionMatrix::writeCellSetSelection(
 
 
 
+ostream& ExpressionMatrix::writeLshSelection(
+    ostream& html,
+    const string& selectName) const
+{
+    const vector<string> availableLshNames = getAvailableLsh();
+
+    html << "<select title='Select one'";
+    html << " name=" << selectName << " style='vertical-align:text-top;'>";
+
+    for(const string& lshName: availableLshNames) {
+        html << "<option value='" << lshName << "'>" << lshName << "</option>";
+    }
+    html << "</select>";
+
+    return html;
+}
+
+
+
 void ExpressionMatrix::exploreCell(
     const vector<string>& request,
     ostream& html)

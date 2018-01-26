@@ -39,6 +39,7 @@ namespace ChanZuckerberg {
         class Lsh;
         class ServerParameters;
         class SimilarPairs;
+        class SignatureGraph;
 
     }
 }
@@ -617,14 +618,23 @@ public:
     void testExpressionMatrixSubset(CellId, CellId) const;
 
 
-    // Signature graph experiments.
+    // Signature graphs.
     // All cells with the same signature are aggregated
-    // into a single vertex of the signature graph.
+    // into a single vertex of a signature graph.
+    map<string, std::shared_ptr<SignatureGraph> > signatureGraphs;
     void createSignatureGraph(
-        // const string& geneSetName,
+        const string& signatureGraphName,
         const string& cellSetName,
         const string& lshName,
         size_t minCellCount);
+
+    // Check that a signature graph does not exist,
+    // and throw an exception if it does.
+    void checkSignatureGraphDoesNotExist(const string& signatureGraphName) const;
+
+    // Return a reference to a signature graph with a given name,
+    // and throw and exception if not found.
+    SignatureGraph& getSignatureGraph(const string& signatureGraphName);
 
 
 private:
@@ -809,6 +819,8 @@ private:
     void createCellGraph(const vector<string>& request, ostream& html);
     void removeCellGraph(const vector<string>& request, ostream& html);
     void getAvailableSimilarPairs(vector<string>&) const;
+    vector<string> getAvailableLsh() const;
+    ostream& writeLshSelection(ostream&, const string& selectName) const;
     void exploreMetaData(const vector<string>& request, ostream& html);
     void metaDataHistogram(const vector<string>& request, ostream& html);
     void metaDataContingencyTable(const vector<string>& request, ostream& html);
@@ -825,6 +837,9 @@ private:
     void compareClustersDialog(const vector<string>& request, ostream& html);
     void compareClusters(const vector<string>& request, ostream& html);
     void createMetaDataFromClusterGraph(const vector<string>& request, ostream& html);
+    void exploreSignatureGraphs(const vector<string>& request, ostream& html);
+    void exploreSignatureGraph(const vector<string>& request, ostream& html);
+    void createSignatureGraph(const vector<string>& request, ostream& html);
 
 
 

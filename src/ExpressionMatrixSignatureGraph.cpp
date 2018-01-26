@@ -10,28 +10,38 @@ using namespace ExpressionMatrix2;
 
 
 
-// Signature graph experiments.
+// Check that a signature graph does not exist,
+// and throw an exception if it does.
+void ExpressionMatrix::checkSignatureGraphDoesNotExist(
+    const string& signatureGraphName) const
+{
+    if(signatureGraphs.find(signatureGraphName) != signatureGraphs.end()) {
+        throw runtime_error("Signature graph " + signatureGraphName + " already exists.");
+    }
+
+}
+
+// Return a reference to a signature graph with a given name,
+// and throw and exception if not found.
+SignatureGraph& ExpressionMatrix::getSignatureGraph(const string& signatureGraphName)
+{
+    const auto it = signatureGraphs.find(signatureGraphName);
+    if(it == signatureGraphs.end()) {
+        throw runtime_error("Signature graph " + signatureGraphName + " does not exists.");
+    }
+    return *(it->second);
+}
+
+
 // All cells with the same signature are aggregated
 // into a single vertex of the signature graph.
 void ExpressionMatrix::createSignatureGraph(
-    // const string& geneSetName,
+    const string& signatureGraphName,
     const string& cellSetName,
     const string& lshName,
     size_t minCellCount)
 {
-    cout << timestamp << "createSignatureGraph begins." << endl;
-
-    /*
-    // Locate the gene set and verify that it is not empty.
-    const auto itGeneSet = geneSets.find(geneSetName);
-    if(itGeneSet == geneSets.end()) {
-        throw runtime_error("Gene set " + geneSetName + " does not exist.");
-    }
-    const GeneSet& geneSet = itGeneSet->second;
-    if(geneSet.size() == 0) {
-        throw runtime_error("Gene set " + geneSetName + " is empty.");
-    }
-    */
+    checkSignatureGraphDoesNotExist(signatureGraphName);
 
     // Locate the cell set and verify that it is not empty.
     const auto& it = cellSets.cellSets.find(cellSetName);
@@ -47,13 +57,13 @@ void ExpressionMatrix::createSignatureGraph(
     // Access the Lsh object that will do the computation.
     Lsh lsh(directoryName + "/Lsh-" + lshName);
     if(lsh.cellCount() != cellCount) {
-        throw runtime_error("LSH object " + lshName + " has a number of cells inconsistent with cell set " + cellSetName);
+        throw runtime_error("LSH object " + lshName +
+            " has a number of cells inconsistent with cell set " + cellSetName + ".");
     }
     const size_t lshBitCount = lsh.lshCount();
     cout << "Number of LSH signature bits is " << lshBitCount << "." << endl;
 
     // Gather cells with the same signature.
-    cout << timestamp << "Gathering cells by LSH signature." << endl;
     map<BitSetPointer, vector<CellId> > signatureMap;
     for(CellId cellId=0; cellId<cellCount; cellId++) {
         signatureMap[lsh.getSignature(cellId)].push_back(cellId);
@@ -62,7 +72,7 @@ void ExpressionMatrix::createSignatureGraph(
     cout << " populated signatures out of " << (1ULL<<lshBitCount);
     cout << " total possible signatures." << endl;
 
-
+#if 0
     // Create a histogram containing how many signatures have a given number of cells.
     {
         cout << timestamp << "Creating signature histogram." << endl;
@@ -86,12 +96,16 @@ void ExpressionMatrix::createSignatureGraph(
             }
         }
     }
+#endif
 
-
+    // Create the signature graph.
+    const std::shared_ptr<SignatureGraph> signatureGraphPointer =
+        std::make_shared<SignatureGraph>(SignatureGraph());
+    signatureGraphs.insert(make_pair(signatureGraphName, signatureGraphPointer));
+    SignatureGraph& signatureGraph = *signatureGraphPointer;
 
     // Create the vertices of the signature graph.
     cout << timestamp << "Creating vertices of the signature graph." << endl;
-    SignatureGraph signatureGraph;
     typedef SignatureGraph::vertex_descriptor vertex_descriptor;
     for(const auto& p: signatureMap) {
         const BitSetPointer signature = p.first;
