@@ -14,12 +14,16 @@ void ExpressionMatrix::exploreSignatureGraphs(const vector<string>& request, ost
         "are collapsed into a single vertex.";
 
     // Table of existing signature graphs.
-    html << "<h2>Existing signature graphs</h2><ul>";
+    html << "<h2>Existing signature graphs</h2><table>";
     for(const auto& p: signatureGraphs) {
-        html << "<li><a href='exploreSignatureGraph?signatureGraphName="
-            << p.first << "'>" << p.first << "</a>";
+        html << "<tr><td><a href='exploreSignatureGraph?signatureGraphName="
+            << p.first << "'>" << p.first << "</a>"
+            "<td><form action=removeSignatureGraph>"
+            "<input type=submit value='Remove'>"
+            "<input hidden type=text name=signatureGraphName value='" << p.first << "'>"
+            "</form>";
     }
-    html << "</ul>";
+    html << "</table>";
 
     // Form to create a new signature graph.
     html <<
@@ -89,5 +93,23 @@ void ExpressionMatrix::createSignatureGraph(const vector<string>& request, ostre
         "<p><form action=exploreSignatureGraph>"
         "<input type=text hidden name=signatureGraphName value=" << signatureGraphName <<
         "><input type=submit value=Continue></form>";
+
+}
+
+
+
+void ExpressionMatrix::removeSignatureGraph(const vector<string>& request, ostream& html)
+{
+    string signatureGraphName;
+    getParameterValue(request, "signatureGraphName", signatureGraphName);
+    if(signatureGraphName.empty()) {
+        html << "Signature graph name is missing.";
+        return;
+    }
+    removeSignatureGraph(signatureGraphName);
+
+    html << "<p>Signature graph " << signatureGraphName << " was removed."
+        "<p><form action=exploreSignatureGraphs>"
+        "<input type=submit value=Continue></form>";
 
 }

@@ -139,3 +139,13 @@ void ExpressionMatrix::createSignatureGraph(
 
     cout << timestamp << "createSignatureGraph ends." << endl;
 }
+
+
+void ExpressionMatrix::removeSignatureGraph(const string& signatureGraphName)
+{
+    const auto it = signatureGraphs.find(signatureGraphName);
+    if(it == signatureGraphs.end()) {
+        throw runtime_error("Signature graph " + signatureGraphName + " does not exists.");
+    }
+    signatureGraphs.erase(it);
+}

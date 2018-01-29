@@ -627,6 +627,7 @@ public:
         const string& cellSetName,
         const string& lshName,
         size_t minCellCount);
+    void removeSignatureGraph(const string& signatureGraphName);
 
     // Check that a signature graph does not exist,
     // and throw an exception if it does.
@@ -840,7 +841,7 @@ private:
     void exploreSignatureGraphs(const vector<string>& request, ostream& html);
     void exploreSignatureGraph(const vector<string>& request, ostream& html);
     void createSignatureGraph(const vector<string>& request, ostream& html);
-
+    void removeSignatureGraph(const vector<string>& request, ostream& html);
 
 
     // Class used by exploreGene.

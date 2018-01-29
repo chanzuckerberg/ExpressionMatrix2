@@ -92,6 +92,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(exploreSignatureGraphs);
     CZI_ADD_TO_FUNCTION_TABLE(exploreSignatureGraph);
     CZI_ADD_TO_FUNCTION_TABLE(createSignatureGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(removeSignatureGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 

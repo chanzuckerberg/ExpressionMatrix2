@@ -934,6 +934,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("lshName"),
            arg("minCellCount")
        )
+       .def("removeSignatureGraph",
+           (
+               void (ExpressionMatrix::*)
+               (const string&)
+           )
+           &ExpressionMatrix::removeSignatureGraph,
+           "Prototype code. ",
+           arg("signatureGraphName")
+       )
 
        // Cell graphs.
        .def("getCellGraphNames",
