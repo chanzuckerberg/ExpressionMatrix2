@@ -114,7 +114,9 @@ void ExpressionMatrix::processRequest(
     // If we did not find the keyword, see if it is a documentation request.
     if(it == serverFunctionTable.end()) {
 
-        // See if it is of the form help/xyz.
+
+
+        // See if it is a documentation request of the form help/xyz.
         // Here, xyz is not allowed to contain "../",
         // otherwise we would open a big security hole: requests of the form help/../../file
         // would give access to anywhere in the file system.
@@ -124,10 +126,32 @@ void ExpressionMatrix::processRequest(
             tokens.front().empty() &&
             tokens[1] == "help") {
             const string name = keyword.substr(6);
-            ifstream file(serverParameters.docDirectory + "/" + name);
-            if (file) {
-                html << "\r\n" << file.rdbuf();
+
+            if(serverParameters.docDirectory.empty()) {
+
+                // No documentation directory was specified in the
+                // server parameters.
+                // satisfy the request from the GitHub Pages.
+                // This documentation does not becessarily apply to the
+                // version we are running, but it is better than nothing.
+                html <<
+                    "\r\n"
+                    "<!DOCTYPE html>"
+                    "<html><script>window.location.replace("
+                    "'https://chanzuckerberg.github.io/ExpressionMatrix2/doc/" << name <<
+                    "');</script></html>";
                 return;
+
+
+            } else {
+
+                // Satisfy the documentation request as specified
+                // in serverParameters.
+                ifstream file(serverParameters.docDirectory + "/" + name);
+                if (file) {
+                    html << "\r\n" << file.rdbuf();
+                    return;
+                }
             }
         }
 
@@ -236,7 +260,7 @@ void ExpressionMatrix::explore(const ServerParameters& serverParameters)
 
 void ExpressionMatrix::writeNavigation(ostream& html)
 {
-    writeNavigation(html, "Summary", "index");
+    writeNavigation(html, "Summary", "index", "");
     writeNavigation(html, "Genes", "gene");
     writeNavigation(html, "Gene sets", "geneSets");
     writeNavigation(html, "Cells", "cell");
@@ -248,9 +272,12 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Clustering", "exploreClusterGraphs");
     writeNavigation(html, "Signature graphs", "exploreSignatureGraphs");
 
-    if(!serverParameters.docDirectory.empty()) {
-        writeNavigation(html, "Help", "help/index.html");
-    }
+    const string helpTooltip =
+        serverParameters.docDirectory.empty() ?
+        "Click here to read the latest documentation on GitHub "
+        "(not necessarily in sync with the version you are using)." :
+        "Click here to read the documentation.";
+    writeNavigation(html, "Help", "help/index.html", helpTooltip);
 
     html << "<div style='clear:both;height:10px;'></div>";
 
@@ -258,11 +285,19 @@ void ExpressionMatrix::writeNavigation(ostream& html)
 
 
 
-void ExpressionMatrix::writeNavigation(ostream& html, const string& text, const string& url)
+void ExpressionMatrix::writeNavigation(
+    ostream& html,
+    const string& text,
+    const string& url,
+    const string& tooltip)
 {
 
     html <<
-        "<button onclick=\"window.location = '" << url << "';\""
+        "<button onclick=\"window.location = '" << url << "';\"";
+    if(!tooltip.empty()) {
+        html << " title='" << tooltip << "'";
+    }
+    html <<
         " style='"
         "background-color:LightBlue;"
         "width:100px;"
