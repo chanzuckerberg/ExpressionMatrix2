@@ -299,6 +299,8 @@ void ExpressionMatrix::writeNavigation(
         html << " title='" << tooltip << "'";
     }
     html <<
+        " onmouseover='this.style.backgroundColor=\"DeepSkyBlue\";'"
+        " onmouseout='this.style.backgroundColor=\"LightBlue\";'"
         " style='"
         "background-color:LightBlue;"
         "width:100px;"
