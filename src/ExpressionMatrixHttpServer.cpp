@@ -115,13 +115,16 @@ void ExpressionMatrix::processRequest(
     if(it == serverFunctionTable.end()) {
 
         // See if it is of the form help/xyz.
-        // Here, xyz is not allowed to contain any slashes,
+        // Here, xyz is not allowed to contain "../",
         // otherwise we would open a big security hole: requests of the form help/../../file
         // would give access to anywhere in the file system.
         vector<string> tokens;
         boost::algorithm::split(tokens, keyword, boost::algorithm::is_any_of("/"));
-        if (tokens.size() == 3 && tokens.front().empty() && tokens[1] == "help") {
-            ifstream file(serverParameters.docDirectory + "/" + tokens[2]);
+        if (keyword.find("../") == string::npos &&
+            tokens.front().empty() &&
+            tokens[1] == "help") {
+            const string name = keyword.substr(6);
+            ifstream file(serverParameters.docDirectory + "/" + name);
             if (file) {
                 html << "\r\n" << file.rdbuf();
                 return;
