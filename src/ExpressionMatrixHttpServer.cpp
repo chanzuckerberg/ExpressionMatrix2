@@ -939,6 +939,7 @@ vector<string> ExpressionMatrix::getAvailableLsh() const
             availableLshNames.push_back(name);
         }
     }
+    sort(availableLshNames.begin(), availableLshNames.end());
 
     return availableLshNames;
 }
