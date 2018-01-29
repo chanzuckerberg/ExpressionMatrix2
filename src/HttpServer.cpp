@@ -69,6 +69,8 @@ void HttpServer::explore(uint16_t port)
               acceptor.close(); // Should not be necessary
               return;
           }
+
+          // Process the request.
           cout << timestamp << remoteEndpoint.address().to_string() << " " << flush;
           const auto t0 = std::chrono::steady_clock::now();
           processRequest(s);
@@ -82,6 +84,9 @@ void HttpServer::explore(uint16_t port)
 
 void HttpServer::processRequest(tcp::iostream& s)
 {
+    // If the client is too slow sending the request, drop it.
+    s.expires_from_now(boost::posix_time::seconds(1));
+
     // Get the first line, which must contain the GET request.
     string requestLine;
     getline(s, requestLine);
@@ -112,6 +117,9 @@ void HttpServer::processRequest(tcp::iostream& s)
         cout << "Empty GET request: " << requestLine;
         return;
     }
+
+    // Give ourselves time to satisfy the request
+    s.expires_from_now(boost::posix_time::seconds(86400));
 
     // Parse the request.
     cout << requestLine << endl;
