@@ -73,13 +73,12 @@ public:
     public:
         bool hideEdges = false;
         double svgSizePixels = 600;
-        double xViewBoxCenter = 0.;
-        double yViewBoxCenter= 0.;
-        double viewBoxHalfSize = 10.;
-        double vertexScalingFactor = 1.;
-        double edgeThickness = 1.e-3;
+        double xShift = 0.;
+        double yShift = 0.;
+        double zoomFactor = 1.;
+        double vertexSizeFactor = 1.;
+        double edgeThicknessFactor = 1.;
     };
-    SvgParameters getDefaultSvgParameters();
     void writeSvg(
         const string& fileName,
         const SvgParameters&);

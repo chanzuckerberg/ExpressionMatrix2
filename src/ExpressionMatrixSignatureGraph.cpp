@@ -133,7 +133,7 @@ void ExpressionMatrix::createSignatureGraph(
 
     // Write out the signature graph in svg format.
     // This gives us more flexibility than using svg to create svg output.
-    SignatureGraph::SvgParameters svgParameters = signatureGraph.getDefaultSvgParameters();
+    SignatureGraph::SvgParameters svgParameters;
     // svgParameters.hideEdges = true;
     signatureGraph.writeSvg("SignatureGraph.svg", svgParameters);
 

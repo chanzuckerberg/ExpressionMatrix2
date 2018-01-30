@@ -171,12 +171,29 @@ void SignatureGraph::computeLayout()
 
 
 
-SignatureGraph::SvgParameters SignatureGraph::getDefaultSvgParameters()
+// Write out the signature graph in Graphviz format.
+void SignatureGraph::writeSvg(
+    const string& fileName,
+    const SvgParameters& svgParameters)
 {
+    ofstream s(fileName);
+    writeSvg(s, svgParameters);
+}
+void SignatureGraph::writeSvg(
+    ostream& s,
+    const SvgParameters& svgParameters)
+{
+    // Make sure the layout was computed.
     computeLayout();
-    SvgParameters svgParameters;
 
-    // Compute minimum and maximum coordinates of the vertices coordinates,
+    // Objects used for random number generation (to generate random colors for the vertices).
+    const int seed = 231;
+    std::mt19937 randomGenerator(seed);
+    std::uniform_real_distribution<double> distribution(0, 1.);
+
+
+
+    // Compute minimum and maximum of the vertices coordinates,
     // and the maximum number of cells.
     double xMin = std::numeric_limits<double>::max();
     double xMax = std::numeric_limits<double>::min();
@@ -194,65 +211,44 @@ SignatureGraph::SvgParameters SignatureGraph::getDefaultSvgParameters()
         yMax = max(yMax, y);
         maxCellCount = max(maxCellCount, vertex.cellCount);
     }
-    const double xCenter = (xMin + xMax) / 2.;
-    const double yCenter = (yMin + yMax) / 2.;
 
-    const double xSize = xMax - xMin;
-    const double ySize = yMax - yMin;
+    // Center and size of the square bounding box containing all the vertices.
+    const double xBoundingBoxCenter = (xMin + xMax) / 2.;
+    const double yBoundingBoxCenter = (yMin + yMax) / 2.;
+    const double xBoundingBoxSize = xMax - xMin;
+    const double yBoundingBoxSize = yMax - yMin;
+    const double boundingBoxSize = max(xBoundingBoxSize, yBoundingBoxSize);
 
-    svgParameters.xViewBoxCenter = xCenter;
-    svgParameters.yViewBoxCenter = yCenter;
-    svgParameters.viewBoxHalfSize = max(xSize, ySize) / 2.;
-    svgParameters.vertexScalingFactor = (0.03 * svgParameters.viewBoxHalfSize) / sqrt(double(maxCellCount));
-
-    return svgParameters;
-}
-
+    // Viewbox parameters.
+    const double xViewBoxCenter = xBoundingBoxCenter - svgParameters.xShift;
+    const double yViewBoxCenter = yBoundingBoxCenter - svgParameters.yShift;
+    const double viewBoxSize = 1.05 * boundingBoxSize / svgParameters.zoomFactor;
+    const double xMinViewBox = xViewBoxCenter - viewBoxSize/2.;
+    const double yMinViewBox = yViewBoxCenter - viewBoxSize/2.;
 
 
-// Write out the signature graph in Graphviz format.
-void SignatureGraph::writeSvg(
-    const string& fileName,
-    const SvgParameters& svgParameters)
-{
-    ofstream s(fileName);
-    writeSvg(s, svgParameters);
-}
-void SignatureGraph::writeSvg(
-    ostream& s,
-    const SvgParameters& svgParameters)
-{
-    computeLayout();
 
-    // Objects used for random number generation (to generate random colors for the vertices).
-    const int seed = 231;
-    std::mt19937 randomGenerator(seed);
-    std::uniform_real_distribution<double> distribution(0, 1.);
+    // Compute a table of vertices ordered by decreasing number of cells.
+    vector< pair<vertex_descriptor, CellId> > sortedVertices;
+    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
+        const SignatureGraphVertex& vertex = graph[v];
+        sortedVertices.push_back(make_pair(v, vertex.cellCount));
+    }
+    sort(sortedVertices.begin(), sortedVertices.end(), OrderPairsBySecondGreater< pair<vertex_descriptor, CellId> >());
+
 
 
     // Start the svg object.
     s <<
-        "<svg width='" << svgParameters.svgSizePixels <<
-        "' height='" << svgParameters.svgSizePixels <<
-        "' viewBox='" <<
-        svgParameters.xViewBoxCenter-svgParameters.viewBoxHalfSize << " "
-        << svgParameters.yViewBoxCenter-svgParameters.viewBoxHalfSize << " " <<
-        2.*svgParameters.viewBoxHalfSize << " " << 2.*svgParameters.viewBoxHalfSize << "'"
-        // " style='background-color:black;'"
+        "<svg "
+        "width='" << svgParameters.svgSizePixels << "' "
+        "height='" << svgParameters.svgSizePixels << "' "
+        "viewBox='" << xMinViewBox << " " << yMinViewBox << " " << viewBoxSize << " " << viewBoxSize << "'"
         ">";
-
-    // Order the vertices by decreasing number of cells.
-    vector< pair<vertex_descriptor, CellId> > vertexTable;
-    SignatureGraph& graph = *this;
-    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
-        const SignatureGraphVertex& vertex = graph[v];
-        vertexTable.push_back(make_pair(v, vertex.cellCount));
-    }
-    sort(vertexTable.begin(), vertexTable.end(), OrderPairsBySecondGreater< pair<vertex_descriptor, CellId> >());
-
 
     // Draw the edges before the vertices, to avoid obscuring the vertices.
     if(!svgParameters.hideEdges) {
+        const double unscaledEdgeThickness = 5.e-4 * boundingBoxSize;
         BGL_FORALL_EDGES(e, graph, SignatureGraph) {
             const vertex_descriptor v1 = source(e, graph);
             const vertex_descriptor v2 = target(e, graph);
@@ -261,7 +257,8 @@ void SignatureGraph::writeSvg(
             s << "<line x1='" << vertex1.position[0] << "' y1='" << vertex1.position[1] << "'";
             s << " x2='" << vertex2.position[0] << "' y2='" << vertex2.position[1] << "'";
 
-            s << " style='stroke:black;stroke-width:" << svgParameters.edgeThickness << "' />";
+            s << " style='stroke:black;stroke-width:" <<
+                unscaledEdgeThickness * svgParameters.edgeThicknessFactor << "' />";
         }
     }
 
@@ -269,17 +266,22 @@ void SignatureGraph::writeSvg(
 
     // Write the vertices in order of decreasing size.
     // This way we mitigate obscuring of vertices by other vertices.
-    for(const auto& p: vertexTable) {
+    const double largestVertexUnscaledRadius = 0.03 * boundingBoxSize;
+    for(const auto& p: sortedVertices) {
         const vertex_descriptor v = p.first;
         const SignatureGraphVertex& vertex = graph[v];
         const double x = vertex.position[0];
         const double y = vertex.position[1];
-        const double vertexRadius = svgParameters.vertexScalingFactor * sqrt(double(vertex.cellCount));
+        const double vertexRadius =
+            svgParameters.vertexSizeFactor *
+            largestVertexUnscaledRadius *
+            sqrt(double(vertex.cellCount)/double(maxCellCount));
         const double red = distribution(randomGenerator);
         const double green = distribution(randomGenerator);
         const double blue = distribution(randomGenerator);
         const string vertexColor = color(red, green, blue);
-        s << "<circle cx='" << x << "' cy='" << y << "' r='" << vertexRadius << "' stroke='none' fill='" << vertexColor << "'></circle>";
+        s << "<circle cx='" << x << "' cy='" << y << "' r='" <<
+            vertexRadius << "' stroke='none' fill='" << vertexColor << "'></circle>";
 
     }
 

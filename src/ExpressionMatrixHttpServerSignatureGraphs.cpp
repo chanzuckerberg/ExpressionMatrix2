@@ -54,7 +54,7 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
 
     html << "<h1>Signature graph " << signatureGraphName << "</h1>";
 
-    SignatureGraph::SvgParameters svgParameters = signatureGraph.getDefaultSvgParameters();
+    SignatureGraph::SvgParameters svgParameters;
     signatureGraph.writeSvg(html, svgParameters);
 
 }
