@@ -240,7 +240,8 @@ void SignatureGraph::writeSvg(
 
     // Start the svg object.
     s <<
-        "<svg "
+        "<svg id=svgObject "
+        "style='border:solid black;margin:2;' "
         "width='" << svgParameters.svgSizePixels << "' "
         "height='" << svgParameters.svgSizePixels << "' "
         "viewBox='" << xMinViewBox << " " << yMinViewBox << " " << viewBoxSize << " " << viewBoxSize << "'"
@@ -248,6 +249,7 @@ void SignatureGraph::writeSvg(
 
     // Draw the edges before the vertices, to avoid obscuring the vertices.
     if(!svgParameters.hideEdges) {
+        s << "<g id=edges>";
         const double unscaledEdgeThickness = 5.e-4 * boundingBoxSize;
         BGL_FORALL_EDGES(e, graph, SignatureGraph) {
             const vertex_descriptor v1 = source(e, graph);
@@ -260,12 +262,14 @@ void SignatureGraph::writeSvg(
             s << " style='stroke:black;stroke-width:" <<
                 unscaledEdgeThickness * svgParameters.edgeThicknessFactor << "' />";
         }
+        s << "</g>";
     }
 
 
 
     // Write the vertices in order of decreasing size.
     // This way we mitigate obscuring of vertices by other vertices.
+    s << "<g id=vertices>";
     const double largestVertexUnscaledRadius = 0.03 * boundingBoxSize;
     for(const auto& p: sortedVertices) {
         const vertex_descriptor v = p.first;
@@ -282,8 +286,8 @@ void SignatureGraph::writeSvg(
         const string vertexColor = color(red, green, blue);
         s << "<circle cx='" << x << "' cy='" << y << "' r='" <<
             vertexRadius << "' stroke='none' fill='" << vertexColor << "'></circle>";
-
     }
+    s << "</g>";
 
 
 
