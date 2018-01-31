@@ -81,17 +81,24 @@ Edge thickness
 
 <script>
 
-var xCenter = 10.;
-var yCenter = 15.;
-var halfViewBoxSize = 5.;
-var mouseDown = false;
-var xMouse = 0;
-var yMouse = 0;
-var radiusFactor = 1.;
-var edgeThicknessFactor = 1.;
-var svgSize = 200.;
-var pixelSize = 2.*halfViewBoxSize / 200;
+// Turn off scrolling with the mouse wheel.
+// Otherwise it interacts with this page's use of the mouse wheel.
+// This is browser dependent. As coded, works 
+// in Firefox 58.0 and Chrome 64.0.
+function stopWheel(e){
+    if(!e) { 
+        e = window.event; 
+    } 
+    e.stopPropagation();
+    e.preventDefault();
+    e.cancelBubble = false;
+    return false;
+}
+document.addEventListener('DOMMouseScroll', stopWheel, false);
+document.addEventListener('wheel', stopWheel, false);
 
+
+// Set the viewBox of the svg object based on the current values of the global variables.
 function setViewBox()
 {
     var svg = document.getElementById("svgObject");
@@ -206,10 +213,28 @@ function handleGraphicsResizeEvent(e) {
     onwheel='zoomHandler(event);'>
 )###";
 
+
+    // Write the svg.
     SignatureGraph::SvgParameters svgParameters;
     signatureGraph.writeSvg(html, svgParameters);
+
+    // End the div that surrounds the svg.
     html << "</div>";
 
+    // Svg display parameters get written to the html in Javascript code
+    html <<
+        "<script>"
+        "xCenter = " << svgParameters.xShift << ";"
+        "yCenter = " << svgParameters.yShift << ";"
+        "halfViewBoxSize = 5.;"
+        "mouseDown = false;"
+        "xMouse = 0;"
+        "yMouse = 0;"
+        "radiusFactor = " << svgParameters.vertexSizeFactor << ";"
+        "edgeThicknessFactor = " << svgParameters.edgeThicknessFactor << ";"
+        "svgSize = " << svgParameters.svgSizePixels << ";"
+        "pixelSize = 2.*halfViewBoxSize / 200;"
+        "</script>";
 }
 
 

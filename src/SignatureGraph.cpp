@@ -241,7 +241,7 @@ void SignatureGraph::writeSvg(
     // Start the svg object.
     s <<
         "<svg id=svgObject "
-        "style='border:solid black;margin:2;' "
+        "style='border:solid DarkBlue;margin:2;' "
         "width='" << svgParameters.svgSizePixels << "' "
         "height='" << svgParameters.svgSizePixels << "' "
         "viewBox='" << xMinViewBox << " " << yMinViewBox << " " << viewBoxSize << " " << viewBoxSize << "'"
