@@ -97,6 +97,10 @@ function stopWheel(e){
 document.addEventListener('DOMMouseScroll', stopWheel, false);
 document.addEventListener('wheel', stopWheel, false);
 
+var mouseDown = false;
+var xMouse = 0;
+var yMouse = 0;
+
 
 // Set the viewBox of the svg object based on the current values of the global variables.
 function setViewBox()
@@ -133,6 +137,8 @@ function mouseMoveHandler(event) {
         var yDelta = event.clientY - yMouse;
         xCenter -= pixelSize*xDelta;
         yCenter -= pixelSize*yDelta;
+        xShift -= pixelSize*xDelta;
+        yShift -= pixelSize*yDelta;
         xMouse = event.clientX;
         yMouse = event.clientY;
         setViewBox();    
@@ -183,7 +189,7 @@ function handleEdgeThicknessEvent(e) {
 // Function called when the user moves the mouse wheel to zoom in or out.
 function zoomHandler(e) {
     var delta = extractWheelDelta(e);
-    var factor = Math.exp(-.001*delta);
+    var factor = Math.exp(.001*delta);
     halfViewBoxSize *= factor;
     pixelSize *= factor;
     setViewBox();
@@ -224,16 +230,15 @@ function handleGraphicsResizeEvent(e) {
     // Svg display parameters get written to the html in Javascript code
     html <<
         "<script>"
-        "xCenter = " << svgParameters.xShift << ";"
-        "yCenter = " << svgParameters.yShift << ";"
-        "halfViewBoxSize = 5.;"
-        "mouseDown = false;"
-        "xMouse = 0;"
-        "yMouse = 0;"
-        "radiusFactor = " << svgParameters.vertexSizeFactor << ";"
-        "edgeThicknessFactor = " << svgParameters.edgeThicknessFactor << ";"
-        "svgSize = " << svgParameters.svgSizePixels << ";"
-        "pixelSize = 2.*halfViewBoxSize / 200;"
+        "var xShift = " << svgParameters.xShift << ";"
+        "var yShift = " << svgParameters.yShift << ";"
+        "var xCenter = " << svgParameters.xCenter << ";"
+        "var yCenter = " << svgParameters.yCenter << ";"
+        "var halfViewBoxSize = " << svgParameters.halfViewBoxSize << ";"
+        "var radiusFactor = " << svgParameters.vertexSizeFactor << ";"
+        "var edgeThicknessFactor = " << svgParameters.edgeThicknessFactor << ";"
+        "var svgSize = " << svgParameters.svgSizePixels << ";"
+        "var pixelSize = " << svgParameters.pixelSize << ";"
         "</script>";
 }
 

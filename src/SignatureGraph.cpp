@@ -174,14 +174,14 @@ void SignatureGraph::computeLayout()
 // Write out the signature graph in Graphviz format.
 void SignatureGraph::writeSvg(
     const string& fileName,
-    const SvgParameters& svgParameters)
+    SvgParameters& svgParameters)
 {
     ofstream s(fileName);
     writeSvg(s, svgParameters);
 }
 void SignatureGraph::writeSvg(
     ostream& s,
-    const SvgParameters& svgParameters)
+    SvgParameters& svgParameters)
 {
     // Make sure the layout was computed.
     computeLayout();
@@ -225,6 +225,12 @@ void SignatureGraph::writeSvg(
     const double viewBoxSize = 1.05 * boundingBoxSize / svgParameters.zoomFactor;
     const double xMinViewBox = xViewBoxCenter - viewBoxSize/2.;
     const double yMinViewBox = yViewBoxCenter - viewBoxSize/2.;
+
+    // Fill in the rest of the SvgParameters.
+    svgParameters.xCenter = xViewBoxCenter;
+    svgParameters.yCenter = yViewBoxCenter;
+    svgParameters.halfViewBoxSize = viewBoxSize / 2.;
+    svgParameters.pixelSize = viewBoxSize / svgParameters.svgSizePixels;
 
 
 

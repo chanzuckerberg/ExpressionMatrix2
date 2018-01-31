@@ -68,9 +68,10 @@ public:
     void writeGraphviz(const string& fileName) const;
     void writeGraphviz(ostream&) const;
 
-    // Write out the signature graph in Graphviz format.
+    // Paramters to control svg output.
     class SvgParameters {
     public:
+        // Parameters that can be set arbitrarily.
         bool hideEdges = false;
         double svgSizePixels = 600;
         double xShift = 0.;
@@ -78,13 +79,22 @@ public:
         double zoomFactor = 1.;
         double vertexSizeFactor = 1.;
         double edgeThicknessFactor = 1.;
+        // Parameters derived from the above values.
+        // These are filled in by writeSvg.
+        double xCenter;
+        double yCenter;
+        double halfViewBoxSize;
+        double pixelSize;
     };
+
+
+    // Write out the signature graph in Graphviz format.
     void writeSvg(
         const string& fileName,
-        const SvgParameters&);
+        SvgParameters&);
     void writeSvg(
         ostream& s,
-        const SvgParameters&);
+        SvgParameters&);
 
 
 private:
