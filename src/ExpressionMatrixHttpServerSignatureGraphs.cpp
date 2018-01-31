@@ -179,7 +179,8 @@ function handleVertexResizeEvent(e) {
     for(i=0; i<vertices.length; i++) {
         vertex = vertices[i];
         if(vertex.tagName == "circle") {
-            vertex.setAttribute("r", factor*vertex.getAttribute("r"));
+            // vertex.setAttribute("r", factor*vertex.getAttribute("r"));
+            vertex.transform.baseVal.getItem(1).setScale(radiusFactor, radiusFactor); 
         }
     }
 }

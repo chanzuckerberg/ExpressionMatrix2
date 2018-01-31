@@ -283,15 +283,16 @@ void SignatureGraph::writeSvg(
         const double x = vertex.position[0];
         const double y = vertex.position[1];
         const double vertexRadius =
-            svgParameters.vertexSizeFactor *
             largestVertexUnscaledRadius *
             sqrt(double(vertex.cellCount)/double(maxCellCount));
         const double red = distribution(randomGenerator);
         const double green = distribution(randomGenerator);
         const double blue = distribution(randomGenerator);
         const string vertexColor = color(red, green, blue);
-        s << "<circle cx='" << x << "' cy='" << y << "' r='" <<
-            vertexRadius << "' stroke='none' fill='" << vertexColor << "'></circle>";
+        s << "<circle cx='0' cy='0' r='" <<
+            vertexRadius << "' stroke='none' fill='" << vertexColor << "'"
+            " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
+            "></circle>";
     }
     s << "</g>";
 
