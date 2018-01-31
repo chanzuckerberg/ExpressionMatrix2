@@ -52,34 +52,36 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
     }
     SignatureGraph& signatureGraph = getSignatureGraph(signatureGraphName);
 
-    html << "<h1>Signature graph " << signatureGraphName << "</h1>";
+    html << "<h2>Signature graph " << signatureGraphName << "</h2>";
 
 
 
     // Write out the JavaScript and html to allow manipulating the svg.
     html << R"###(
-<button 
-    onwheel='handleGraphicsResizeEvent(event);' 
-    style="width:80px;height:50px;"
-    title="With the mouse pointing here, use the mouse wheel to control the size of the graphics window.">
-Graphics size
-</button>
-<button 
-    onwheel='handleVertexResizeEvent(event);' 
-    style="width:80px;height:50px;" 
-    title="With the mouse pointing here, use the mouse wheel to control the size of the vertices.">
-Vertex size
-</button>
-<button 
-    onwheel='handleEdgeThicknessEvent(event);' 
-    style="width:80px;height:50px;" 
-    title="With the mouse pointing here, use the mouse wheel to control the thickness of the edges.">
-Edge thickness
-</button>
-
 <br>
+To pan  the graphics, use the mouse to drag an empty location in the graph.
+<br>
+<form id=mouseWheelForm>
+Mouse wheel controls: 
+<input id=mouseWheelFormDefault type="radio" onclick='updateMouseWheelFunction(this)' name="mouseWheelFunction" value="zoom" checked=checked>zoom 
+<input type="radio" onclick='updateMouseWheelFunction(this)' name="mouseWheelFunction" value="graphicsSize">graphics size 
+<input type="radio" onclick='updateMouseWheelFunction(this)' name="mouseWheelFunction" value="vertexSize">vertex size 
+<input type="radio" onclick='updateMouseWheelFunction(this)' name="mouseWheelFunction" value="edgeThickness">edge thickness
+</form>
+
+
 
 <script>
+document.getElementById("mouseWheelFormDefault").checked = true;
+// Function called when the user clicks one of the radio buttons
+// that control mouse wheel function.
+var mouseWheelFunction = "zoom";
+function updateMouseWheelFunction(element) 
+{
+    if(element.checked) {
+        mouseWheelFunction = element.value;
+    }
+}
 
 // Turn off scrolling with the mouse wheel.
 // Otherwise it interacts with this page's use of the mouse wheel.
@@ -149,6 +151,23 @@ function mouseUpHandler() {
     mouseDown = false;
 }
 
+
+
+// Function called when the user moves the mouse wheel.
+function handleMouseWheelEvent(e) 
+{
+    if(mouseWheelFunction == "zoom") {
+        zoomHandler(e);
+    } else if(mouseWheelFunction == "graphicsSize") {
+        handleGraphicsResizeEvent(e);
+    } else if(mouseWheelFunction == "vertexSize") {
+        handleVertexResizeEvent(e);
+    } else if(mouseWheelFunction == "edgeThickness") {
+        handleEdgeThicknessEvent(e);
+    }
+}
+
+
 // Function called when the user moves the mouse wheel to resize the vertices.
 function handleVertexResizeEvent(e) {
     var delta = extractWheelDelta(e);
@@ -216,7 +235,7 @@ function handleGraphicsResizeEvent(e) {
     onmousedown='mouseDownHandler(event);' 
     onmouseup='mouseUpHandler(event);' 
     onmousemove='mouseMoveHandler(event);'
-    onwheel='zoomHandler(event);'>
+    onwheel='handleMouseWheelEvent(event);'>
 )###";
 
 
