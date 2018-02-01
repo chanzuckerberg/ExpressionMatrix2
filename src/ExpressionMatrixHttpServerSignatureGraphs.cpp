@@ -44,6 +44,7 @@ void ExpressionMatrix::exploreSignatureGraphs(const vector<string>& request, ost
 
 void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostream& html)
 {
+    // Get parameters from the request.
     string signatureGraphName;
     getParameterValue(request, "signatureGraphName", signatureGraphName);
     if(signatureGraphName.empty()) {
@@ -51,6 +52,25 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
         return;
     }
     SignatureGraph& signatureGraph = getSignatureGraph(signatureGraphName);
+
+    string coloringOption = "random";
+    getParameterValue(request, "coloringOption", coloringOption);
+
+    string metaDataName;
+    getParameterValue(request, "metaDataName", metaDataName);
+
+    SignatureGraph::SvgParameters svgParameters;
+    string hideEdges;
+    getParameterValue(request, "hideEdges", hideEdges);
+    svgParameters.hideEdges = (hideEdges == "on");
+    getParameterValue(request, "svgSizePixels", svgParameters.svgSizePixels);
+    getParameterValue(request, "xShift", svgParameters.xShift);
+    getParameterValue(request, "yShift", svgParameters.yShift);
+    getParameterValue(request, "zoomFactor", svgParameters.zoomFactor);
+    getParameterValue(request, "vertexSizeFactor", svgParameters.vertexSizeFactor);
+    getParameterValue(request, "edgeThicknessFactor", svgParameters.edgeThicknessFactor);
+
+
 
     html << "<h2>Signature graph " << signatureGraphName << "</h2>";
 
@@ -139,8 +159,8 @@ function mouseMoveHandler(event) {
         var yDelta = event.clientY - yMouse;
         xCenter -= pixelSize*xDelta;
         yCenter -= pixelSize*yDelta;
-        xShift -= pixelSize*xDelta;
-        yShift -= pixelSize*yDelta;
+        xShift += pixelSize*xDelta;
+        yShift += pixelSize*yDelta;
         xMouse = event.clientX;
         yMouse = event.clientY;
         setViewBox();    
@@ -172,7 +192,7 @@ function handleMouseWheelEvent(e)
 function handleVertexResizeEvent(e) {
     var delta = extractWheelDelta(e);
     var factor = Math.exp(-.001*delta);
-    radiusFactor *= factor;
+    vertexSizeFactor *= factor;
     
     // Resize all the vertices.
     var vertices = document.getElementById("vertices").childNodes;
@@ -180,7 +200,7 @@ function handleVertexResizeEvent(e) {
         vertex = vertices[i];
         if(vertex.tagName == "circle") {
             // vertex.setAttribute("r", factor*vertex.getAttribute("r"));
-            vertex.transform.baseVal.getItem(1).setScale(radiusFactor, radiusFactor); 
+            vertex.transform.baseVal.getItem(1).setScale(vertexSizeFactor, vertexSizeFactor); 
         }
     }
 }
@@ -210,6 +230,7 @@ function handleEdgeThicknessEvent(e) {
 function zoomHandler(e) {
     var delta = extractWheelDelta(e);
     var factor = Math.exp(.001*delta);
+    zoomFactor /= factor;
     halfViewBoxSize *= factor;
     pixelSize *= factor;
     setViewBox();
@@ -221,7 +242,7 @@ function zoomHandler(e) {
 function handleGraphicsResizeEvent(e) {
     var delta = extractWheelDelta(e);
     var factor = Math.exp(-.001*delta);
-    svgSize *= factor;
+    svgSizePixels *= factor;
     pixelSize /= factor;
     
     svg = document.getElementById("svgObject");
@@ -229,37 +250,100 @@ function handleGraphicsResizeEvent(e) {
     svg.setAttribute("height", factor*svg.getAttribute("height"));
 }
 
+
+// Function called when the user clicks "Redraw graph."
+function prepareColoringFormForSubmit()
+{
+    document.getElementById("svgSizePixels").value = svgSizePixels;
+    document.getElementById("xShift").value = xShift;
+    document.getElementById("yShift").value = yShift;
+    document.getElementById("zoomFactor").value = zoomFactor;
+    document.getElementById("vertexSizeFactor").value = vertexSizeFactor;
+    document.getElementById("edgeThicknessFactor").value = edgeThicknessFactor;
+}
 </script>
-
-
-<div 
-    onmousedown='mouseDownHandler(event);' 
-    onmouseup='mouseUpHandler(event);' 
-    onmousemove='mouseMoveHandler(event);'
-    onwheel='handleMouseWheelEvent(event);'>
 )###";
 
 
-    // Write the svg.
-    SignatureGraph::SvgParameters svgParameters;
-    signatureGraph.writeSvg(html, svgParameters);
+    // Div to contain the svg graphics and the form for coloring.
+    html << "<div>";
 
-    // End the div that surrounds the svg.
+
+    // Write the svg.
+    html <<
+        "<div style='float:left;'"
+        "onmousedown='mouseDownHandler(event);'"
+        "onmouseup='mouseUpHandler(event);'"
+        "onmousemove='mouseMoveHandler(event);'"
+        "onwheel='handleMouseWheelEvent(event);'>";
+    signatureGraph.writeSvg(html, svgParameters);
     html << "</div>";
 
     // Svg display parameters get written to the html in Javascript code
     html <<
         "<script>"
+        "var svgSizePixels = " << svgParameters.svgSizePixels << ";"
         "var xShift = " << svgParameters.xShift << ";"
         "var yShift = " << svgParameters.yShift << ";"
+        "var zoomFactor = " << svgParameters.zoomFactor << ";"
+        "var vertexSizeFactor = " << svgParameters.vertexSizeFactor << ";"
+        "var edgeThicknessFactor = " << svgParameters.edgeThicknessFactor << ";"
         "var xCenter = " << svgParameters.xCenter << ";"
         "var yCenter = " << svgParameters.yCenter << ";"
         "var halfViewBoxSize = " << svgParameters.halfViewBoxSize << ";"
-        "var radiusFactor = " << svgParameters.vertexSizeFactor << ";"
-        "var edgeThicknessFactor = " << svgParameters.edgeThicknessFactor << ";"
-        "var svgSize = " << svgParameters.svgSizePixels << ";"
         "var pixelSize = " << svgParameters.pixelSize << ";"
         "</script>";
+
+
+
+    // Form for coloring the graph.
+    html <<
+        "<div>"
+        "<form id=coloringForm onsubmit='prepareColoringFormForSubmit()'>"
+        "<br><input type=radio name=coloringOption value=black";
+    if(coloringOption == "black") {
+        html << " checked=checked";
+    }
+    html <<
+        ">Color black"
+        "<br><input type=radio name=coloringOption value=random";
+    if(coloringOption == "random") {
+        html << " checked=checked";
+    }
+    html <<
+        ">Color randomly"
+        "<br><input type=radio name=coloringOption value=byMetaData";
+    if(coloringOption == "byMetaData") {
+        html << " checked=checked";
+    }
+    html <<
+        ">Color by meta data field ";
+    set<string> selectedMetaData;
+    if(!metaDataName.empty()) {
+        selectedMetaData.insert(metaDataName);
+    }
+    writeMetaDataSelection(html, "metaDataName", selectedMetaData, false);
+    html << "<br><input type=checkbox name=hideEdges";
+    if(svgParameters.hideEdges) {
+        html << " checked=checked";
+    }
+    html <<
+        ">Hide edges"
+        "<input type=text hidden id=signatureGraphName name=signatureGraphName value='" << signatureGraphName << "'>"
+        "<input type=text hidden id=svgSizePixels name=svgSizePixels>"
+        "<input type=text hidden id=xShift name=xShift>"
+        "<input type=text hidden id=yShift name=yShift>"
+        "<input type=text hidden id=zoomFactor name=zoomFactor>"
+        "<input type=text hidden id=vertexSizeFactor name=vertexSizeFactor>"
+        "<input type=text hidden id=edgeThicknessFactor name=edgeThicknessFactor>"
+        "<p><button type=submit>Redraw graph</button>"
+        "</form>"
+        "</div>";
+
+
+
+    // End the div containing the svg graphics and the form for coloring.
+    html << "</div>";
 }
 
 

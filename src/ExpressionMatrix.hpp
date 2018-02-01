@@ -637,8 +637,15 @@ public:
     // and throw and exception if not found.
     SignatureGraph& getSignatureGraph(const string& signatureGraphName);
 
-
 private:
+    // Functions to color a signature graph.
+    // These set the color field of the vertices.
+    void colorBlack(SignatureGraph&) const;
+    void colorRandom(SignatureGraph&) const;
+    void colorByMetaDataInterpretedAsCategory(SignatureGraph&) const;
+    void colorByMetaDataInterpretedAsColor(SignatureGraph&) const;
+
+
 
     // The directory that contains the binary data for this Expression matrix.
     string directoryName;

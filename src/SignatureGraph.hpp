@@ -12,6 +12,7 @@
 
 #include "iosfwd.hpp"
 #include "map.hpp"
+#include "utility.hpp"
 
 
 
@@ -44,6 +45,12 @@ public:
 
     // The position of this vertex in the 2-D graph layout.
     array<double, 2> position;
+
+    // The colors to be used to render this vertex.
+    // If more than onem, the vertex is rendered as a pie chart.
+    // Each color comes with a weight that determines
+    // its fraction of the pie chart.
+    vector< pair<string, double> > colors;
 };
 
 
@@ -73,7 +80,7 @@ public:
     public:
         // Parameters that can be set arbitrarily.
         bool hideEdges = false;
-        double svgSizePixels = 600;
+        double svgSizePixels = 500;
         double xShift = 0.;
         double yShift = 0.;
         double zoomFactor = 1.;
