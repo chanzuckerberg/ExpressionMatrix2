@@ -186,11 +186,6 @@ void SignatureGraph::writeSvg(
     // Make sure the layout was computed.
     computeLayout();
 
-    // Objects used for random number generation (to generate random colors for the vertices).
-    const int seed = 231;
-    std::mt19937 randomGenerator(seed);
-    std::uniform_real_distribution<double> distribution(0, 1.);
-
 
 
     // Compute minimum and maximum of the vertices coordinates,
@@ -285,14 +280,21 @@ void SignatureGraph::writeSvg(
         const double vertexRadius =
             largestVertexUnscaledRadius *
             sqrt(double(vertex.cellCount)/double(maxCellCount));
-        const double red = distribution(randomGenerator);
-        const double green = distribution(randomGenerator);
-        const double blue = distribution(randomGenerator);
-        const string vertexColor = color(red, green, blue);
-        s << "<circle cx='0' cy='0' r='" <<
-            vertexRadius << "' stroke='none' fill='" << vertexColor << "'"
-            " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
-            "></circle>";
+
+        if(vertex.colors.size() < 2) {
+
+            // Draw the vertex as a circle.
+            const string vertexColor = vertex.colors.empty() ? string("black") : vertex.colors.front().first;
+            s << "<circle cx='0' cy='0' r='" <<
+                vertexRadius << "' stroke='none' fill='" << vertexColor << "'"
+                " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
+                "></circle>";
+
+        } else {
+
+            // Draw the vertex as a pie chart using svg path elements.
+            CZI_ASSERT(0);
+        }
     }
     s << "</g>";
 

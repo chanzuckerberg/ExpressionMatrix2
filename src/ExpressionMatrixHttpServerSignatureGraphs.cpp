@@ -75,6 +75,16 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
     html << "<h2>Signature graph " << signatureGraphName << "</h2>";
 
 
+    // Color the signature graph as requested.
+    if(coloringOption == "byMetaData") {
+        colorByMetaDataInterpretedAsCategory(signatureGraph, metaDataName);
+    } else if(coloringOption == "random") {
+        colorRandom(signatureGraph);
+    } else {
+        colorBlack(signatureGraph);
+    }
+
+
 
     // Write out the JavaScript and html to allow manipulating the svg.
     html << R"###(

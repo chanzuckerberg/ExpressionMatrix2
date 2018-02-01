@@ -5,6 +5,9 @@ using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
 #include "SignatureGraph.hpp"
+#include "color.hpp"
+
+#include <boost/graph/iteration_macros.hpp>
 
 #include "fstream.hpp"
 
@@ -149,3 +152,55 @@ void ExpressionMatrix::removeSignatureGraph(const string& signatureGraphName)
     }
     signatureGraphs.erase(it);
 }
+
+
+
+void ExpressionMatrix::colorBlack(SignatureGraph& graph) const
+{
+    const pair<string, double> p("black", 1.);
+    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
+        SignatureGraphVertex& vertex = graph[v];
+        vertex.colors.resize(1);
+        vertex.colors.front() = p;
+    }
+
+}
+
+
+
+void ExpressionMatrix::colorRandom(SignatureGraph& graph) const
+{
+    // Objects used for random number generation.
+    const int seed = 231;
+    std::mt19937 randomGenerator(seed);
+    std::uniform_real_distribution<double> distribution(0, 1.);
+
+    // Loop over all vertices.
+    string vertexColor;
+    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
+        SignatureGraphVertex& vertex = graph[v];
+        const double red = distribution(randomGenerator);
+        const double green = distribution(randomGenerator);
+        const double blue = distribution(randomGenerator);
+        vertexColor = color(red, green, blue);
+        vertex.colors.resize(1);
+        vertex.colors.front() = make_pair(vertexColor, 1.);
+    }
+}
+
+
+
+void ExpressionMatrix::colorByMetaDataInterpretedAsCategory(SignatureGraph&, const string& metaDataName) const
+{
+    throw runtime_error("Signature graph coloring by meta data interpreted as category is not implemented.");
+}
+
+void ExpressionMatrix::colorByMetaDataInterpretedAsColor(SignatureGraph&) const
+{
+    throw runtime_error("Signature graph coloring by meta data interpreted as color is not implemented.");
+}
+void ExpressionMatrix::colorByMetaDataInterpretedAsNumber(SignatureGraph&) const
+{
+    throw runtime_error("Signature graph coloring by meta data interpreted as number is not implemented.");
+}
+

@@ -642,8 +642,9 @@ private:
     // These set the color field of the vertices.
     void colorBlack(SignatureGraph&) const;
     void colorRandom(SignatureGraph&) const;
-    void colorByMetaDataInterpretedAsCategory(SignatureGraph&) const;
+    void colorByMetaDataInterpretedAsCategory(SignatureGraph&, const string& metaDataName) const;
     void colorByMetaDataInterpretedAsColor(SignatureGraph&) const;
+    void colorByMetaDataInterpretedAsNumber(SignatureGraph&) const;
 
 
 
