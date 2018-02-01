@@ -154,7 +154,6 @@ void ExpressionMatrix::removeSignatureGraph(const string& signatureGraphName)
 }
 
 
-
 void ExpressionMatrix::colorBlack(SignatureGraph& graph) const
 {
     const pair<string, double> p("black", 1.);
@@ -195,11 +194,11 @@ void ExpressionMatrix::colorByMetaDataInterpretedAsCategory(SignatureGraph&, con
     throw runtime_error("Signature graph coloring by meta data interpreted as category is not implemented.");
 }
 
-void ExpressionMatrix::colorByMetaDataInterpretedAsColor(SignatureGraph&) const
+void ExpressionMatrix::colorByMetaDataInterpretedAsColor(SignatureGraph&, const string& metaDataName) const
 {
     throw runtime_error("Signature graph coloring by meta data interpreted as color is not implemented.");
 }
-void ExpressionMatrix::colorByMetaDataInterpretedAsNumber(SignatureGraph&) const
+void ExpressionMatrix::colorByMetaDataInterpretedAsNumber(SignatureGraph&, const string& metaDataName) const
 {
     throw runtime_error("Signature graph coloring by meta data interpreted as number is not implemented.");
 }

@@ -70,6 +70,9 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
     getParameterValue(request, "vertexSizeFactor", svgParameters.vertexSizeFactor);
     getParameterValue(request, "edgeThicknessFactor", svgParameters.edgeThicknessFactor);
 
+    string metaDataMeaning = "category";
+    getParameterValue(request, "metaDataMeaning", metaDataMeaning);
+
 
 
     html << "<h2>Signature graph " << signatureGraphName << "</h2>";
@@ -77,7 +80,13 @@ void ExpressionMatrix::exploreSignatureGraph(const vector<string>& request, ostr
 
     // Color the signature graph as requested.
     if(coloringOption == "byMetaData") {
-        colorByMetaDataInterpretedAsCategory(signatureGraph, metaDataName);
+        if(metaDataMeaning == "number") {
+            colorByMetaDataInterpretedAsNumber(signatureGraph, metaDataName);
+        } else if(metaDataMeaning == "color") {
+            colorByMetaDataInterpretedAsColor(signatureGraph, metaDataName);
+        } else {
+            colorByMetaDataInterpretedAsCategory(signatureGraph, metaDataName);
+        }
     } else if(coloringOption == "random") {
         colorRandom(signatureGraph);
     } else {
@@ -333,6 +342,23 @@ function prepareColoringFormForSubmit()
         selectedMetaData.insert(metaDataName);
     }
     writeMetaDataSelection(html, "metaDataName", selectedMetaData, false);
+    html << " interpreted as a <select name=metaDataMeaning>";
+    html << "<option value=category";
+    if(metaDataMeaning == "category") {
+        html << " selected=selected";
+    }
+    html << ">category</option>";
+    html << "<option value=number";
+    if(metaDataMeaning == "number") {
+        html << " selected=selected";
+    }
+    html << ">number</option>";
+    html << "<option value=color";
+    if(metaDataMeaning == "color") {
+        html << " selected=selected";
+    }
+    html << ">color</option>";
+    html << "</select>.";
     html << "<br><input type=checkbox name=hideEdges";
     if(svgParameters.hideEdges) {
         html << " checked=checked";

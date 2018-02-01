@@ -643,8 +643,8 @@ private:
     void colorBlack(SignatureGraph&) const;
     void colorRandom(SignatureGraph&) const;
     void colorByMetaDataInterpretedAsCategory(SignatureGraph&, const string& metaDataName) const;
-    void colorByMetaDataInterpretedAsColor(SignatureGraph&) const;
-    void colorByMetaDataInterpretedAsNumber(SignatureGraph&) const;
+    void colorByMetaDataInterpretedAsColor(SignatureGraph&, const string& metaDataName) const;
+    void colorByMetaDataInterpretedAsNumber(SignatureGraph&, const string& metaDataName) const;
 
 
 
