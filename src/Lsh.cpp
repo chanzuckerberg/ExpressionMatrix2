@@ -155,7 +155,7 @@ void Lsh::computeCellLshSignatures(
 
     // Loop over all the cells in the cell set we are using.
     // The CellId is local to the cell set we are using.
-    const CellId messageFrequency = CellId(1.e7 / lshCount);
+    const CellId messageFrequency = CellId(1.e7 / double(lshCount);
     cout << timestamp << "Computation of cell LSH signatures begins." << endl;
     const auto t0 = std::chrono::steady_clock::now();
     for(CellId localCellId=0; localCellId<cellCount; localCellId++) {
