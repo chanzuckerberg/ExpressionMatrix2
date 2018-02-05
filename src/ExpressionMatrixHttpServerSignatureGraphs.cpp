@@ -217,8 +217,8 @@ function handleVertexResizeEvent(e) {
     var vertices = document.getElementById("vertices").childNodes;
     for(i=0; i<vertices.length; i++) {
         vertex = vertices[i];
-        if(vertex.tagName == "circle") {
-            // vertex.setAttribute("r", factor*vertex.getAttribute("r"));
+        if(vertex.tagName == "circle" || vertex.tagName == "path") {
+            // vertex.setAttribute("r", factor*vertex.getAttribute("r")); This only works for circles.
             vertex.transform.baseVal.getItem(1).setScale(vertexSizeFactor, vertexSizeFactor); 
         }
     }
@@ -290,10 +290,10 @@ function prepareColoringFormForSubmit()
 
     // Write the svg.
     html <<
-        "<div style='float:left;'"
-        "onmousedown='mouseDownHandler(event);'"
-        "onmouseup='mouseUpHandler(event);'"
-        "onmousemove='mouseMoveHandler(event);'"
+        "<div style='float:left;' "
+        "onmousedown='mouseDownHandler(event);' "
+        "onmouseup='mouseUpHandler(event);' "
+        "onmousemove='mouseMoveHandler(event);' "
         "onwheel='handleMouseWheelEvent(event);'>";
     signatureGraph.writeSvg(html, svgParameters);
     html << "</div>";

@@ -40,8 +40,13 @@ public:
     // The signature common to all cells of this vertex.
     BitSetPointer signature;
 
-    // Number of cells with this signature.
-    CellId cellCount;
+    // The cells with this signature.
+    vector<CellId> localCellIds;    // Local to cell set used to create the signature graph.
+    vector<CellId> globalCellIds;
+    CellId cellCount() const
+    {
+        return CellId(localCellIds.size());
+    }
 
     // The position of this vertex in the 2-D graph layout.
     array<double, 2> position;

@@ -67,6 +67,7 @@ void ExpressionMatrix::createSignatureGraph(
     cout << "Number of LSH signature bits is " << lshBitCount << "." << endl;
 
     // Gather cells with the same signature.
+    // These are cell ids local to the cell set we are using to create the signature graph.
     map<BitSetPointer, vector<CellId> > signatureMap;
     for(CellId cellId=0; cellId<cellCount; cellId++) {
         signatureMap[lsh.getSignature(cellId)].push_back(cellId);
@@ -120,7 +121,11 @@ void ExpressionMatrix::createSignatureGraph(
         signatureGraph.vertexMap.insert(make_pair(signature, v));
         SignatureGraphVertex& vertex = signatureGraph[v];
         vertex.signature = signature;
-        vertex.cellCount = CellId(cells.size());
+        vertex.localCellIds = cells;
+        vertex.globalCellIds.reserve(cells.size());
+        for(const CellId localCellId: cells) {
+            vertex.globalCellIds.push_back(cellSet[localCellId]);
+        }
     }
     cout << "The signature graph has " << num_vertices(signatureGraph) << " vertices." << endl;
 
@@ -189,15 +194,83 @@ void ExpressionMatrix::colorRandom(SignatureGraph& graph) const
 
 
 
-void ExpressionMatrix::colorByMetaDataInterpretedAsCategory(SignatureGraph&, const string& metaDataName) const
+void ExpressionMatrix::colorByMetaDataInterpretedAsCategory(SignatureGraph& graph, const string& metaDataName) const
 {
-    throw runtime_error("Signature graph coloring by meta data interpreted as category is not implemented.");
+
+    // Count the number of cells with each of the meta data values.
+    // The map is keyed by meta data values.
+    map<string, CellId> metaDataValuesTable;
+    const StringId metaDataNameId = cellMetaDataNames(metaDataName);
+    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
+        const SignatureGraphVertex& vertex = graph[v];
+        for(const CellId globalCellId: vertex.globalCellIds) {
+            const string metaDataValue = getCellMetaData(globalCellId, metaDataNameId);
+            const auto it = metaDataValuesTable.find(metaDataValue);
+            if(it == metaDataValuesTable.end()) {
+                metaDataValuesTable.insert(make_pair(metaDataValue, 1));
+            } else {
+                ++(it->second);
+            }
+        }
+    }
+
+    // Sort the meta data values by decreasing number of cells.
+    vector< pair<string, CellId> > metaDataValues(metaDataValuesTable.begin(), metaDataValuesTable.end());
+    sort(metaDataValues.begin(), metaDataValues.end(), OrderPairsBySecondGreater< pair<string, CellId> >());
+
+    // Assign colors to meta data values.
+    map<string, string> colorTable;
+    for(size_t colorIndex=0; colorIndex<metaDataValues.size(); colorIndex++) {
+        const string color = (colorIndex < 12) ? colorPalette1(colorIndex) : "black";
+        colorTable.insert(make_pair(metaDataValues[colorIndex].first, color));
+    }
+
+
+    // Now we can color the vertices.
+    BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
+        SignatureGraphVertex& vertex = graph[v];
+        vertex.colors.clear();
+        for(const CellId globalCellId: vertex.globalCellIds) {
+            const string metaDataValue = getCellMetaData(globalCellId, metaDataNameId);
+            const string color = colorTable[metaDataValue];
+            bool done = false;
+            for(auto& p: vertex.colors) {
+                if(p.first == color) {
+                    ++(p.second);
+                    done = true;
+                    break;
+                }
+            }
+            if(!done) {
+                vertex.colors.push_back(make_pair(color, 1.));
+            }
+        }
+
+        // Sort with the most frequent ones first.
+        sort(vertex.colors.begin(), vertex.colors.end(), OrderPairsBySecondGreater< pair<string, double> >());
+
+        // Normalize so the sum is 1.
+        double sum = 0;
+        for(const auto& p: vertex.colors) {
+            sum += p.second;
+        }
+        const double factor = 1./sum;
+        for(auto& p: vertex.colors) {
+            p.second *= factor;
+        }
+    }
+
 }
+
+
 
 void ExpressionMatrix::colorByMetaDataInterpretedAsColor(SignatureGraph&, const string& metaDataName) const
 {
     throw runtime_error("Signature graph coloring by meta data interpreted as color is not implemented.");
 }
+
+
+
 void ExpressionMatrix::colorByMetaDataInterpretedAsNumber(SignatureGraph&, const string& metaDataName) const
 {
     throw runtime_error("Signature graph coloring by meta data interpreted as number is not implemented.");

@@ -4,10 +4,11 @@
 #include "orderPairs.hpp"
 using namespace ChanZuckerberg::ExpressionMatrix2;
 
-#include "boost/algorithm/string.hpp"
+#include <boost/algorithm/string.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include "boost_lexical_cast.hpp"
+#include <boost/math/constants/constants.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -78,7 +79,7 @@ void SignatureGraph::Writer::operator()(std::ostream& s) const
 void SignatureGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) const
 {
     const SignatureGraphVertex& vertex = graph[v];
-    const double vertexSize = 1.e-2 * sqrt(double(vertex.cellCount));
+    const double vertexSize = 1.e-2 * sqrt(double(vertex.cellCount()));
 
     s << "[";
     s << "width=" << vertexSize;
@@ -93,7 +94,7 @@ void SignatureGraph::Writer::operator()(std::ostream& s, edge_descriptor e) cons
     const vertex_descriptor v1 = source(e, graph);
     const SignatureGraphVertex& vertex0 = graph[v0];
     const SignatureGraphVertex& vertex1 = graph[v0];
-    double edgeWeight = vertex0.cellCount * vertex1.cellCount;
+    double edgeWeight = double(vertex0.cellCount()) * double(vertex1.cellCount());
 
     s << "[weight=\"" << edgeWeight << "\"]";
 }
@@ -204,7 +205,7 @@ void SignatureGraph::writeSvg(
         xMax = max(xMax, x);
         yMin = min(yMin, y);
         yMax = max(yMax, y);
-        maxCellCount = max(maxCellCount, vertex.cellCount);
+        maxCellCount = max(maxCellCount, CellId(vertex.cellCount()));
     }
 
     // Center and size of the square bounding box containing all the vertices.
@@ -233,7 +234,7 @@ void SignatureGraph::writeSvg(
     vector< pair<vertex_descriptor, CellId> > sortedVertices;
     BGL_FORALL_VERTICES(v, graph, SignatureGraph) {
         const SignatureGraphVertex& vertex = graph[v];
-        sortedVertices.push_back(make_pair(v, vertex.cellCount));
+        sortedVertices.push_back(make_pair(v, vertex.cellCount()));
     }
     sort(sortedVertices.begin(), sortedVertices.end(), OrderPairsBySecondGreater< pair<vertex_descriptor, CellId> >());
 
@@ -270,7 +271,7 @@ void SignatureGraph::writeSvg(
 
     // Write the vertices in order of decreasing size.
     // This way we mitigate obscuring of vertices by other vertices.
-    s << "<g id=vertices>";
+    s << "<g id=vertices>"; // fill-opacity='0.5'
     const double largestVertexUnscaledRadius = 0.03 * boundingBoxSize;
     for(const auto& p: sortedVertices) {
         const vertex_descriptor v = p.first;
@@ -279,7 +280,7 @@ void SignatureGraph::writeSvg(
         const double y = vertex.position[1];
         const double vertexRadius =
             largestVertexUnscaledRadius *
-            sqrt(double(vertex.cellCount)/double(maxCellCount));
+            sqrt(double(vertex.cellCount())/double(maxCellCount));
 
         if(vertex.colors.size() < 2) {
 
@@ -292,8 +293,23 @@ void SignatureGraph::writeSvg(
 
         } else {
 
-            // Draw the vertex as a pie chart using svg path elements.
-            CZI_ASSERT(0);
+            // Draw the vertex as a pie chart.
+            double totalAngle = 0.;
+            for(const auto& p: vertex.colors) {
+                const string& color = p.first;
+                const double angle = p.second * 2. * boost::math::constants::pi<double>();
+                const double angle0 = totalAngle;
+                const double angle1 = angle0 + angle;
+                s << "<path d='M 0 0 L " << vertexRadius*cos(angle0) << " " << vertexRadius*sin(angle0) << " A " <<
+                    vertexRadius << " " << vertexRadius << " 0 " <<
+                    ((angle>boost::math::constants::pi<double>()) ? 1 : 0) << " 1 " <<
+                    vertexRadius*cos(angle1) << " " << vertexRadius*sin(angle1) <<
+                    " Z' stroke='none' fill='" << color << "'"
+                    " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
+                    "></path>";
+
+                totalAngle = angle1;
+            }
         }
     }
     s << "</g>";
