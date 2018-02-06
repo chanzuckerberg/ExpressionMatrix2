@@ -1068,7 +1068,7 @@ void ExpressionMatrix::similarPairs(const vector<string>& request, ostream& html
         "<tr><td>Similar pairs name<td class=centered>"
         "<input type=text size=8 required autofocus name=similarPairsName>"
         "<tr><td>Similarity threshold<td class=centered>"
-        "<input type=text style='text-align:center' size=8 name=similarityThreshold value='0.5'>"
+        "<input type=text style='text-align:center' size=8 name=similarityThreshold value='0.2'>"
         "<tr><td>Maximum connectivity<td class=centered>"
         "<input type=text style='text-align:center' size=8 name=maxConnectivity value='100'>"
         "<tr><td>Number of LSH bits<td class=centered>"
