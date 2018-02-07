@@ -273,7 +273,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("expressionCountsFileName"),
            arg("expressionCountsFileSeparators") = ",",
            arg("cellMetaDataFileName"),
-           arg("cellMetaDataFileSeparators") = ","
+           arg("cellMetaDataFileSeparators") = ",",
+           arg("additionalCellMetaData") = vector< pair<string, string> >()
        )
 #ifndef CZI_EXPRESSION_MATRIX2_SKIP_HDF5
        .def("addCellsFromHdf5",

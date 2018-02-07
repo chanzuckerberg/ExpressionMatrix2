@@ -195,7 +195,8 @@ public:
         const string& expressionCountsFileName,
         const string& expressionCountsFileSeparators,
         const string& metaDataFileName,
-        const string& metaDataFileSeparators
+        const string& metaDataFileSeparators,
+        const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
         );
     // Old version that needs much more memory.
     void addCellsOld1(

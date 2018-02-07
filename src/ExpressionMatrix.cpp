@@ -386,11 +386,13 @@ void ExpressionMatrix::addCells(
     const string& expressionCountsFileName,
     const string& expressionCountsFileSeparators,
     const string& cellMetaDataFileName,
-    const string& cellMetaDataFileSeparators
+    const string& cellMetaDataFileSeparators,
+    const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
     )
 {
     cout << timestamp << "Begin addCells: " << cellCount() <<" cells, "
         << geneCount() << " genes." << endl;
+
 
     // Get the number of meta data fields.
     const size_t metaDataCount =
@@ -630,7 +632,7 @@ void ExpressionMatrix::addCells(
 
 
     // Now we can add all the cells to be kept.
-    vector< pair<string, string> > metaDataForOneCell;
+    vector< pair<string, string> > metaDataForOneCell = additionalCellMetaData;
     vector< pair<string, float> > countsForOneCell;
     for(const string& metaDataName: metaDataNames) {
         metaDataForOneCell.push_back(make_pair(metaDataName, ""));
@@ -641,7 +643,8 @@ void ExpressionMatrix::addCells(
         // const CellId cellIdInExpressionCountsFile = p.second;
         CZI_ASSERT(metaDataInFile[cellIdInMetaDataFile].size() == metaDataNames.size());
         for(size_t j=0; j<metaDataNames.size(); j++) {
-            metaDataForOneCell[j].second = metaDataInFile[cellIdInMetaDataFile][j];
+            metaDataForOneCell[j+additionalCellMetaData.size()].second
+                = metaDataInFile[cellIdInMetaDataFile][j];
         }
         countsForOneCell.clear();
         for(const auto& p: counts[i]) {
