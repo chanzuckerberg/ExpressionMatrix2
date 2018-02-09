@@ -1,6 +1,7 @@
 #include "ExpressionMatrix.hpp"
 #include "ExpressionMatrixSubset.hpp"
 #include "heap.hpp"
+#include "SimilarGenePairs.hpp"
 #include "timestamp.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
@@ -116,13 +117,20 @@ void ExpressionMatrix::findSimilarGenePairs0(
 
 
     // For each gene, keep only the k best and sort them.
+    cout << timestamp << "Keeping best " << k << " pairs for each gene." << endl;
+    size_t totalKept = 0;
     for(vector< pair<GeneId, float> >& v: similarGenes) {
         keepBest(v, k, OrderPairsBySecondGreater< pair<GeneId, float> >());
         sort(v.begin(), v.end(), OrderPairsBySecondGreater< pair<GeneId, float> >());
+        totalKept += v.size();
     }
+    cout << "Average number of pairs kept per gene is " << double(totalKept)/geneCount << endl;
 
 
-
+    // Create the SimilarGenePairs object.
+    cout << timestamp << "Permanently storing the similar gene pairs." << endl;
+    SimilarGenePairs similarGenePairs(directoryName + "/SimilarGenePairs-" + similarGenePairsName,
+        k, geneSet, similarGenes);
 
     cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 ends." << endl;
 }
