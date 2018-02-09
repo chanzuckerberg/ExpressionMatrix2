@@ -80,7 +80,7 @@ public:
     void writeGraphviz(const string& fileName) const;
     void writeGraphviz(ostream&) const;
 
-    // Paramters to control svg output.
+    // Parameters to control svg output.
     class SvgParameters {
     public:
         // Parameters that can be set arbitrarily.
@@ -100,7 +100,7 @@ public:
     };
 
 
-    // Write out the signature graph in Graphviz format.
+    // Write out the signature graph in SVG format.
     void writeSvg(
         const string& fileName,
         SvgParameters&);

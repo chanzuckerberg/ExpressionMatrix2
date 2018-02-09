@@ -36,6 +36,7 @@ namespace ChanZuckerberg {
         class ExpressionMatrix;
         class ExpressionMatrixCreationParameters;
         class ExpressionMatrixSubset;
+        class GeneGraph;
         class Lsh;
         class ServerParameters;
         class SimilarPairs;
@@ -860,6 +861,10 @@ private:
     void exploreSignatureGraph(const vector<string>& request, ostream& html);
     void createSignatureGraph(const vector<string>& request, ostream& html);
     void removeSignatureGraph(const vector<string>& request, ostream& html);
+    void exploreGeneGraphs(const vector<string>& request, ostream& html);
+    void exploreGeneGraph(const vector<string>& request, ostream& html);
+    void createGeneGraph(const vector<string>& request, ostream& html);
+    void removeGeneGraph(const vector<string>& request, ostream& html);
 
 
     // Class used by exploreGene.
@@ -1101,6 +1106,27 @@ public:
         const string& clusterGraphName,
         const string& metaDataName);
 
+
+
+    // Gene graphs and related functionality.
+    map<string, boost::shared_ptr<GeneGraph> > geneGraphs;
+
+    // Create or remove a gene graph.
+    void createGeneGraph(
+        const string& geneGraphName,
+        const string& geneSetName,
+        const string& similarGenePairsName,
+        int k,
+        double similarityThreshold);
+    void removeGeneGraph(const string& geneGraphName);
+
+    // Return a reference to the gene graph with a given name,
+    // and throw and exception if not found.
+    GeneGraph& getGeneGraph(const string& GeneGraphName);
+
+    // Check that a gene graph does not exist,
+    // and throw an exception if it does.
+    void checkGeneGraphDoesNotExist(const string& geneGraphName) const;
 
 };
 

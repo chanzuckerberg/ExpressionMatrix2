@@ -93,6 +93,13 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(exploreSignatureGraph);
     CZI_ADD_TO_FUNCTION_TABLE(createSignatureGraph);
     CZI_ADD_TO_FUNCTION_TABLE(removeSignatureGraph);
+
+
+    // Gene graphs.
+    CZI_ADD_TO_FUNCTION_TABLE(exploreGeneGraphs);
+    CZI_ADD_TO_FUNCTION_TABLE(exploreGeneGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(createGeneGraph);
+    CZI_ADD_TO_FUNCTION_TABLE(removeGeneGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
 
@@ -272,6 +279,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
     writeNavigation(html, "Cell graphs", "cellGraphs");
     writeNavigation(html, "Clustering", "exploreClusterGraphs");
     writeNavigation(html, "Signature graphs", "exploreSignatureGraphs");
+    writeNavigation(html, "Gene graphs", "exploreGeneGraphs");
 
     const string helpTooltip =
         serverParameters.docDirectory.empty() ?
