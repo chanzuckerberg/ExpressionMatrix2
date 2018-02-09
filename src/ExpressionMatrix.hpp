@@ -618,6 +618,15 @@ public:
     // Unit test for class ExpressionMatrixSubset.
     void testExpressionMatrixSubset(CellId, CellId) const;
 
+    // Find pairs of similar genes.
+    void findSimilarGenePairs0(
+        const string& geneSetName,
+        const string& cellSetName,
+        const string& similarGenePairsName,
+        size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
+        double similarityThreshold
+        );
+
 
     // Signature graphs.
     // All cells with the same signature are aggregated

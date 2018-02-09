@@ -922,6 +922,18 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("seed") = 231
        )
 
+
+       // Find pairs of similar genes.
+       .def("findSimilarGenePairs0",
+           &ExpressionMatrix::findSimilarGenePairs0,
+           arg("geneSetName") = "AllGenes",
+           arg("cellSetName") = "AllCells",
+           arg("similarGenePairsName"),
+           arg("k") = 100,
+           arg("similarityThreshold") = 0.2
+       )
+
+
        // Signature graphs.
        .def("createSignatureGraph",
            (
