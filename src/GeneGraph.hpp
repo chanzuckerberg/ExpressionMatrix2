@@ -13,6 +13,7 @@
 #include <boost/graph/adjacency_list.hpp>
 
 #include "iosfwd.hpp"
+#include "map.hpp"
 #include "string.hpp"
 
 
@@ -27,7 +28,7 @@ namespace ChanZuckerberg {
 
         // The base class for class CellGraph.
         using GeneGraphBaseClass = boost::adjacency_list<
-            boost::listS,
+            boost::setS,    // Prevent parallel edges.
             boost::listS,
             boost::undirectedS,
             GeneGraphVertex,
@@ -41,9 +42,12 @@ namespace ChanZuckerberg {
 // A vertex of the gene graph.
 class ChanZuckerberg::ExpressionMatrix2::GeneGraphVertex {
 public:
-    GeneId globalGeneId = invalidGeneId;    // Gene id as defined by the ExpressionMatrix.
     GeneId localGeneId = invalidGeneId;     // Gene id as defined by the GeneSet.
+    GeneId globalGeneId = invalidGeneId;    // Gene id as defined by the ExpressionMatrix.
     array<double, 2> position;
+    GeneGraphVertex() {}
+    GeneGraphVertex(GeneId localGeneId, GeneId globalGeneId) :
+        localGeneId(localGeneId), globalGeneId(globalGeneId) {}
 };
 
 
@@ -82,11 +86,16 @@ public:
     }
 
     GeneGraph(
-        const GeneSet&,
+        ostream& out,
+        GeneSet&,
         const string& similarGenePairsName,
         double similarityThreshold,
         size_t maxConnectivity
         );
+
+    // Write out the signature graph in Graphviz format.
+    void writeGraphviz(const string& fileName) const;
+    void writeGraphviz(ostream&) const;
 
     // Parameters to control svg output.
     class SvgParameters {
@@ -107,6 +116,8 @@ public:
         double pixelSize;
     };
 
+    // Use Graphviz to compute the graph layout and store it in the vertex positions.
+    void computeLayout();
 
     // Write out the gene graph in SVG format.
     void writeSvg(
@@ -116,6 +127,20 @@ public:
         ostream& s,
         SvgParameters&);
 
+    // Map from local gene id to vertex descriptor.
+    map<GeneId, vertex_descriptor> vertexTable;
+
+private:
+    class Writer {
+    public:
+        Writer(const GeneGraph&);
+        void operator()(ostream&) const;
+        void operator()(ostream&, vertex_descriptor) const;
+        void operator()(ostream&, edge_descriptor) const;
+        const GeneGraph& graph;
+    };
+
+    bool layoutWasComputed = false;
 };
 
 

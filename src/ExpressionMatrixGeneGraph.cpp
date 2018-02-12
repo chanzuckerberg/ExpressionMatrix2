@@ -30,6 +30,7 @@ GeneGraph& ExpressionMatrix::getGeneGraph(const string& geneGraphName)
 
 
 void ExpressionMatrix::createGeneGraph(
+    ostream& out,
     const string& geneGraphName,
     const string& geneSetName,
     const string& similarGenePairsName,
@@ -44,7 +45,7 @@ void ExpressionMatrix::createGeneGraph(
     if(it == geneSets.end()) {
         throw runtime_error("Gene set " + geneSetName + " does not exist.");
     }
-    const GeneSet& geneSet = it->second;
+    GeneSet& geneSet = it->second;
     const GeneId geneCount = GeneId(geneSet.size());
     if(geneCount == 0) {
         throw runtime_error("Gene set " + geneSetName + " is empty.");
@@ -56,14 +57,12 @@ void ExpressionMatrix::createGeneGraph(
     // Now we have everything we need. Create the gene graph.
     const std::shared_ptr<GeneGraph> geneGraphPointer =
         std::make_shared<GeneGraph>(
+        out,
         geneSet,
         directoryName + "/SimilarGenePairs-" + similarGenePairsName,
         similarityThreshold,
         k);
     geneGraphs.insert(make_pair(geneGraphName, geneGraphPointer));
-    GeneGraph& geneGraph = *geneGraphPointer;
-
-
 }
 
 

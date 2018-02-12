@@ -1115,6 +1115,7 @@ public:
 
     // Create or remove a gene graph.
     void createGeneGraph(
+        ostream& out,
         const string& geneGraphName,
         const string& geneSetName,
         const string& similarGenePairsName,

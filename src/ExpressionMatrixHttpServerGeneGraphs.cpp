@@ -59,6 +59,7 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
         return;
     }
     GeneGraph& geneGraph = getGeneGraph(geneGraphName);
+    geneGraph.computeLayout();
 
 
     GeneGraph::SvgParameters svgParameters;
@@ -332,8 +333,10 @@ void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& h
 
 
     html << "<h1>Create gene graph " << geneGraphName << "</h1>";
-    createGeneGraph(geneGraphName, geneSetName, similarGenePairsName,
+    html << "<pre>";
+    createGeneGraph(html, geneGraphName, geneSetName, similarGenePairsName,
         maximumConnectivity, similarityThreshold);
+    html << "</pre>";
     html << "<p>Gene graph " << geneGraphName << " was created."
         "<p><form action=exploreGeneGraph>"
         "<input type=text hidden name=geneGraphName value=" << geneGraphName <<
