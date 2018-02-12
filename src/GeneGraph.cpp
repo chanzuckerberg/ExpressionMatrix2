@@ -13,6 +13,7 @@ using namespace ChanZuckerberg::ExpressionMatrix2;
 #include <boost/uuid/uuid_io.hpp>
 
 // Standard libraries.
+#include "algorithm.hpp"
 #include "fstream.hpp"
 #include "utility.hpp"
 
@@ -78,7 +79,7 @@ GeneGraph::GeneGraph(
     }
 
     out << "The gene graph has " << boost::num_vertices(graph);
-    out << " vertices and " << num_edges(graph) << " edges\nafter";
+    out << " vertices and " << num_edges(graph) << " edges\nafter ";
     out << isolatedVertices.size() << " vertices were removed. "<< endl;
 }
 
@@ -112,7 +113,7 @@ void GeneGraph::Writer::operator()(std::ostream& s) const
 // Write out a vertex of the cell graph.
 void GeneGraph::Writer::operator()(std::ostream& s, vertex_descriptor v) const
 {
-    const double vertexSize = 0.1;
+    const double vertexSize = 0.01;
 
     s << "[";
     s << "width=" << vertexSize;
@@ -209,5 +210,99 @@ void GeneGraph::writeSvg(
     ostream& s,
     SvgParameters& svgParameters)
 {
-    CZI_ASSERT(0);
+    // Make sure the layout was computed.
+    computeLayout();
+
+
+
+    // Compute minimum and maximum of the vertices coordinates.
+    double xMin = std::numeric_limits<double>::max();
+    double xMax = std::numeric_limits<double>::min();
+    double yMin = xMin;
+    double yMax = xMax;
+    const GeneGraph& graph = *this;
+    BGL_FORALL_VERTICES(v, graph, GeneGraph) {
+        const GeneGraphVertex& vertex = graph[v];
+        const double x = vertex.position[0];
+        const double y = vertex.position[1];
+        xMin = min(xMin, x);
+        xMax = max(xMax, x);
+        yMin = min(yMin, y);
+        yMax = max(yMax, y);
+    }
+
+    // Center and size of the square bounding box containing all the vertices.
+    const double xBoundingBoxCenter = (xMin + xMax) / 2.;
+    const double yBoundingBoxCenter = (yMin + yMax) / 2.;
+    const double xBoundingBoxSize = xMax - xMin;
+    const double yBoundingBoxSize = yMax - yMin;
+    const double boundingBoxSize = max(xBoundingBoxSize, yBoundingBoxSize);
+
+    // Viewbox parameters.
+    const double xViewBoxCenter = xBoundingBoxCenter - svgParameters.xShift;
+    const double yViewBoxCenter = yBoundingBoxCenter - svgParameters.yShift;
+    const double viewBoxSize = 1.05 * boundingBoxSize / svgParameters.zoomFactor;
+    const double xMinViewBox = xViewBoxCenter - viewBoxSize/2.;
+    const double yMinViewBox = yViewBoxCenter - viewBoxSize/2.;
+
+    // Fill in the rest of the SvgParameters.
+    svgParameters.xCenter = xViewBoxCenter;
+    svgParameters.yCenter = yViewBoxCenter;
+    svgParameters.halfViewBoxSize = viewBoxSize / 2.;
+    svgParameters.pixelSize = viewBoxSize / svgParameters.svgSizePixels;
+
+
+
+    // Start the svg object.
+    s <<
+        "<svg id=svgObject "
+        "style='border:solid DarkBlue;margin:2;' "
+        "width='" << svgParameters.svgSizePixels << "' "
+        "height='" << svgParameters.svgSizePixels << "' "
+        "viewBox='" << xMinViewBox << " " << yMinViewBox << " " << viewBoxSize << " " << viewBoxSize << "'"
+        ">";
+
+    // Draw the edges before the vertices, to avoid obscuring the vertices.
+    if(!svgParameters.hideEdges) {
+        s << "<g id=edges>";
+        const double unscaledEdgeThickness = 5.e-4 * boundingBoxSize;
+        BGL_FORALL_EDGES(e, graph, GeneGraph) {
+            const vertex_descriptor v1 = source(e, graph);
+            const vertex_descriptor v2 = target(e, graph);
+            const GeneGraphVertex& vertex1 = graph[v1];
+            const GeneGraphVertex& vertex2 = graph[v2];
+            s << "<line x1='" << vertex1.position[0] << "' y1='" << vertex1.position[1] << "'";
+            s << " x2='" << vertex2.position[0] << "' y2='" << vertex2.position[1] << "'";
+
+            s << " style='stroke:black;stroke-width:" <<
+                unscaledEdgeThickness * svgParameters.edgeThicknessFactor << "' />";
+        }
+        s << "</g>";
+    }
+
+
+
+    // Write the vertices.
+    s << "<g id=vertices>"; // fill-opacity='0.5'
+    const double vertexUnscaledRadius = 0.03 * boundingBoxSize;
+    BGL_FORALL_VERTICES(v, graph, GeneGraph) {
+        const GeneGraphVertex& vertex = graph[v];
+        const double x = vertex.position[0];
+        const double y = vertex.position[1];
+        const double vertexRadius = vertexUnscaledRadius;
+
+
+        // Draw the vertex as a circle.
+        s << "<circle cx='0' cy='0' r='" <<
+            vertexRadius << "' stroke='none' fill='black'"
+            " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
+            "></circle>";
+
+    }
+    s << "</g>";
+
+
+
+    // End the svg object.
+    s << "</svg>";
 }
