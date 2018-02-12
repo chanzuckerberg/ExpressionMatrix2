@@ -3,6 +3,7 @@
 #include "heap.hpp"
 #include "SimilarGenePairs.hpp"
 #include "timestamp.hpp"
+#include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -133,4 +134,24 @@ void ExpressionMatrix::findSimilarGenePairs0(
         k, geneSet, similarGenes);
 
     cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 ends." << endl;
+}
+
+
+
+// Get a list of the currently available sets of similar gene pairs.
+void ExpressionMatrix::getAvailableSimilarGenePairs(
+    vector<string>& availableSimilarGenePairs) const
+{
+
+    const string fileNamePrefix = directoryName + "/SimilarGenePairs-";
+    const string fileNameSuffix = "-Info";
+    const vector<string> directoryContents = filesystem::directoryContents(directoryName);
+    for(string name: directoryContents) {
+        // Here, name contains the entire file name.
+        if(stripPrefixAndSuffix(fileNamePrefix, fileNameSuffix, name)) {
+            // Here, now contains just the similar pairs set name.
+            availableSimilarGenePairs.push_back(name);
+        }
+    }
+
 }

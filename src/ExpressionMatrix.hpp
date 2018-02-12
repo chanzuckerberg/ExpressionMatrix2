@@ -826,6 +826,7 @@ private:
     ostream& writeGeneSetSelection(ostream& html, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeCellGraphSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
+    ostream& writeSimilarGenePairsSelection(ostream& html, const string& selectName) const;
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
     void removeCellSet(const vector<string>& request, ostream& html);
     void similarPairs(const vector<string>& request, ostream& html);
@@ -839,6 +840,7 @@ private:
     void createCellGraph(const vector<string>& request, ostream& html);
     void removeCellGraph(const vector<string>& request, ostream& html);
     void getAvailableSimilarPairs(vector<string>&) const;
+    void getAvailableSimilarGenePairs(vector<string>&) const;
     vector<string> getAvailableLsh() const;
     ostream& writeLshSelection(ostream&, const string& selectName) const;
     void exploreMetaData(const vector<string>& request, ostream& html);
@@ -1109,7 +1111,7 @@ public:
 
 
     // Gene graphs and related functionality.
-    map<string, boost::shared_ptr<GeneGraph> > geneGraphs;
+    map<string, std::shared_ptr<GeneGraph> > geneGraphs;
 
     // Create or remove a gene graph.
     void createGeneGraph(

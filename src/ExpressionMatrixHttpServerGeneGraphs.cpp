@@ -13,25 +13,38 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
 
     // Table of existing gene graphs.
     html << "<h2>Existing gene graphs</h2><table>";
-    for(const auto& p: geneGraphs) {
-        html << "<tr><td><a href='exploreGeneGraph?geneGraphName="
-            << p.first << "'>" << p.first << "</a>"
-            "<td><form action=removeGeneGraph>"
-            "<input type=submit value='Remove'>"
-            "<input hidden type=text name=signatureGeneName value='" << p.first << "'>"
-            "</form>";
+    if(geneGraphs.empty()) {
+        html << "<p>No gene graphs exist. You can create one using the form below.";
+    } else {
+        for(const auto& p: geneGraphs) {
+            html << "<tr><td><a href='exploreGeneGraph?geneGraphName="
+                << p.first << "'>" << p.first << "</a>"
+                "<td><form action=removeGeneGraph>"
+                "<input type=submit value='Remove'>"
+                "<input hidden type=text name=signatureGeneName value='" << p.first << "'>"
+                "</form>";
+        }
+        html << "</table>";
     }
-    html << "</table>";
+
+
 
     // Form to create a new gene graph.
     html <<
         "<h2>Create a new gene graph</h2>"
         "<form action=createGeneGraph>"
-        "<input type=submit value='Create'> a new gene graph named "
-        "<input type=text size=8 name=geneGraphName required> "
-        "for gene set ";
+        "<table>"
+        "<tr><td>Gene set<td class=centered>";
     writeGeneSetSelection(html, "geneSetName", false);
-    html << "</form>";
+    html << "<tr><td>Similar gene pairs<td class=centered>";
+    writeSimilarGenePairsSelection(html, "similarGenePairsName");
+    html <<
+        "<tr><td>Similarity threshold<td class=centered><input type=text size=8 name=similarityThreshold required value=0.5>"
+        "<tr><td>Maximum connectivity<td class=centered><input type=text size=8 name=maximumConnectivity required value=3>"
+        "<tr><td>Gene graph<td class=centered><input type=text size=8 name=geneGraphName required>"
+        "</table>"
+        "<input type=submit value='Create a new gene graph as described above'>"
+        "</form>";
 }
 
 
@@ -290,13 +303,6 @@ function prepareColoringFormForSubmit()
 
 void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& html)
 {
-    string geneGraphName;
-    getParameterValue(request, "geneGraphName", geneGraphName);
-    if(geneGraphName.empty()) {
-        html << "Gene graph name is missing.";
-        return;
-    }
-
     string geneSetName;
     getParameterValue(request, "geneSetName", geneSetName);
     if(geneSetName.empty()) {
@@ -304,9 +310,30 @@ void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& h
         return;
     }
 
+    string similarGenePairsName;
+    getParameterValue(request, "similarGenePairsName", similarGenePairsName);
+    if(similarGenePairsName.empty()) {
+        html << "Similar gene pairs name is missing.";
+        return;
+    }
+
+    int maximumConnectivity = 3;
+    getParameterValue(request, "maximumConnectivity", maximumConnectivity);
+    double similarityThreshold = 0.5;
+    getParameterValue(request, "similarityThreshold", similarityThreshold);
+
+    string geneGraphName;
+    getParameterValue(request, "geneGraphName", geneGraphName);
+    if(geneGraphName.empty()) {
+        html << "Gene graph name is missing.";
+        return;
+    }
+
+
 
     html << "<h1>Create gene graph " << geneGraphName << "</h1>";
-    CZI_ASSERT(0);
+    createGeneGraph(geneGraphName, geneSetName, similarGenePairsName,
+        maximumConnectivity, similarityThreshold);
     html << "<p>Gene graph " << geneGraphName << " was created."
         "<p><form action=exploreGeneGraph>"
         "<input type=text hidden name=geneGraphName value=" << geneGraphName <<
@@ -331,3 +358,27 @@ void ExpressionMatrix::removeGeneGraph(const vector<string>& request, ostream& h
         "<input type=submit value=Continue></form>";
 
 }
+
+
+
+ostream& ExpressionMatrix::writeSimilarGenePairsSelection(
+    ostream& html,
+    const string& selectName) const
+{
+    vector<string> availableSimilarGenePairs;
+    getAvailableSimilarGenePairs(availableSimilarGenePairs);
+
+    html << "<select";
+    html << " title='Select one'";
+    html << " name=" << selectName << " style='vertical-align:text-top;'>";
+    html << "<option value=''></option>";
+    for(const string& name: availableSimilarGenePairs) {
+        html << "<option value='" << name;
+        html << "'>" << name << "</option>";
+    }
+    html << "</select>";
+
+    return html;
+
+}
+

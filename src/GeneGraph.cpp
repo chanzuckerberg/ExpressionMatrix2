@@ -12,7 +12,7 @@ GeneGraph::GeneGraph(
     size_t maxConnectivity
     )
 {
-
+    CZI_ASSERT(0);
 }
 
 

@@ -1,5 +1,6 @@
 #include "ExpressionMatrix.hpp"
 #include "GeneGraph.hpp"
+#include "SimilarGenePairs.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -35,6 +36,7 @@ void ExpressionMatrix::createGeneGraph(
     int k,
     double similarityThreshold)
 {
+    // Check that a signature graph with this name does not already exist.
     checkSignatureGraphDoesNotExist(geneGraphName);
 
     // Locate the gene set and verify that it is not empty.
@@ -48,7 +50,20 @@ void ExpressionMatrix::createGeneGraph(
         throw runtime_error("Gene set " + geneSetName + " is empty.");
     }
 
-    CZI_ASSERT(0);
+    // Access the similar gene pairs.
+    SimilarGenePairs similarGenePairs(directoryName + "/SimilarGenePairs-" + similarGenePairsName , true);
+
+    // Now we have everything we need. Create the gene graph.
+    const std::shared_ptr<GeneGraph> geneGraphPointer =
+        std::make_shared<GeneGraph>(
+        geneSet,
+        directoryName + "/SimilarGenePairs-" + similarGenePairsName,
+        similarityThreshold,
+        k);
+    geneGraphs.insert(make_pair(geneGraphName, geneGraphPointer));
+    GeneGraph& geneGraph = *geneGraphPointer;
+
+
 }
 
 
