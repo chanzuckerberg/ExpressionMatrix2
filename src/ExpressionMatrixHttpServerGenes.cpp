@@ -102,19 +102,19 @@ void ExpressionMatrix::exploreGene(
 
     // Write the form for information on a single gene.
     html <<
-        "<form>"
+        "<p><form>"
         "<input type=submit value='Show information about gene'>"
         " <input type=text name=geneId";
     if(geneIdIsPresent) {
         html << " value=" << geneIdString;
     }
     html <<
-        " autofocus>"
-        " (specify a gene using a case-sensitive name or a numeric id between 0 and  " << geneCount()-1 << "),";
-    html << "<br>displaying expression counts for this gene for cells in cell set ";
+        " autofocus title='"
+        "Specify a gene using a case-sensitive name or a numeric id between 0 and  " << geneCount()-1 << "'>";
+    html << "<br>Show expression counts for this gene for cells in cell set: ";
     const set<string> selectedCellSet = {cellSetName};
     writeCellSetSelection(html, "cellSetName", selectedCellSet, false);
-    html << "<br>and showing for each cell the following cell meta data fields: ";
+    html << "<br>Show for each cell the following cell meta data fields (use Ctrl key to select multiple fields):<br>";
     writeMetaDataSelection(html, "metaDataName", metaDataToDisplay, true);
     html << "</form>";
 

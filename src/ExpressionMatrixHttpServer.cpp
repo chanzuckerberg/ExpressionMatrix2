@@ -266,6 +266,57 @@ void ExpressionMatrix::explore(const ServerParameters& serverParameters)
 }
 
 
+
+void ExpressionMatrix::writeNavigation(ostream& html)
+{
+    html << "<ul class=navigationMenu>";
+
+    writeNavigation(html, "Genes", {
+        {"Genes", "gene"},
+        {"Gene sets", "geneSets"},
+        });
+    writeNavigation(html, "Cells", {
+        {"Cells", "cell"},
+        {"Cell meta data", "metaData"},
+        {"Compare two cells", "compareTwoCells"},
+        {"Cell sets", "cellSets"},
+        });
+    writeNavigation(html, "Gene graphs", {
+        {"Gene graphs", "exploreGeneGraphs"}
+        });
+    writeNavigation(html, "Cell graphs", {
+        {"Find pairs of similar cells", "similarPairs"},
+        {"Cell graphs", "cellGraphs"},
+        {"Cell clustering", "exploreClusterGraphs"},
+        {"Signature graphs", "exploreSignatureGraphs"}
+        });
+    writeNavigation(html, "Other", {
+        {"Run information", "index"},
+        {"Hash tables", "exploreHashTableSummary"}
+        });
+
+    html << "</ul>";
+}
+
+
+void ExpressionMatrix::writeNavigation(ostream& html, const string& title, const vector<pair <string, string> >& items)
+{
+    html <<
+        "<li class=navigationMenuEntry>"
+        "<div class=navigationButton>" << title << "</div>"
+        "<div class=navigationItems>";
+
+    for(const auto& item: items) {
+        html << "<a class=navigationItem href=" << item.second << ">" << item.first << "</a>";
+    }
+
+    html << "</div></li>";
+
+}
+
+
+
+#if 0
 void ExpressionMatrix::writeNavigation(ostream& html)
 {
     writeNavigation(html, "Summary", "index", "");
@@ -290,11 +341,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
 
     html << "<div style='clear:both;height:10px;'></div>";
 
-}
-
-
-
-void ExpressionMatrix::writeNavigation(
+}void ExpressionMatrix::writeNavigation(
     ostream& html,
     const string& text,
     const string& url,
@@ -326,7 +373,7 @@ void ExpressionMatrix::writeNavigation(
         "'>\n"
         << text << "</button>";
 }
-
+#endif
 
 
 void ExpressionMatrix::exploreSummary(
@@ -341,15 +388,10 @@ void ExpressionMatrix::exploreSummary(
         " genes.";
 
 
-    // Link to the summary of hash table usage.
-    html << "<p>See a <a href=exploreHashTableSummary>summary of hash table utilization</a>.";
-
-
-
     // If the run directory contains a README.html file, copy it to html.
     if(filesystem::exists("README.html") && filesystem::isRegularFile("README.html")) {
         ifstream readMeFile("README.html");
-        html << "<h1>README.html file</h1>";
+        // html << "<h1>README.html file</h1>";
         html << readMeFile.rdbuf();
     }
 
@@ -358,7 +400,8 @@ void ExpressionMatrix::exploreSummary(
     // If the run directory contains a README file, copy it to html (enclosed in a <pre> element).
     if(filesystem::exists("README") && filesystem::isRegularFile("README")) {
         ifstream readMeFile("README");
-        html << "<h1>README file</h1><pre>";
+        // html << "<h1>README file</h1>
+        html << "<pre>";
         html << readMeFile.rdbuf();
         html << "</pre>";
     }

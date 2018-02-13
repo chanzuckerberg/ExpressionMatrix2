@@ -297,6 +297,53 @@ void HttpServer::writeStyle(ostream& html)
     a {
         color: DarkSlateBlue;
     }
+    ul.navigationMenu {
+        list-style-type: none;
+        margin: 0px 0px 12px 0px;
+        padding: 0;
+        overflow: hidden;
+        background-color: #404040;
+    }
+    
+    div.navigationButton {
+        display: inline-block;
+        color: white;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        // min-width: 120px;
+    }
+    
+    .navigationMenuEntry:hover .navigationButton {
+        background-color: black;
+    }
+    
+    li.navigationMenuEntry {
+        display: inline-block;
+    }
+    
+    .navigationItems {
+        display: none;
+        position: absolute;
+        background-color: DodgerBlue;
+        // min-width: 120px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+    
+    a.navigationItem {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+    }
+    
+    .navigationItems a:hover {background-color: SteelBlue}
+    
+    .navigationMenuEntry:hover .navigationItems {
+        display: block;
+}
 </style>
     )%";
 }

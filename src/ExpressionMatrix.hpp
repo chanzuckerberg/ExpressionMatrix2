@@ -791,7 +791,8 @@ private:
     set<string> nonHtmlKeywords;
     void fillServerFunctionTable();
     void writeNavigation(ostream& html);
-    void writeNavigation(ostream& html, const string& text, const string& url, const string& toolTip = "");
+    // void writeNavigation(ostream& html, const string& text, const string& url, const string& toolTip = "");
+    void writeNavigation(ostream& html, const string& title, const vector<pair <string, string> >&);
     void exploreSummary(const vector<string>& request, ostream& html);
     void exploreHashTableSummary(const vector<string>& request, ostream&);
     void exploreGene(const vector<string>& request, ostream& html);
