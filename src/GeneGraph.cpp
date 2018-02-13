@@ -2,6 +2,7 @@
 #include "GeneGraph.hpp"
 #include "CZI_ASSERT.hpp"
 #include "GeneSet.hpp"
+#include "ExpressionMatrix.hpp"
 #include "SimilarGenePairs.hpp"
 using namespace ChanZuckerberg::ExpressionMatrix2;
 
@@ -201,14 +202,16 @@ void GeneGraph::computeLayout()
 // Write out the signature graph in SVG format.
 void GeneGraph::writeSvg(
     const string& fileName,
-    SvgParameters& svgParameters)
+    SvgParameters& svgParameters,
+    const ExpressionMatrix& expressionMatrix)
 {
     ofstream file(fileName);
-    writeSvg(file, svgParameters);
+    writeSvg(file, svgParameters, expressionMatrix);
 }
 void GeneGraph::writeSvg(
     ostream& s,
-    SvgParameters& svgParameters)
+    SvgParameters& svgParameters,
+    const ExpressionMatrix& expressionMatrix)
 {
     // Make sure the layout was computed.
     computeLayout();
@@ -262,6 +265,7 @@ void GeneGraph::writeSvg(
         "viewBox='" << xMinViewBox << " " << yMinViewBox << " " << viewBoxSize << " " << viewBoxSize << "'"
         ">";
 
+
     // Draw the edges before the vertices, to avoid obscuring the vertices.
     if(!svgParameters.hideEdges) {
         s << "<g id=edges>";
@@ -284,19 +288,22 @@ void GeneGraph::writeSvg(
 
     // Write the vertices.
     s << "<g id=vertices>"; // fill-opacity='0.5'
-    const double vertexUnscaledRadius = 0.03 * boundingBoxSize;
+    const double vertexUnscaledRadius = 2.e-3 * boundingBoxSize;
     BGL_FORALL_VERTICES(v, graph, GeneGraph) {
         const GeneGraphVertex& vertex = graph[v];
         const double x = vertex.position[0];
         const double y = vertex.position[1];
         const double vertexRadius = vertexUnscaledRadius;
+        const string geneName = expressionMatrix.geneName(vertex.globalGeneId);
 
 
         // Draw the vertex as a circle.
         s << "<circle cx='0' cy='0' r='" <<
             vertexRadius << "' stroke='none' fill='black'"
             " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
-            "></circle>";
+            // " onclick='window.location=\"gene?geneId=" << geneName << "\";'"
+            " onclick='window.open(\"gene?geneId=" << geneName << "\");'"
+            " cursor=pointer><title>" << geneName << "</title></circle>";
 
     }
     s << "</g>";

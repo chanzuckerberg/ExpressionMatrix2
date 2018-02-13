@@ -24,6 +24,7 @@ namespace ChanZuckerberg {
         class GeneGraph;
         class GeneGraphVertex;
         class GeneGraphEdge;
+        class ExpressionMatrix;
         class GeneSet;
 
         // The base class for class CellGraph.
@@ -122,10 +123,12 @@ public:
     // Write out the gene graph in SVG format.
     void writeSvg(
         const string& fileName,
-        SvgParameters&);
+        SvgParameters&,
+        const ExpressionMatrix&);
     void writeSvg(
         ostream& s,
-        SvgParameters&);
+        SvgParameters&,
+        const ExpressionMatrix&);
 
     // Map from local gene id to vertex descriptor.
     map<GeneId, vertex_descriptor> vertexTable;

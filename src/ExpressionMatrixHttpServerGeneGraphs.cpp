@@ -18,7 +18,7 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
     } else {
         for(const auto& p: geneGraphs) {
             html << "<tr><td><a href='exploreGeneGraph?geneGraphName="
-                << p.first << "'>" << p.first << "</a>"
+                << p.first << "?hideEdges=on'>" << p.first << "</a>"
                 "<td><form action=removeGeneGraph>"
                 "<input type=submit value='Remove'>"
                 "<input hidden type=text name=signatureGeneName value='" << p.first << "'>"
@@ -273,6 +273,9 @@ function prepareColoringFormForSubmit()
 )###";
 
 
+    // Div to contain the svg graphics and the form on the right.
+    html << "<div>";
+
 
     // Write the svg.
     html <<
@@ -281,7 +284,7 @@ function prepareColoringFormForSubmit()
         "onmouseup='mouseUpHandler(event);' "
         "onmousemove='mouseMoveHandler(event);' "
         "onwheel='handleMouseWheelEvent(event);'>";
-    geneGraph.writeSvg(html, svgParameters);
+    geneGraph.writeSvg(html, svgParameters, *this);
     html << "</div>";
 
     // Svg display parameters get written to the html in Javascript code
@@ -298,6 +301,34 @@ function prepareColoringFormForSubmit()
         "var halfViewBoxSize = " << svgParameters.halfViewBoxSize << ";"
         "var pixelSize = " << svgParameters.pixelSize << ";"
         "</script>";
+
+
+
+    // Formon the right of the graph.
+    // Currently only contains the "hide edges" check box.
+    html <<
+        "<div>"
+        "<form id=coloringForm onsubmit='prepareColoringFormForSubmit()'>"
+        "<br><input type=checkbox name=hideEdges title='The graph displays faster if the edges are hidden'";
+    if(svgParameters.hideEdges) {
+        html << " checked=checked";
+    }
+    html <<
+        ">Hide edges"
+        "<input type=text hidden id=geneGraphName name=geneGraphName value='" << geneGraphName << "'>"
+        "<input type=text hidden id=svgSizePixels name=svgSizePixels>"
+        "<input type=text hidden id=xShift name=xShift>"
+        "<input type=text hidden id=yShift name=yShift>"
+        "<input type=text hidden id=zoomFactor name=zoomFactor>"
+        "<input type=text hidden id=vertexSizeFactor name=vertexSizeFactor>"
+        "<input type=text hidden id=edgeThicknessFactor name=edgeThicknessFactor>"
+        "<p><button type=submit>Redraw graph</button>"
+        "</form>"
+        "</div>";
+
+
+    // End of div containing the svg graphics and the form on the right.
+    html << "<div>";
 }
 
 
@@ -340,7 +371,7 @@ void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& h
     html << "<p>Gene graph " << geneGraphName << " was created."
         "<p><form action=exploreGeneGraph>"
         "<input type=text hidden name=geneGraphName value=" << geneGraphName <<
-        "><input type=submit value=Continue></form>";
+        "><input type=text hidden name=hideEdges value=on><input type=submit value=Continue></form>";
 
 }
 
