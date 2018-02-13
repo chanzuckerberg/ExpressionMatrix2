@@ -269,6 +269,20 @@ function prepareColoringFormForSubmit()
     document.getElementById("vertexSizeFactor").value = vertexSizeFactor;
     document.getElementById("edgeThicknessFactor").value = edgeThicknessFactor;
 }
+
+
+function highlightGene()
+{
+    var geneName = document.getElementById("geneToHighlight").value;
+    var circle = document.getElementById(geneName);
+    if(!circle) {
+        alert(geneName + " not found in gene graph");
+    } else {
+        circle.setAttribute("fill", "red");
+        circle.setAttribute("stroke", "green");
+    }
+    
+}
 </script>
 )###";
 
@@ -304,8 +318,10 @@ function prepareColoringFormForSubmit()
 
 
 
-    // Formon the right of the graph.
-    // Currently only contains the "hide edges" check box.
+    // Form on the right of the graph.
+    html << "<div>";
+
+    // Form containing the "hide edges" check box.
     html <<
         "<div>"
         "<form id=coloringForm onsubmit='prepareColoringFormForSubmit()'>"
@@ -323,12 +339,21 @@ function prepareColoringFormForSubmit()
         "<input type=text hidden id=vertexSizeFactor name=vertexSizeFactor>"
         "<input type=text hidden id=edgeThicknessFactor name=edgeThicknessFactor>"
         "<p><button type=submit>Redraw graph</button>"
-        "</form>"
-        "</div>";
+        "</form>";
 
+
+    // Form to highlight a gene.
+    html <<
+        "<button onclick='highlightGene()'>Highlight this gene:</button>"
+        "<input id=geneToHighlight type=text>";
+
+
+
+    // End of div containing the forms on the right.
+    html << "</div>";
 
     // End of div containing the svg graphics and the form on the right.
-    html << "<div>";
+    html << "</div>";
 }
 
 

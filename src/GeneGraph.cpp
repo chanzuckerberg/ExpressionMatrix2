@@ -303,7 +303,7 @@ void GeneGraph::writeSvg(
             " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
             // " onclick='window.location=\"gene?geneId=" << geneName << "\";'"
             " onclick='window.open(\"gene?geneId=" << geneName << "\");'"
-            " cursor=pointer><title>" << geneName << "</title></circle>";
+            " cursor=pointer id='" << geneName << "'><title>" << geneName << "</title></circle>";
 
     }
     s << "</g>";
