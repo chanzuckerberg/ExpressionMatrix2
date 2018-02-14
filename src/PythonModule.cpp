@@ -181,7 +181,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         "Most high level functionality is provided by this class. "
         "Binary data files for an instance of this class are stored "
         "in a single directory on disk. They are accessed as memory mapped files. ")
-       .def(init<string, uint64_t, uint64_t, uint64_t, uint64_t>(),
+       .def(init<string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>(),
            "This constructor creates a new (empty) ExpressionMatrix object "
            "in the specified directory. "
            "The directory must not exists. "
@@ -190,7 +190,9 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("geneCapacity"),
            arg("cellCapacity"),
            arg("cellMetaDataNameCapacity"),
-           arg("cellMetaDataValueCapacity")
+           arg("cellMetaDataValueCapacity"),
+           arg("geneMetaDataNameCapacity") = 1<<8,
+           arg("geneMetaDataValueCapacity") = 1<<8
        )
        .def(init<string, bool>(),
            "This constructor can be used to access an existing ExpressionMatrix object "
@@ -234,6 +236,17 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::geneIdFromName,
            "Return the numeric id of a gene given its name.",
            arg("geneName")
+       )
+       .def("setGeneMetaData",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&)
+           )
+           &ExpressionMatrix::setGeneMetaData,
+           "Set a meta data field for a gene.",
+           arg("geneName"),
+           arg("name"),
+           arg("value")
        )
 
 

@@ -146,7 +146,33 @@ void ExpressionMatrix::exploreGene(
         "<a href='https://www.google.com/#q=gene+" << urlEncode(geneName) << "'>Google</a>."
         ;
 
+
+
+    // Meta data for this gene.
+    html << "<h2>Gene meta data</h2>";
+    const auto& metaData = geneMetaData[geneId];
+    vector< pair<string, string> > metaDataVector;
+    for(auto it=metaData.begin(); it!=metaData.end(); ++it) {
+        const string name = geneMetaDataNames[(*it).first];
+        const string value = geneMetaDataValues[(*it).second];
+        metaDataVector.push_back(make_pair(name, value));
+    }
+    if(metaDataVector.empty()) {
+        html << "<p>This gene has no meta data.";
+    } else {
+        html << "<table><tr><th>Name<th>Value";
+        for(const auto& p: metaDataVector) {
+            const string name = p.first;
+            const string value = p.second;
+            html << "<tr><td>" << name << "<td>" << value;
+        }
+        html << "</table>";
+    }
+
+
+
     // If there is no cell set name, stop here.
+    html << "<h2>Expression counts</h2>";
     if(cellSetName.empty()) {
         html << "<p>To get expression counts for this gene, specify a cell set in the form above.";
         return;

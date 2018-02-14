@@ -71,12 +71,16 @@ public:
     uint64_t cellCapacity = 1<<24;              // Controls the maximum number of cells.
     uint64_t cellMetaDataNameCapacity = 1<<16;  // Controls the maximum number of distinct cell meta data name strings.
     uint64_t cellMetaDataValueCapacity = 1<<28; // Controls the maximum number of distinct cell meta data value strings.
+    uint64_t geneMetaDataNameCapacity = 1<<16;  // Controls the maximum number of distinct gene meta data name strings.
+    uint64_t geneMetaDataValueCapacity = 1<<20; // Controls the maximum number of distinct gene meta data value strings.
 
     ExpressionMatrixCreationParameters(
         uint64_t geneCapacity,
         uint64_t cellCapacity,
         uint64_t cellMetaDataNameCapacity,
-        uint64_t cellMetaDataValueCapacity
+        uint64_t cellMetaDataValueCapacity,
+        uint64_t geneMetaDataNameCapacity,
+        uint64_t geneMetaDataValueCapacity
         );
 };
 
@@ -122,7 +126,9 @@ public:
         uint64_t geneCapacity,
         uint64_t cellCapacity,
         uint64_t cellMetaDataNameCapacity,
-        uint64_t cellMetaDataValueCapacity
+        uint64_t cellMetaDataValueCapacity,
+        uint64_t geneMetaDataNameCapacity,
+        uint64_t geneMetaDataValueCapacity
     );
 
     // Access a previously created expression matrix stored in the specified directory.
@@ -671,6 +677,34 @@ public:
     // Return the name of the gene with the given id.
     string geneName(GeneId) const;
 private:
+
+
+
+    // The meta data for each gene.
+    // For each gene we store pairs of string ids for each meta data (name, value) pair.
+    // The corresponding strings are stored in geneMetaDataNames and geneMetaDataValues.
+    // The first (name, value) pair for each gene contains name = "GeneName"
+    // and value = the name of the gene.
+    MemoryMapped::VectorOfLists< pair<StringId, StringId> > geneMetaData;
+    MemoryMapped::StringTable<StringId> geneMetaDataNames;
+    MemoryMapped::StringTable<StringId> geneMetaDataValues;
+
+    // The number of genes that use each of the gene meta data names.
+    // This is maintained to always have the same size as geneMetaDataNames,
+    // and it is indexed by the StringId.
+    MemoryMapped::Vector<GeneId> geneMetaDataNamesUsageCount;
+    void incrementGeneMetaDataNameUsageCount(StringId);
+    void decrementGeneMetaDataNameUsageCount(StringId);
+
+    // Set a meta data (name, value) pair for a given gene.
+    // If the name already exists for that gene, the value is replaced.
+public:
+    void setGeneMetaData(const string& geneName, const string& name, const string& value);
+private:
+    void setGeneMetaData(GeneId, const string& name, const string& value);
+    void setGeneMetaData(GeneId, StringId nameId, const string& value);
+    void setGeneMetaData(GeneId, StringId nameId, StringId valueId);
+
 
     // Vector containing fixed size information for each cell.
     // Variable size information (meta data and expression counts)

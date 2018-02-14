@@ -48,6 +48,11 @@ ExpressionMatrix::ExpressionMatrix(
     filesystem::createDirectory(directoryName);
 
     geneNames.createNew(directoryName + "/" + "GeneNames", parameters.geneCapacity);
+    geneMetaData.createNew(directoryName + "/" + "GeneMetaData");
+    geneMetaDataNames.createNew(directoryName + "/" + "GeneMetaDataNames", parameters.geneMetaDataNameCapacity);
+    geneMetaDataValues.createNew(directoryName + "/" + "GeneMetaDataValues", parameters.geneMetaDataValueCapacity);
+    geneMetaDataNamesUsageCount.createNew(directoryName + "/" + "GeneMetaDataNamesUsageCount");
+
     cells.createNew(directoryName + "/" + "Cells");
     cellNames.createNew(directoryName + "/" + "CellNames", parameters.cellCapacity);
     cellMetaData.createNew(directoryName + "/" + "CellMetaData");
@@ -78,11 +83,17 @@ ExpressionMatrix::ExpressionMatrix(
     uint64_t geneCapacity,
     uint64_t cellCapacity,
     uint64_t cellMetaDataNameCapacity,
-    uint64_t cellMetaDataValueCapacity
+    uint64_t cellMetaDataValueCapacity,
+    uint64_t geneMetaDataNameCapacity,
+    uint64_t geneMetaDataValueCapacity
     ) :
     ExpressionMatrix(
         directoryName,
-        ExpressionMatrixCreationParameters(geneCapacity, cellCapacity, cellMetaDataNameCapacity, cellMetaDataValueCapacity))
+        ExpressionMatrixCreationParameters(
+            geneCapacity, cellCapacity,
+            cellMetaDataNameCapacity, cellMetaDataValueCapacity,
+            geneMetaDataNameCapacity, geneMetaDataValueCapacity
+            ))
 {
 }
 
@@ -92,12 +103,16 @@ ExpressionMatrixCreationParameters::ExpressionMatrixCreationParameters(
     uint64_t geneCapacity,
     uint64_t cellCapacity,
     uint64_t cellMetaDataNameCapacity,
-    uint64_t cellMetaDataValueCapacity
+    uint64_t cellMetaDataValueCapacity,
+    uint64_t geneMetaDataNameCapacity,
+    uint64_t geneMetaDataValueCapacity
     ) :
     geneCapacity(geneCapacity),
     cellCapacity(cellCapacity),
     cellMetaDataNameCapacity(cellMetaDataNameCapacity),
-    cellMetaDataValueCapacity(cellMetaDataValueCapacity)
+    cellMetaDataValueCapacity(cellMetaDataValueCapacity),
+    geneMetaDataNameCapacity(geneMetaDataNameCapacity),
+    geneMetaDataValueCapacity(geneMetaDataValueCapacity)
 {
 }
 
@@ -109,7 +124,13 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
 {
     // Access the binary data with read-write access, so we can add new cells
     // and perform other operations that change the state on disk.
+
     geneNames.accessExistingReadWrite(directoryName + "/" + "GeneNames", allowReadOnly);
+    geneMetaData.accessExistingReadWrite(directoryName + "/" + "GeneMetaData", allowReadOnly);
+    geneMetaDataNames.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataNames", allowReadOnly);
+    geneMetaDataValues.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataValues", allowReadOnly);
+    geneMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataNamesUsageCount", allowReadOnly);
+
     cells.accessExistingReadWrite(directoryName + "/" + "Cells", allowReadOnly);
     cellNames.accessExistingReadWrite(directoryName + "/" + "CellNames", allowReadOnly);
     cellMetaData.accessExistingReadWrite(directoryName + "/" + "CellMetaData", allowReadOnly);
@@ -151,25 +172,6 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
 
     // Fill the table containing commands known to the http server.
     fillServerFunctionTable();
-}
-
-
-
-// Add a gene.
-// Returns true if the gene was added, false if it was already present.
-bool ExpressionMatrix::addGene(const string& geneName)
-{
-    CZI_ASSERT(geneSets.find("AllGenes") != geneSets.end());
-
-    const StringId stringId = geneNames(geneName);
-    if(stringId == geneNames.invalidStringId) {
-        const GeneId geneId = GeneId(geneNames[geneName]);
-        geneSets["AllGenes"].addGene(geneId);
-        geneSets["AllGenes"].forceSorted(); // We guarantee that it remains sorted.
-        return true;
-    } else {
-        return false;   // Was already present.
-    }
 }
 
 
