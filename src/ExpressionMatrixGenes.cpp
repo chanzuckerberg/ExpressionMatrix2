@@ -19,9 +19,6 @@ bool ExpressionMatrix::addGene(const string& geneName)
         // This gene did not already exist. Add it to our container of gene names.
         const GeneId geneId = GeneId(geneNames[geneName]);
 
-        // Add a gene meta data pair for the gene name.
-        setGeneMetaData(geneId, "GeneName", geneName);
-
         // Make space for meta data for this gene.
         geneMetaData.push_back();
 

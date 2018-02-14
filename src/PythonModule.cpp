@@ -191,8 +191,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("cellCapacity"),
            arg("cellMetaDataNameCapacity"),
            arg("cellMetaDataValueCapacity"),
-           arg("geneMetaDataNameCapacity") = 1<<8,
-           arg("geneMetaDataValueCapacity") = 1<<8
+           arg("geneMetaDataNameCapacity") = 1<<16,
+           arg("geneMetaDataValueCapacity") = 1<<16
        )
        .def(init<string, bool>(),
            "This constructor can be used to access an existing ExpressionMatrix object "
@@ -234,7 +234,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        )
        .def("geneIdFromName",
            &ExpressionMatrix::geneIdFromName,
-           "Return the numeric id of a gene given its name.",
+           "Return the numeric id of a gene given its name."
+           " Return invalidGeneId if a gene with the given name does not exist.",
            arg("geneName")
        )
        .def("setGeneMetaData",
@@ -1141,6 +1142,12 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
             "Returns the y coordinate of the vertex in the two-dimensional layout "
             "of the graph the vertex belongs to. ")
         ;
+
+
+
+    // Constants
+    module.attr("invalidGeneId") = pybind11::int_(invalidGeneId);
+    module.attr("invalidCellId") = pybind11::int_(invalidCellId);
 
 
 
