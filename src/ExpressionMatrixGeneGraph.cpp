@@ -58,8 +58,8 @@ void ExpressionMatrix::createGeneGraph(
     SimilarGenePairs similarGenePairs(directoryName + "/SimilarGenePairs-" + similarGenePairsName , true);
 
     // Now we have everything we need. Create the gene graph.
-    const std::shared_ptr<GeneGraph> geneGraphPointer =
-        std::make_shared<GeneGraph>(
+    const shared_ptr<GeneGraph> geneGraphPointer =
+        make_shared<GeneGraph>(
         out,
         geneSet,
         directoryName + "/SimilarGenePairs-" + similarGenePairsName,

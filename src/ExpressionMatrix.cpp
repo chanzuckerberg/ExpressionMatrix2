@@ -2151,8 +2151,8 @@ void ExpressionMatrix::createClusterGraph(
 
 
     // Create the ClusterGraph.
-    const boost::shared_ptr<ClusterGraph> clusterGraphPointer =
-        boost::shared_ptr<ClusterGraph>(new ClusterGraph(cellGraph, geneSet));
+    const shared_ptr<ClusterGraph> clusterGraphPointer =
+        make_shared<ClusterGraph>(cellGraph, geneSet);
     clusterGraphs.insert(make_pair(clusterGraphName, clusterGraphPointer));
     ClusterGraph& clusterGraph = *clusterGraphPointer;
 

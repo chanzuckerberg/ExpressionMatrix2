@@ -20,7 +20,7 @@
 // Standard libraries.
 #include "cstddef.hpp"
 #include "cstdint.hpp"
-#include <memory>
+#include "memory.hpp"
 #include "vector.hpp"
 
 namespace ChanZuckerberg {
@@ -167,11 +167,11 @@ private:
 
         bool isInitialized = false;
 
-        std::shared_ptr<cl::Buffer> mismatchBuffer;
+        shared_ptr<cl::Buffer> mismatchBuffer;
         size_t mismatchBufferSize;
         uint16_t* mismatchBufferHostPointer;
 
-        std::shared_ptr<cl::Buffer> neighborsBuffer;
+        shared_ptr<cl::Buffer> neighborsBuffer;
         size_t neighborsBufferSize;
         uint32_t* neighborsBufferHostPointer;
         void setupNeighborsBuffer (
@@ -180,7 +180,7 @@ private:
             size_t k,
             size_t mismatchCountThreshold);
 
-        std::shared_ptr<cl::Buffer> neighborCountsBuffer;
+        shared_ptr<cl::Buffer> neighborCountsBuffer;
         size_t neighborCountsBufferSize;
         uint32_t* neighborCountsBufferHostPointer;
         void setupNeighborCountsBuffer (
@@ -188,7 +188,7 @@ private:
             size_t blockSize,
             size_t mismatchCountThreshold);
 
-        std::shared_ptr<cl::Buffer> cellId1sBuffer;
+        shared_ptr<cl::Buffer> cellId1sBuffer;
         size_t cellId1sBufferSize;
         uint32_t* cellId1sBufferHostPointer;
         void setupCellId1sBuffer(
@@ -197,7 +197,7 @@ private:
             size_t maxCheck
             );
 
-        std::shared_ptr<cl::Buffer> cellId1CountsBuffer;
+        shared_ptr<cl::Buffer> cellId1CountsBuffer;
         size_t cellId1CountsBufferSize;
         uint32_t* cellId1CountsBufferHostPointer;
         void setupCellId1CountsBuffer(

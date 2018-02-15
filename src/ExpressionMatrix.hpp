@@ -16,14 +16,12 @@
 #include "MemoryMappedStringTable.hpp"
 #include "NormalizationMethod.hpp"
 
-// Boost libraries.
-#include <boost/shared_ptr.hpp>
-
-// Standard library, partially injected in the ExpressionMatrix2 namespace.
+// Standard library.
+#include <limits>
 #include "map.hpp"
+#include "memory.hpp"
 #include "string.hpp"
 #include "utility.hpp"
-#include <limits>
 
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
@@ -638,7 +636,7 @@ public:
     // Signature graphs.
     // All cells with the same signature are aggregated
     // into a single vertex of a signature graph.
-    map<string, std::shared_ptr<SignatureGraph> > signatureGraphs;
+    map<string, shared_ptr<SignatureGraph> > signatureGraphs;
     void createSignatureGraph(
         const string& signatureGraphName,
         const string& cellSetName,
@@ -1098,7 +1096,7 @@ public:
 
     // The cluster graphs.
     // This is not persistent (lives in memory only).
-    map<string, boost::shared_ptr<ClusterGraph> > clusterGraphs;
+    map<string, shared_ptr<ClusterGraph> > clusterGraphs;
 
     // Create a new named ClusterGraph by running clustering on an existing CellGraph.
     void createClusterGraph(
@@ -1149,7 +1147,7 @@ public:
 
 
     // Gene graphs and related functionality.
-    map<string, std::shared_ptr<GeneGraph> > geneGraphs;
+    map<string, shared_ptr<GeneGraph> > geneGraphs;
 
     // Create or remove a gene graph.
     void createGeneGraph(
