@@ -8,7 +8,6 @@
 #include "filesystem.hpp"
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
-#include "boost_array.hpp"
 #include "boost_lexical_cast.hpp"
 
 // Standard libraries, partially injected into the ExpressionMatrix2 namespace.
@@ -24,6 +23,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "array.hpp"
 
 // Forward declarations.
 namespace ChanZuckerberg {

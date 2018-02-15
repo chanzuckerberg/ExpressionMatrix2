@@ -7,9 +7,9 @@
 #include "BitSet.hpp"
 #include "Ids.hpp"
 
-#include "boost_array.hpp"
 #include <boost/graph/adjacency_list.hpp>
 
+#include "array.hpp"
 #include "iosfwd.hpp"
 #include "map.hpp"
 #include "utility.hpp"

@@ -3,7 +3,7 @@
 #include "CZI_ASSERT.hpp"
 using namespace ChanZuckerberg::ExpressionMatrix2;
 
-#include "boost_array.hpp"
+#include "array.hpp"
 
 #include "algorithm.hpp"
 #include "iostream.hpp"
