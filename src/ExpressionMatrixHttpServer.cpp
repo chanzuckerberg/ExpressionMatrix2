@@ -440,7 +440,7 @@ void ExpressionMatrix::exploreHashTableSummary(const vector<string>& request, os
         const double size = double(geneCount());
         const double loadFactor = size / capacity;
         const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
-        const bool isBad = (loadFactor >= 0.5);
+        const bool isBad = (loadFactor >= 0.3);
         const string color = isBad ? (" style='background-color:red'") : "";
         html <<
             "<tr><td>Gene names"
@@ -455,12 +455,52 @@ void ExpressionMatrix::exploreHashTableSummary(const vector<string>& request, os
     }
 
     {
+        // Hash table used to hold gene meta data names.
+        const double capacity = double(geneMetaDataNames.capacity());
+        const double size = double(geneMetaDataNames.size());
+        const double loadFactor = size / capacity;
+        const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
+        const bool isBad = (loadFactor >= 0.3);
+        const string color = isBad ? (" style='background-color:red'") : "";
+        html <<
+            "<tr><td>Gene meta data names"
+            "<td class=centered>geneMetaDataNameCapacity"
+            "<td class=centered>" << capacity <<
+            "<td class=centered>" << size;
+        const auto oldPrecision = html.precision(3);
+        html <<
+            "<td class=centered" << color << ">" << loadFactor <<
+            "<td class=centered>" << penalty;
+        html.precision(oldPrecision);
+    }
+
+    {
+        // Hash table used to hold gene meta data values.
+        const double capacity = double(geneMetaDataValues.capacity());
+        const double size = double(geneMetaDataValues.size());
+        const double loadFactor = size / capacity;
+        const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
+        const bool isBad = (loadFactor >= 0.3);
+        const string color = isBad ? (" style='background-color:red'") : "";
+        html <<
+            "<tr><td>Gene meta data values"
+            "<td class=centered>geneMetaDataValueCapacity"
+            "<td class=centered>" << capacity <<
+            "<td class=centered>" << size;
+        const auto oldPrecision = html.precision(3);
+        html <<
+            "<td class=centered" << color << ">" << loadFactor <<
+            "<td class=centered>" << penalty;
+        html.precision(oldPrecision);
+    }
+
+    {
         // Hash table used to hold cell names.
         const double capacity = double(cellNames.capacity());
         const double size = double(cellCount());
         const double loadFactor = size / capacity;
         const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
-        const bool isBad = (loadFactor >= 0.5);
+        const bool isBad = (loadFactor >= 0.3);
         const string color = isBad ? (" style='background-color:red'") : "";
         html <<
             "<tr><td>Cell names"
@@ -480,7 +520,7 @@ void ExpressionMatrix::exploreHashTableSummary(const vector<string>& request, os
         const double size = double(cellMetaDataNames.size());
         const double loadFactor = size / capacity;
         const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
-        const bool isBad = (loadFactor >= 0.5);
+        const bool isBad = (loadFactor >= 0.3);
         const string color = isBad ? (" style='background-color:red'") : "";
         html <<
             "<tr><td>Cell meta data names"
@@ -500,7 +540,7 @@ void ExpressionMatrix::exploreHashTableSummary(const vector<string>& request, os
         const double size = double(cellMetaDataValues.size());
         const double loadFactor = size / capacity;
         const double penalty = 0.5 * (1. + 1. / ((1.-loadFactor) * (1.-loadFactor))) - 1.;
-        const bool isBad = (loadFactor >= 0.5);
+        const bool isBad = (loadFactor >= 0.3);
         const string color = isBad ? (" style='background-color:red'") : "";
         html <<
             "<tr><td>Cell meta data values"
