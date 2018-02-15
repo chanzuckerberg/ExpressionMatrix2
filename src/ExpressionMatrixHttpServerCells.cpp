@@ -7,7 +7,7 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
-#include "boost_tuple_tuple.hpp"
+#include "tuple.hpp"
 
 
 
@@ -413,8 +413,8 @@ void ExpressionMatrix::compareTwoCells(
     double maxCount0 = 0;
     double maxCount1 = 0;
     for(const auto& t: data) {
-        const double count0 = t.get<2>();
-        const double count1 = t.get<3>();
+        const double count0 = std::get<2>(t);
+        const double count1 = std::get<3>(t);
         maxCount0 = max(maxCount0, count0);
         maxCount1 = max(maxCount1, count1);
     }
@@ -464,9 +464,9 @@ void ExpressionMatrix::compareTwoCells(
         "        data.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});"
         "        data.addRows([";
     for(const auto& t: data) {
-        const int geneId = t.get<1>();
-        const double count0 = t.get<2>();
-        const double count1 = t.get<3>();
+        const int geneId = std::get<1>(t);
+        const double count0 = std::get<2>(t);
+        const double count1 = std::get<3>(t);
         html << "[" << count0 << "," << count1 << ",";
         // html << "<span onclick=\"window.location = \\x22gene?geneId=" << geneId << "\\x22\">" << genes[geneId].name << "</span>";
         html << "\"<a href='gene?geneId=" << geneId << "'>" << geneNames[geneId] << "</a>\"";
@@ -547,9 +547,9 @@ void ExpressionMatrix::compareTwoCells(
     html << "</thead><tbody>";
 
     for(const auto& t: data) {
-        const int geneId = t.get<1>();
-        const double count0 = t.get<2>();
-        const double count1 = t.get<3>();
+        const int geneId = std::get<1>(t);
+        const double count0 = std::get<2>(t);
+        const double count1 = std::get<3>(t);
         html << "<tr><td>";
         writeGeneLink(html, geneId, true);
         html << "<td>";
