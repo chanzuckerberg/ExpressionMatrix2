@@ -1820,13 +1820,13 @@ void ExpressionMatrix::createCellGraph(
     const MemoryMapped::Vector<CellId>& cellSet = *(it->second);
 
     // Create the graph.
-    typedef boost::shared_ptr<CellGraph> GraphSharedPointer;
-    const GraphSharedPointer graph = GraphSharedPointer(new CellGraph(
+    typedef shared_ptr<CellGraph> GraphSharedPointer;
+    const GraphSharedPointer graph = make_shared<CellGraph>(
         cellSet,
         directoryName + "/SimilarPairs-" + similarPairsName,
         similarityThreshold,
         maxConnectivity
-        ));
+        );
 
     // Create the GraphInformation object that will be stored with the graph.
     CellGraphInformation graphInformation;
