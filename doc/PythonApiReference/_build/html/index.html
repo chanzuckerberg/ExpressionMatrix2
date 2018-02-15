@@ -95,7 +95,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, geneCapacity: int, cellCapacity: int, cellMetaDataNameCapacity: int, cellMetaDataValueCapacity: int) -&gt; None</li>
+<li>__init__(self: ExpressionMatrix2.ExpressionMatrix, directoryName: str, geneCapacity: int, cellCapacity: int, cellMetaDataNameCapacity: int, cellMetaDataValueCapacity: int, geneMetaDataNameCapacity: int=65536, geneMetaDataValueCapacity: int=65536) -&gt; None</li>
 </ol>
 <p>This constructor creates a new (empty) ExpressionMatrix object in the specified directory. The directory must not exists. See <a class="reference external" href="../../../Running.html#creationParameters">here</a> for more information</p>
 <ol class="arabic simple" start="2">
@@ -124,7 +124,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.addCells">
-<code class="descname">addCells</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>expressionCountsFileName: str</em>, <em>expressionCountsFileSeparators: str='</em>, <em>'</em>, <em>cellMetaDataFileName: str</em>, <em>cellMetaDataFileSeparators: str='</em>, <em>'</em><span class="sig-paren">)</span> &rarr; None</dt>
+<code class="descname">addCells</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>expressionCountsFileName: str</em>, <em>expressionCountsFileSeparators: str='</em>, <em>'</em>, <em>cellMetaDataFileName: str</em>, <em>cellMetaDataFileSeparators: str='</em>, <em>'</em>, <em>additionalCellMetaData: List[Tuple[str</em>, <em>str]]=[]</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Adds cells to the system, reading expression counts and cell meta data from files. See <a class="reference external" href="../../../PythonApi.html#addCells">here</a> for more information. .</p>
 </dd></dl>
 
@@ -315,6 +315,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.createSignatureGraph">
+<code class="descname">createSignatureGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>signatureGraphName: str</em>, <em>cellSetName: str='AllCells'</em>, <em>lshName: str</em>, <em>minCellCount: int</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Prototype code.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.downsampleCellSet">
 <code class="descname">downsampleCellSet</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputCellSetName: str='AllCells'</em>, <em>newCellSetName: str</em>, <em>probability: float</em>, <em>seed: int</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Create a new cell set by downsampling an existing cell set. Return true if successful, false if the input cell set does not exist.</p>
@@ -325,6 +331,11 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <code class="descname">explore</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>port: int=17100</em>, <em>docDirectory: str=''</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Starts an http server that can be used, in conjunction with a Web browser, to interact with the ExpressionMatrix object.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarGenePairs0">
+<code class="descname">findSimilarGenePairs0</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarGenePairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs0">
@@ -363,6 +374,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarPairs7Gpu">
+<code class="descname">findSimilarPairs7Gpu</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix, geneSetName: str='AllGenes', cellSetName: str='AllCells', lshName: str, similarPairsName: str, k: int=100, similarityThreshold: float=0.2, lshSliceLengths: List[int], maxCheck: int, log2BucketCount: int, blockSize: int</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>LSH-based computation of similar cell pairs without looping over all possible pairs of cells.Prototype code. Use findSimilarPairs4 instead.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.geneCount">
 <code class="descname">geneCount</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em><span class="sig-paren">)</span> &rarr; int</dt>
 <dd><p>Returns the total number of genes.</p>
@@ -371,7 +388,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.geneIdFromName">
 <code class="descname">geneIdFromName</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneName: str</em><span class="sig-paren">)</span> &rarr; int</dt>
-<dd><p>Return the numeric id of a gene given its name.</p>
+<dd><p>Return the numeric id of a gene given its name. Return invalidGeneId if a gene with the given name does not exist.</p>
 </dd></dl>
 
 <dl class="method">
@@ -516,6 +533,18 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dt id="ExpressionMatrix2.ExpressionMatrix.removeGeneSet">
 <code class="descname">removeGeneSet</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Removes an existing gene set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.removeSignatureGraph">
+<code class="descname">removeSignatureGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>signatureGraphName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Prototype code.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.setGeneMetaData">
+<code class="descname">setGeneMetaData</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneName: str</em>, <em>name: str</em>, <em>value: str</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Set a meta data field for a gene.</p>
 </dd></dl>
 
 <dl class="method">
