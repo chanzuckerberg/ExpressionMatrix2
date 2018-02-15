@@ -847,6 +847,9 @@ private:
     ostream& writeMetaDataSelection(ostream&, const string& selectName, bool multiple) const;
     ostream& writeMetaDataSelection(ostream&, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeMetaDataSelection(ostream&, const string& selectName, const vector<string>& selected, bool multiple) const;
+    ostream& writeGeneMetaDataSelection(ostream&, const string& selectName, bool multiple) const;
+    ostream& writeGeneMetaDataSelection(ostream&, const string& selectName, const set<string>& selected, bool multiple) const;
+    ostream& writeGeneMetaDataSelection(ostream&, const string& selectName, const vector<string>& selected, bool multiple) const;
     void compareTwoCells(const vector<string>& request, ostream& html);
     void exploreCellSets(const vector<string>& request, ostream& html);
     void exploreCellSet(const vector<string>& request, ostream& html);
@@ -1165,6 +1168,15 @@ public:
     // Check that a gene graph does not exist,
     // and throw an exception if it does.
     void checkGeneGraphDoesNotExist(const string& geneGraphName) const;
+
+    // Functions to color the gene graph.
+    void colorGeneGraphBlack(GeneGraph&) const;
+    void colorGeneGraphByMetaData(GeneGraph&, const string& metaDataName) const;
+
+    // Return the value of a specified meta data field for a given gene.
+    // Returns an empty string if the gene does not have the specified meta data field.
+    string getGeneMetaData(GeneId, const string& name) const;
+    string getGeneMetaData(GeneId, StringId) const;
 
 };
 

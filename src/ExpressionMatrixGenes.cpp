@@ -79,6 +79,37 @@ void ExpressionMatrix::setGeneMetaData(GeneId geneId, StringId nameId, StringId 
 
 }
 
+// Return the value of a specified meta data field for a given gene.
+// Returns an empty string if the gene does not have the specified meta data field.
+string ExpressionMatrix::getGeneMetaData(GeneId geneId, const string& name) const
+{
+    // Find the string id of the name.
+    // If it does not exist, return an empty string.
+    const StringId nameId = geneMetaDataNames(name);
+    if(nameId == geneMetaDataNames.invalidStringId) {
+        return "";
+    }
+    return getGeneMetaData(geneId, nameId);
+}
+string ExpressionMatrix::getGeneMetaData(GeneId geneId, StringId nameId) const
+{
+
+    // Scan the name/value pairs for this gene, looking for nameId.
+    for(const auto& metaDataPair: geneMetaData[geneId]) {
+        if(metaDataPair.first == nameId) {
+            const StringId valueId = metaDataPair.second;
+            if(valueId == geneMetaDataValues.invalidStringId) {
+                return "";  // Should never happen, but just in case.
+            } else {
+                return geneMetaDataValues[valueId];
+            }
+        }
+    }
+
+    // We did not find it. Return an empty string.
+    return "";
+}
+
 
 
 void ExpressionMatrix::incrementGeneMetaDataNameUsageCount(StringId nameId)

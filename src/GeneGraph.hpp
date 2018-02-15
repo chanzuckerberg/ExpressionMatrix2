@@ -46,6 +46,7 @@ public:
     GeneId localGeneId = invalidGeneId;     // Gene id as defined by the GeneSet.
     GeneId globalGeneId = invalidGeneId;    // Gene id as defined by the ExpressionMatrix.
     array<double, 2> position;
+    string color;
     GeneGraphVertex() {}
     GeneGraphVertex(GeneId localGeneId, GeneId globalGeneId) :
         localGeneId(localGeneId), globalGeneId(globalGeneId) {}

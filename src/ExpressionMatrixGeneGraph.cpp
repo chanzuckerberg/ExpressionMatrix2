@@ -1,8 +1,11 @@
 #include "ExpressionMatrix.hpp"
+#include "color.hpp"
 #include "GeneGraph.hpp"
 #include "SimilarGenePairs.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
+
+#include <boost/graph/iteration_macros.hpp>
 
 
 
@@ -74,5 +77,68 @@ void ExpressionMatrix::removeGeneGraph(const string& geneGraphName)
         throw runtime_error("Gene graph " + geneGraphName + " does not exists.");
     }
     geneGraphs.erase(it);
+}
+
+
+
+void ExpressionMatrix::colorGeneGraphBlack(GeneGraph& geneGraph) const
+{
+    BGL_FORALL_VERTICES(v, geneGraph, GeneGraph) {
+        geneGraph[v].color= "black";
+    }
+}
+
+
+
+void ExpressionMatrix::colorGeneGraphByMetaData(GeneGraph& geneGraph, const string& metaDataName) const
+{
+
+    // Count the number of vertices with each value of the given meta data field.
+    map<string, GeneId> frequency;
+    BGL_FORALL_VERTICES(v, geneGraph, GeneGraph) {
+        const GeneGraphVertex& vertex = geneGraph[v];
+        const GeneId globalGeneId = vertex.globalGeneId;
+        const string metaDataValue = getGeneMetaData(globalGeneId, metaDataName);
+        const auto it = frequency.find(metaDataValue);
+        if(it == frequency.end()) {
+            frequency.insert(make_pair(metaDataValue, 1));
+        } else {
+            ++(it->second);
+        }
+    }
+
+    // Sort by decreasing frequency, without counting empty values.
+    vector< pair<string, GeneId> > sortedFrequency;
+    for(const auto& p: frequency) {
+        if(!p.first.empty()) {
+            sortedFrequency.push_back(p);
+        }
+    }
+    sort(sortedFrequency.begin(), sortedFrequency.end(), OrderPairsBySecondGreater< pair<string, GeneId> >());
+
+
+
+    // Assign colors to meta data values.
+    // Vertices for which the value is empty are colored black.
+    // The remaining values are assigned colors from colorPalette1
+    // in order of decreasing frequency.
+    map<string, string> colorMap;
+    for(size_t i=0; (i<sortedFrequency.size()) && (i<12); i++) {
+        const auto& p = sortedFrequency[i];
+        colorMap[p.first] = colorPalette1(i);
+    }
+
+    // Assign colors to the vertices.
+    BGL_FORALL_VERTICES(v, geneGraph, GeneGraph) {
+        const GeneGraphVertex& vertex = geneGraph[v];
+        const GeneId globalGeneId = vertex.globalGeneId;
+        const string metaDataValue = getGeneMetaData(globalGeneId, metaDataName);
+        const auto it = colorMap.find(metaDataValue);
+        if(it == colorMap.end()) {
+            geneGraph[v].color= "black";
+        } else {
+            geneGraph[v].color = it->second;
+        }
+    }
 }
 

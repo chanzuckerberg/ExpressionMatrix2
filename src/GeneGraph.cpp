@@ -299,7 +299,7 @@ void GeneGraph::writeSvg(
 
         // Draw the vertex as a circle.
         s << "<circle cx='0' cy='0' r='" <<
-            vertexRadius << "' stroke='none' fill='black'"
+            vertexRadius << "' stroke='none' fill='" << vertex.color << "'"
             " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
             // " onclick='window.location=\"gene?geneId=" << geneName << "\";'"
             " onclick='window.open(\"gene?geneId=" << geneName << "\");'"

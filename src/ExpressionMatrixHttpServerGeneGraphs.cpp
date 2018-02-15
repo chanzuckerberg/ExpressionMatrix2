@@ -61,6 +61,12 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
     GeneGraph& geneGraph = getGeneGraph(geneGraphName);
     geneGraph.computeLayout();
 
+    string coloringOption = "black";
+    getParameterValue(request, "coloringOption", coloringOption);
+
+    string metaDataName;
+    getParameterValue(request, "metaDataName", metaDataName);
+
 
     GeneGraph::SvgParameters svgParameters;
     string hideEdges;
@@ -75,6 +81,14 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
 
     string metaDataMeaning = "category";
     getParameterValue(request, "metaDataMeaning", metaDataMeaning);
+
+
+    // Color the gene graph as requested.
+    if(coloringOption == "byMetaData") {
+        colorGeneGraphByMetaData(geneGraph, metaDataName);
+    } else {
+        colorGeneGraphBlack(geneGraph);
+    }
 
 
 
@@ -321,10 +335,30 @@ function highlightGene()
     // Form on the right of the graph.
     html << "<div>";
 
-    // Form containing the "hide edges" check box.
+
+
+    // Form for coloring the graph.
     html <<
         "<div>"
         "<form id=coloringForm onsubmit='prepareColoringFormForSubmit()'>"
+        "<br><input type=radio name=coloringOption value=black";
+    if(coloringOption == "black") {
+        html << " checked=checked";
+    }
+    html <<
+        ">Color black"
+        "<br><input type=radio name=coloringOption value=byMetaData";
+    if(coloringOption == "byMetaData") {
+        html << " checked=checked";
+    }
+    html <<
+        ">Color by meta data field ";
+    set<string> selectedMetaData;
+    if(!metaDataName.empty()) {
+        selectedMetaData.insert(metaDataName);
+    }
+    writeGeneMetaDataSelection(html, "metaDataName", selectedMetaData, false);
+    html <<
         "<br><input type=checkbox name=hideEdges title='The graph displays faster if the edges are hidden'";
     if(svgParameters.hideEdges) {
         html << " checked=checked";

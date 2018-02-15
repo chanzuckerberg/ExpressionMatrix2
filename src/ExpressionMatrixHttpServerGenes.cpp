@@ -74,6 +74,66 @@ ostream& ExpressionMatrix::writeGeneSetSelection(
 
 
 
+ostream& ExpressionMatrix::writeGeneMetaDataSelection(
+    ostream& html,
+    const string& selectName,
+    bool multiple) const
+{
+    set<string> selected;
+    return writeGeneMetaDataSelection(html, selectName, selected, multiple);
+}
+ostream& ExpressionMatrix::writeGeneMetaDataSelection(
+    ostream& html,
+    const string& selectName,
+    const vector<string>& selected,
+    bool multiple) const
+{
+    set<string> selectedSet(selected.begin(), selected.end());
+    return writeMetaDataSelection(html, selectName, selectedSet, multiple);
+}
+ostream& ExpressionMatrix::writeGeneMetaDataSelection(
+    ostream& html,
+    const string& selectName,
+    const set<string>& selected,
+    bool multiple) const
+{
+    // Get a sorted vector containing all the meta data names.
+    vector<string> names;
+    CZI_ASSERT(geneMetaDataNamesUsageCount.size() == geneMetaDataNames.strings.size());
+    for(StringId i=0; i<geneMetaDataNames.strings.size(); i++) {
+        if(geneMetaDataNamesUsageCount[i] == 0) {
+            continue;
+        }
+        const auto geneMetaDataName = geneMetaDataNames.strings[i];
+        names.push_back(string(geneMetaDataName.begin(), geneMetaDataName.end()));
+    }
+    sort(names.begin(), names.end());
+
+    // Start the <select> element.
+    html << "<select name='" << selectName << "' id='" << selectName << "'";
+    if(multiple) {
+        html << " multiple";
+    }
+    html << " style='width:8em;vertical-align:text-top;'>";
+
+
+    // Write an <option> element for each meta data field.
+    CZI_ASSERT(geneMetaDataNamesUsageCount.size() == geneMetaDataNames.strings.size());
+    for(const string& name: names) {
+        html << "<option value='" << name << "'";
+        if(selected.find(name) != selected.end()) {
+            html << " selected=selected";
+        }
+        html << ">" << name << "</option>";
+    }
+
+    // Finish the <select> element.
+    html << "</select>";
+
+    return html;
+}
+
+
 void ExpressionMatrix::exploreGene(
     const vector<string>& request,
     ostream& html)
