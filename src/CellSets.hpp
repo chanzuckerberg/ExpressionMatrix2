@@ -4,9 +4,8 @@
 #include "Ids.hpp"
 #include "MemoryMappedVector.hpp"
 
-#include <boost/shared_ptr.hpp>
-
 #include "map.hpp"
+#include "memory.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 
@@ -60,7 +59,7 @@ public:
     void removeCellSet(const string& cellSetName);
 
     // The currently defined cell sets.
-    map<string, boost::shared_ptr<CellSet> > cellSets;
+    map<string, shared_ptr<CellSet> > cellSets;
 
     // The name of the directory where files for these CellSets are.
     // The names are patterned after directoryName/CellSet-Name.

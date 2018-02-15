@@ -50,7 +50,7 @@ void CellSets::accessExisting(const string& directoryNameArgument, bool allowRea
         }
 
         // We found a file containing a CellSet. Access it.
-        boost::shared_ptr<CellSet> mappedCellSet = boost::shared_ptr<CellSet>(new CellSet);
+        shared_ptr<CellSet> mappedCellSet = make_shared<CellSet>();
         mappedCellSet->accessExistingReadWrite(fileName, allowReadOnly);
 
         // Store it in our table of known cell sets.
@@ -71,7 +71,7 @@ void CellSets::addCellSet(
     ExpressionMatrix2::deduplicate(cellSet);
 
     // Create the new cell set in mapped memory.
-    boost::shared_ptr<CellSet> mappedCellSet = boost::shared_ptr<CellSet>(new CellSet);
+    shared_ptr<CellSet> mappedCellSet = make_shared<CellSet>();
     mappedCellSet->createNew(directoryName + "/CellSet-" + cellSetName, cellSet.size());
 
     // Copy the data from the given cell set.
