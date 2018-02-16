@@ -627,6 +627,7 @@ public:
     void findSimilarGenePairs0(
         const string& geneSetName,
         const string& cellSetName,
+        NormalizationMethod,
         const string& similarGenePairsName,
         size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
         double similarityThreshold

@@ -942,6 +942,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            &ExpressionMatrix::findSimilarGenePairs0,
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
+           arg("normalizationMethod") = NormalizationMethod::L2,
            arg("similarGenePairsName"),
            arg("k") = 100,
            arg("similarityThreshold") = 0.2

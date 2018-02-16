@@ -12,12 +12,16 @@ using namespace ExpressionMatrix2;
 void ExpressionMatrix::findSimilarGenePairs0(
     const string& geneSetName,
     const string& cellSetName,
+    NormalizationMethod normalizationMethod,
     const string& similarGenePairsName,
     size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
     double similarityThreshold
     )
 {
     cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 begins." << endl;
+    cout << "Gene set: " << geneSetName << endl;
+    cout << "Cell set: " << cellSetName << endl;
+    cout << "Normalization method: " << normalizationMethodToLongString(normalizationMethod) << endl;
 
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
@@ -61,6 +65,24 @@ void ExpressionMatrix::findSimilarGenePairs0(
             v[geneId][cellId] = count;
         }
     }
+
+
+
+    // Normalize the expression vector of each cell, if requested.
+    if(normalizationMethod != NormalizationMethod::none) {
+        CZI_ASSERT(normalizationMethod != NormalizationMethod::Invalid);
+        for(CellId cellId=0; cellId!=cellCount; cellId++) {
+            const float factor =
+                (normalizationMethod==NormalizationMethod::L1) ?
+                    float(1. / expressionMatrixSubset.sums[cellId].sum1) :
+                    float(1. / sqrt(expressionMatrixSubset.sums[cellId].sum2));
+            for(GeneId geneId=0; geneId!=geneCount; geneId++) {
+                v[geneId][cellId] *= factor;
+            }
+        }
+    }
+
+
 
     // Shift and normalize the dense expression vector of each gene
     // to zero mean and unit variance. This way regression coefficients can
