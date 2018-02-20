@@ -2,7 +2,9 @@
 // of class ExpressionMatrix related to genes.
 
 #include "ExpressionMatrix.hpp"
+#include "ExpressionMatrixSubset.hpp"
 #include "tokenize.hpp"
+#include "uuid.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -835,4 +837,138 @@ void ExpressionMatrix::exploreGeneInformationContent(const vector<string>& reque
         "$(document).ready(function(){$('#countTable').tablesorter({sortList:[[3,0]]});});"
         "</script>"
         ;
+}
+
+
+
+void ExpressionMatrix::compareTwoGenes(
+    const vector<string>& request,
+    ostream& html)
+{
+    // Get the gene ids.
+    array<string, 2> geneIdStrings;
+    const bool geneId0IsPresent = getParameterValue(request, "geneId0", geneIdStrings[0]);
+    const bool geneId1IsPresent = getParameterValue(request, "geneId1", geneIdStrings[1]);
+    const bool geneIdsArePresent = geneId0IsPresent && geneId1IsPresent;
+
+    // Get the name of the cell set to be used for the comparison.
+    string cellSetName = "AllCells";
+    getParameterValue(request, "cellSetName", cellSetName);
+
+    // Get the normalization method to be used.
+    string normalizationMethodString = "L2";
+    getParameterValue(request, "normalizationMethod", normalizationMethodString);
+    const NormalizationMethod normalizationMethod =
+        normalizationMethodFromShortString(normalizationMethodString);
+
+    // Get the gene set to be used for the normalization.
+    string geneSetName;
+    getParameterValue(request, "geneSetName", geneSetName);
+
+
+    // Write the form.
+    html <<
+        "<form>"
+        "Specify two genes using names or numeric ids between 0 and " << geneCount()-1 << ":"
+        "<br><input type=text name=geneId0 autofocus";
+    if(geneId0IsPresent) {
+        html << " value=" << geneIdStrings[0];
+    }
+    html <<
+        ">"
+        "<br><input type=text name=geneId1";
+    if(geneId1IsPresent) {
+        html << " value=" << geneIdStrings[1];
+    }
+    html << "><br>Select a cell set to be used for the comparison: ";
+    writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
+    html << "<br>Normalize cell expression vectors using ";
+    writeNormalizationSelection(html, NormalizationMethod::L2);
+    html << " on gene set ";
+    writeGeneSetSelection(html, "geneSetName", {"AllGenes"}, false);
+    html <<
+        "<br><input type=submit value=Compare>"
+        "</form>";
+
+
+
+    // If the gene ids are not specified, do nothing.
+    if(!geneIdsArePresent) {
+        return;
+    }
+
+    // Access the gene set.
+    const auto itG = geneSets.find(geneSetName);
+    if(itG == geneSets.end()) {
+        html << "<p>Gene set " << geneSetName << " does not exist." << endl;
+        return;
+    }
+    const GeneSet& geneSet = itG->second;
+
+    // Access the cell set.
+    const auto itC = cellSets.cellSets.find(cellSetName);
+    if(itC == cellSets.cellSets.end()) {
+        html << "<p>Cell set " << cellSetName << " does not exist." << endl;
+        return;
+    }
+    const CellSet& cellSet = *(itC->second);
+
+    // Access the genes.
+    array<GeneId, 2> globalGeneIds;
+    array<GeneId, 2> localGeneIds;  // Local to the gene set.
+    for(int i=0; i<2; i++) {
+        globalGeneIds[i] = geneIdFromString(geneIdStrings[i]);
+        if(globalGeneIds[i] == invalidGeneId) {
+            html << "<p>Invalid gene id " << geneIdStrings[i];
+            return;
+        }
+        localGeneIds[i] = geneSet.getLocalGeneId(globalGeneIds[i]);
+    }
+
+
+
+    // Write a title.
+    html  << "<h1>Comparison of genes " << globalGeneIds[0] << " ";
+    writeGeneLink(html, globalGeneIds[0], false);
+    html << " and " << globalGeneIds[1] << " ";
+    writeGeneLink(html, globalGeneIds[1], false);
+    html << " using cell set <a href='cellSet?cellSetName="
+        << cellSetName << "'>"
+        << cellSetName  << "</a> and " <<
+        normalizationMethodToLongString(normalizationMethod) << "</h1>";
+
+
+
+    // Create the expression matrix subset for this gene set and cell set.
+    const string expressionMatrixSubsetName =
+        directoryName + "/tmp-ExpressionMatrixSubset-" + randomUuid();
+    ExpressionMatrixSubset expressionMatrixSubset(
+        expressionMatrixSubsetName, geneSet, cellSet, cellExpressionCounts);
+
+    // Create a dense expression vector for each gene.
+    // All indices are local to the gene set and cell set.
+    vector< vector<float> > v;
+    expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
+
+    // Write out a table with the counts.
+    html << "<table><th>Cell id<th>Cell<th>";
+    writeGeneLink(html, globalGeneIds[0], false);
+    html << "<th>";
+    writeGeneLink(html, globalGeneIds[1], false);
+    for(CellId localCellId=0; localCellId<expressionMatrixSubset.cellCount(); localCellId++) {
+        const float count0 = v[localGeneIds[0]][localCellId];
+        const float count1 = v[localGeneIds[1]][localCellId];
+        if(count0==0. && count1==0.) {
+            continue;
+        }
+        const CellId globalCellId = cellSet[localCellId];
+        html << "<tr><td>" << globalCellId << "<td>";
+        writeCellLink(html, globalCellId);
+        const auto oldPrecision = html.precision(3);
+        html << "<td>" << count0;
+        html << "<td>" << count1;
+        html.precision(oldPrecision);
+    }
+
+
 }

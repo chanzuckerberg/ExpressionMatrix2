@@ -30,6 +30,7 @@ void ExpressionMatrix::fillServerFunctionTable()
 
     // Genes and gene sets.
     serverFunctionTable["/gene"]                            = &ExpressionMatrix::exploreGene;
+    CZI_ADD_TO_FUNCTION_TABLE(compareTwoGenes);
     serverFunctionTable["/geneInformationContent"]          = &ExpressionMatrix::exploreGeneInformationContent;
     serverFunctionTable["/geneSets"]                        = &ExpressionMatrix::exploreGeneSets;
     serverFunctionTable["/geneSet"]                         = &ExpressionMatrix::exploreGeneSet;
@@ -273,6 +274,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
 
     writeNavigation(html, "Genes", {
         {"Genes", "gene"},
+        {"Compare two genes", "compareTwoGenes"},
         {"Gene sets", "geneSets"},
         });
     writeNavigation(html, "Cells", {

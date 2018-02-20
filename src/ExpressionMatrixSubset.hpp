@@ -16,6 +16,7 @@ It uses temporary files for all of its mapped files, so it is not persistent.
 #include "GeneSet.hpp"
 #include "Ids.hpp"
 #include "MemoryMappedVectorOfVectors.hpp"
+#include "NormalizationMethod.hpp"
 
 #include "utility.hpp"
 
@@ -97,6 +98,15 @@ public:
         double sum2 = 0.;
     };
     vector<Sum> sums;
+
+    // Get a dense representation of the expression matrix subset.
+    // Indexed by [localGeneId][localCellId].
+    // Note this means that the counts for all cells and a given
+    // gene are contiguous.
+    // Cell expression vectors are normalized as requested.
+    void getDenseRepresentation(
+        vector< vector<float> >&,
+        NormalizationMethod) const;
 
 private:
     void computeSums();

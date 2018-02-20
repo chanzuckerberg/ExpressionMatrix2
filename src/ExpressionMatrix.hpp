@@ -850,6 +850,7 @@ private:
     ostream& writeGeneMetaDataSelection(ostream&, const string& selectName, const set<string>& selected, bool multiple) const;
     ostream& writeGeneMetaDataSelection(ostream&, const string& selectName, const vector<string>& selected, bool multiple) const;
     void compareTwoCells(const vector<string>& request, ostream& html);
+    void compareTwoGenes(const vector<string>& request, ostream& html);
     void exploreCellSets(const vector<string>& request, ostream& html);
     void exploreCellSet(const vector<string>& request, ostream& html);
     void createCellSetUsingMetaData(const vector<string>& request, ostream& html);
@@ -1013,6 +1014,11 @@ public:
     void createGeneSetFromGeneNames(
         const string& geneSetName,
         const vector<string>& geneNames);
+
+    // Create a gene set consisting of the genes with ids passed in a vector.
+    void createGeneSetFromGeneIds(
+        const string& geneSetName,
+        const vector<GeneId>&);
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field is identical to a given string

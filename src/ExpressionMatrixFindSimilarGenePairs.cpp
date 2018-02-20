@@ -57,6 +57,13 @@ void ExpressionMatrix::findSimilarGenePairs0(
     // Create a dense expression vector for each gene.
     // All indices are local to the gene set and cell set.
     cout << timestamp << "Creating dense expression vectors." << endl;
+    vector< vector<float> > v;
+    expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
+
+
+
+#if 0
+    // The code under ifdef was moved to ExpressionMatrixSubset::getDenseRepresentation.
     vector< vector<float> > v(geneCount, vector<float>(cellCount, 0.));
     for(CellId cellId=0; cellId!=cellCount; ++cellId) {
         for(const auto& p: expressionMatrixSubset.cellExpressionCounts[cellId]) {
@@ -81,7 +88,7 @@ void ExpressionMatrix::findSimilarGenePairs0(
             }
         }
     }
-
+#endif
 
 
     // Shift and normalize the dense expression vector of each gene

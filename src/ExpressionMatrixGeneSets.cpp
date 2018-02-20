@@ -126,6 +126,29 @@ void ExpressionMatrix::createGeneSetFromGeneNames(
 }
 
 
+
+// Create a gene set consisting of the genes with ids passed in a vector.
+void ExpressionMatrix::createGeneSetFromGeneIds(
+    const string& geneSetName,
+    const vector<GeneId>& geneIds)
+{
+    // Check if a gene set with this name already exists.
+    if(geneSets.find(geneSetName) != geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " already exists.");
+    }
+
+    // Create the new gene set.
+    GeneSet& geneSet = geneSets[geneSetName];
+    geneSet.createNew(directoryName + "/GeneSet-" + geneSetName);
+    for(const GeneId& geneId: geneIds) {
+        geneSet.addGene(geneId);
+    }
+    geneSet.sort();
+
+}
+
+
+
 bool ExpressionMatrix::createGeneSetIntersection(const string& inputSetsNames, const string& outputSetName)
 {
     return createGeneSetIntersectionOrUnion(inputSetsNames, outputSetName, false);

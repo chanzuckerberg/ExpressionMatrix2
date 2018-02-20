@@ -132,3 +132,43 @@ double ExpressionMatrixSubset::computeCellSimilarity(CellId localCellId0, CellId
     return numerator / denominator;
 }
 
+
+
+// Get a dense representation of the expression matrix subset.
+// Indexed by [localGeneId][localCellId].
+// Note this means that the counts for all cells and a given
+// gene are contiguous.
+// Cell expression vectors are normalized as requested.
+void ExpressionMatrixSubset::getDenseRepresentation(
+    vector< vector<float> >& v,
+    NormalizationMethod normalizationMethod) const
+{
+    v.clear();
+    v.resize(geneCount(), vector<float>(cellCount(), 0.));
+
+    for(CellId cellId=0; cellId!=cellCount(); ++cellId) {
+        for(const auto& p: cellExpressionCounts[cellId]) {
+            const GeneId geneId = p.first;
+            const float count = p.second;
+            v[geneId][cellId] = count;
+        }
+    }
+
+    // Normalize the expression vector of each cell, if requested.
+    if(normalizationMethod != NormalizationMethod::none) {
+        CZI_ASSERT(normalizationMethod != NormalizationMethod::Invalid);
+        for(CellId cellId=0; cellId!=cellCount(); cellId++) {
+            const double scaling =
+                (normalizationMethod==NormalizationMethod::L1) ?
+                    sums[cellId].sum1 :
+                    sqrt(sums[cellId].sum2);
+            if(scaling != 0.) {
+                const float factor = float(1./scaling);
+                for(GeneId geneId=0; geneId!=geneCount(); geneId++) {
+                    v[geneId][cellId] *= factor;
+                }
+            }
+        }
+    }
+
+}
