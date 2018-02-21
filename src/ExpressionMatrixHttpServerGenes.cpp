@@ -950,6 +950,92 @@ void ExpressionMatrix::compareTwoGenes(
     vector< vector<float> > v;
     expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
 
+
+
+    // Scatter plot of the counts for the two genes.
+    html << R"###(
+<div title="
+To zoom, drag horizontally or vertically, then click. 
+To reset to initial display, double click.
+To pan, shift+drag.
+To see details on a cell, click on a data point.
+">Mouse here to see scatter plot navigation tips.</div>
+<div id="graphdiv"
+"></div>
+
+<script>
+
+// Get dygraphs, the package used to do the plot.
+// Define the dygraphs style here so we don't have to put in the head.
+// It is illegal to add the <link> in <body>.
+var newStyle = document.createElement("link");
+newStyle.rel = "stylesheet";
+newStyle.href = "http://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css";
+document.getElementsByTagName("head")[0].appendChild(newStyle);
+</script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+
+<script type="text/javascript">
+  g = new Dygraph(
+
+    document.getElementById("graphdiv"),
+
+    "x,y,CellId\n)###";
+
+    float max0 = std::numeric_limits<float>::min();
+    float max1 = std::numeric_limits<float>::min();
+    for(CellId localCellId=0; localCellId<expressionMatrixSubset.cellCount(); localCellId++) {
+        const float count0 = v[localGeneIds[0]][localCellId];
+        const float count1 = v[localGeneIds[1]][localCellId];
+        const CellId globalCellId = cellSet[localCellId];
+        max0 = max(max0, count0);
+        max1 = max(max1, count1);
+        html << count0 << "," << count1 << "," << globalCellId << "\\n";
+    }
+
+    html << R"###(",
+    {
+        visibility: [ true, false ],
+        strokeWidth: 0.0,
+        pointSize: 3,
+        drawPoints: true,
+        xlabel: ')###" << geneNames[globalGeneIds[0]] << R"###(',
+        ylabel: ')###" << geneNames[globalGeneIds[1]] << R"###(',
+        color: 'DarkBlue',
+        
+        // This sets the horizontal axis range. Using null for automatic
+        // does not always work.
+        dateWindow: [0, )###" << max0 << R"###(],
+        
+        // This sets the vertical axis range. Using null for automatic
+        // does not always work.
+        valueRange: [0, )###" << max1 << R"###(],
+
+        axes: {
+            y: {
+              axisLabelWidth: 100  
+            }
+        },
+        
+        // This draws a border around the plot.
+        underlayCallback: function(ctx, area, dygraph) {
+            ctx.strokeStyle = 'black';
+            ctx.strokeRect(area.x, area.y, area.w, area.h);    
+        },
+        
+        pointClickCallback: function(e, point) {
+            window.open("cell?cellId=" + this.getValue(point.idx, 2));        
+        },
+        
+        showLabelsOnHighlight: false,
+     }
+    
+
+  );
+</script>
+    )###";
+
+
     // Write to html jQuery and TableSorter so we can make the table below sortable.
     writeJQuery( html);
     writeTableSorter(html);
@@ -976,13 +1062,27 @@ void ExpressionMatrix::compareTwoGenes(
         html << "<td class=centered>" << count1;
         html.precision(oldPrecision);
     }
+
+
+
     // Finish the table and make it sortable.
-    html <<
-        "</tbody></table>"
-        "<script>"
-        "$(document).ready(function(){$('#countTable').tablesorter();});"
-        "</script>"
-        ;
+    html << R"###(
+</tbody></table>
+<script>
+$(document).ready(function(){$('#countTable').tablesorter();});
+
+// Add a parser for floating point numbers in scientific notation.
+$.tablesorter.addParser({ 
+id: 'scinot', 
+is: function(s) { 
+    return /[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?/.test(s); 
+}, 
+format: function(s) { 
+    return $.tablesorter.formatFloat(s);
+}, 
+type: 'numeric' 
+});</script>"
+    )###";
 
 
 }
