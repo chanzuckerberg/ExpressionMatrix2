@@ -328,7 +328,7 @@ void ExpressionMatrix::compareTwoCells(
     writeCellLink(html, cellIds[0], false);
     html << " and " << cellIds[1] << " ";
     writeCellLink(html, cellIds[1], false);
-    html << "using gene set " << geneSetName << "</h1>";
+    html << " using gene set " << geneSetName << "</h1>";
 
 
     // Write a table of similarities between these two cells.
