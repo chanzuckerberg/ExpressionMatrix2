@@ -950,11 +950,18 @@ void ExpressionMatrix::compareTwoGenes(
     vector< vector<float> > v;
     expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
 
+    // Write to html jQuery and TableSorter so we can make the table below sortable.
+    writeJQuery( html);
+    writeTableSorter(html);
+
     // Write out a table with the counts.
-    html << "<table><th>Cell id<th>Cell<th>";
-    writeGeneLink(html, globalGeneIds[0], false);
-    html << "<th>";
-    writeGeneLink(html, globalGeneIds[1], false);
+    html << "<p><strong>The table is sortable.</strong> Click on a header to sort by that header. "
+    "Click again to reverse the sorting order.";
+    html << "<table id=countTable class=tablesorter><thead><th class=centered>Cell id<th class=centered>Cell<th class=centered>";
+    html << geneNames[globalGeneIds[0]];
+    html << "<th class=centered>";
+    html << geneNames[globalGeneIds[1]];
+    html << "</thead><tbody>";
     for(CellId localCellId=0; localCellId<expressionMatrixSubset.cellCount(); localCellId++) {
         const float count0 = v[localGeneIds[0]][localCellId];
         const float count1 = v[localGeneIds[1]][localCellId];
@@ -962,13 +969,20 @@ void ExpressionMatrix::compareTwoGenes(
             continue;
         }
         const CellId globalCellId = cellSet[localCellId];
-        html << "<tr><td>" << globalCellId << "<td>";
+        html << "<tr><td class=centered>" << globalCellId << "<td>";
         writeCellLink(html, globalCellId);
         const auto oldPrecision = html.precision(3);
-        html << "<td>" << count0;
-        html << "<td>" << count1;
+        html << "<td class=centered>" << count0;
+        html << "<td class=centered>" << count1;
         html.precision(oldPrecision);
     }
+    // Finish the table and make it sortable.
+    html <<
+        "</tbody></table>"
+        "<script>"
+        "$(document).ready(function(){$('#countTable').tablesorter();});"
+        "</script>"
+        ;
 
 
 }
