@@ -21,7 +21,7 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
                 << p.first << "?hideEdges=on'>" << p.first << "</a>"
                 "<td><form action=removeGeneGraph>"
                 "<input type=submit value='Remove'>"
-                "<input hidden type=text name=signatureGeneName value='" << p.first << "'>"
+                "<input hidden type=text name=geneGraphName value='" << p.first << "'>"
                 "</form>";
         }
         html << "</table>";
@@ -444,7 +444,7 @@ void ExpressionMatrix::removeGeneGraph(const vector<string>& request, ostream& h
         html << "Gene graph name is missing.";
         return;
     }
-    removeSignatureGraph(geneGraphName);
+    removeGeneGraph(geneGraphName);
 
     html << "<p>Gene graph " << geneGraphName << " was removed."
         "<p><form action=exploreGeneGraphs>"
