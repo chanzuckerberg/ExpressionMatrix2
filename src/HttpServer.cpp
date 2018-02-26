@@ -37,7 +37,7 @@ void HttpServer::explore(uint16_t port)
 
     // Bind to the requested port, and try the next port if that fails.
     bool bindWasSuccessful = false;
-    for(int iteration=0; iteration<10; ++iteration) {
+    for(int iteration=0; iteration<30; ++iteration) {
         try {
             acceptor.bind(endpoint);
             bindWasSuccessful = true;
