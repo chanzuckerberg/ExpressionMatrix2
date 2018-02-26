@@ -121,6 +121,21 @@ void ExpressionMatrix::writeSimilarPairs(const string& name) const
 
 
 
+// Remove a similar pairs object given its name.
+// This throws an exception if the requested SimilarPairs object does not exist.
+void ExpressionMatrix::removeSimilarPairs(const string& name)
+{
+    try {
+        SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, false);
+        similarPairs.remove();
+    } catch(runtime_error e) {
+        cout << e.what() << endl;
+        throw runtime_error("Error removing similar pairs object " + name);
+    }
+}
+
+
+
 // Unit test for class ExpressionMatrixSubset.
 void ExpressionMatrix::testExpressionMatrixSubset(CellId cellId0, CellId cellId1) const
 {

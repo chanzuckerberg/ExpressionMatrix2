@@ -609,6 +609,11 @@ public:
         const string& similarPairsName0,
         const string& similarPairsName1);
 
+    // Remove a similar pairs object given its name.
+    // This throws an exception if the requested SimilarPairs object does not exist.
+    void removeSimilarPairs(const string& name);
+
+
     // Create a new cell graph.
     // Graphs are not persistent (they are stored in memory only).
     void createCellGraph(

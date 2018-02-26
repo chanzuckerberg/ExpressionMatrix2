@@ -1093,8 +1093,7 @@ void ExpressionMatrix::removeSimilarPairs(const vector<string>& request, ostream
     string similarPairsName;
     getParameterValue(request, "similarPairsName", similarPairsName);
 
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, false);
-    similarPairs.remove();
+    removeSimilarPairs(similarPairsName);
 
     html <<
         "<p>Removed similar pairs " << similarPairsName << "."

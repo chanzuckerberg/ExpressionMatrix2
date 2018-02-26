@@ -907,6 +907,15 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "Only intended to be used for testing. "
            "See the source code in the ExpressionMatrix2/src directory for more information. "
        )
+       .def("removeSimilarPairs",
+           (
+               void (ExpressionMatrix::*)
+               (const string&)
+           )
+           &ExpressionMatrix::removeSimilarPairs,
+           "Remove the similar cell pairs object with the specified name.",
+           arg("similarPairsName")
+       )
        .def("compareSimilarPairs",
            &ExpressionMatrix::compareSimilarPairs,
            "Only intended to be used for testing. "

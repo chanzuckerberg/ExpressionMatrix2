@@ -334,7 +334,7 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 
 <dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.findSimilarGenePairs0">
-<code class="descname">findSimilarGenePairs0</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>similarGenePairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em><span class="sig-paren">)</span> &rarr; None</dt>
+<code class="descname">findSimilarGenePairs0</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneSetName: str='AllGenes'</em>, <em>cellSetName: str='AllCells'</em>, <em>normalizationMethod: ExpressionMatrix2.NormalizationMethod=NormalizationMethod.L2</em>, <em>similarGenePairsName: str</em>, <em>k: int=100</em>, <em>similarityThreshold: float=0.2</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -539,6 +539,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 <dt id="ExpressionMatrix2.ExpressionMatrix.removeSignatureGraph">
 <code class="descname">removeSignatureGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>signatureGraphName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
 <dd><p>Prototype code.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.removeSimilarPairs">
+<code class="descname">removeSimilarPairs</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>similarPairsName: str</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Remove the similar cell pairs object with the specified name.</p>
 </dd></dl>
 
 <dl class="method">
