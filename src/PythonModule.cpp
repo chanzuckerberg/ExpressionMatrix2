@@ -495,7 +495,9 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            "is indexed in python as m[cellId][geneId], where cellId and geneId "
            "are ids local to the cell set and gene set respectively "
            "(that is, they only equal global cell ids and gene ids "
-           "if the function is called for the AllCells and AllGenes sets).",
+           "if the function is called for the AllCells and AllGenes sets). "
+           "Gene sets and cell sets store their genes and cells "
+           "in order of increasing id.",
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",
            arg("normalizationMethod") = NormalizationMethod::none
