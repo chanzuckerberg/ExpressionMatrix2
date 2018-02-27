@@ -7,6 +7,8 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include <numeric>
+
 
 
 void ExpressionMatrix::findSimilarGenePairs0(
