@@ -8,6 +8,7 @@ using namespace ExpressionMatrix2;
 #include "color.hpp"
 
 #include <boost/graph/iteration_macros.hpp>
+#include <random>
 
 #include "fstream.hpp"
 
