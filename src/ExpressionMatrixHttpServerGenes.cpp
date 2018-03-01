@@ -201,6 +201,7 @@ void ExpressionMatrix::exploreGene(
     // Links with information on this gene on various web sites.
     html <<
         "<p>Look up this gene on "
+        "<a href='http://www.genecards.org/Search/Keyword?queryString=" << urlEncode(geneName) << "'>GeneCards</a>, "
         "<a href='https://www.ncbi.nlm.nih.gov/gene/?term=" << urlEncode(geneName) << "'>NCBI</a>, "
         "<a href='https://genome.ucsc.edu/cgi-bin/hgTracks?org=Human&db=hg38&position=" << urlEncode(geneName) << "'>UCSC</a>, "
         "<a href='http://www.ensembl.org/Multi/Search/Results?q=" << urlEncode(geneName) << ";site=ensembl'>Ensembl</a>, "
