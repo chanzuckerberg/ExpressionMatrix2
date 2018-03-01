@@ -167,7 +167,8 @@ Using double quotes will not work.
 
 <p>
 For convenience, the table below lists the CMake <code>-D</code>
-options used for each of the pre-built configurations.
+options used for each of the pre-built configurations,
+as well as for configurations that are not part of the release package.
 <table style="margin-left:auto;margin-right:auto">
 
 <tr><td>Release-ubuntu16-python2
@@ -205,6 +206,14 @@ options used for each of the pre-built configurations.
 -DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages
 -DBUILD_WITH_HDF5=OFF
 </code>
+
+<tr><td>Arch Linux (not included in release package -
+see <a href=#ArchLinux>here</a> for more information)
+<td><code>
+-DPYTHON_INCLUDE_PATH=/usr/include/python3.6m 
+-DPYBIND11_INCLUDE_PATH=/usr/include/python3.6m/pybind11 
+-DHDF5_INCLUDE_PATH=/usr/include 
+-DHDF5_LIBRARIES='hdf5_cpp hdf5'</code>
 
 </table>
 
@@ -260,6 +269,42 @@ are listed here:
 <p>The <code>pybind11</code> package is installed using (as root)
 <code>pip install pybind11</code> for Python 2
 and <code>pip3 install pybind11</code> for Python 3.
+
+
+
+<h2 id=ArchLinux>Building from source on Arch Linux</h2>
+<p>
+As an alternative to building with <code>cmake</code> as described above, 
+for Arch Linux you also can use the following commands to build from source an Arch Linux
+package that can be installed in the standard way using <code>pacman</code>:
+<code>
+<pre>
+curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=expressionmatrix2-git
+makepkg
+</pre>
+</code>
+The resulting package can be installed using the following command (must be run as root):
+<code>
+<pre>
+pacman -U expressionmatrix2-git-*.tar.xz
+</pre>
+</code>
+If you do this, you don't need to set the <code>PYTHONPATH</code>
+environment variable to be able to import the <code>ExpressionMatrix2</code>
+module in Python.
+
+<p>
+</code>
+The <code>makepkg</code> command is supposed to take care of all dependencies,
+but in case you run into problems you can manually install the prerequisites
+using the following commands as root:
+<ul>
+<li><code>pacman -S cmake</code>
+<li><code>pacman -S boost</code>
+<li><code>pacman -S hdf5</code>
+<li><code>pacman -S python-pipenv</code>
+<li><code>pip install pybind11</code>
+</ul>
 
 
 
