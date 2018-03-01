@@ -61,6 +61,18 @@ To build the <code>ExpressionMatrix2</code> software from source,
 you can use Eclipse or CMake.
 
 
+<h2>Obtaining the source code</h2>
+<p>
+There are a couple of ways to get the source code from GitHub. 
+<ul>
+<li>From <a href="https://github.com/chanzuckerberg/ExpressionMatrix2">top page for the ExpressionMatrix2 repository</a>, click on <code>Clone or Download</code>.
+<li> Use the following command: 
+<code>git clone https://github.com/chanzuckerberg/ExpressionMatrix2</code>.
+This requires <code>git</code> to be installed.
+</ul>
+
+
+
 <h2>Building from source using Eclipse</h2>
 <p>
 The repository includes at its top level Eclipse files <code>.project</code>
@@ -145,6 +157,10 @@ Only used if <code>BUILD_WITH_HDF5</code> is <code>ON</code>.
 <tr><td><code>HDF5_LIBRARIES</code><td><code>hdf5_cpp hdf5_serial</code>
 <td>The names of the HDF5 libraries to link with.
 Only used if <code>BUILD_WITH_HDF5</code> is <code>ON</code>.
+If invoking <code>cmake</code> from the <code>bash</code> shell,
+enter these names separated by spaces and enclosed in single quotes, not double quotes, like this:
+<code>-DHDF5_LIBRARIES='hdf5_cpp hdf5_serial'</code>. 
+Using double quotes will not work.
 </table>
 
 
@@ -180,7 +196,7 @@ options used for each of the pre-built configurations.
 -DPYTHON_INCLUDE_PATH=/usr/include/python2.7 
 -DPYBIND11_INCLUDE_PATH=/usr/lib/python2.7/site-packages
 -DHDF5_INCLUDE_PATH=/usr/include
--DHDF5_LIBRARIES="hdf5_cpp hdf5"
+-DHDF5_LIBRARIES='hdf5_cpp hdf5'
 </code>
 
 <tr><td>Release-centos7-nohdf5-python2
