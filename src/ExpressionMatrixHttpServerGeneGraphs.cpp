@@ -50,7 +50,9 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
 
 
 
-void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& html)
+void ExpressionMatrix::exploreGeneGraph(
+    const vector<string>& request,
+    ostream& html, const BrowserInformation& browserInformation)
 {
     // Get parameters from the request.
     string geneGraphName;
@@ -75,7 +77,7 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
     svgParameters.showEdges = (showEdges == "on");
     string showVertexLabels;
     getParameterValue(request, "showVertexLabels", showVertexLabels);
-    svgParameters.showVertexLabels = (showVertexLabels == "on");
+    svgParameters.showVertexLabels = (showVertexLabels == "on") && browserInformation.isChrome;
     getParameterValue(request, "svgSizePixels", svgParameters.svgSizePixels);
     getParameterValue(request, "xShift", svgParameters.xShift);
     getParameterValue(request, "yShift", svgParameters.yShift);
@@ -376,12 +378,16 @@ function highlightGene()
         html << " checked=checked";
     }
     html << ">Display edges";
-    html <<
-        "<br><input type=checkbox name=showVertexLabels";
-    if(svgParameters.showVertexLabels) {
-        html << " checked=checked";
+    if(browserInformation.isChrome) {
+        html <<
+            "<br><input type=checkbox name=showVertexLabels";
+        if(svgParameters.showVertexLabels) {
+            html << " checked=checked";
+        }
+        html << ">Display gene labels";
+    } else {
+        html << "<br>Gene labels are only supported with the Chrome browser.";
     }
-    html << ">Display gene labels (gene labels don't work on Firefox)";
     html <<
         "<input type=text hidden id=geneGraphName name=geneGraphName value='" << geneGraphName << "'>"
         "<input type=text hidden id=svgSizePixels name=svgSizePixels>"
@@ -406,6 +412,15 @@ function highlightGene()
 
     // End of div containing the svg graphics and the form on the right.
     html << "</div>";
+
+    if(svgParameters.showVertexLabels) {
+        html <<
+            "<p>If gene labels don't display correctly, "
+            "a slight panning will often fix the problem. "
+            "This is caused by browser bugs displaying text in svg graphics."
+            "To pan, use the mouse to drag an empty location in the graph.";
+
+    }
 }
 
 

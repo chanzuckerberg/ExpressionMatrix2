@@ -187,6 +187,7 @@ void HttpServer::BrowserInformation::set(const string& userAgentHeader)
 {
     const string firefoxString = "Firefox/";
     const string chromeString = "Chrome/";
+    const string edgeString = "Edge/";
     vector<string> tokens;
     tokenize(" ", userAgentHeader, tokens);
     for(const string& token: tokens) {
@@ -196,6 +197,14 @@ void HttpServer::BrowserInformation::set(const string& userAgentHeader)
         if(token.compare(0, chromeString.size(), chromeString) == 0) {
             isChrome = true;
         }
+        if(token.compare(0, edgeString.size(), edgeString) == 0) {
+            isEdge = true;
+        }
+    }
+
+    // Edge writes both Chrome and Edge in its User Agent string.
+    if(isChrome && isEdge) {
+        isChrome = false;
     }
 
 }

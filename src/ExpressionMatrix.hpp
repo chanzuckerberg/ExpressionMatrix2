@@ -824,10 +824,26 @@ public:
 private:
     ServerParameters serverParameters;
     void processRequest(const vector<string>& request, ostream& html, const BrowserInformation&);
-    typedef void (ExpressionMatrix::*ServerFunction)(const vector<string>& request, ostream& html);
+
+    // Function table and related information.
+    // Associates request keywords with functions.
+    // We have two seperate function tables, one for most
+    // functions that don't require browser information, and one
+    // for the few functions that dop.
+    typedef void (ExpressionMatrix::*ServerFunction)(
+        const vector<string>& request,
+        ostream& html);
     map<string, ServerFunction> serverFunctionTable;
+    typedef void (ExpressionMatrix::*ServerFunctionWithBrowserInfo)(
+        const vector<string>& request,
+        ostream& html,
+        const BrowserInformation&);
+    map<string, ServerFunctionWithBrowserInfo> serverFunctionWithBrowserInfoTable;
     set<string> nonHtmlKeywords;
     void fillServerFunctionTable();
+
+
+
     void writeNavigation(ostream& html);
     // void writeNavigation(ostream& html, const string& text, const string& url, const string& toolTip = "");
     void writeNavigation(ostream& html, const string& title, const vector<pair <string, string> >&);
@@ -907,7 +923,7 @@ private:
     void createSignatureGraph(const vector<string>& request, ostream& html);
     void removeSignatureGraph(const vector<string>& request, ostream& html);
     void exploreGeneGraphs(const vector<string>& request, ostream& html);
-    void exploreGeneGraph(const vector<string>& request, ostream& html);
+    void exploreGeneGraph(const vector<string>& request, ostream& html, const BrowserInformation&);
     void createGeneGraph(const vector<string>& request, ostream& html);
     void removeGeneGraph(const vector<string>& request, ostream& html);
 

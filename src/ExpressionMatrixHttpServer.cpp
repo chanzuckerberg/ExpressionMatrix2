@@ -20,6 +20,7 @@ using namespace ExpressionMatrix2;
 // Fill the server function table, which contains the function associated with each keyword.
 // The macro can only be used when the keyword and the function name are identical.
 #define CZI_ADD_TO_FUNCTION_TABLE(name) serverFunctionTable[string("/") + #name ] = &ExpressionMatrix::name
+#define CZI_ADD_TO_FUNCTION_WITH_BROWSER_INFO_TABLE(name) serverFunctionWithBrowserInfoTable[string("/") + #name ] = &ExpressionMatrix::name
 void ExpressionMatrix::fillServerFunctionTable()
 {
     // Summary.
@@ -98,11 +99,12 @@ void ExpressionMatrix::fillServerFunctionTable()
 
     // Gene graphs.
     CZI_ADD_TO_FUNCTION_TABLE(exploreGeneGraphs);
-    CZI_ADD_TO_FUNCTION_TABLE(exploreGeneGraph);
+    CZI_ADD_TO_FUNCTION_WITH_BROWSER_INFO_TABLE(exploreGeneGraph);
     CZI_ADD_TO_FUNCTION_TABLE(createGeneGraph);
     CZI_ADD_TO_FUNCTION_TABLE(removeGeneGraph);
 }
 #undef CZI_ADD_TO_FUNCTION_TABLE
+#undef CZI_ADD_TO_FUNCTION_WITH_BROWSER_INFO_TABLE
 
 
 
@@ -118,11 +120,12 @@ void ExpressionMatrix::processRequest(
 {
     // Look up the keyword to find the function that will process this request.
     const string& keyword = request.front();
-    const auto it = serverFunctionTable.find(keyword);
+    const auto it1 = serverFunctionTable.find(keyword);
+    const auto it2 = serverFunctionWithBrowserInfoTable.find(keyword);
 
 
     // If we did not find the keyword, see if it is a documentation request.
-    if(it == serverFunctionTable.end()) {
+    if(it1==serverFunctionTable.end() && it2==serverFunctionWithBrowserInfoTable.end()) {
 
 
 
@@ -196,13 +199,9 @@ void ExpressionMatrix::processRequest(
 
 
 
-    // We found the keyword. Get the function that processes this keyword.
-    const auto function = it->second;
-    const bool isHtml = nonHtmlKeywords.find(keyword) == nonHtmlKeywords.end();
-
-
 
     // Write everything that goes before the html body.
+    const bool isHtml = nonHtmlKeywords.find(keyword) == nonHtmlKeywords.end();
     if(isHtml) {
         html <<
             "\r\n"
@@ -218,9 +217,18 @@ void ExpressionMatrix::processRequest(
         writeNavigation(html);
     }
 
+
+
+    // We found the keyword. Call the function that processes this keyword.
     // The processing function is only responsible for writing the html body.
     try {
-        (this->*function)(request, html);
+        if(it1 != serverFunctionTable.end()) {
+            const auto function = it1->second;
+            (this->*function)(request, html);
+        } else if(it2 != serverFunctionWithBrowserInfoTable.end()) {
+            const auto function = it2->second;
+            (this->*function)(request, html, browserInformation);
+        }
     } catch(std::exception& e) {
         html << e.what();
     }

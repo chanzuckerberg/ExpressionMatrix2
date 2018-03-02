@@ -95,6 +95,7 @@ protected:
     public:
         bool isChrome = false;
         bool isFirefox = false;
+        bool isEdge = false;
         void set(const string& userAgentHeader);
     };
 
