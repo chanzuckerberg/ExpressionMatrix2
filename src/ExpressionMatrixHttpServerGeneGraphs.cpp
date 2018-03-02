@@ -12,13 +12,14 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
     html << "<h1>Gene graphs</h1>";
 
     // Table of existing gene graphs.
-    html << "<h2>Existing gene graphs</h2><table>";
+    html << "<h2>Existing gene graphs</h2>";
     if(geneGraphs.empty()) {
         html << "<p>No gene graphs exist. You can create one using the form below.";
     } else {
+        html << "<table>";
         for(const auto& p: geneGraphs) {
             html << "<tr><td><a href='exploreGeneGraph?geneGraphName="
-                << p.first << "?hideEdges=on&?hideVertexLabels=on'>" << p.first << "</a>"
+                << p.first << "'>" << p.first << "</a>"
                 "<td><form action=removeGeneGraph>"
                 "<input type=submit value='Remove'>"
                 "<input hidden type=text name=geneGraphName value='" << p.first << "'>"
@@ -69,12 +70,12 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
 
 
     GeneGraph::SvgParameters svgParameters;
-    string hideEdges;
-    getParameterValue(request, "hideEdges", hideEdges);
-    svgParameters.hideEdges = (hideEdges == "on");
-    string hideVertexLabels;
-    getParameterValue(request, "hideVertexLabels", hideVertexLabels);
-    svgParameters.hideVertexLabels = (hideVertexLabels == "on");
+    string showEdges;
+    getParameterValue(request, "showEdges", showEdges);
+    svgParameters.showEdges = (showEdges == "on");
+    string showVertexLabels;
+    getParameterValue(request, "showVertexLabels", showVertexLabels);
+    svgParameters.showVertexLabels = (showVertexLabels == "on");
     getParameterValue(request, "svgSizePixels", svgParameters.svgSizePixels);
     getParameterValue(request, "xShift", svgParameters.xShift);
     getParameterValue(request, "yShift", svgParameters.yShift);
@@ -370,17 +371,17 @@ function highlightGene()
     }
     writeGeneMetaDataSelection(html, "metaDataName", selectedMetaData, false);
     html <<
-        "<br><input type=checkbox name=hideEdges title='The graph displays faster if the edges are hidden'";
-    if(svgParameters.hideEdges) {
+        "<br><input type=checkbox name=showEdges title='The graph displays faster if the edges are not displayed'";
+    if(svgParameters.showEdges) {
         html << " checked=checked";
     }
-    html << ">Hide edges";
+    html << ">Display edges";
     html <<
-        "<br><input type=checkbox name=hideVertexLabels";
-    if(svgParameters.hideVertexLabels) {
+        "<br><input type=checkbox name=showVertexLabels";
+    if(svgParameters.showVertexLabels) {
         html << " checked=checked";
     }
-    html << ">Hide gene labels (gene labels don't work on Firefox)";
+    html << ">Display gene labels (gene labels don't work on Firefox)";
     html <<
         "<input type=text hidden id=geneGraphName name=geneGraphName value='" << geneGraphName << "'>"
         "<input type=text hidden id=svgSizePixels name=svgSizePixels>"
@@ -447,9 +448,7 @@ void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& h
     html << "<p>Gene graph " << geneGraphName << " was created."
         "<p><form action=exploreGeneGraph>"
         "<input type=text hidden name=geneGraphName value=" << geneGraphName <<
-        "><input type=text hidden name=hideEdges value=on>"
-        "<input type=text hidden name=hideVertexLabels value=on>"
-        "<input type=submit value=Continue></form>";
+        "><input type=submit value=Continue></form>";
 
 }
 

@@ -103,8 +103,8 @@ public:
     class SvgParameters {
     public:
         // Parameters that can be set arbitrarily.
-        bool hideEdges = false;
-        bool hideVertexLabels = false;
+        bool showEdges = true;
+        bool showVertexLabels = true;
         double svgSizePixels = 500;
         double xShift = 0.;
         double yShift = 0.;

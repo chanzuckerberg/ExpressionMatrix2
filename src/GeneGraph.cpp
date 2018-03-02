@@ -267,7 +267,7 @@ void GeneGraph::writeSvg(
 
 
     // Draw the edges before the vertices, to avoid obscuring the vertices.
-    if(!svgParameters.hideEdges) {
+    if(svgParameters.showEdges) {
         s << "<g id=edges>";
         const double unscaledEdgeThickness = 5.e-4 * boundingBoxSize;
         BGL_FORALL_EDGES(e, graph, GeneGraph) {
@@ -312,7 +312,7 @@ void GeneGraph::writeSvg(
 
 
     // Write the vertex labels.
-    if(!svgParameters.hideVertexLabels) {
+    if(svgParameters.showVertexLabels) {
         s << "<g id=vertexLabels>"; // fill-opacity='0.5'
         BGL_FORALL_VERTICES(v, graph, GeneGraph) {
             const GeneGraphVertex& vertex = graph[v];
