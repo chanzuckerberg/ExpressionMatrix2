@@ -113,7 +113,8 @@ void ExpressionMatrix::fillServerFunctionTable()
 // The request is guaranteed not to be empty.
 void ExpressionMatrix::processRequest(
     const vector<string>& request,
-    ostream& html)
+    ostream& html,
+    const BrowserInformation& browserInformation)
 {
     // Look up the keyword to find the function that will process this request.
     const string& keyword = request.front();

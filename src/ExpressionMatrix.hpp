@@ -823,7 +823,7 @@ public:
     void explore(uint16_t port, const string& docDirectory);
 private:
     ServerParameters serverParameters;
-    void processRequest(const vector<string>& request, ostream& html);
+    void processRequest(const vector<string>& request, ostream& html, const BrowserInformation&);
     typedef void (ExpressionMatrix::*ServerFunction)(const vector<string>& request, ostream& html);
     map<string, ServerFunction> serverFunctionTable;
     set<string> nonHtmlKeywords;

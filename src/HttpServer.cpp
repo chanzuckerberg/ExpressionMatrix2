@@ -3,6 +3,7 @@
 #include "HttpServer.hpp"
 #include "sstream.hpp"
 #include "timestamp.hpp"
+#include "tokenize.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -129,18 +130,24 @@ void HttpServer::processRequest(tcp::iostream& s)
     // This takes care of % encoding, which the browser will do if it has to send special characters.
     // Note that we have to do this after parsing the request into tokens.
     // With this, we can support special characters in cell meta data, cell set names, graph names, etc.
-    for(string& token: tokens) {
-    	string newToken;
-    	urlDecode(token, newToken);
-    	if(newToken != token) {
-    		cout << "Request token " << token << " decoded as " << newToken << endl;
-    	}
-    	token = newToken;
+    for(string& token : tokens) {
+        string newToken;
+        urlDecode(token, newToken);
+        if(newToken != token) {
+            cout << "Request token " << token << " decoded as " << newToken << endl;
+        }
+        token = newToken;
     }
 
-    // Read the rest of the input from the client, but ignore it.
-    // We have to do this, otherwise the client may get a timeout.
+
+
+    // Read the rest of the input from the client, but ignore it,
+    // except for the User Agent string, which tells us what browser
+    // issued the request.
+    // If we don't read all the input, the client may get a timeout.
     string line;
+    const string userAgentPrefix = "User-Agent: ";
+    BrowserInformation browserInformation;
     while(true) {
         if(!s) {
             break;
@@ -149,11 +156,20 @@ void HttpServer::processRequest(tcp::iostream& s)
         if(!s) {
             break;
         }
-        // cout << "Got another line: " << line.size() /* << "<<<" << line << ">>>" */ << endl;
+        // cout << "Got another line of length " << line.size() << ": <<<" << line << ">>>" << endl;
         if(line.size()==1) {
             break;
         }
+
+        // See if this is the User Agent string.
+        if(line.compare(0, userAgentPrefix.size(), userAgentPrefix) == 0) {
+            browserInformation.set(line);
+        }
     }
+    cout << "isFirefox=" << browserInformation.isFirefox << " ";
+    cout << "isChrome=" << browserInformation.isChrome << endl;
+
+
 
     // Write the success response.
     // We don't write the required empty line, so the derived class can send headers
@@ -161,7 +177,27 @@ void HttpServer::processRequest(tcp::iostream& s)
     s << "HTTP/1.1 200 OK\r\n";
 
     // The derived class processes the request.
-    processRequest(tokens, s);
+    processRequest(tokens, s, browserInformation);
+}
+
+
+
+// Construct browser information from the User Agent line.
+void HttpServer::BrowserInformation::set(const string& userAgentHeader)
+{
+    const string firefoxString = "Firefox/";
+    const string chromeString = "Chrome/";
+    vector<string> tokens;
+    tokenize(" ", userAgentHeader, tokens);
+    for(const string& token: tokens) {
+        if(token.compare(0, firefoxString.size(), firefoxString) == 0) {
+            isFirefox = true;
+        }
+        if(token.compare(0, chromeString.size(), chromeString) == 0) {
+            isChrome = true;
+        }
+    }
+
 }
 
 

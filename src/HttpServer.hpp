@@ -15,9 +15,9 @@
 #include "vector.hpp"
 
 namespace ChanZuckerberg {
-	namespace ExpressionMatrix2 {
-		class HttpServer;
-	}
+    namespace ExpressionMatrix2 {
+        class HttpServer;
+    }
 }
 
 
@@ -25,30 +25,36 @@ namespace ChanZuckerberg {
 class ChanZuckerberg::ExpressionMatrix2::HttpServer {
 public:
 
-	// This function puts the server into an endless loop
-	// of processing requests.
-	void explore(uint16_t port);
+    // This function puts the server into an endless loop
+    // of processing requests.
+    void explore(uint16_t port);
 
-	// The derived class should override this.
-	// It is passed the string of the GET request,
-	// already parsed using "?=&" as separators.
-	// It should write the response to the given request on the stream passed as a second argument.
-	// The request is guaranteed not to be empty.
-	virtual void processRequest(const vector<string>& request, ostream& html) = 0;
+    // The destructor needs to be virtual for clean destruction of
+    // the derived class.
+    virtual ~HttpServer()
+    {
+    }
 
-	// The destructor needs to be virtual for clean destruction of
-	// the derived class.
-	virtual ~HttpServer() {}
+protected:
 
-	// This function can be used by the derived class to get the value of a parameter.
-	// If the parameter is missing, returns false and the value is not touched.
+    // The derived class should override this.
+    // It is passed the string of the GET request,
+    // already parsed using "?=&" as separators.
+    // It should write the response to the given request on the stream passed as a second argument.
+    // The request is guaranteed not to be empty.
+    class BrowserInformation;
+    virtual void processRequest(const vector<string>& request, ostream& html, const BrowserInformation&) = 0;
+
+
+    // This function can be used by the derived class to get the value of a parameter.
+    // If the parameter is missing, returns false and the value is not touched.
     template<class T> static bool getParameterValue(const vector<string>& request, const string& name, T& value)
     {
-        for(size_t i=0; i<request.size()-1; i++) {
-            if(request[i]==name) {
+        for(size_t i = 0; i < request.size() - 1; i++) {
+            if(request[i] == name) {
                 try {
-                    value = lexical_cast<T>(request[i+1]);
-                } catch(...) {
+                    value = lexical_cast<T>(request[i + 1]);
+                } catch (...) {
                     return false;
                 }
                 return true;
@@ -81,10 +87,21 @@ public:
     // https://stackoverflow.com/questions/154536/encode-decode-urls-in-c
     static string urlEncode(const string&);
 
+
+protected:
+
+    // Class used to identify the browser that issued a request.
+    class BrowserInformation {
+    public:
+        bool isChrome = false;
+        bool isFirefox = false;
+        void set(const string& userAgentHeader);
+    };
+
+
+
 private:
-
-	void processRequest(boost::asio::ip::tcp::iostream&);
-
+    void processRequest(boost::asio::ip::tcp::iostream&);
 
 };
 
