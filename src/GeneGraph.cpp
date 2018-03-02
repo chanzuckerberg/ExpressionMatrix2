@@ -305,10 +305,32 @@ void GeneGraph::writeSvg(
             " onclick='window.open(\"gene?geneId=" << geneName << "\");'"
             " cursor=pointer id='" << geneName << "'><title>" << geneName << "</title></circle>";
 
+
     }
     s << "</g>";
 
 
+
+    // Write the vertex labels.
+    if(!svgParameters.hideVertexLabels) {
+        s << "<g id=vertexLabels>"; // fill-opacity='0.5'
+        BGL_FORALL_VERTICES(v, graph, GeneGraph) {
+            const GeneGraphVertex& vertex = graph[v];
+            const double x = vertex.position[0];
+            const double y = vertex.position[1];
+            const double vertexRadius = vertexUnscaledRadius;
+            const string geneName = expressionMatrix.geneName(vertex.globalGeneId);
+            const double labelOffset = 0.7*vertexRadius;
+
+            // Add the label.
+            s << "<text x='" << labelOffset << "' y='-" << labelOffset << "'" <<
+                " transform='translate(" << x << " " << y << ") scale(" << svgParameters.vertexSizeFactor << ")'"
+                " font-size='" << 2.*vertexRadius << "' font-weight='bold' fill='green'>" <<
+                geneName << "</text>";
+
+        }
+        s << "</g>";
+    }
 
     // End the svg object.
     s << "</svg>";

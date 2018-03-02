@@ -104,6 +104,7 @@ public:
     public:
         // Parameters that can be set arbitrarily.
         bool hideEdges = false;
+        bool hideVertexLabels = false;
         double svgSizePixels = 500;
         double xShift = 0.;
         double yShift = 0.;

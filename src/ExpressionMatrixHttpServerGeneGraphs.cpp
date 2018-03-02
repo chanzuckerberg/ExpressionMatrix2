@@ -18,7 +18,7 @@ void ExpressionMatrix::exploreGeneGraphs(const vector<string>& request, ostream&
     } else {
         for(const auto& p: geneGraphs) {
             html << "<tr><td><a href='exploreGeneGraph?geneGraphName="
-                << p.first << "?hideEdges=on'>" << p.first << "</a>"
+                << p.first << "?hideEdges=on&?hideVertexLabels=on'>" << p.first << "</a>"
                 "<td><form action=removeGeneGraph>"
                 "<input type=submit value='Remove'>"
                 "<input hidden type=text name=geneGraphName value='" << p.first << "'>"
@@ -72,6 +72,9 @@ void ExpressionMatrix::exploreGeneGraph(const vector<string>& request, ostream& 
     string hideEdges;
     getParameterValue(request, "hideEdges", hideEdges);
     svgParameters.hideEdges = (hideEdges == "on");
+    string hideVertexLabels;
+    getParameterValue(request, "hideVertexLabels", hideVertexLabels);
+    svgParameters.hideVertexLabels = (hideVertexLabels == "on");
     getParameterValue(request, "svgSizePixels", svgParameters.svgSizePixels);
     getParameterValue(request, "xShift", svgParameters.xShift);
     getParameterValue(request, "yShift", svgParameters.yShift);
@@ -220,9 +223,17 @@ function handleVertexResizeEvent(e) {
     var vertices = document.getElementById("vertices").childNodes;
     for(i=0; i<vertices.length; i++) {
         vertex = vertices[i];
-        if(vertex.tagName == "circle" || vertex.tagName == "path") {
-            // vertex.setAttribute("r", factor*vertex.getAttribute("r")); This only works for circles.
+        if(vertex.tagName == "circle") {
             vertex.transform.baseVal.getItem(1).setScale(vertexSizeFactor, vertexSizeFactor); 
+        }
+    }
+    
+    // Resize all the vertex labels.
+    var vertexLabels = document.getElementById("vertexLabels").childNodes;
+    for(i=0; i<vertexLabels.length; i++) {
+        label = vertexLabels[i];
+        if(label.tagName == "text") {
+            label.transform.baseVal.getItem(1).setScale(vertexSizeFactor, vertexSizeFactor); 
         }
     }
 }
@@ -363,8 +374,14 @@ function highlightGene()
     if(svgParameters.hideEdges) {
         html << " checked=checked";
     }
+    html << ">Hide edges";
     html <<
-        ">Hide edges"
+        "<br><input type=checkbox name=hideVertexLabels";
+    if(svgParameters.hideVertexLabels) {
+        html << " checked=checked";
+    }
+    html << ">Hide gene labels (gene labels don't work on Firefox)";
+    html <<
         "<input type=text hidden id=geneGraphName name=geneGraphName value='" << geneGraphName << "'>"
         "<input type=text hidden id=svgSizePixels name=svgSizePixels>"
         "<input type=text hidden id=xShift name=xShift>"
@@ -430,7 +447,9 @@ void ExpressionMatrix::createGeneGraph(const vector<string>& request, ostream& h
     html << "<p>Gene graph " << geneGraphName << " was created."
         "<p><form action=exploreGeneGraph>"
         "<input type=text hidden name=geneGraphName value=" << geneGraphName <<
-        "><input type=text hidden name=hideEdges value=on><input type=submit value=Continue></form>";
+        "><input type=text hidden name=hideEdges value=on>"
+        "<input type=text hidden name=hideVertexLabels value=on>"
+        "<input type=submit value=Continue></form>";
 
 }
 
