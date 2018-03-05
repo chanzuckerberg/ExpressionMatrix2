@@ -93,7 +93,7 @@ void SignatureGraph::Writer::operator()(std::ostream& s, edge_descriptor e) cons
     const vertex_descriptor v0 = source(e, graph);
     const vertex_descriptor v1 = source(e, graph);
     const SignatureGraphVertex& vertex0 = graph[v0];
-    const SignatureGraphVertex& vertex1 = graph[v0];
+    const SignatureGraphVertex& vertex1 = graph[v1];
     double edgeWeight = double(vertex0.cellCount()) * double(vertex1.cellCount());
 
     s << "[weight=\"" << edgeWeight << "\"]";
