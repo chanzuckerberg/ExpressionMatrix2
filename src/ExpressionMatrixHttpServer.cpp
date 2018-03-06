@@ -302,9 +302,12 @@ void ExpressionMatrix::writeNavigation(ostream& html)
         {"Cell clustering", "exploreClusterGraphs"},
         {"Signature graphs", "exploreSignatureGraphs"}
         });
-    writeNavigation(html, "Other", {
+    writeNavigation(html, "Run information", {
         {"Run information", "index"},
         {"Hash tables", "exploreHashTableSummary"}
+        });
+    writeNavigation(html, "Help", {
+        {"Documentation", "help/index.html"},
         });
 
     html << "</ul>";
