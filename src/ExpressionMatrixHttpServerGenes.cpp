@@ -3,6 +3,7 @@
 
 #include "ExpressionMatrix.hpp"
 #include "ExpressionMatrixSubset.hpp"
+#include "timestamp.hpp"
 #include "tokenize.hpp"
 #include "uuid.hpp"
 using namespace ChanZuckerberg;
@@ -566,6 +567,9 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
     GeneSet& newGeneSet = geneSets[newGeneSetName];
     newGeneSet.createNew(directoryName + "/GeneSet-" + newGeneSetName);
     for(GeneId localGeneId=0; localGeneId!=geneSet.size(); localGeneId++) {
+        if((localGeneId>0) &&  ((localGeneId%1000)==0)) {
+            cout << timestamp << "Processed "  << localGeneId << " genes of " << geneSet.size() << endl;
+        }
         if(informationContent[localGeneId] > threshold) {
             const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
             newGeneSet.addGene(globalGeneId);

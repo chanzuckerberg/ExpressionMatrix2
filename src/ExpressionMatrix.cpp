@@ -1954,10 +1954,15 @@ void ExpressionMatrix::computeGeneInformationContent(
     const CellSet& cellSet,
     NormalizationMethod normalizationMethod,
     vector<float>& geneInformationContent) const
-    {
+{
     geneInformationContent.reserve(geneSet.size());
     geneInformationContent.clear();
+    uint64_t processedCount = 0;
     for(const GeneId geneId : geneSet) {
+        if((processedCount>0) &&  ((processedCount%100)==0)) {
+            cout << timestamp << "Processed "  << processedCount << " genes of " << geneSet.size() << endl;
+        }
+        processedCount++;
         geneInformationContent.push_back(computeGeneInformationContent(geneId, cellSet, normalizationMethod));
     }
 
