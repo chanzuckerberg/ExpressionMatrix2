@@ -119,6 +119,7 @@ void ExpressionMatrix::processRequest(
     const BrowserInformation& browserInformation)
 {
     // Look up the keyword to find the function that will process this request.
+    // Note that the keyword includes the initial "/".
     const string& keyword = request.front();
     const auto it1 = serverFunctionTable.find(keyword);
     const auto it2 = serverFunctionWithBrowserInfoTable.find(keyword);
@@ -129,16 +130,16 @@ void ExpressionMatrix::processRequest(
 
 
 
-        // See if it is a documentation request of the form help/xyz.
+        // See if it is a documentation request of the form /help/xyz.
         // Here, xyz is not allowed to contain "../",
-        // otherwise we would open a big security hole: requests of the form help/../../file
+        // otherwise we would open a big security hole: requests of the form /help/../../file
         // would give access to anywhere in the file system.
         vector<string> tokens;
         boost::algorithm::split(tokens, keyword, boost::algorithm::is_any_of("/"));
         if (keyword.find("../") == string::npos &&
             tokens.front().empty() &&
             tokens[1] == "help") {
-            const string name = keyword.substr(6);
+            const string name = (tokens.size()>2) ? keyword.substr(6) : "index.html";
 
             if(serverParameters.docDirectory.empty()) {
 
