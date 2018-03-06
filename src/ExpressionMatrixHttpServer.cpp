@@ -262,12 +262,12 @@ void ExpressionMatrix::explore(const ServerParameters& serverParameters)
     // If specified and not valid, set it to an empty string.
     if (this->serverParameters.docDirectory.empty()) {
         cout << "A documentation directory was not specified. "
-            "Documentation will not be available from the server."  << endl;
+            "The server will use documentation on GitHub Pages."  << endl;
     } else {
         ifstream file(serverParameters.docDirectory + "/index.html");
         if (!file) {
             cout << "Documentation index file " << serverParameters.docDirectory;
-            cout << "/index.html could not be open. Documentation will not be available from the server." << endl;
+            cout << "/index.html could not be open. The server will use documentation on GitHub Pages." << endl;
             this->serverParameters.docDirectory.clear();
         }
     }
