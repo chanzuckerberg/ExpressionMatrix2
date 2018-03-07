@@ -18,6 +18,7 @@
 #include "MemoryMappedVector.hpp"
 #include "MemoryMappedVectorOfLists.hpp"
 #include "multipleSetUnion.hpp"
+#include "ShortStaticString.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
@@ -1191,6 +1192,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         );
     module.def("multipleSetUnionTest",
         multipleSetUnionTest,
+        "Only intended to be used for testing. "
+        "See the source code in the ExpressionMatrix2/src directory for more information. "
+        );
+    module.def("testShortStaticString",
+        testShortStaticString,
         "Only intended to be used for testing. "
         "See the source code in the ExpressionMatrix2/src directory for more information. "
         );
