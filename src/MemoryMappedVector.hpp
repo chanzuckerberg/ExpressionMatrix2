@@ -6,6 +6,7 @@
 // CZI.
 #include "CZI_ASSERT.hpp"
 #include "filesystem.hpp"
+#include "MurmurHash2.hpp"
 #include "touchMemory.hpp"
 
 // Boost libraries, partially injected into the ExpressionMatrix2 namespace,
@@ -118,6 +119,10 @@ public:
             size() == that.size() &&
             std::equal(begin(), end(), that.begin());
     }
+
+    // Return a hash function of the stored data.
+    // Can be used to check integrity.
+    uint64_t hash() const;
 
 private:
 
@@ -703,6 +708,13 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
     {
     copy.createNew(newName, size());
     std::copy(begin(), end(), copy.begin());
+}
+
+// Return a hash function of the stored data.
+// Can be used to check for integrity.
+template<class T> inline uint64_t ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::hash() const
+{
+    return MurmurHash64A(begin(), size()*sizeof(T), 231);
 }
 
 
