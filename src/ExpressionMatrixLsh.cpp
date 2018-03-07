@@ -57,7 +57,7 @@ void ExpressionMatrix::analyzeSimilarPairs(
     double csvDownsample) const
 {
     // Open the SimilarPairs object we want to analyze.
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+    const SimilarPairs similarPairs(directoryName, similarPairsName, true);
     const GeneSet& geneSet = similarPairs.getGeneSet();
     const CellSet& cellSet = similarPairs.getCellSet();
     const CellId cellCount = CellId(cellSet.size());
@@ -275,7 +275,7 @@ void ExpressionMatrix::findSimilarPairs4(
 
     // Store the pairs in a SimilarPairs object.
     out << timestamp << "Initializing SimilarPairs object." << endl;
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
     out << timestamp << "Copying similar pairs." << endl;
     similarPairs.copy(tmp);
 
@@ -486,7 +486,7 @@ void ExpressionMatrix::findSimilarPairs5(
 
     // Store the pairs in a SimilarPairs object.
     cout << timestamp << "Initializing SimilarPairs object." << endl;
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
     cout << timestamp << "Copying similar pairs." << endl;
     similarPairs.copy(tmp);
 
@@ -564,7 +564,7 @@ void ExpressionMatrix::findSimilarPairs7(
     }
 
     // Create SimilarPairs object that will store the results.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
 
 
 
@@ -1129,7 +1129,7 @@ void ExpressionMatrix::findSimilarPairs6(
 
     // Store the pairs in a SimilarPairs object.
     cout << timestamp << "Initializing SimilarPairs object." << endl;
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
     cout << timestamp << "Copying similar pairs." << endl;
     similarPairs.copy(pairs);
 
@@ -1201,8 +1201,8 @@ void ExpressionMatrix::compareSimilarPairs(
     const string& similarPairsName1)
 {
     // Access the SimilarPairs objects.
-    const SimilarPairs similarPairs0(directoryName + "/SimilarPairs-" + similarPairsName0, true);
-    const SimilarPairs similarPairs1(directoryName + "/SimilarPairs-" + similarPairsName1, true);
+    const SimilarPairs similarPairs0(directoryName, similarPairsName0, true);
+    const SimilarPairs similarPairs1(directoryName, similarPairsName1, true);
 
     // Sanity check that the two use the same gene sets and cell sets.
     CZI_ASSERT(similarPairs0.getGeneSet() == similarPairs1.getGeneSet());

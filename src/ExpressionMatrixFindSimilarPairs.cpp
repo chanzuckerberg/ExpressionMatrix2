@@ -46,7 +46,7 @@ void ExpressionMatrix::findSimilarPairs0(
     }
 
     // Create the SimilarPairs object where we will store the pairs.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
 
     // Create the expression matrix subset for this gene set and cell set.
     const string expressionMatrixSubsetName = directoryName + "/tmp-ExpressionMatrixSubset-" + similarPairsName;
@@ -103,7 +103,7 @@ void ExpressionMatrix::findSimilarPairs0(
 // Dump to csv file a set of similar cell pairs.
 void ExpressionMatrix::writeSimilarPairs(const string& name) const
 {
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, true);
+    SimilarPairs similarPairs(directoryName, name, true);
     ofstream csvOut("SimilarPairs-" + name + ".csv");
     csvOut << "Cell0,Cell1,Computed,Exact AllGenes\n";
 
@@ -126,7 +126,7 @@ void ExpressionMatrix::writeSimilarPairs(const string& name) const
 void ExpressionMatrix::removeSimilarPairs(const string& name)
 {
     try {
-        SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + name, false);
+        SimilarPairs similarPairs(directoryName, name, false);
         similarPairs.remove();
     } catch(runtime_error e) {
         cout << e.what() << endl;

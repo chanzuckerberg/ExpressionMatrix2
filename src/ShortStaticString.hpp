@@ -18,6 +18,7 @@ namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         template<size_t capacity> class ShortStaticString;
         void testShortStaticString();
+        using StaticString255 = ShortStaticString<255>;
     }
 }
 

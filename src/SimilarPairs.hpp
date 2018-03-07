@@ -7,6 +7,7 @@
 #include "MemoryAsContainer.hpp"
 #include "MemoryMappedObject.hpp"
 #include "MemoryMappedVector.hpp"
+#include "ShortStaticString.hpp"
 
 #include "string.hpp"
 #include "utility.hpp"
@@ -36,13 +37,17 @@ public:
 
     // Create a new SimilarPairs object.
     SimilarPairs(
-        const string& name,
-        size_t k,
-        const GeneSet& geneSet,
-        const CellSet& cellSet);
+        const string& directoryName,
+        const string& similarPairsName,
+        const string& geneSetName,
+        const string& cellSetName,
+        size_t k);
 
     // Access an existing SimilarPairs object.
-    SimilarPairs(const string& name, bool allowReadOnly);
+    SimilarPairs(
+        const string& directoryName,
+        const string& similarPairsName,
+        bool allowReadOnly);
 
     // The type used to store a cell similarity.
     typedef float CellSimilarity;
@@ -187,10 +192,20 @@ private:
         // The maximum number of similar cells stored for each cell.
         size_t k;
 
-        // The number of cells for which this table was constructed.
-        CellId cellCount;
+        // The name and hash of the gene set used by this SimilarPairs object.
+        StaticString255 geneSetName;
+        uint64_t geneSetHash;
+
+        // The name and hash of the cell set used by this SimilarPairs object.
+        StaticString255 cellSetName;
+        uint64_t cellSetHash;
     };
     MemoryMapped::Object<Info> info;
+
+    static string getPathBaseName(
+        const string& directoryName,
+        const string& similarPairsName
+        );
 
 
 
@@ -200,6 +215,12 @@ private:
     // These copies are owned by the SimilarPairs object.
     GeneSet geneSet;
     CellSet cellSet;
+    void accessGeneSet(
+        const string& directoryName,
+        const string& geneSetName);
+    void accessCellSet(
+        const string& directoryName,
+        const string& cellSetName);
 
     // Add a pair (low level version).
     void add(CellId, Pair);

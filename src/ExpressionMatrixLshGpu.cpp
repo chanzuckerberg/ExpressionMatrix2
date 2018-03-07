@@ -74,7 +74,7 @@ void ExpressionMatrix::findSimilarPairs4Gpu(
         (t12*1024.*1024.)) << " MB/s." << endl;
 
     // Create the SimilarPairs object that will store the results.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
 
     // Call the appropriate lower level function.
     switch(kernel) {
@@ -406,7 +406,7 @@ void ExpressionMatrix::findSimilarPairs7Gpu(
         (t12*1024.*1024.)) << " MB/s." << endl;
 
     // Create the SimilarPairs object that will store the results.
-    SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, k, geneSet, cellSet);
+    SimilarPairs similarPairs(directoryName, similarPairsName, geneSetName, cellSetName, k);
 
     // Call the appropriate lower level function.
     // For now we only have kernel 3, but this allows for

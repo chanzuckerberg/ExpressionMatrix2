@@ -32,6 +32,7 @@ using boost::algorithm::is_any_of;
 
 CellGraph::CellGraph(
     const MemoryMapped::Vector<CellId>& cellSet, // The cell set to be used.
+    const string& directoryName,
     const string& similarPairsName,              // The name of the SimilarPairs object to be used to create the graph.
     double similarityThreshold,                  // The minimum similarity to create an edge.
     size_t maxConnectivity                      // The maximum number of neighbors (k of the k-NN graph).
@@ -40,7 +41,7 @@ CellGraph::CellGraph(
     typedef SimilarPairs::Pair Pair;
 
     // Create the SimilarPairs object.
-    const SimilarPairs similarPairs(similarPairsName, true);
+    const SimilarPairs similarPairs(directoryName, similarPairsName, true);
 
     // Create a vertex for each cell in the cell set.
     for(const CellId cellId: cellSet) {

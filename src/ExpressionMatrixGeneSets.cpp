@@ -282,7 +282,7 @@ bool ExpressionMatrix::createGeneSetDifference(
 vector<string> ExpressionMatrix::geneSetNamesFromSimilarPairsName(const string& similarPairsName) const
 {
     // Open the existing SimilarPairs object.
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+    const SimilarPairs similarPairs(directoryName, similarPairsName, true);
 
     // Start with no gene sets.
     vector<string> geneSetNames;

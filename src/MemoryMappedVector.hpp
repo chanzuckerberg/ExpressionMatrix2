@@ -714,7 +714,12 @@ template<class T> inline void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::V
 // Can be used to check for integrity.
 template<class T> inline uint64_t ChanZuckerberg::ExpressionMatrix2::MemoryMapped::Vector<T>::hash() const
 {
-    return MurmurHash64A(begin(), size()*sizeof(T), 231);
+    // The second argument to MurmurHash64A is a 4-byte integer.
+    // Sooner or later we will have to deal with this.
+    // For now we just check that there is no overflow.
+    const uint64_t byteCount = size()*sizeof(T);
+    CZI_ASSERT(byteCount <= uint64_t(std::numeric_limits<int>::max()));
+    return MurmurHash64A(begin(), int(byteCount), 231);
 }
 
 

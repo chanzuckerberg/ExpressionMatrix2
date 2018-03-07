@@ -815,7 +815,7 @@ Thinner edge
 #endif
 
         // THIS IS THE NEW CODE THAT USES THE GENE SET APPROPRIATE FOR THIS GRAPH.
-        const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+        const SimilarPairs similarPairs(directoryName, similarPairsName, true);
         const GeneSet& geneSet = similarPairs.getGeneSet();
         const GeneId localGeneId = geneSet.getLocalGeneId(geneId);
         CZI_ASSERT(localGeneId != invalidGeneId);
@@ -841,7 +841,7 @@ Thinner edge
             return;
         }
         colorByNumber = true;
-        const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+        const SimilarPairs similarPairs(directoryName, similarPairsName, true);
         const GeneSet& geneSet = similarPairs.getGeneSet();
         BGL_FORALL_VERTICES(v, graph, CellGraph) {
             CellGraphVertex& vertex = graph[v];

@@ -1823,7 +1823,8 @@ void ExpressionMatrix::createCellGraph(
     typedef shared_ptr<CellGraph> GraphSharedPointer;
     const GraphSharedPointer graph = make_shared<CellGraph>(
         cellSet,
-        directoryName + "/SimilarPairs-" + similarPairsName,
+        directoryName,
+        similarPairsName,
         similarityThreshold,
         maxConnectivity
         );
@@ -2132,7 +2133,7 @@ void ExpressionMatrix::createClusterGraph(
     }
     const CellGraphInformation& cellGraphInformation = it->second.first;
     const string& similarPairsName = cellGraphInformation.similarPairsName;
-    const SimilarPairs similarPairs(directoryName + "/SimilarPairs-" + similarPairsName, true);
+    const SimilarPairs similarPairs(directoryName, similarPairsName, true);
     const GeneSet& geneSet = similarPairs.getGeneSet();
     CellGraph& cellGraph = *(it->second.second);
 

@@ -205,6 +205,7 @@ public:
 
     CellGraph(
         const MemoryMapped::Vector<CellId>& cellSet, // The cell set to be used.
+        const string& directoryName,
         const string& similarPairsName,           // The name of the SimilarPairs object to be used to create the graph.
         double similarityThreshold,                  // The minimum similarity to create an edge.
         size_t maxConnectivity                       // The maximum number of neighbors (k of the k-NN graph).
