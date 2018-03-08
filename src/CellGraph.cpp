@@ -43,6 +43,12 @@ CellGraph::CellGraph(
     // Create the SimilarPairs object.
     const SimilarPairs similarPairs(directoryName, similarPairsName, true);
 
+    // Note that there are two cell sets involved: the cell set to
+    // be used for graph creation and the cell set that was used
+    // to create the SimilarPairs. If we want to make sure not to
+    // lose edges, the former must be a subset of the latter.
+    // However, for flexibility we do not check for this.
+
     // Create a vertex for each cell in the cell set.
     for(const CellId cellId: cellSet) {
         const vertex_descriptor v = boost::add_vertex(CellGraphVertex(cellId), graph());
@@ -60,6 +66,7 @@ CellGraph::CellGraph(
         // corresponding to this global cell id.
         // If the cell set of the SimilarPairs object does not contain this cell,
         // this is an invalid cell id and in that case we skip this cell.
+        // This could result in missing some edges in the graph.
         const CellId localCellId0 = similarPairs.getLocalCellId(cellId0);
         if(localCellId0 == invalidCellId) {
             continue;
