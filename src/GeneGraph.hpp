@@ -41,15 +41,30 @@ namespace ChanZuckerberg {
 
 
 // A vertex of the gene graph.
+// Each vertex corresponds to a gene.
 class ChanZuckerberg::ExpressionMatrix2::GeneGraphVertex {
 public:
-    GeneId localGeneId = invalidGeneId;     // Gene id as defined by the GeneSet.
-    GeneId globalGeneId = invalidGeneId;    // Gene id as defined by the ExpressionMatrix.
+
+    // The GeneId local to the gene set that was
+    // used to create the gene graph.
+    // This is not necessarily the same as the gene set
+    // used to create the SimilarGenePairs object
+    // used for graph creaton.
+    // GeneId localGeneId = invalidGeneId;
+
+    // The global GeneId known to the ExpressionMatrix object.
+    GeneId globalGeneId = invalidGeneId;
+
+    // Position of this vertex (gene) in the graph layout.
     array<double, 2> position;
+
+    // Color to be used to display this vertex.
     string color;
+
+    // Constructors.
     GeneGraphVertex() {}
-    GeneGraphVertex(GeneId localGeneId, GeneId globalGeneId) :
-        localGeneId(localGeneId), globalGeneId(globalGeneId) {}
+    GeneGraphVertex(GeneId globalGeneId) :
+        globalGeneId(globalGeneId) {}
 };
 
 
@@ -132,10 +147,10 @@ public:
         SvgParameters&,
         const ExpressionMatrix&);
 
-    // Map from local gene id to vertex descriptor.
+private:
+    // Map from global gene id to vertex descriptor.
     map<GeneId, vertex_descriptor> vertexTable;
 
-private:
     class Writer {
     public:
         Writer(const GeneGraph&);

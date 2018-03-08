@@ -33,17 +33,31 @@ GeneGraph::GeneGraph(
     SimilarGenePairs similarGenePairs(similarGenePairsName, true);
 
     // Create the vertices.
-    for(const GeneId localGeneId: geneSet.genes()) {
-        const GeneId globalGeneId = geneSet.getGlobalGeneId(localGeneId);
-        const vertex_descriptor v = add_vertex(GeneGraphVertex(localGeneId, globalGeneId), graph);
-        vertexTable.insert(make_pair(localGeneId, v));
+    for(const GeneId globalGeneId: geneSet.genes()) {
+        const vertex_descriptor v = add_vertex(GeneGraphVertex(globalGeneId), graph);
+        vertexTable.insert(make_pair(globalGeneId, v));
     }
 
 
 
     // Create the edges.
-    for(const GeneId localGeneId0: geneSet.genes()) {
-        const vertex_descriptor v0 = vertexTable[localGeneId0];
+    // Note that there are two gene sets involved: the gene set to
+    // be used for graph creation and the gene set that was used
+    // to create the SimilarPairs. If we want to make sure not to
+    // lose edges, the former must be a subset of the latter.
+    // However, for flexibility we do not check for this.
+    for(const GeneId globalGeneId0: geneSet.genes()) {
+        const vertex_descriptor v0 = vertexTable[globalGeneId0];
+
+        // Find the local gene id (in the cell set of the SimilarGenePairs object)
+        // corresponding to this global gene id.
+        // If the gene set of the SimilarPairs object does not contain this gene,
+        // we skip this gene.
+        // This could result in missing some edges in the graph.
+        const CellId localGeneId0 = similarGenePairs.getGeneSet().getLocalGeneId(globalGeneId0);
+        if(localGeneId0 == invalidGeneId) {
+            continue;
+        }
 
         // Only add the first maxConnectivity neighbors that are also in the gene set.
         // The similar genes are stored by decreasing similarity.
@@ -54,9 +68,10 @@ GeneGraph::GeneGraph(
                 break;  // They are sorted by decreasing similarity, so no need to look at the rest.
             }
             const GeneId localGeneId1 = p.first;
-            const auto it1 = vertexTable.find(localGeneId1);
+            const GeneId globalGeneId1 = similarGenePairs.getGeneSet().getGlobalGeneId(localGeneId1);
+            const auto it1 = vertexTable.find(globalGeneId1);
             if(it1 != vertexTable.end()) {
-                const vertex_descriptor v1 = vertexTable[localGeneId1];
+                const vertex_descriptor v1 = it1->second;
                 add_edge(v0, v1, GeneGraphEdge(similarity), graph);
                 ++connectivity;
                 if(connectivity == maxConnectivity) {
@@ -74,7 +89,7 @@ GeneGraph::GeneGraph(
         }
     }
     for(const vertex_descriptor v: isolatedVertices) {
-        vertexTable.erase(graph[v].localGeneId);
+        vertexTable.erase(graph[v].globalGeneId);
         clear_vertex(v, graph);
         remove_vertex(v, graph);
     }
@@ -94,7 +109,7 @@ void GeneGraph::writeGraphviz(ostream& s) const
 {
     Writer writer(*this);
     boost::write_graphviz(s, *this, writer, writer, writer,
-        boost::get(&GeneGraphVertex::localGeneId, *this));
+        boost::get(&GeneGraphVertex::globalGeneId, *this));
 }
 GeneGraph::Writer::Writer(const GeneGraph& graph) :
     graph(graph)
