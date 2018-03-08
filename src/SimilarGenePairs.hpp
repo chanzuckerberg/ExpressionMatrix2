@@ -7,6 +7,7 @@
 #include "MemoryAsContainer.hpp"
 #include "MemoryMappedObject.hpp"
 #include "MemoryMappedVector.hpp"
+#include "NormalizationMethod.hpp"
 #include "ShortStaticString.hpp"
 
 #include "string.hpp"
@@ -50,6 +51,7 @@ public:
         const string& geneSetName,
         const string& cellSetName,
         size_t k,
+        NormalizationMethod normalizationMethod,
         const vector< vector<Pair> >&);
 
     // Access an existing SimilarGenePairs object.
@@ -130,7 +132,7 @@ private:
 
 
 
-
+public:
     // Small size information about this table of similar pairs is stored
     // in a memory mapped object.
     class Info {
@@ -145,8 +147,12 @@ private:
         // The name and hash of the cell set used by this SimilarGenePairs object.
         StaticString255 cellSetName;
         uint64_t cellSetHash;
+
+        // The NOrmalizationMethod used to create this SimilarGenePairs.
+        NormalizationMethod normalizationMethod;
     };
     MemoryMapped::Object<Info> info;
+private:
 
     static string getPathBaseName(
         const string& directoryName,

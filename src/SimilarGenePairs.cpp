@@ -11,6 +11,7 @@ SimilarGenePairs::SimilarGenePairs(
     const string& geneSetName,
     const string& cellSetName,
     size_t k,
+    NormalizationMethod normalizationMethod,
     const vector< vector<Pair> >& pairsArgument)
 {
     // Access the gene set and the cell set.
@@ -27,6 +28,7 @@ SimilarGenePairs::SimilarGenePairs(
     const string pathBaseName = getPathBaseName(directoryName, similarGenePairsName);
     info.createNew(pathBaseName + "-Info");
     info->k = k;
+    info->normalizationMethod = normalizationMethod;
     info->geneSetName = geneSetName;
     info->geneSetHash = geneSet.genes().hash();
     info->cellSetName = cellSetName;

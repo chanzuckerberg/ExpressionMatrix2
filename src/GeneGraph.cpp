@@ -26,7 +26,9 @@ GeneGraph::GeneGraph(
     const string& similarGenePairsName,
     double similarityThreshold,
     size_t maxConnectivity
-    )
+    ) :
+    directoryName(directoryName),
+    similarGenePairsName(similarGenePairsName)
 {
     GeneGraph& graph = *this;
 
@@ -232,6 +234,13 @@ void GeneGraph::writeSvg(
     // Make sure the layout was computed.
     computeLayout();
 
+    // Access the similar gene pairs.
+    // This is used to write hyperlinks for the edges
+    // ( we need the gene set name, cell set name, and normalization method).
+    SimilarGenePairs similarGenePairs(directoryName, similarGenePairsName, true);
+    const string geneSetName = similarGenePairs.info->geneSetName;
+    const string cellSetName = similarGenePairs.info->cellSetName;
+    const NormalizationMethod normalizationMethod = similarGenePairs.info->normalizationMethod;
 
 
     // Compute minimum and maximum of the vertices coordinates.
@@ -291,11 +300,18 @@ void GeneGraph::writeSvg(
             const vertex_descriptor v2 = target(e, graph);
             const GeneGraphVertex& vertex1 = graph[v1];
             const GeneGraphVertex& vertex2 = graph[v2];
+            const string edgeUrl =
+                "compareTwoGenes?"
+                "geneId0=" + std::to_string(vertex1.globalGeneId) +
+                "&geneId1=" + std::to_string(vertex2.globalGeneId) +
+                "&cellSetName=" + cellSetName +
+                "&normalizationMethod=" + normalizationMethodToShortString(normalizationMethod) +
+                "&geneSetName=" + geneSetName;
             s << "<line x1='" << vertex1.position[0] << "' y1='" << vertex1.position[1] << "'";
             s << " x2='" << vertex2.position[0] << "' y2='" << vertex2.position[1] << "'";
-
             s << " style='stroke:black;stroke-width:" <<
-                unscaledEdgeThickness * svgParameters.edgeThicknessFactor << "' />";
+                unscaledEdgeThickness * svgParameters.edgeThicknessFactor <<
+                "' cursor=pointer onclick='window.open(\"" << edgeUrl << "\")'/>";
         }
         s << "</g>";
     }

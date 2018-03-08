@@ -162,6 +162,10 @@ private:
     };
 
     bool layoutWasComputed = false;
+
+    // Information needed to access the SimilarGenePairs used to create this gene graph.
+    string directoryName;
+    string similarGenePairsName;
 };
 
 
