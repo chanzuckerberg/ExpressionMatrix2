@@ -296,22 +296,33 @@ void GeneGraph::writeSvg(
         s << "<g id=edges>";
         const double unscaledEdgeThickness = 5.e-4 * boundingBoxSize;
         BGL_FORALL_EDGES(e, graph, GeneGraph) {
-            const vertex_descriptor v1 = source(e, graph);
-            const vertex_descriptor v2 = target(e, graph);
+            const vertex_descriptor v0 = source(e, graph);
+            const vertex_descriptor v1 = target(e, graph);
+            const GeneGraphVertex& vertex0 = graph[v0];
             const GeneGraphVertex& vertex1 = graph[v1];
-            const GeneGraphVertex& vertex2 = graph[v2];
+            const string geneId0 = std::to_string(vertex0.globalGeneId);
+            const string geneId1 = std::to_string(vertex1.globalGeneId);
+            const string geneName0 = expressionMatrix.geneName(vertex0.globalGeneId);
+            const string geneName1 = expressionMatrix.geneName(vertex1.globalGeneId);
+            const GeneGraphEdge& edge = graph[e];
             const string edgeUrl =
                 "compareTwoGenes?"
-                "geneId0=" + std::to_string(vertex1.globalGeneId) +
-                "&geneId1=" + std::to_string(vertex2.globalGeneId) +
+                "geneId0=" + geneId0 +
+                "&geneId1=" + geneId1 +
                 "&cellSetName=" + cellSetName +
                 "&normalizationMethod=" + normalizationMethodToShortString(normalizationMethod) +
                 "&geneSetName=" + geneSetName;
-            s << "<line x1='" << vertex1.position[0] << "' y1='" << vertex1.position[1] << "'";
-            s << " x2='" << vertex2.position[0] << "' y2='" << vertex2.position[1] << "'";
+            s << "<line x1='" << vertex0.position[0] << "' y1='" << vertex0.position[1] << "'";
+            s << " x2='" << vertex1.position[0] << "' y2='" << vertex1.position[1] << "'";
+            const auto oldPrecision = s.precision(2);
+            const auto oldOptions = s.setf(std::ios::fixed);
             s << " style='stroke:black;stroke-width:" <<
                 unscaledEdgeThickness * svgParameters.edgeThicknessFactor <<
-                "' cursor=pointer onclick='window.open(\"" << edgeUrl << "\")'/>";
+                "' cursor=pointer onclick='window.open(\"" << edgeUrl << "\")'><title>" <<
+                geneName0 << " " << geneName1 << " " << edge.similarity <<
+                "</title></line>";
+            s.precision(oldPrecision);
+            s.setf(oldOptions);
         }
         s << "</g>";
     }
