@@ -940,7 +940,12 @@ void ExpressionMatrix::compareTwoGenes(
     html << " using cell set <a href='cellSet?cellSetName="
         << cellSetName << "'>"
         << cellSetName  << "</a> and " <<
-        normalizationMethodToLongString(normalizationMethod) << "</h1>";
+        normalizationMethodToLongString(normalizationMethod);
+    if(normalizationMethod != NormalizationMethod::none) {
+        html << " on gene set <a href='geneSet?geneSetName=" << geneSetName <<
+            "'>" << geneSetName << "</a>";
+    }
+    html<< "</h1>";
 
 
 
