@@ -210,9 +210,6 @@ private:
 
 
     // The gene set and cell set used by this SimilarPairs object.
-    // Tese are copies of the gene set and cell set passed to the constructor
-    // when the SimilarPairs object was created.
-    // These copies are owned by the SimilarPairs object.
     GeneSet geneSet;
     CellSet cellSet;
     void accessGeneSet(

@@ -1,12 +1,13 @@
 #ifndef CZI_EXPRESSION_MATRIX2_SIMILAR_GENE_PAIRS_HPP
 #define CZI_EXPRESSION_MATRIX2_SIMILAR_GENE_PAIRS_HPP
 
-
+#include "CellSets.hpp"
 #include "GeneSet.hpp"
 #include "Ids.hpp"
 #include "MemoryAsContainer.hpp"
 #include "MemoryMappedObject.hpp"
 #include "MemoryMappedVector.hpp"
+#include "ShortStaticString.hpp"
 
 #include "string.hpp"
 #include "utility.hpp"
@@ -44,13 +45,18 @@ public:
 
     // Create a new SimilarGenePairs object.
     SimilarGenePairs(
-        const string& name,
+        const string& directoryName,
+        const string& similarGenePairsName,
+        const string& geneSetName,
+        const string& cellSetName,
         size_t k,
-        const GeneSet& geneSet,
         const vector< vector<Pair> >&);
 
     // Access an existing SimilarGenePairs object.
-    SimilarGenePairs(const string& name, bool allowReadOnly);
+    SimilarGenePairs(
+        const string& directoryName,
+        const string& similarGenePairsName,
+        bool allowReadOnly);
 
     // Returns a MemoryAsContainer containing the pairs for a given gene.
     // This can be used to easily iterate over the pairs for a given gene.
@@ -132,18 +138,31 @@ private:
         // The maximum number of similar genes stored for each cell.
         size_t k;
 
-        // The number of genes for which this table was constructed.
-        GeneId geneCount;
+        // The name and hash of the gene set used by this SimilarGenePairs object.
+        StaticString255 geneSetName;
+        uint64_t geneSetHash;
+
+        // The name and hash of the cell set used by this SimilarGenePairs object.
+        StaticString255 cellSetName;
+        uint64_t cellSetHash;
     };
     MemoryMapped::Object<Info> info;
 
+    static string getPathBaseName(
+        const string& directoryName,
+        const string& similarPairsName
+        );
 
 
-    // The gene set used by this SimilarPairs object.
-    // This is a copy of the gene set passed to the constructor
-    // when the SimilarPairs object was created.
-    // This copy is owned by the SimilarGenePairs object.
+    // The gene set and cell set used by this SimilarGenePairs object.
     GeneSet geneSet;
+    CellSet cellSet;
+    void accessGeneSet(
+        const string& directoryName,
+        const string& geneSetName);
+    void accessCellSet(
+        const string& directoryName,
+        const string& cellSetName);
 
 };
 

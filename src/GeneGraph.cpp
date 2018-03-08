@@ -22,6 +22,7 @@ using namespace ChanZuckerberg::ExpressionMatrix2;
 GeneGraph::GeneGraph(
     ostream& out,
     GeneSet& geneSet,
+    const string& directoryName,
     const string& similarGenePairsName,
     double similarityThreshold,
     size_t maxConnectivity
@@ -30,7 +31,7 @@ GeneGraph::GeneGraph(
     GeneGraph& graph = *this;
 
     // Access the similar gene pairs.
-    SimilarGenePairs similarGenePairs(similarGenePairsName, true);
+    SimilarGenePairs similarGenePairs(directoryName, similarGenePairsName, true);
 
     // Create the vertices.
     for(const GeneId globalGeneId: geneSet.genes()) {

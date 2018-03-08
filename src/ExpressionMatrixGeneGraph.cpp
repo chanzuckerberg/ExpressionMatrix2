@@ -55,14 +55,15 @@ void ExpressionMatrix::createGeneGraph(
     }
 
     // Access the similar gene pairs.
-    SimilarGenePairs similarGenePairs(directoryName + "/SimilarGenePairs-" + similarGenePairsName , true);
+    SimilarGenePairs similarGenePairs(directoryName, similarGenePairsName , true);
 
     // Now we have everything we need. Create the gene graph.
     const shared_ptr<GeneGraph> geneGraphPointer =
         make_shared<GeneGraph>(
         out,
         geneSet,
-        directoryName + "/SimilarGenePairs-" + similarGenePairsName,
+        directoryName,
+        similarGenePairsName,
         similarityThreshold,
         k);
     geneGraphs.insert(make_pair(geneGraphName, geneGraphPointer));

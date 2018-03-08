@@ -105,6 +105,7 @@ public:
     GeneGraph(
         ostream& out,
         GeneSet&,
+        const string& directoryName,
         const string& similarGenePairsName,
         double similarityThreshold,
         size_t maxConnectivity

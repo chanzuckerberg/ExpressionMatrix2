@@ -161,8 +161,8 @@ void ExpressionMatrix::findSimilarGenePairs0(
 
     // Create the SimilarGenePairs object.
     cout << timestamp << "Permanently storing the similar gene pairs." << endl;
-    SimilarGenePairs similarGenePairs(directoryName + "/SimilarGenePairs-" + similarGenePairsName,
-        k, geneSet, similarGenes);
+    SimilarGenePairs similarGenePairs(directoryName, similarGenePairsName,
+        geneSetName, cellSetName, k, similarGenes);
 
     cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 ends." << endl;
 }
