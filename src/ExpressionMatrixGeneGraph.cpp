@@ -32,6 +32,17 @@ GeneGraph& ExpressionMatrix::getGeneGraph(const string& geneGraphName)
 }
 
 
+
+void ExpressionMatrix::createGeneGraph(
+    const string& geneGraphName,
+    const string& geneSetName,
+    const string& similarGenePairsName,
+    int k,
+    double similarityThreshold)
+{
+    createGeneGraph(cout,
+        geneGraphName, geneSetName, similarGenePairsName, k, similarityThreshold);
+}
 void ExpressionMatrix::createGeneGraph(
     ostream& out,
     const string& geneGraphName,

@@ -279,6 +279,12 @@ See <a class="reference external" href="../../../index.html">here</a> for the co
 </dd></dl>
 
 <dl class="method">
+<dt id="ExpressionMatrix2.ExpressionMatrix.createGeneGraph">
+<code class="descname">createGeneGraph</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>geneGraphName: str</em>, <em>geneSetName: str='AllGenes'</em>, <em>similarGenePairsName: str</em>, <em>k: int</em>, <em>similarityThreshold: float</em><span class="sig-paren">)</span> &rarr; None</dt>
+<dd><p>Creates a gene similarity graph.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ExpressionMatrix2.ExpressionMatrix.createGeneSetDifference">
 <code class="descname">createGeneSetDifference</code><span class="sig-paren">(</span><em>self: ExpressionMatrix2.ExpressionMatrix</em>, <em>inputSetName0: str</em>, <em>inputSetName1: str</em>, <em>oututSetName: str</em><span class="sig-paren">)</span> &rarr; bool</dt>
 <dd><p>Creates a new gene set as the difference between two gene sets. The newly created gene set consists of all genes that are in inputGeneSetName0 but not in inputGeneSetName1. Returns False if the operation failed because one of the input gene sets does not exist or the output gene set already exists, True otherwise.</p>

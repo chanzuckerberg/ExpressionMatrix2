@@ -1114,6 +1114,25 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
 
 
+       // Gene graphs.
+       .def
+       (
+           "createGeneGraph",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, int, double)
+           )
+           &ExpressionMatrix::createGeneGraph,
+           "Creates a gene similarity graph.",
+           arg("geneGraphName"),
+           arg("geneSetName") = "AllGenes",
+           arg("similarGenePairsName"),
+           arg("k"),
+           arg("similarityThreshold")
+       )
+
+
+
        // Run the http server.
        .def("explore",
            (
