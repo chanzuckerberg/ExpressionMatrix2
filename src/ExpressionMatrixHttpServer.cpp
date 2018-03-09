@@ -201,7 +201,7 @@ void ExpressionMatrix::processRequest(
 
 
 
-    // Write everything that goes before the html body.
+    // Write everything that goes before the html body, plus the navigation menus.
     const bool isHtml = nonHtmlKeywords.find(keyword) == nonHtmlKeywords.end();
     if(isHtml) {
         html <<
@@ -212,9 +212,10 @@ void ExpressionMatrix::processRequest(
             "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
             "<meta charset='UTF-8'>";
         writeStyle(html);
+        writeMakeAllTablesSelectable(html);
         html <<
             "</head>"
-            "<body>";
+            "<body onload='makeAllTablesSelectableByDoubleClick()'>";
         writeNavigation(html);
     }
 
@@ -239,6 +240,47 @@ void ExpressionMatrix::processRequest(
         html << "</html>";
     }
 }
+
+
+
+void ExpressionMatrix::writeMakeAllTablesSelectable(ostream& html)
+{
+    html << R"###(
+<script>
+
+// Make all tables selectable by double click.
+// This must be called after all tables have
+// already been created, so it can be called during onload.
+
+// This function is called when the user double clicks on a table.
+function selectElement(table)
+{
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    var range = document.createRange();
+    range.selectNode(table);
+    selection.addRange(range);
+}
+
+// Attach the above function to the double click event
+// for all tables in the document.
+// Also add to each table a title that displays a tooltip 
+// explaining that the table can be selected via double click.
+function makeAllTablesSelectableByDoubleClick()
+{
+    var allTables = document.getElementsByTagName("table");
+    for (var i=0; i<allTables.length; i++) {
+        var table = allTables[i];
+        table.ondblclick = function() {selectElement(this);};
+        table.setAttribute("title", 
+        "Double click to select the entire table. You can then paste it into a spreadsheet.");
+    }
+}
+</script>
+    )###";
+}
+
+
 
 ServerParameters::ServerParameters(uint16_t port, string docDirectory) :
     port(port),

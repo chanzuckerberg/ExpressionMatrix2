@@ -844,6 +844,7 @@ private:
 
 
 
+    void writeMakeAllTablesSelectable(ostream& html);
     void writeNavigation(ostream& html);
     // void writeNavigation(ostream& html, const string& text, const string& url, const string& toolTip = "");
     void writeNavigation(ostream& html, const string& title, const vector<pair <string, string> >&);
