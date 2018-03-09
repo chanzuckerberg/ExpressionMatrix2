@@ -1048,11 +1048,11 @@ document.getElementsByTagName("head")[0].appendChild(newStyle);
         
         // This sets the horizontal axis range. Using null for automatic
         // does not always work.
-        dateWindow: [0, )###" << max0 << R"###(],
+        dateWindow: [0, )###" << max0*1.05 << R"###(],
         
         // This sets the vertical axis range. Using null for automatic
         // does not always work.
-        valueRange: [0, )###" << max1 << R"###(],
+        valueRange: [0, )###" << max1*1.05 << R"###(],
 
         axes: {
             y: {
