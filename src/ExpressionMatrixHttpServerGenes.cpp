@@ -960,6 +960,39 @@ void ExpressionMatrix::compareTwoGenes(
     vector< vector<float> > v;
     expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
 
+    // Shift and normalize the dense expression vectors of our two genes
+    // to zero mean and unit variance. This way the regression coefficient can
+    // be computed as simple scalar products.
+    array<vector<float>, 2> zeroMeanUnitVarianceExpression;
+    for(size_t i=0; i<2; i++) {
+        const GeneId localGeneId = localGeneIds[i];
+        vector<float>& x = zeroMeanUnitVarianceExpression[i];
+        x = v[localGeneId];
+        double sum = 0.;
+        for(float count: x) {
+            sum += count;
+        }
+        const float average = float(sum / double(cellSet.size()));
+        for(float& count: x) {
+            count -= average;
+        }
+        double sum2 = 0.;
+        for(float count: x) {
+            sum2 += count * count;
+        }
+        const float factor = float(1./(sqrt(sum2)));
+        for(float& count: x) {
+            count *= factor;
+        }
+    }
+    // Compute the regression coefficient.
+    const vector<float>& x = zeroMeanUnitVarianceExpression[0];
+    const vector<float>& y = zeroMeanUnitVarianceExpression[1];
+    double r = 0.;
+    for(size_t i=0; i<x.size(); i++) {
+        r += double(x[i]*y[i]);
+    }
+    html << "<p>Gene similarity (regression coefficient) is " << r;
 
 
     // Scatter plot of the counts for the two genes.
