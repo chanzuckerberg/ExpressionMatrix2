@@ -397,6 +397,7 @@ function highlightGene()
         "<input type=text hidden id=vertexSizeFactor name=vertexSizeFactor>"
         "<input type=text hidden id=edgeThicknessFactor name=edgeThicknessFactor>"
         "<p><button type=submit>Redraw graph</button>"
+        " If browser behaves erratically, try clicking on \"Redraw graph\"."
         "</form>";
 
 
