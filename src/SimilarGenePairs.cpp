@@ -123,5 +123,4 @@ void SimilarGenePairs::remove()
     info.remove();
     geneInfo.remove();
     pairs.remove();
-    geneSet.remove();
 }

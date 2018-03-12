@@ -630,6 +630,7 @@ public:
 
     // Find pairs of similar genes.
     void findSimilarGenePairs0(
+        ostream&,
         const string& geneSetName,
         const string& cellSetName,
         NormalizationMethod,
@@ -637,6 +638,18 @@ public:
         size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
         double similarityThreshold
         );
+    void findSimilarGenePairs0(
+        const string& geneSetName,
+        const string& cellSetName,
+        NormalizationMethod,
+        const string& similarGenePairsName,
+        size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
+        double similarityThreshold
+        );
+
+    // Remove a similar gene pairs object given its name.
+    // This throws an exception if the requested SimilarGenePairs object does not exist.
+    void removeSimilarGenePairs(const string& name);
 
 
     // Signature graphs.
@@ -887,6 +900,8 @@ private:
     ostream& writeCellGraphSelection(ostream& html, const string& selectName, bool multiple) const;
     ostream& writeNormalizationSelection(ostream& html, NormalizationMethod selectedNormalizationMethod) const;
     ostream& writeSimilarGenePairsSelection(ostream& html, const string& selectName) const;
+    void createSimilarGenePairs(const vector<string>& request, ostream& html);
+    void removeSimilarGenePairs(const vector<string>& request, ostream& html);
     NormalizationMethod getNormalizationMethod(const vector<string>& request, NormalizationMethod defaultValue);
     void removeCellSet(const vector<string>& request, ostream& html);
     void similarPairs(const vector<string>& request, ostream& html);
@@ -923,6 +938,7 @@ private:
     void exploreSignatureGraph(const vector<string>& request, ostream& html);
     void createSignatureGraph(const vector<string>& request, ostream& html);
     void removeSignatureGraph(const vector<string>& request, ostream& html);
+    void similarGenePairs(const vector<string>& request, ostream& html);
     void exploreGeneGraphs(const vector<string>& request, ostream& html);
     void exploreGeneGraph(const vector<string>& request, ostream& html, const BrowserInformation&);
     void createGeneGraph(const vector<string>& request, ostream& html);

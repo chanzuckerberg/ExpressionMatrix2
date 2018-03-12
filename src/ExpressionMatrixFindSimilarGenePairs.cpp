@@ -11,6 +11,7 @@ using namespace ExpressionMatrix2;
 
 
 
+
 void ExpressionMatrix::findSimilarGenePairs0(
     const string& geneSetName,
     const string& cellSetName,
@@ -20,10 +21,23 @@ void ExpressionMatrix::findSimilarGenePairs0(
     double similarityThreshold
     )
 {
-    cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 begins." << endl;
-    cout << "Gene set: " << geneSetName << endl;
-    cout << "Cell set: " << cellSetName << endl;
-    cout << "Normalization method: " << normalizationMethodToLongString(normalizationMethod) << endl;
+    findSimilarGenePairs0(cout, geneSetName, cellSetName,
+        normalizationMethod, similarGenePairsName, k, similarityThreshold);
+}
+void ExpressionMatrix::findSimilarGenePairs0(
+    ostream& s,
+    const string& geneSetName,
+    const string& cellSetName,
+    NormalizationMethod normalizationMethod,
+    const string& similarGenePairsName,
+    size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
+    double similarityThreshold
+    )
+{
+    s << timestamp << "ExpressionMatrix::findSimilarGenePairs0 begins." << endl;
+    s << "Gene set: " << geneSetName << endl;
+    s << "Cell set: " << cellSetName << endl;
+    s << "Normalization method: " << normalizationMethodToLongString(normalizationMethod) << endl;
 
     // Locate the gene set and verify that it is not empty.
     const auto itGeneSet = geneSets.find(geneSetName);
@@ -48,7 +62,7 @@ void ExpressionMatrix::findSimilarGenePairs0(
     }
 
     // Create the expression matrix subset for this gene set and cell set.
-    cout << timestamp << "Creating expression matrix subset." << endl;
+    s << timestamp << "Creating expression matrix subset." << endl;
     const string expressionMatrixSubsetName =
         directoryName + "/tmp-ExpressionMatrixSubset-" + similarGenePairsName;
     ExpressionMatrixSubset expressionMatrixSubset(
@@ -58,7 +72,7 @@ void ExpressionMatrix::findSimilarGenePairs0(
 
     // Create a dense expression vector for each gene.
     // All indices are local to the gene set and cell set.
-    cout << timestamp << "Creating dense expression vectors." << endl;
+    s << timestamp << "Creating dense expression vectors." << endl;
     vector< vector<float> > v;
     expressionMatrixSubset.getDenseRepresentation(v, normalizationMethod);
 
@@ -126,15 +140,15 @@ void ExpressionMatrix::findSimilarGenePairs0(
     size_t pairsDone = 0;
     size_t pairsStored = 0.;
     const size_t totalPairCount = (size_t(geneCount) * (size_t(geneCount) - 1)) / 2;
-    cout << timestamp << "Loop over gene pairs begins." << endl;
+    s << timestamp << "Loop over gene pairs begins." << endl;
     const size_t messageFrequency = size_t(1.e10/double(cellCount));
     for(GeneId geneId0=1; geneId0!=geneCount; geneId0++) {
         vector<float>& x0 = v[geneId0];
         for(GeneId geneId1=0; geneId1!=geneId0; geneId1++, ++pairsDone) {
             if(pairsDone>0 && (pairsDone % messageFrequency) == 0) {
-                cout << timestamp << 100.*double(pairsDone)/double(totalPairCount) << "% done. ";
-                cout << 100.*double(pairsStored)/double(pairsDone) << "% of gene pairs were stored.";
-                cout << endl;
+                s << timestamp << 100.*double(pairsDone)/double(totalPairCount) << "% done. ";
+                s << 100.*double(pairsStored)/double(pairsDone) << "% of gene pairs were stored.";
+                s << endl;
             }
             vector<float>& x1 = v[geneId1];
             const float r = std::inner_product(x0.begin(), x0.end(), x1.begin(), 0.f);
@@ -149,22 +163,22 @@ void ExpressionMatrix::findSimilarGenePairs0(
 
 
     // For each gene, keep only the k best and sort them.
-    cout << timestamp << "Keeping best " << k << " pairs for each gene." << endl;
+    s << timestamp << "Keeping best " << k << " pairs for each gene." << endl;
     size_t totalKept = 0;
     for(vector< pair<GeneId, float> >& v: similarGenes) {
         keepBest(v, k, OrderPairsBySecondGreater< pair<GeneId, float> >());
         sort(v.begin(), v.end(), OrderPairsBySecondGreater< pair<GeneId, float> >());
         totalKept += v.size();
     }
-    cout << "Average number of pairs kept per gene is " << double(totalKept)/geneCount << endl;
+    s << "Average number of pairs kept per gene is " << double(totalKept)/geneCount << endl;
 
 
     // Create the SimilarGenePairs object.
-    cout << timestamp << "Permanently storing the similar gene pairs." << endl;
+    s << timestamp << "Permanently storing the similar gene pairs." << endl;
     SimilarGenePairs similarGenePairs(directoryName, similarGenePairsName,
         geneSetName, cellSetName, k, normalizationMethod, similarGenes);
 
-    cout << timestamp << "ExpressionMatrix::findSimilarGenePairs0 ends." << endl;
+    s << timestamp << "ExpressionMatrix::findSimilarGenePairs0 ends." << endl;
 }
 
 
@@ -186,3 +200,18 @@ void ExpressionMatrix::getAvailableSimilarGenePairs(
     }
 
 }
+
+
+// Remove a similar gene pairs object given its name.
+// This throws an exception if the requested SimilarGenePairs object does not exist.
+void ExpressionMatrix::removeSimilarGenePairs(const string& name)
+{
+    try {
+        SimilarGenePairs similarGenePairs(directoryName, name, false);
+        similarGenePairs.remove();
+    } catch(runtime_error e) {
+        cout << e.what() << endl;
+        throw runtime_error("Error removing similar gene pairs object " + name);
+    }
+}
+

@@ -1036,7 +1036,7 @@ void ExpressionMatrix::similarPairs(const vector<string>& request, ostream& html
     html <<
         "<h1>Pairs of similar cells</h1>"
         "<p>When creating a cell graph, you need to specify one of the "
-        "sets of similar cell pairs specified here. "
+        "sets of similar cell pairs listed below. "
         "This information is used to create the graph edges."
         "The gene set used to find similar cell pairs defines the similarity measure used.";
 

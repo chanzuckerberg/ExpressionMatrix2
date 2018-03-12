@@ -120,8 +120,6 @@ void SimilarPairs::remove()
     similarPairs.remove();
     cellInfo.remove();
     info.remove();
-    geneSet.remove();
-    cellSet.remove();
 }
 
 

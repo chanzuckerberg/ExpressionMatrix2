@@ -60,7 +60,12 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(metaDataContingencyTable);
     CZI_ADD_TO_FUNCTION_TABLE(removeMetaData);
 
-    // Similar pairs.
+    // Similar gene pairs.
+    CZI_ADD_TO_FUNCTION_TABLE(similarGenePairs);
+    CZI_ADD_TO_FUNCTION_TABLE(createSimilarGenePairs);
+    CZI_ADD_TO_FUNCTION_TABLE(removeSimilarGenePairs);
+
+    // Similar cell pairs.
     CZI_ADD_TO_FUNCTION_TABLE(similarPairs);
     CZI_ADD_TO_FUNCTION_TABLE(createSimilarPairs);
     CZI_ADD_TO_FUNCTION_TABLE(removeSimilarPairs);
@@ -336,6 +341,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
         {"Cell sets", "cellSets"},
         });
     writeNavigation(html, "Gene graphs", {
+        {"Find pairs of similar genes", "similarGenePairs"},
         {"Gene graphs", "exploreGeneGraphs"}
         });
     writeNavigation(html, "Cell graphs", {

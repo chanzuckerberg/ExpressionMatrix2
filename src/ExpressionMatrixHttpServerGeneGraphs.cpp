@@ -509,3 +509,16 @@ ostream& ExpressionMatrix::writeSimilarGenePairsSelection(
 
 }
 
+
+
+void ExpressionMatrix::removeSimilarGenePairs(const vector<string>& request, ostream& html)
+{
+    string similarGenePairsName;
+    getParameterValue(request, "similarGenePairsName", similarGenePairsName);
+
+    removeSimilarGenePairs(similarGenePairsName);
+
+    html <<
+        "<p>Removed similar gene pairs " << similarGenePairsName << "."
+        "<p><form action=similarGenePairs><input type=submit value=Continue></form>";
+}

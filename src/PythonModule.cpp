@@ -956,6 +956,10 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
        // Find pairs of similar genes.
        .def("findSimilarGenePairs0",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, NormalizationMethod, const string&, size_t, double)
+           )
            &ExpressionMatrix::findSimilarGenePairs0,
            arg("geneSetName") = "AllGenes",
            arg("cellSetName") = "AllCells",

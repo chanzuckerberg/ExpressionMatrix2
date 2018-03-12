@@ -1129,3 +1129,86 @@ type: 'numeric'
 
 
 }
+
+
+void ExpressionMatrix::similarGenePairs(const vector<string>& request, ostream& html)
+{
+    html <<
+        "<h1>Pairs of similar genes</h1>"
+        "<p>When creating a gene graph, you need to specify one of the "
+        "sets of similar gene pairs listed below. "
+        "This information is used to create the graph edges.";
+
+    // Write the table of existing SimilarGenePairs object.
+    html << "<h2>Existing sets of similar gene pairs</h2>";
+    vector<string> existingSimilarGenePairs;
+    getAvailableSimilarGenePairs(existingSimilarGenePairs);
+    html << "<table>";
+    for(const string& similarGenePairsName: existingSimilarGenePairs) {
+        html <<
+            "<tr><td>" << similarGenePairsName << "<td>"
+            "<form action=removeSimilarGenePairs><input type=text hidden name=similarGenePairsName value='" <<
+            similarGenePairsName <<
+            "'><input type=submit value='Remove'></form>";
+    }
+    html << "</table>";
+
+
+    // Form to create a new SimilarGenePairs object.
+    html <<
+        "<h2>Create a new set of similar gene pairs</h2>"
+        "<form action=createSimilarGenePairs>"
+        "<table>"
+        "<tr><td>Gene set<td class=centered>";
+    writeGeneSetSelection(html, "geneSetName", false);
+    html << "<tr><td>Cell set<td class=centered>";
+    writeCellSetSelection(html, "cellSetName", false);
+    html <<
+        "<tr><td>Similar gene pairs name<td class=centered>"
+        "<input type=text size=8 required autofocus name=similarGenePairsName>"
+        "<tr><td>Normalization method<td class=centered>";
+    writeNormalizationSelection(html, NormalizationMethod::L2);
+    html <<
+        "<tr><td>Similarity threshold<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=similarityThreshold value='0.2'>"
+        "<tr><td>Maximum connectivity<td class=centered>"
+        "<input type=text style='text-align:center' size=8 name=maxConnectivity value='100'>"
+        "</table>"
+        "<p><input type=submit value='Create'>"
+        "</form>";
+}
+
+
+void ExpressionMatrix::createSimilarGenePairs(const vector<string>& request, ostream& html)
+{
+    html << "<h1>Create a new set of similar gene pairs</h1>";
+
+    // Get the parameters from the URL.
+    string geneSetName;
+    getParameterValue(request, "geneSetName", geneSetName);
+    string cellSetName;
+    getParameterValue(request, "cellSetName", cellSetName);
+    string similarGenePairsName;
+    getParameterValue(request, "similarGenePairsName", similarGenePairsName);
+    double similarityThreshold = 0.2;
+    getParameterValue(request, "similarityThreshold", similarityThreshold);
+    int maxConnectivity = 100;
+    getParameterValue(request, "maxConnectivity", maxConnectivity);
+
+    // Get the normalization method to be used.
+    string normalizationMethodString = "L2";
+    getParameterValue(request, "normalizationMethod", normalizationMethodString);
+    const NormalizationMethod normalizationMethod =
+        normalizationMethodFromShortString(normalizationMethodString);
+
+    html << "<pre>";
+    findSimilarGenePairs0(html,
+        geneSetName, cellSetName,
+        normalizationMethod, similarGenePairsName,
+        maxConnectivity, similarityThreshold);
+    html << "</pre>";
+
+    html <<
+        "<p>New set of similar gene pairs " << similarGenePairsName << " was created."
+        "<p><form action=similarGenePairs><input type=submit value=Continue></form>";
+}
