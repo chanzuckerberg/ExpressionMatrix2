@@ -1130,6 +1130,16 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("k"),
            arg("similarityThreshold")
        )
+       .def
+       (
+           "getGeneGraphConnectivity",
+           &ExpressionMatrix::getGeneGraphConnectivity,
+           "Return the connectivity of the specified gene graph. "
+           "The return vector is indexed by the local GeneId in the gene set "
+           "that was used to create the gene graph. "
+           "It contain pairs (local GeneId, similarity).",
+           arg("geneGraphName")
+       )
 
 
 

@@ -15,6 +15,8 @@
 #include "iosfwd.hpp"
 #include "map.hpp"
 #include "string.hpp"
+#include "utility.hpp"
+#include "vector.hpp"
 
 
 
@@ -138,6 +140,13 @@ public:
     // Use Graphviz to compute the graph layout and store it in the vertex positions.
     void computeLayout();
 
+    // Get the connectivity of a gene graph.
+    // The return vector is indexed by the local GeneId in the gene set
+    // that was used to create the gene graph.
+    // It contain pairs (local GeneId, similarity).
+    vector< vector< pair<GeneId, float> > > getConnectivity() const;
+
+
     // Write out the gene graph in SVG format.
     void writeSvg(
         const string& fileName,
@@ -166,6 +175,8 @@ private:
     // Information needed to access the SimilarGenePairs used to create this gene graph.
     string directoryName;
     string similarGenePairsName;
+
+    const GeneSet& geneSet;
 };
 
 

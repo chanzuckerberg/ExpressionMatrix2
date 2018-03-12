@@ -28,7 +28,8 @@ GeneGraph::GeneGraph(
     size_t maxConnectivity
     ) :
     directoryName(directoryName),
-    similarGenePairsName(similarGenePairsName)
+    similarGenePairsName(similarGenePairsName),
+    geneSet(geneSet)
 {
     GeneGraph& graph = *this;
 
@@ -101,6 +102,46 @@ GeneGraph::GeneGraph(
     out << " vertices and " << num_edges(graph) << " edges\nafter ";
     out << isolatedVertices.size() << " vertices were removed. "<< endl;
 }
+
+
+
+vector< vector< pair<GeneId, float> > > GeneGraph::getConnectivity() const
+{
+    const GeneGraph& graph = *this;
+
+    // Create the return vector.
+    vector< vector< pair<GeneId, float> > > v(geneSet.size());
+
+    // Loop over all genes in the gene set used to create this gene graph.
+    for(GeneId localGeneId0=0; localGeneId0!=geneSet.size(); localGeneId0++) {
+
+        // Locate the vertex corresponding to this gene.
+        const GeneId globalGeneId0 = geneSet.getGlobalGeneId(localGeneId0);
+        const auto it0 = vertexTable.find(globalGeneId0);
+        if(it0 == vertexTable.end()) {
+            // This gene has no vertex in the graph.
+            // We must have removed this vertex because it was isolated.
+            continue;
+        }
+        const vertex_descriptor v0 = it0->second;
+
+        // Loop over neighbors of this vertex.
+        BGL_FORALL_OUTEDGES(v0, e, *this, GeneGraph) {
+            const GeneGraphEdge& edge = graph[e];
+            const float similarity = edge.similarity;
+            const vertex_descriptor v1 = target(e, graph);
+            const GeneGraphVertex& vertex1 = graph[v1];
+            const GeneId globalGeneId1 = vertex1.globalGeneId;
+            const GeneId localGeneId1 = geneSet.getLocalGeneId(globalGeneId1);
+            CZI_ASSERT(localGeneId1 != invalidGeneId);
+            v[localGeneId0].push_back(make_pair(localGeneId1, similarity));
+        }
+    }
+
+    // Done.
+    return v;
+}
+
 
 // Write out the signature graph in Graphviz format.
 void GeneGraph::writeGraphviz(const string& fileName) const

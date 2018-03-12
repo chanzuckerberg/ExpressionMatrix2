@@ -30,6 +30,14 @@ GeneGraph& ExpressionMatrix::getGeneGraph(const string& geneGraphName)
     }
     return *(it->second);
 }
+const GeneGraph& ExpressionMatrix::getGeneGraph(const string& geneGraphName) const
+{
+    const auto it = geneGraphs.find(geneGraphName);
+    if(it == geneGraphs.end()) {
+        throw runtime_error("Gene graph " + geneGraphName + " does not exists.");
+    }
+    return *(it->second);
+}
 
 
 
@@ -89,6 +97,16 @@ void ExpressionMatrix::removeGeneGraph(const string& geneGraphName)
         throw runtime_error("Gene graph " + geneGraphName + " does not exists.");
     }
     geneGraphs.erase(it);
+}
+
+
+// Get the connectivity of a gene graph.
+// Indexed by the local GeneId in the gene set
+// that was used to create the gene graph.
+vector< vector< pair<GeneId, float> > >
+    ExpressionMatrix::getGeneGraphConnectivity(const string& geneGraphName) const
+{
+    return getGeneGraph(geneGraphName).getConnectivity();
 }
 
 

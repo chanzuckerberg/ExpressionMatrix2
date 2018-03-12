@@ -1197,6 +1197,14 @@ public:
     // Return a reference to the gene graph with a given name,
     // and throw and exception if not found.
     GeneGraph& getGeneGraph(const string& GeneGraphName);
+    const GeneGraph& getGeneGraph(const string& GeneGraphName) const;
+
+    // Get the connectivity of a gene graph.
+    // The return vector is indexed by the local GeneId in the gene set
+    // that was used to create the gene graph.
+    // It contain pairs (local GeneId, similarity).
+    vector< vector< pair<GeneId, float> > >
+        getGeneGraphConnectivity(const string& geneGraphName) const;
 
     // Check that a gene graph does not exist,
     // and throw an exception if it does.
