@@ -506,6 +506,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
 
 
        // Gene sets.
+       .def("getGeneSetGenes",
+           &ExpressionMatrix::getGeneSetGenes,
+           "Get the global gene ids of the genes in a gene set.",
+           arg("geneSetName") = "AllGenes"
+       )
        .def(
            "createGeneSetUsingInformationContent",
            (

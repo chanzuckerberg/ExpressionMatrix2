@@ -988,6 +988,11 @@ public:
     // This always contains gene set AllGenes.
     map<string, GeneSet> geneSets;
 
+    // Return the gene set with a given name.
+    // Throw an exception if a gene set with this name does not exist.
+    GeneSet& getGeneSet(const string& geneSetName);
+    const GeneSet& getGeneSet(const string& geneSetName) const;
+
     // Returns the names of the gene sets in the geneSets map that are identical
     // to the gene set of a SimilarPairs object with the given name.
     // Note that there could be zero, one, or multiple gene sets
@@ -1041,6 +1046,11 @@ public:
     void createGeneSetFromGeneIds(
         const string& geneSetName,
         const vector<GeneId>&);
+
+    // Get the global gene ids of the genes in a gene set.
+    vector<GeneId> getGeneSetGenes(const string& geneSetName);
+
+
 
     // Create a new cell set that contains cells for which
     // the value of a specified meta data field is identical to a given string

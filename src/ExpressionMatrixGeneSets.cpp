@@ -33,6 +33,37 @@ void ExpressionMatrix::removeGeneSet(
 
 
 
+// Return the gene set with a given name.
+// Throw an exception if a gene set with this name does not exist.
+GeneSet& ExpressionMatrix::getGeneSet(const string& geneSetName)
+{
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    return it->second;
+}
+const GeneSet& ExpressionMatrix::getGeneSet(const string& geneSetName) const
+{
+    const auto it = geneSets.find(geneSetName);
+    if(it == geneSets.end()) {
+        throw runtime_error("Gene set " + geneSetName + " does not exist.");
+    }
+    return it->second;
+}
+
+
+// Get the global gene ids of the genes in a gene set.
+vector<GeneId> ExpressionMatrix::getGeneSetGenes(const string& geneSetName)
+{
+    GeneSet& geneSet = getGeneSet(geneSetName);
+    vector<GeneId> genes(geneSet.size());
+    copy(geneSet.genes().begin(), geneSet.genes().end(), genes.begin());
+    return genes;
+}
+
+
+
 // Create a new gene set consisting of genes whose name matches a given regular expression.
 bool ExpressionMatrix::createGeneSetFromRegex(const string& geneSetName, const string& regexString)
 {
