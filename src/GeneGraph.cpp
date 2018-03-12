@@ -355,11 +355,11 @@ void GeneGraph::writeSvg(
                 "&geneSetName=" + geneSetName;
             s << "<line x1='" << vertex0.position[0] << "' y1='" << vertex0.position[1] << "'";
             s << " x2='" << vertex1.position[0] << "' y2='" << vertex1.position[1] << "'";
+            s << " style='stroke:black;stroke-width:" <<
+                unscaledEdgeThickness * svgParameters.edgeThicknessFactor;
             const auto oldPrecision = s.precision(2);
             const auto oldOptions = s.setf(std::ios::fixed);
-            s << " style='stroke:black;stroke-width:" <<
-                unscaledEdgeThickness * svgParameters.edgeThicknessFactor <<
-                "' cursor=pointer onclick='window.open(\"" << edgeUrl << "\")'><title>" <<
+            s << "' cursor=pointer onclick='window.open(\"" << edgeUrl << "\")'><title>" <<
                 geneName0 << " " << geneName1 << " " << edge.similarity <<
                 "</title></line>";
             s.precision(oldPrecision);
