@@ -592,9 +592,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("geneSetName"),
            arg("geneNames")
        )
-       .def
-       (
-           "createWellExpressedGeneSet",
+       .def("createWellExpressedGeneSet",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, CellId)
+           )
            &ExpressionMatrix::createWellExpressedGeneSet,
            "Create a gene set consisting of genes that are expressed in at "
            "least a minimum number of cells. "

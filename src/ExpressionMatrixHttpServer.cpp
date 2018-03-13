@@ -41,6 +41,7 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(createGeneSetIntersectionOrUnion);
     CZI_ADD_TO_FUNCTION_TABLE(createGeneSetDifference);
     CZI_ADD_TO_FUNCTION_TABLE(createGeneSetUsingInformationContent);
+    CZI_ADD_TO_FUNCTION_TABLE(createWellExpressedGeneSet);
 
     // Cells and cell sets.
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;

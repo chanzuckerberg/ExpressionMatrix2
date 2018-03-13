@@ -584,6 +584,39 @@ void ExpressionMatrix::createGeneSetUsingInformationContent(const vector<string>
 
 
 
+void ExpressionMatrix::createWellExpressedGeneSet(const vector<string>& request, ostream& html)
+{
+    // Get the name of the input gene set.
+    string inputGeneSetName;
+    getParameterValue(request, "inputGeneSetName", inputGeneSetName);
+
+    // Get the name of the new gene set to be created.
+    string outputGeneSetName;
+    getParameterValue(request, "outputGeneSetName", outputGeneSetName);
+
+    // Get the name of the cell set.
+    string cellSetName;
+    getParameterValue(request, "cellSetName", cellSetName);
+
+    // Get the minimum number of cells for a gene to be included in the new gene set.
+    CellId minCellCount = 10;
+    getParameterValue(request, "minCellCount", minCellCount);
+
+    // Create the new gene set.
+    createWellExpressedGeneSet(
+        inputGeneSetName,
+        cellSetName,
+        outputGeneSetName,
+        minCellCount);
+
+    html << "<p>Gene set " << outputGeneSetName << " was created. It has ";
+    html << getGeneSet(outputGeneSetName).size() << " genes.";
+    html << "<p><form action=geneSets><input type=submit value=Continue></form>";
+
+}
+
+
+
 void ExpressionMatrix::exploreGeneSets(
     const vector<string>& request,
     ostream& html)
@@ -679,6 +712,23 @@ void ExpressionMatrix::exploreGeneSets(
         " bits<br>and name the resulting gene set "
         "<input type=text name=newGeneSetName>"
         "</form>";
+
+
+
+    // Form to create a gene set consisting of well expressed genes.
+    html <<
+        "<br><h2>Create a gene set consisting of genes expressed in at least a specified number of cells</h2>"
+        "<form action=createWellExpressedGeneSet>"
+        "<input type=submit value='Create a new gene set'> named "
+        "<input type=text name=outputGeneSetName>"
+        " consisting of genes in gene set ";
+    writeGeneSetSelection(html, "inputGeneSetName", false);
+    html <<
+        " that are expressed in at least "
+        "<input type=text name=minCellCount required> "
+        "cells in cell set ";
+    writeCellSetSelection(html, "cellSetName", {"AllCells"}, false);
+    html << "</form>";
 
 
 
