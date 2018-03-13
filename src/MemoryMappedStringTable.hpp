@@ -98,6 +98,9 @@ private:
     Vector<StringId> hashTable;
     uint64_t mask;
 
+    // Double the size of the hash table and rehash.
+    void rehash();
+
 };
 
 
@@ -169,6 +172,7 @@ template<class StringId> inline
 template<class StringId> inline
     StringId ChanZuckerberg::ExpressionMatrix2::MemoryMapped::StringTable<StringId>::operator[](const string& s)
 {
+
     uint64_t bucketIndex = MurmurHash64A(s.data(), int(s.size()), 237) & mask;
 
     while(true) {
@@ -177,15 +181,14 @@ template<class StringId> inline
 
             // The bucket is empty. This means that this string is not already in the table. Add it.
             stringId = StringId(strings.size());
-            if(stringId > hashTable.size()/2) {
-                throw runtime_error(
-                    hashTable.fileName +
-                    ": string table capacity " +
-                    lexical_cast<string>(hashTable.size()) +
-                    " exceeded.");
-            }
             strings.appendVector(s.begin(), s.end());
-            return stringId;
+            if(strings.size() > hashTable.size()/2) {
+                // We reached load factor 1/2. Rehash.
+                rehash();
+                return StringId(strings.size() - 1ULL); // The previous stringId is a reference and is no longer valid.
+            } else {
+                return stringId;
+            }
 
         } else {
 
@@ -203,7 +206,6 @@ template<class StringId> inline
         }
     }
 
-    // Note that this will loop forever if the capacity of the hash table is exceeded.
 
 }
 
@@ -275,6 +277,38 @@ template<class StringId> inline
             std::equal(s.begin(), s.end(), strings.begin(stringId));
     }
 
+
+
+template<class StringId> inline
+    void ChanZuckerberg::ExpressionMatrix2::MemoryMapped::StringTable<StringId>::rehash()
+{
+
+    // Double the size of the table.
+    hashTable.resize(2 * hashTable.size());
+    fill(hashTable.begin(), hashTable.end(), invalidStringId);
+    mask = hashTable.size() - 1ULL;
+
+    // Rehash.
+    for(StringId stringId=0; stringId<strings.size(); stringId++) {
+        const auto& s = strings[stringId];
+        uint64_t bucketIndex = MurmurHash64A(s.begin(), int(s.size()), 237) & mask;
+
+        // Find the first available slot.
+        while(true) {
+            StringId& slot = hashTable[bucketIndex];
+            if(slot == invalidStringId) {
+                slot = stringId;
+                break;
+            } else {
+                ++bucketIndex;
+                bucketIndex &= mask;
+            }
+        }
+
+    }
+
+    hashTable.syncToDisk();
+}
 
 #endif
 

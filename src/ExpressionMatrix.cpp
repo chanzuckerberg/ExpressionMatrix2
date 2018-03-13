@@ -191,7 +191,7 @@ CellId ExpressionMatrix::addCell(
 #if 0
     cout << "ExpressionMatrix::addCell called." << endl;
     cout << "Cell meta data:" << endl;
-    for(const auto& p: metaData) {
+    for(const auto& p: metaDataArgument) {
         cout << p.first << " " << p.second << endl;
     }
     cout << "Expression counts:" << endl;
