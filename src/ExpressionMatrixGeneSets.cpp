@@ -305,6 +305,63 @@ bool ExpressionMatrix::createGeneSetDifference(
 }
 
 
+// Create a gene set consisting of genes that are expressed in at
+// least a minimum number of cells.
+// The resulting gene set will contain all of the
+// genes in the specified existing gene set that are
+// expressed in at least the specified minimum number of cells,
+// counting only cells in the specified cell set.
+void ExpressionMatrix::createWellExpressedGeneSet(
+    const string& inputGeneSetName,
+    const string& inputCellSetName,
+    const string& outputGeneSetName,
+    CellId minCellCount
+    )
+{
+    // See if a gene set with the name of the output gene set already exists.
+    if(geneSets.find(outputGeneSetName) != geneSets.end()) {
+        throw runtime_error("Gene set " + outputGeneSetName + " already exists.");
+    }
+
+    // Access the input gene set and cell set.
+    const GeneSet& inputGeneSet = getGeneSet(inputGeneSetName);
+    inputGeneSet.assertIsSorted();
+    const CellSet& inputCellSet = cellSet(inputCellSetName);
+
+    // Counter to hold the number of cells that each gene
+    // in our input gene set is expressed in.
+    // Indexed by the local gene id in the input gene set.
+    vector<GeneId> cellCount(inputGeneSet.size(), 0);
+
+    // Loop over all cells in the given cell set.
+    for(CellId localCellId=0; localCellId!=inputCellSet.size(); localCellId++) {
+        const CellId globalCellId = inputCellSet[localCellId];
+        const auto& expressionVector = cellExpressionCounts[globalCellId];
+
+        // Loop over the expression vector of this cell.
+        for(const auto& p: expressionVector) {
+            const GeneId globalGeneId = p.first;
+            const GeneId localGeneId = inputGeneSet.getLocalGeneId(globalGeneId);
+            if(localGeneId != invalidGeneId) {
+                CZI_ASSERT(localGeneId < inputGeneSet.size());
+                ++(cellCount[localGeneId]);
+            }
+        }
+    }
+
+    // Create the output gene set.
+    GeneSet& outputGeneSet = geneSets[outputGeneSetName];
+    outputGeneSet.createNew(directoryName + "/GeneSet-" + outputGeneSetName);
+    for(GeneId localGeneId=0; localGeneId<inputGeneSet.size(); localGeneId++) {
+        if(cellCount[localGeneId] >= minCellCount) {
+            const GeneId globalGeneId = inputGeneSet.getGlobalGeneId(localGeneId);
+            outputGeneSet.addGene(globalGeneId);
+        }
+    }
+    outputGeneSet.sort();
+}
+
+
 
 // Returns the names of the gene sets in the geneSets map that are identical
 // to the gene set of a SimilarPairs object with the given name.

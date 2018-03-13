@@ -1063,6 +1063,19 @@ public:
         const string& geneSetName,
         const vector<GeneId>&);
 
+    // Create a gene set consisting of genes that are expressed in at
+    // least a minimum number of cells.
+    // The resulting gene set will contain all of the
+    // genes in the specified existing gene set that are
+    // expressed in at least the specified minimum number of cells,
+    // counting only cells in the specified cell set.
+    void createWellExpressedGeneSet(
+        const string& inputGeneSetName,
+        const string& inputCellSetName,
+        const string& outputGeneSetName,
+        CellId minCellCount
+        );
+
     // Get the global gene ids of the genes in a gene set.
     vector<GeneId> getGeneSetGenes(const string& geneSetName);
 

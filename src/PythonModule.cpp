@@ -592,6 +592,21 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("geneSetName"),
            arg("geneNames")
        )
+       .def
+       (
+           "createWellExpressedGeneSet",
+           &ExpressionMatrix::createWellExpressedGeneSet,
+           "Create a gene set consisting of genes that are expressed in at "
+           "least a minimum number of cells. "
+           "The resulting gene set will contain all of the "
+           "genes in the specified existing gene set that are "
+           "expressed in at least the specified minimum number of cells, "
+           "counting only cells in the specified cell set.",
+           arg("inputGeneSetName") = "AllGenes",
+           arg("inputCellSetName") = "AllCells",
+           arg("outputGeneSetName"),
+           arg("minCellCount")
+       )
        .def("removeGeneSet",
            (
                void (ExpressionMatrix::*)
