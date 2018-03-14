@@ -34,45 +34,6 @@ See <a href="PythonApi.html#addCells">here</a> for detailed information on how t
 
 
 
-<h2 id=creationParameters>Expression matrix creation parameters</h2>
-
-<p>
-See several parameters control initial creation of an <code>ExpressionMatrix</code> object:
-
-<ul>
-<li><code>geneCapacity</code> specifies the size of a hash table used to store gene names.
-<li><code>cellCapacity</code> specifies the size of a hash table used to store cell names.
-<li><code>cellMetaDataNameCapacity</code> specifies the size of a hash table used to store meta data field names.
-<li><code>cellMetaDataValueCapacity</code> specifies the size of a hash table used to store meta data values.
-(each distinct meta data value is stored only once).
-</ul>
-
-<p> 
-Each of the specified capacities gets rounded up to the next power of two. 
-To avoid performance degradation of the hash tables, the <code>ExpressionMatrix2</code>
-refuses to add more elements when a hash table reaches a 50% load factor, meaning
-that half its slots are used. 
-This means that, for example, if you specify <code>cellCapacity=20</code>,
-the actual capacity of the hash table used to hold cell names is 32,
-and the code will refuse to add more than 16 cells to it.
-
-<p>
-The memory cost of these hash tables is not high, and therefore it is advisable to be generous
-in setting these capacity values - that is, use values that are likely to be 3-5 times
-larger than expected.
-
-
-<p>
-Future versions of the code will do automatic rehashing, which means that
-the capacities are adjusted automatically as needed.
-This will be particularly important when cells are to be added incrementally to the system.
-
-<p>
-When using the http server, the Summary page has a link to a page showing 
-details of the capacity and actual usage of these hash tables.
-
-
-
 <br><br><h2>Finding similar cell pairs</h2>
 
 <p>

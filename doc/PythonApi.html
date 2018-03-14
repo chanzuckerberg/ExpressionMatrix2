@@ -33,23 +33,15 @@ import ExpressionMatrix2
 
 <h2>Creating and accessing expression matrix objects</h2>
 
-<p>To begin working with a new data set, you must first create a new Python object to describe the expression matrix for the new data set. This can be done as shown in the following example:
+<p>To begin working with a new data set, you must first create a new Python object to represent the expression matrix for the new data set. This can be done as shown in the following example:
 
 <pre>
-e = ExpressionMatrix.ExpressionMatrix(
-    directoryName = 'data',
-    geneCapacity = 1<<18,                # Maximum number of genes.
-    cellCapacity = 1<<16,                # Maximum number of cells.           
-    cellMetaDataNameCapacity = 1<<12,    # Maximum number of distinct cell meta data name strings.
-    cellMetaDataValueCapacity = 1<<20    # Maximum number of distinct cell meta data value strings.
-    )
+e = ExpressionMatrix.ExpressionMatrix(directoryName = 'data')
 </pre>
 
-<p>The parameters object is used to specify the capacity of various hash tables used to store genes, cells, and cell meta data, as explained in the comments. Keep in mind that the present version of the code does not provide a way to redefine these capacities later by rehashing the tables. 
+<p>The parameter is the name of a directory that will be used to hold various binary files containing expression matrix data structures. The directory should not already exist, and will be created.
 
-<p> The last line creates the expression matrix object. The first parameter is the name of a directory that will be used to hold various binary files containing expression matrix data structures. The directory will be create is it does not exist.
-
-<p>Since most data structures are stored in files, the expression matrix object is persistent: it can be reaccessed in the future, even after the Python object used for the original creation disappears. This can be done by simply specifying the name of the directory containing the binary data, without specifying creation parameters:
+<p>Since most data structures are stored in files, the expression matrix object is persistent: it can be reaccessed in the future, even after the Python object used for the original creation disappears. This can be done by simply specifying the name of the existing directory containing the binary data, just as before:
 
 <pre>
 e = ExpressionMatrix.ExpressionMatrix(directoryName = 'data')
@@ -164,7 +156,7 @@ is described below.
 <h4 id=addCellsFromBioHub1>For Illumina data, July 2017</h4>
 <p>
 Function 
-<a href=PythonApiReference.html#addCellsFromBioHub1><code>ExpressionMatrix.addCellsFromBioHub1</code></a> 
+<a href="PythonApiReference/_build/html/index.html?highlight=biohub#ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub1"><code>ExpressionMatrix.addCellsFromBioHub1</code></a> 
 can be used to add to the system cells created by the BioHub pipeline
 as of July 2017 from Illumina data. For each plate, three files
 are used:
@@ -198,7 +190,7 @@ to <code>addCellMetaData<code>.
 <h4 id=addCellsFromBioHub2>For 10X Genomics data, September 2017</h4>
 <p>
 Function 
-<a href=PythonApiReference.html#addCellsFromBioHub2><code>ExpressionMatrix.addCellsFromBioHub2</code></a>
+<a href="PythonApiReference/_build/html/index.html?highlight=biohub#ExpressionMatrix2.ExpressionMatrix.addCellsFromBioHub2"><code>ExpressionMatrix.addCellsFromBioHub2</code></a>
 can be used to
 add to the system cells created by the BioHub pipeline
 as of September 2017 from 10X genomics data. 
