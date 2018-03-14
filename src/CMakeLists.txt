@@ -18,6 +18,8 @@
 #   PYBIND11_INCLUDE_PATH=/usr/local/include/python3.5
 #   HDF5_INCLUDE_PATH=/usr/include/hdf5/serial
 #   HDF5_LIBRARIES=hdf5_cpp hdf5_serial
+#   BUILD_WITH_OPEN_CL=OFF
+#   OPENCL_LIBRARY=/usr/lib/x86_64-linux-gnu/libOpenCL.so.1
 # - Run command "make". If your machine has more than
 #   one processor and sufficient memory you can speed up to build
 #   using the make "-j" option - see the man page for the make
@@ -157,6 +159,24 @@ if(BUILD_WITH_HDF5)
         target_link_libraries(ExpressionMatrix2 ${HDF5_LIBRARY})
     endforeach(HDF5_LIBRARY)
 endif(BUILD_WITH_HDF5)
+
+
+
+#OpenCL (for GPU functionality, off by default).
+option(BUILD_WITH_OPENCL "Include OpenCL functionality in the build." OFF)
+if(NOT OPENCL_LIBRARY)
+    # Default value for ubuntu16.
+    set(OPENCL_LIBRARY /usr/lib/x86_64-linux-gnu/libOpenCL.so.1)
+endif(NOT OPENCL_LIBRARY)
+message(STATUS "BUILD_WITH_OPENCL=" ${BUILD_WITH_OPENCL})
+message(STATUS OPENCL_LIBRARY=${OPENCL_LIBRARY})
+if(BUILD_WITH_OPENCL)
+    add_definitions(-DCZI_EXPRESSION_MATRIX2_BUILD_FOR_GPU) 
+    add_definitions(-DCL_HPP_MINIMUM_OPENCL_VERSION=120) 
+    add_definitions(-DCL_HPP_TARGET_OPENCL_VERSION=120) 
+    add_definitions(-DCL_HPP_ENABLE_EXCEPTIONS)
+    target_link_libraries(ExpressionMatrix2 ${OPENCL_LIBRARY})
+endif(BUILD_WITH_OPENCL)
 
 
 
