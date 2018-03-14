@@ -28,40 +28,63 @@ using namespace ExpressionMatrix2;
 
 
 
-// Construct a new expression matrix. All binary data for the new expression matrix
-// will be stored in the specified directory. If the directory does not exist,
-// it will be created. If the directory already exists, any previous
-// expression matrix stored in the directory will be overwritten by the new one.
+// Construct a new expression matrix or access an existing one.
+// The argument is the name of the directory that contains,
+// or will contain, binary data for the ExpressionMatrix object.
+// If the directory does not exist, it will be created,
+// and initialized to a new empty ExpressionMatrix without any genes and cells.
+// If the directory already exists, it must be a directory containing
+// a previously created ExpressionMatrix. In this case,
+// the constructor will access the existing ExpressionMatrix.
 ExpressionMatrix::ExpressionMatrix(
     const string& directoryName,
-    const ExpressionMatrixCreationParameters& parameters) :
+    bool allowReadOnly) :
     directoryName(directoryName)
 {
-    // If directory already exists, don't do anything.
-    // This ensures that we don't delete or overwrite anything,
-    // and that the directory does not contain stale data.
     if(filesystem::exists(directoryName)) {
-        throw runtime_error("Directory " + directoryName + " already exists.");
+        accessExisting(allowReadOnly);
+    } else {
+        createNew();
     }
 
-    // Create the directory. This guarantees that we start with an empty directory.
+    // Fill the table containing commands known to the http server.
+    fillServerFunctionTable();
+}
+
+
+
+void ExpressionMatrix::createNew()
+{
+    // Capacity parameters for the various hash tables.
+    // The hash tables do automatic rehashing as necessary,
+    // so the choices for these initial capacities are not critical.
+    const uint64_t geneCapacity              = 1<<18;   // Genes.
+    const uint64_t cellCapacity              = 1<<18;   // Cells.
+    const uint64_t cellMetaDataNameCapacity  = 1<<12;   // Cell meta data name strings.
+    const uint64_t cellMetaDataValueCapacity = 1<<24;   // Cell meta data value strings.
+    const uint64_t geneMetaDataNameCapacity  = 1<<12;   // Gene meta data name strings.
+    const uint64_t geneMetaDataValueCapacity = 1<<18;   // Gene meta data value strings.
+
+    // Create the directory.
     filesystem::createDirectory(directoryName);
 
-    geneNames.createNew(directoryName + "/" + "GeneNames", parameters.geneCapacity);
+    // Create gene data structures.
+    geneNames.createNew(directoryName + "/" + "GeneNames", geneCapacity);
     geneMetaData.createNew(directoryName + "/" + "GeneMetaData");
-    geneMetaDataNames.createNew(directoryName + "/" + "GeneMetaDataNames", parameters.geneMetaDataNameCapacity);
-    geneMetaDataValues.createNew(directoryName + "/" + "GeneMetaDataValues", parameters.geneMetaDataValueCapacity);
+    geneMetaDataNames.createNew(directoryName + "/" + "GeneMetaDataNames", geneMetaDataNameCapacity);
+    geneMetaDataValues.createNew(directoryName + "/" + "GeneMetaDataValues", geneMetaDataValueCapacity);
     geneMetaDataNamesUsageCount.createNew(directoryName + "/" + "GeneMetaDataNamesUsageCount");
 
+    // Create cell data structures.
     cells.createNew(directoryName + "/" + "Cells");
-    cellNames.createNew(directoryName + "/" + "CellNames", parameters.cellCapacity);
+    cellNames.createNew(directoryName + "/" + "CellNames", cellCapacity);
     cellMetaData.createNew(directoryName + "/" + "CellMetaData");
-    cellMetaDataNames.createNew(directoryName + "/" + "CellMetaDataNames", parameters.cellMetaDataNameCapacity);
-    cellMetaDataValues.createNew(directoryName + "/" + "CellMetaDataValues", parameters.cellMetaDataValueCapacity);
+    cellMetaDataNames.createNew(directoryName + "/" + "CellMetaDataNames", cellMetaDataNameCapacity);
+    cellMetaDataValues.createNew(directoryName + "/" + "CellMetaDataValues", cellMetaDataValueCapacity);
     cellMetaDataNamesUsageCount.createNew(directoryName + "/" + "CellMetaDataNamesUsageCount");
     cellExpressionCounts.createNew(directoryName + "/" + "CellExpressionCounts");
 
-    // Initialize the CellSets.
+    // Initialize the cell sets.
     cellSets.createNew(directoryName);
     vector<CellId> emptyCellSet;
     cellSets.addCellSet("AllCells", emptyCellSet);
@@ -75,62 +98,21 @@ ExpressionMatrix::ExpressionMatrix(
     CZI_ASSERT(cellExpressionCounts.size() == cells.size());
     CZI_ASSERT(cellSets.cellSets["AllCells"]->size() == cells.size());
 
-    // Fill the table containing commands known to the http server.
-    fillServerFunctionTable();
-}
-ExpressionMatrix::ExpressionMatrix(
-    const string& directoryName,
-    uint64_t geneCapacity,
-    uint64_t cellCapacity,
-    uint64_t cellMetaDataNameCapacity,
-    uint64_t cellMetaDataValueCapacity,
-    uint64_t geneMetaDataNameCapacity,
-    uint64_t geneMetaDataValueCapacity
-    ) :
-    ExpressionMatrix(
-        directoryName,
-        ExpressionMatrixCreationParameters(
-            geneCapacity, cellCapacity,
-            cellMetaDataNameCapacity, cellMetaDataValueCapacity,
-            geneMetaDataNameCapacity, geneMetaDataValueCapacity
-            ))
-{
-}
-
-
-
-ExpressionMatrixCreationParameters::ExpressionMatrixCreationParameters(
-    uint64_t geneCapacity,
-    uint64_t cellCapacity,
-    uint64_t cellMetaDataNameCapacity,
-    uint64_t cellMetaDataValueCapacity,
-    uint64_t geneMetaDataNameCapacity,
-    uint64_t geneMetaDataValueCapacity
-    ) :
-    geneCapacity(geneCapacity),
-    cellCapacity(cellCapacity),
-    cellMetaDataNameCapacity(cellMetaDataNameCapacity),
-    cellMetaDataValueCapacity(cellMetaDataValueCapacity),
-    geneMetaDataNameCapacity(geneMetaDataNameCapacity),
-    geneMetaDataValueCapacity(geneMetaDataValueCapacity)
-{
 }
 
 
 
 // Access a previously created expression matrix stored in the specified directory.
-ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOnly) :
-    directoryName(directoryName)
+void ExpressionMatrix::accessExisting(bool allowReadOnly)
 {
-    // Access the binary data with read-write access, so we can add new cells
-    // and perform other operations that change the state on disk.
-
+    // Access gene data structures.
     geneNames.accessExistingReadWrite(directoryName + "/" + "GeneNames", allowReadOnly);
     geneMetaData.accessExistingReadWrite(directoryName + "/" + "GeneMetaData", allowReadOnly);
     geneMetaDataNames.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataNames", allowReadOnly);
     geneMetaDataValues.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataValues", allowReadOnly);
     geneMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "GeneMetaDataNamesUsageCount", allowReadOnly);
 
+    // Access cell data structures.
     cells.accessExistingReadWrite(directoryName + "/" + "Cells", allowReadOnly);
     cellNames.accessExistingReadWrite(directoryName + "/" + "CellNames", allowReadOnly);
     cellMetaData.accessExistingReadWrite(directoryName + "/" + "CellMetaData", allowReadOnly);
@@ -138,12 +120,12 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
     cellMetaDataValues.accessExistingReadWrite(directoryName + "/" + "CellMetaDataValues", allowReadOnly);
     cellMetaDataNamesUsageCount.accessExistingReadWrite(directoryName + "/" + "CellMetaDataNamesUsageCount", allowReadOnly);
     cellExpressionCounts.accessExistingReadWrite(directoryName + "/" + "CellExpressionCounts", allowReadOnly);
+
+    // Access the cell sets.
     cellSets.accessExisting(directoryName, allowReadOnly);
     if(!cellSets.exists("AllCells")) {
         throw runtime_error("Cell set \"AllCells\" is missing.");
     }
-
-
 
     // Access the gene sets.
     const string fileNamePrefix = directoryName + "/GeneSet-";
@@ -160,8 +142,6 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
         throw runtime_error("Gene set \"AllGenes\" is missing.");
     }
 
-
-
     // Sanity checks.
     CZI_ASSERT(cellNames.size() == cells.size());
     CZI_ASSERT(cellMetaData.size() == cells.size());
@@ -170,8 +150,6 @@ ExpressionMatrix::ExpressionMatrix(const string& directoryName, bool allowReadOn
     CZI_ASSERT(cellMetaDataNamesUsageCount.size() == cellMetaDataNames.size());
     CZI_ASSERT(geneSets["AllGenes"].size() == geneCount());
 
-    // Fill the table containing commands known to the http server.
-    fillServerFunctionTable();
 }
 
 

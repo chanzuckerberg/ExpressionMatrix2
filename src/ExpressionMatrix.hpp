@@ -32,7 +32,6 @@ namespace ChanZuckerberg {
         class ClusterGraph;
         class ClusterGraphCreationParameters;
         class ExpressionMatrix;
-        class ExpressionMatrixCreationParameters;
         class ExpressionMatrixSubset;
         class GeneGraph;
         class Lsh;
@@ -49,39 +48,6 @@ namespace pybind11 {
     class array;
     class buffer;
 }
-
-
-
-// Class used to store various parameters that control the initial creation of
-// the ExpressionMatrix.
-class ChanZuckerberg::ExpressionMatrix2::ExpressionMatrixCreationParameters {
-public:
-
-    // The following parameters control the capacity of various hash tables
-    // use to store strings.
-    // These capacities are hard limits: after the capacity is reached,
-    // inserting a new element triggers an endless loop
-    // (because we use open addressing hash tables without rehashing and without checks).
-    // For good performance of these hash tables, these capacities
-    // should equal at least twice the actual expected number of strings
-    // of each type that will be stored.
-    uint64_t geneCapacity = 1<<18;              // Controls the maximum number of genes.
-    uint64_t cellCapacity = 1<<24;              // Controls the maximum number of cells.
-    uint64_t cellMetaDataNameCapacity = 1<<16;  // Controls the maximum number of distinct cell meta data name strings.
-    uint64_t cellMetaDataValueCapacity = 1<<28; // Controls the maximum number of distinct cell meta data value strings.
-    uint64_t geneMetaDataNameCapacity = 1<<16;  // Controls the maximum number of distinct gene meta data name strings.
-    uint64_t geneMetaDataValueCapacity = 1<<20; // Controls the maximum number of distinct gene meta data value strings.
-
-    ExpressionMatrixCreationParameters(
-        uint64_t geneCapacity,
-        uint64_t cellCapacity,
-        uint64_t cellMetaDataNameCapacity,
-        uint64_t cellMetaDataValueCapacity,
-        uint64_t geneMetaDataNameCapacity,
-        uint64_t geneMetaDataValueCapacity
-        );
-};
-
 
 
 // Class used to store information about a cell graph.
@@ -114,23 +80,17 @@ class ChanZuckerberg::ExpressionMatrix2::ExpressionMatrix : public HttpServer {
 public:
 
 
-    // Construct a new expression matrix. All binary data for the new expression matrix
-    // will be stored in the specified directory. If the directory does not exist,
-    // it will be created. If the directory already exists, any previous
-    // expression matrix stored in the directory will be overwritten by the new one.
-    ExpressionMatrix(const string& directoryName, const ExpressionMatrixCreationParameters&);
+    // Construct a new expression matrix or access an existing one.
+    // The argument is the name of the directory that contains,
+    // or will contain, binary data for the ExpressionMatrix object.
+    // If the directory does not exist, it will be created,
+    // and initialized to a new empty ExpressionMatrix without any genes and cells.
+    // If the directory already exists, it must be a directory containing
+    // a previously created ExpressionMatrix. In this case,
+    // the constructor will access the existing ExpressionMatrix.
     ExpressionMatrix(
         const string& directoryName,
-        uint64_t geneCapacity,
-        uint64_t cellCapacity,
-        uint64_t cellMetaDataNameCapacity,
-        uint64_t cellMetaDataValueCapacity,
-        uint64_t geneMetaDataNameCapacity,
-        uint64_t geneMetaDataValueCapacity
-    );
-
-    // Access a previously created expression matrix stored in the specified directory.
-    ExpressionMatrix(const string& directoryName, bool allowReadOnly);
+        bool allowReadOnly = false);
 
     // Add a gene.
     // Returns true if the gene was added, false if it was already present.
@@ -672,6 +632,11 @@ public:
     SignatureGraph& getSignatureGraph(const string& signatureGraphName);
 
 private:
+
+    // Private functions called by the constructor.
+    void createNew();
+    void accessExisting(bool allowReadOnly);
+
     // Functions to color a signature graph.
     // These set the color field of the vertices.
     void colorBlack(SignatureGraph&) const;

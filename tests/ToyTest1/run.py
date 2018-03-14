@@ -9,13 +9,7 @@ import ExpressionMatrix2
 # Create the expression matrix and add the cells.
 # This creates directory "data" to contain the binary data for this expression matrix.
 # Later, we can access the binary data using a different ExpressinMatrix constructor (see runServer.py)
-e = ExpressionMatrix2.ExpressionMatrix(
-    directoryName = 'data', 
-    geneCapacity = 1<<18,                # Maximum number of genes.
-    cellCapacity = 1<<16,                # Maximum number of cells.           
-    cellMetaDataNameCapacity = 1<<12,    # Maximum number of distinct cell meta data name strings.
-    cellMetaDataValueCapacity = 1<<20    # Maximum number of distinct cell meta data value strings.
-    )
+e = ExpressionMatrix2.ExpressionMatrix(directoryName = 'data')
 e.addCells(
     expressionCountsFileName = 'ExpressionMatrix.csv', 
     cellMetaDataFileName = 'MetaData.csv'

@@ -182,33 +182,17 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
         "Most high level functionality is provided by this class. "
         "Binary data files for an instance of this class are stored "
         "in a single directory on disk. They are accessed as memory mapped files. ")
-       .def(init<string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t>(),
-           "This constructor creates a new (empty) ExpressionMatrix object "
-           "in the specified directory. "
-           "The directory must not exists. "
-           "See `here <../../../Running.html#creationParameters>`__ for more information",
-           arg("directoryName"),
-           arg("geneCapacity"),
-           arg("cellCapacity"),
-           arg("cellMetaDataNameCapacity"),
-           arg("cellMetaDataValueCapacity"),
-           arg("geneMetaDataNameCapacity") = 1<<16,
-           arg("geneMetaDataValueCapacity") = 1<<16
-       )
        .def(init<string, bool>(),
-           "This constructor can be used to access an existing ExpressionMatrix object "
-           "in the specified directory. The directory must exist. "
-           "If write access is not permitted on some of the data, "
-           "the operation fails if allowReadOnly is False, "
-           "and falls back to read-only access If allowReadOnly is True. "
-           "In this case, however, any write operations on data with read-only access "
-           "will generate a Segmentation Fault and cause immediate termination "
-           "of the calling Python script, without cleanup. "
-           "Therefore, this constructor should be called with allowReadOnly = False "
-           "except in circumstances where limited functionality "
-           "with read-only access to the data is desired. ",
+           "Construct a new expression matrix or access an existing one. "
+           "The argument is the name of the directory that contains, "
+           "or will contain, binary data for the ExpressionMatrix object. "
+           "If the directory does not exist, it will be created, "
+           "and initialized to a new empty ExpressionMatrix without any genes and cells. "
+           "If the directory already exists, it must be a directory containing "
+           "a previously created ExpressionMatrix. In this case, "
+           "the constructor will access the existing ExpressionMatrix. ",
            arg("directoryName"),
-           arg("allowReadOnly")=false
+           arg("allowReadOnly") = false
        )
 
        // Get the total number of genes or cells currently in the system.
