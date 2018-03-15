@@ -163,6 +163,14 @@ public:
         const string& metaDataFileSeparators,
         const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
         );
+    void addCells(
+        ostream& out,
+        const string& expressionCountsFileName,
+        const string& expressionCountsFileSeparators,
+        const string& metaDataFileName,
+        const string& metaDataFileSeparators,
+        const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
+        );
     // Old version that needs much more memory.
     void addCellsOld1(
         const string& expressionCountsFileName,
@@ -802,6 +810,7 @@ public:
 private:
     ServerParameters serverParameters;
     void processRequest(const vector<string>& request, ostream& html, const BrowserInformation&);
+    void processPostRequest(const PostData&, ostream& html);
 
     // Function table and related information.
     // Associates request keywords with functions.
@@ -817,6 +826,10 @@ private:
         ostream& html,
         const BrowserInformation&);
     map<string, ServerFunctionWithBrowserInfo> serverFunctionWithBrowserInfoTable;
+    typedef void (ExpressionMatrix::*ServerPostFunction)(
+        const PostData&,
+        ostream& html);
+    map<string, ServerPostFunction> serverPostFunctionTable;
     set<string> nonHtmlKeywords;
     void fillServerFunctionTable();
 
@@ -826,6 +839,8 @@ private:
     void writeNavigation(ostream& html);
     // void writeNavigation(ostream& html, const string& text, const string& url, const string& toolTip = "");
     void writeNavigation(ostream& html, const string& title, const vector<pair <string, string> >&);
+    void writeHtmlBegin(ostream& html);
+    void writeHtmlEnd(ostream& html);
     void exploreSummary(const vector<string>& request, ostream& html);
     void exploreHashTableSummary(const vector<string>& request, ostream&);
     void exploreGene(const vector<string>& request, ostream& html);
@@ -840,6 +855,8 @@ private:
     void createGeneSetUsingInformationContent(const vector<string>& request, ostream& html);
     void createWellExpressedGeneSet(const vector<string>& request, ostream& html);
     void exploreCell(const vector<string>& request, ostream& html);
+    void addCellsDialog(const vector<string>& request, ostream& html);
+    void addCells(const PostData&, ostream& html);
     ostream& writeCellLink(ostream&, CellId, bool writeId=false);
     ostream& writeCellLink(ostream&, const string& cellName, bool writeId=false);
     ostream& writeGeneLink(ostream&, GeneId, bool writeId=false);

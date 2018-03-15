@@ -4,9 +4,11 @@
 #include "ExpressionMatrix.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
+#include "uuid.hpp"
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include "fstream.hpp"
 #include "tuple.hpp"
 
 
@@ -260,6 +262,93 @@ void ExpressionMatrix::exploreCell(
         "$(document).ready(function(){$('#countTable').tablesorter();});"
         "</script>"
         ;
+
+}
+
+void ExpressionMatrix::addCellsDialog(
+    const vector<string>& request,
+    ostream& html)
+{
+    html <<
+        "<h1>Add cells</h1>"
+        "<form action=addCells method=post enctype='multipart/form-data'>"
+        "<table>"
+        "<tr><th class=centered>Input file<th class=centered>Select file<th class=centered>Separators"
+        "<tr><td>Expression counts file"
+        "<td><input type=file name=expressionCountsFile>"
+        "<td><input type=text name=expressionCountsFileSeparators required>"
+        "<tr><td>Cell meta data file"
+        "<td><input type=file name=cellMetaDataFile>"
+        "<td><input type=text name=cellMetaDataFileSeparators required>"
+        "</table>"
+        "<p><input type=submit value='Add cells'>"
+        "</form>";
+}
+
+
+
+void ExpressionMatrix::addCells(const PostData& postData, ostream& html)
+{
+    html << "<h1>Adding cells</h1>";
+    html << "<p>ExpressionMatrix::addCells not implemented.";
+
+    // Extract the expression counts data.
+    const auto itExpressionCountsFile = postData.formData.find("expressionCountsFile");
+    if(itExpressionCountsFile == postData.formData.end()) {
+        throw runtime_error("Missing expressionCountsFile.");
+    }
+    const auto& expressionCountsFileData = itExpressionCountsFile->second;
+    html << "<p>Received " << expressionCountsFileData.size() << " bytes of expression counts data." << endl;
+
+    // Extract the expression counts separators.
+    const auto itExpressionCountsSeparators = postData.formData.find("expressionCountsFileSeparators");
+    if(itExpressionCountsSeparators == postData.formData.end()) {
+        throw runtime_error("Missing expressionCountsFileSeparators.");
+    }
+    const auto& expressionCountsSeparators = itExpressionCountsSeparators->second;
+    html << "<p>Received " << expressionCountsSeparators.size() << " bytes of expression counts separators." << endl;
+
+    // Extract the cell meta data.
+    const auto itCellMetaDataFile = postData.formData.find("cellMetaDataFile");
+    if(itCellMetaDataFile == postData.formData.end()) {
+        throw runtime_error("Missing cellMetaDataFile.");
+    }
+    const auto& cellMetaDataFileData = itCellMetaDataFile->second;
+    html << "<p>Received " << cellMetaDataFileData.size() << " bytes of cell meta data." << endl;
+
+    // Extract the meta data separators.
+    const auto itCellMetaDataFileSeparators = postData.formData.find("cellMetaDataFileSeparators");
+    if(itCellMetaDataFileSeparators == postData.formData.end()) {
+        throw runtime_error("Missing cellMetaDataFileSeparators.");
+    }
+    const auto& cellMetaDataFileSeparators = itCellMetaDataFileSeparators->second;
+    html << "<p>Received " << cellMetaDataFileSeparators.size() << " bytes of cell meta data separators." << endl;
+
+    // Write out the expression count file.
+    const string uuid = randomUuid();
+    const string baseName = directoryName + "/" + uuid + "-";
+    const string expressionCountsFileName = baseName + "ExpressionCounts";
+    ofstream expressionCountsFile(expressionCountsFileName);
+    expressionCountsFile.write(expressionCountsFileData.begin(), expressionCountsFileData.size());
+    expressionCountsFile.close();
+
+    // Write out the cell meta data file.
+    const string cellMetaDataFileName = baseName + "CellMetaData";
+    ofstream cellMetaDataFile(cellMetaDataFileName);
+    cellMetaDataFile.write(cellMetaDataFileData.begin(), cellMetaDataFileData.size());
+    cellMetaDataFile.close();
+
+    // Add the cells.
+    html << "<pre>";
+    addCells(
+        html,
+        expressionCountsFileName,
+        string(expressionCountsSeparators.begin(), expressionCountsSeparators.size()),
+        cellMetaDataFileName,
+        string(cellMetaDataFileSeparators.begin(), cellMetaDataFileSeparators.size()),
+        vector< pair<string, string> >()
+        );
+    html << "</pre>";
 
 }
 

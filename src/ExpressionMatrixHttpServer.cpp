@@ -21,6 +21,7 @@ using namespace ExpressionMatrix2;
 // The macro can only be used when the keyword and the function name are identical.
 #define CZI_ADD_TO_FUNCTION_TABLE(name) serverFunctionTable[string("/") + #name ] = &ExpressionMatrix::name
 #define CZI_ADD_TO_FUNCTION_WITH_BROWSER_INFO_TABLE(name) serverFunctionWithBrowserInfoTable[string("/") + #name ] = &ExpressionMatrix::name
+#define CZI_ADD_TO_POST_FUNCTION_TABLE(name) serverPostFunctionTable[string("/") + #name ] = &ExpressionMatrix::name
 void ExpressionMatrix::fillServerFunctionTable()
 {
     // Summary.
@@ -44,7 +45,9 @@ void ExpressionMatrix::fillServerFunctionTable()
     CZI_ADD_TO_FUNCTION_TABLE(createWellExpressedGeneSet);
 
     // Cells and cell sets.
+    CZI_ADD_TO_POST_FUNCTION_TABLE(addCells);
     serverFunctionTable["/cell"]                            = &ExpressionMatrix::exploreCell;
+    CZI_ADD_TO_FUNCTION_TABLE(addCellsDialog);
     CZI_ADD_TO_FUNCTION_TABLE(compareTwoCells);
     serverFunctionTable["/cellSets"]                        = &ExpressionMatrix::exploreCellSets;
     serverFunctionTable["/cellSet"]                         = &ExpressionMatrix::exploreCellSet;
@@ -210,19 +213,7 @@ void ExpressionMatrix::processRequest(
     // Write everything that goes before the html body, plus the navigation menus.
     const bool isHtml = nonHtmlKeywords.find(keyword) == nonHtmlKeywords.end();
     if(isHtml) {
-        html <<
-            "\r\n"
-            "<!DOCTYPE html>"
-            "<html>"
-            "<head>"
-            "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
-            "<meta charset='UTF-8'>";
-        writeStyle(html);
-        writeMakeAllTablesSelectable(html);
-        html <<
-            "</head>"
-            "<body onload='makeAllTablesSelectableByDoubleClick()'>";
-        writeNavigation(html);
+        writeHtmlBegin(html);
     }
 
 
@@ -242,12 +233,276 @@ void ExpressionMatrix::processRequest(
     }
 
     if(isHtml) {
-        html << "</body>";
-        html << "</html>";
+        writeHtmlEnd(html);
     }
 }
 
 
+void ExpressionMatrix::processPostRequest(const PostData& postData, ostream& html)
+{
+    /*
+    html << "ExpressionMatrix:: Received post request:";
+    for(const string& x: postData.request) {
+        html <<  " " << x;
+    }
+    html << endl;
+    */
+
+    try {
+
+        if(postData.request.size() != 3) {
+            throw runtime_error("Unexpected format of POST request.");
+        }
+
+        // Look up the keyword to find the function that will process this request.
+        // Note that the keyword includes the initial "/".
+        const string& keyword = postData.request[1];
+        const auto it = serverPostFunctionTable.find(keyword);
+        if(it == serverPostFunctionTable.end()) {
+            html << "\r\nUnsupported POST request " << keyword;
+            return;
+        }
+
+        // Begin the html document.
+        writeHtmlBegin(html);
+
+        // Call the function that processes this keyword.
+        const auto function = it->second;
+        (this->*function)(postData, html);
+
+        // Finish the html document.
+        writeHtmlEnd(html);
+    } catch(std::exception& e) {
+        html << e.what();
+    }
+}
+
+
+
+void ExpressionMatrix::writeHtmlBegin(ostream& html)
+{
+    html <<
+        "\r\n"
+        "<!DOCTYPE html>"
+        "<html>"
+        "<head>"
+        "<link rel=icon href=\"https://s0.wp.com/wp-content/themes/vip/czi/images/build/favicon.ico\" />"
+        "<meta charset='UTF-8'>";
+    writeStyle(html);
+    writeMakeAllTablesSelectable(html);
+    html <<
+        "</head>"
+        "<body onload='makeAllTablesSelectableByDoubleClick()'>";
+    writeNavigation(html);
+}
+
+
+
+void ExpressionMatrix::writeHtmlEnd(ostream& html)
+{
+    html << "</body>";
+    html << "</html>";
+}
+
+
+#if 0
+// Process POST requests.
+// The only POST request we accept is addCells.
+void ExpressionMatrix::processPost(const vector<string>& request, std::iostream& s)
+{
+
+    // Verify that this is an addCells request.
+    if(request.size() < 2) {
+        s << "Insufficient number of tokens in POST request.";
+        cout << timestamp << "Insufficient number of tokens in POST request." << endl;
+        return;
+    }
+    const string& requestKeyword = request[1];
+    if(requestKeyword != "/addCells") {
+        s << "Unsupported POST request.";
+        cout << timestamp << "Unsupported POST request." << endl;
+        return;
+    }
+    cout << timestamp << "Processing POST addCells request." << endl;
+
+
+
+    // Process the headers.
+    // We look for "Content-Length: nnn"
+    // and "Content-Type: ... boundary=bbb".
+    size_t contentLength = 0;
+    string boundary;
+    string line;
+    vector<string> tokens;
+    while(true) {
+
+        // Get a header line.
+        getline(s, line);
+        CZI_ASSERT(s);
+
+        // Remove the final '\r'.
+        CZI_ASSERT(line.size() >0);
+        CZI_ASSERT(line.back() == '\r');
+        line.resize(line.size() - 1);
+        cout << line << endl;
+
+        // If empty, we have reach the end of the headers.
+        if(line.size() == 0) {
+            break;
+        }
+
+        // Tokenize the line using space as seperator.
+        tokenizeBare(" ", line, tokens);
+
+        // Extract content length.
+        if((tokens.size()>=2) && tokens.front() == "Content-Length:") {
+            contentLength = lexical_cast<size_t>(tokens[1]);
+        }
+
+        // Extract boundary.
+        if((tokens.size()>=2) && tokens.front()=="Content-Type:") {
+            // cout << "Found Content-Type:" << endl;
+            const string target = "boundary=";
+            for(const string& token: tokens) {
+                // cout << "***" << token << "*** " << token.size() << endl;
+                if((token.size()>target.size()) &&
+                    (token.substr(0, target.size())==target)) {
+                    boundary = token.substr(target.size());
+                    break;
+                }
+            }
+        }
+    }
+    CZI_ASSERT(contentLength != 0);
+    CZI_ASSERT(boundary.size() > 0);
+    // cout << "Content length is " << contentLength << endl;
+    // cout << "Boundary is " << boundary << endl;
+
+    // Read the content.
+    string postContent(contentLength, '*');
+    s.read(&postContent.front(), postContent.size());
+    cout << "POST content follows:" << endl;
+    cout << postContent;
+
+
+    // Look for occurrences of boundary in the content.
+    const string actualBoundary = "--" + boundary;
+    vector<size_t> boundaryPositions;
+    size_t startPosition = 0;
+    while(startPosition+actualBoundary.size() <= postContent.size()) {
+        const size_t nextPosition = postContent.find(boundary, startPosition);
+        if(nextPosition == string::npos) {
+            break;
+        }
+        boundaryPositions.push_back(nextPosition);
+        startPosition = nextPosition + actualBoundary.size();
+    }
+    /*
+    cout << "Positions of boundary in POST content:";
+    for(const size_t position: boundaryPositions) {
+        cout << " " << position;
+    }
+    cout << endl;
+    */
+    if(boundaryPositions.size() != 3) {
+        s << "HTTP/1.1 200 OK\r\n\r\n";
+        s << "Unexpected number of content items in POST request.";
+        return;
+    }
+
+
+
+    // Extract the expression counts and meta data files from the content.
+    string expressionCountsFileName;
+    string metaDataFileName;
+    for(size_t i=0; i<2; i++) {
+        const size_t beginPosition = boundaryPositions[i] + actualBoundary.size();
+        const size_t endPosition = boundaryPositions[i+1];
+        const size_t contentItemLength = endPosition - beginPosition;
+        const string contentItemData = postContent.substr(beginPosition, contentItemLength);
+        // cout << "Content item "<< i << ":" << endl;
+        // cout << contentItemData << endl;
+
+        // Process the header for this content item.
+        // We look for "name" and "filename" in the "Content-Disposition" line.
+        string name;
+        string filename;
+        const size_t  fileContentBegin = contentItemData.find("\r\n\r\n") + 4;
+        const size_t fileContentEnd = contentItemData.size() - 4;
+        const string header =
+            contentItemData.substr(0, fileContentBegin-2); // Includes the first "\r\n"
+        // cout << "Header:" << endl;
+        // cout << header << endl;
+        std::istringstream headerStream(header);
+        while(true) {
+            getline(headerStream, line);
+            if(!headerStream || (line.size()==0)) {
+                break;
+            }
+            CZI_ASSERT(line.size() > 0);
+            /*
+            cout << ">>>line length " << line.size() << ", line:";
+            for(const char c: line) {
+                cout << " " << int(c);
+            }
+            cout << endl;
+            */
+            CZI_ASSERT(line.back() == '\r');
+            line.resize(line.size() - 1);
+            // cout << "Header line: " << line << endl;
+            tokenizeBare(" ", line, tokens);
+            if(tokens.size()>=3 && tokens.front()=="Content-Disposition:") {
+                // Look for "name="
+                for(const auto& token: tokens) {
+                    if(boost::starts_with(token, "name=")) {
+                        name = token.substr(5);
+                        // cout << "***" << token << "***" << name << endl;
+                        CZI_ASSERT(name.front()=='"');
+                        CZI_ASSERT(name[name.size()-2]=='"');
+                        CZI_ASSERT(name.back()==';');
+                        name = name.substr(1, name.size()-3);
+                    }
+                }
+                // Look for "filename="
+                // cout << "Processing filename" << endl;
+                for(const auto& token: tokens) {
+                    if(boost::starts_with(token, "filename=")) {
+                        // cout << "Token at A ***" << token << endl;
+                        filename = token.substr(9);
+                        // cout << "Token at B ***" << token << endl;
+                        // cout << "filename " << filename.size() << " ***" << filename << "***" << endl;
+                        CZI_ASSERT(filename.front()=='"');
+                        CZI_ASSERT(filename.back()=='"');
+                        filename = filename.substr(1, filename.size()-2);
+                    }
+                }
+            }
+        }
+        CZI_ASSERT(name.size() > 0);
+        CZI_ASSERT(filename.size() > 0);
+        // cout << "name " << name << endl;
+        // cout << "filename " << filename << endl;
+        if(name == "expressionCountsFile") {
+            expressionCountsFileName = filename;
+        }
+        if(name == "cellMetaDataFile") {
+            metaDataFileName = filename;
+        }
+
+
+        // Extract the file contents and write them out.
+        ofstream file(directoryName + "/" + filename);
+        file << contentItemData.substr(fileContentBegin, fileContentEnd-fileContentBegin);
+    }
+    cout << "Uploaded " << expressionCountsFileName << " and " << metaDataFileName << endl;
+
+
+    // For now.
+    s << "HTTP/1.1 200 OK\r\n\r\n";
+    s << "Not implemented.";
+
+}
+#endif
 
 void ExpressionMatrix::writeMakeAllTablesSelectable(ostream& html)
 {
@@ -336,6 +591,7 @@ void ExpressionMatrix::writeNavigation(ostream& html)
         {"Gene sets", "geneSets"},
         });
     writeNavigation(html, "Cells", {
+        {"Add cells", "addCellsDialog"},
         {"Cells", "cell"},
         {"Cell meta data", "metaData"},
         {"Compare two cells", "compareTwoCells"},

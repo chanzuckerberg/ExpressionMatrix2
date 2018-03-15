@@ -370,14 +370,30 @@ void ExpressionMatrix::addCells(
     const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
     )
 {
-    cout << timestamp << "Begin addCells: " << cellCount() <<" cells, "
+    addCells(cout,
+        expressionCountsFileName,
+        expressionCountsFileSeparators,
+        cellMetaDataFileName,
+        cellMetaDataFileSeparators,
+        additionalCellMetaData);
+}
+void ExpressionMatrix::addCells(
+    ostream& out,
+    const string& expressionCountsFileName,
+    const string& expressionCountsFileSeparators,
+    const string& cellMetaDataFileName,
+    const string& cellMetaDataFileSeparators,
+    const vector< pair<string, string> >& additionalCellMetaData // Added to all cells.
+    )
+{
+    out << timestamp << "Begin addCells: " << cellCount() <<" cells, "
         << geneCount() << " genes." << endl;
 
 
     // Get the number of meta data fields.
     const size_t metaDataCount =
         countTokensInSecondLine(cellMetaDataFileName, cellMetaDataFileSeparators);
-    cout << "Cell meta data file " << cellMetaDataFileName
+    out << "Cell meta data file " << cellMetaDataFileName
         << " contains " << metaDataCount
         << " meta data fields." << endl;
 
@@ -448,9 +464,9 @@ void ExpressionMatrix::addCells(
 
         // Check that we have the expected number of tokens.
         if(tokens.size() != metaDataNames.size()) {
-            cout << "Unexpected number of items in this line of cell meta data file "
+            out << "Unexpected number of items in this line of cell meta data file "
                 << cellMetaDataFileName << ":\n";
-            cout << line << endl;
+            out << line << endl;
             throw runtime_error("Unexpected number of items in line of cell meta data file " + cellMetaDataFileName);
         }
 
@@ -468,7 +484,7 @@ void ExpressionMatrix::addCells(
         CZI_ASSERT(metaDataInFile.size() == metaDataInFileMap.size());
     }
     CZI_ASSERT(metaDataInFile.size() == metaDataInFileMap.size());
-    cout << "Cell meta data file " << cellMetaDataFileName <<
+    out << "Cell meta data file " << cellMetaDataFileName <<
         " contains meta data for " << metaDataInFile.size() << " cells." << endl;
 
 
@@ -478,7 +494,7 @@ void ExpressionMatrix::addCells(
     // and in the expression counts file.
     const size_t cellCountInExpressionFile =
         countTokensInSecondLine(expressionCountsFileName, expressionCountsFileSeparators) - 1;
-    cout << "Cell expression counts file " << expressionCountsFileName <<
+    out << "Cell expression counts file " << expressionCountsFileName <<
         " contains data for " << cellCountInExpressionFile << " cells." << endl;
 
 
@@ -525,9 +541,9 @@ void ExpressionMatrix::addCells(
         const auto j = it->second;
         cellsToBeKept.push_back(make_pair(j, i));
     }
-    cout << "The number of cells that appear in both the cell meta data file " <<
+    out << "The number of cells that appear in both the cell meta data file " <<
         " and the expression counts file is " << cellsToBeKept.size() << "." << endl;
-    cout << "This is the number of cells that will be kept." << endl;
+    out << "This is the number of cells that will be kept." << endl;
 
 
     // Gene names encountered in the expression counts file.
@@ -542,7 +558,7 @@ void ExpressionMatrix::addCells(
     // Read the rest of the expression counts file.
     while(true) {
         if((geneIdsInFile.size()%1000)==0) {
-            cout << timestamp << "Working on gene " << geneIdsInFile.size() << endl;
+            out << timestamp << "Working on gene " << geneIdsInFile.size() << endl;
         }
 
         // Read a line.
@@ -564,9 +580,9 @@ void ExpressionMatrix::addCells(
 
         // Check that we have the expected number of tokens.
         if(tokens.size() != cellCountInExpressionFile+1) {
-            cout << "Unexpected number of items in this line of expression counts file "
+            out << "Unexpected number of items in this line of expression counts file "
                 << expressionCountsFileName << ":\n";
-            cout << line << endl;
+            out << line << endl;
             throw runtime_error("Unexpected number of items in line of expression counts file " + expressionCountsFileName);
         }
 
@@ -633,7 +649,7 @@ void ExpressionMatrix::addCells(
         addCell(metaDataForOneCell, countsForOneCell);
     }
 
-    cout << timestamp << "End addCells: " << cellCount() <<" cells, "
+    out << timestamp << "End addCells: " << cellCount() <<" cells, "
         << geneCount() << " genes." << endl;
 }
 

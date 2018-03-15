@@ -6,10 +6,13 @@
 #ifndef CZI_EXPRESSION_MATRIX2_HTTP_SERVER_HPP
 #define CZI_EXPRESSION_MATRIX2_HTTP_SERVER_HPP
 
+#include "MemoryAsContainer.hpp"
+
 #include <boost/asio/ip/tcp.hpp>
 #include "boost_lexical_cast.hpp"
 
 #include "iosfwd.hpp"
+#include "map.hpp"
 #include "set.hpp"
 #include "string.hpp"
 #include "vector.hpp"
@@ -17,6 +20,7 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
         class HttpServer;
+        class PostData;
     }
 }
 
@@ -43,7 +47,16 @@ protected:
     // It should write the response to the given request on the stream passed as a second argument.
     // The request is guaranteed not to be empty.
     class BrowserInformation;
-    virtual void processRequest(const vector<string>& request, ostream& html, const BrowserInformation&) = 0;
+    virtual void processRequest(
+        const vector<string>& request,
+        ostream& html,
+        const BrowserInformation&) = 0;
+
+    // If the derived class wants to process POST requests, it should override this.
+    virtual void processPostRequest(
+        const PostData&,
+        ostream& html);
+
 
 
     // This function can be used by the derived class to get the value of a parameter.
@@ -104,7 +117,45 @@ protected:
 private:
     void processRequest(boost::asio::ip::tcp::iostream&);
 
+    void processPost(
+        const vector<string>& request,
+        std::iostream&);
 };
 
+
+
+// Class describing a POST request.
+class ChanZuckerberg::ExpressionMatrix2::PostData {
+public:
+
+    // The request already parsed in tokens.
+    vector<string> request;
+
+    // The headers.
+    map<string, string> headers;
+
+    // The content data.
+    string content;
+
+    // The form data.
+    // Keyed by the name.
+    // The values point into the content data string above.
+    map<string, MemoryAsContainer<const char> > formData;
+
+    PostData(const vector<string>& request, istream&);
+
+private:
+    void readHeaders(istream&);
+    size_t getContentLength() const;
+    void readContent(istream&);
+    void constructFormData();
+
+    // Get the content boundary defined in the Content-Type header.
+    // The actual boundary used to separate form data in the content
+    // is this, prepended with two dashes.
+    string getBoundary() const;
+
+
+};
 #endif
 

@@ -34,6 +34,22 @@ void ChanZuckerberg::ExpressionMatrix2::tokenize(
     }
 }
 
+// Same, but without quoting/escaping.
+void ChanZuckerberg::ExpressionMatrix2::tokenizeBare(
+    const string& separators,
+    const string& inputString,
+    vector<string>& tokens)
+{
+    using Separator = boost::char_separator<char>;
+    using Tokenizer = boost::tokenizer<Separator>;
+
+    const Separator separator(separators.c_str());
+    Tokenizer tokenizer(inputString, separator);
+
+    tokens.clear();
+    tokens.insert(tokens.begin(), tokenizer.begin(), tokenizer.end());
+}
+
 
 
 // Tokenize all the lines of a file.

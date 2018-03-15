@@ -1,6 +1,7 @@
 // Implementation of class HttpServer - see HttpServer.hpp for more information.
 
 #include "HttpServer.hpp"
+#include "CZI_ASSERT.hpp"
 #include "sstream.hpp"
 #include "timestamp.hpp"
 #include "tokenize.hpp"
@@ -17,6 +18,7 @@ using namespace boost;
 using namespace asio;
 using namespace ip;
 
+#include "fstream.hpp"
 #include "iostream.hpp"
 #include "stdexcept.hpp"
 #include <sstream>
@@ -106,6 +108,12 @@ void HttpServer::processRequest(tcp::iostream& s)
         cout << "Request was: " << requestLine << endl;
         return;
     }
+    if(tokens.front() == "POST") {
+        s.expires_from_now(boost::posix_time::seconds(10000000));
+        processPost(tokens, s);
+        return;
+    }
+
     if(tokens.front() != "GET") {
         s << "Unexpected keyword in http request: " << tokens.front();
         cout << "Unexpected keyword in http request: " << tokens.front() << endl;
@@ -179,6 +187,30 @@ void HttpServer::processRequest(tcp::iostream& s)
     // The derived class processes the request.
     processRequest(tokens, s, browserInformation);
 }
+
+
+
+#if 0
+// If the derived class wants to process POST requests,
+// it should override this. The version implemented in this class
+// just returns an error.
+void HttpServer::processPost(
+    const vector<string>& requestLine,
+    const string& postData,
+    std::ostream& s )
+{
+    // s << "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
+    cout << "***abc" << endl;
+    s << "HTTP/1.1 200 OK\r\n\r\n";
+
+    // Copy to a file.
+    ofstream debugOut("Post.txt");
+    debugOut << postData;
+
+
+
+}
+#endif
 
 
 
@@ -410,4 +442,202 @@ ostream& HttpServer::writeTableSorter(ostream& html)
     return html;
 }
 
+
+
+void HttpServer::processPost(
+    const vector<string>& requestLine,
+    std::iostream& s)
+{
+    cout << timestamp << "Received a POST." << endl;
+    PostData postData(requestLine, s);
+    s << "HTTP/1.1 200 OK\r\n";
+    processPostRequest(postData, s);
+}
+
+
+PostData::PostData(const vector<string>& request, istream& s) :
+    request(request)
+{
+    readHeaders(s);
+    readContent(s);
+    constructFormData();
+}
+
+
+void PostData::readHeaders(istream& s)
+{
+    // cout << "Reading POST headers." << endl;
+
+    string line;
+    while(true) {
+
+        // Get a header line.
+        getline(s, line);
+        CZI_ASSERT(s);
+
+        // Remove the final '\r'.
+        CZI_ASSERT(line.size() > 0);
+        CZI_ASSERT(line.back() == '\r');
+        line.resize(line.size() - 1);
+
+        // If empty, we have reached the end of the headers.
+        if(line.size() == 0) {
+            break;
+        }
+        // cout << "Processing POST header line:" << endl;
+        // cout << line << endl;
+
+        // Locate the ":".
+        const size_t colonPosition = line.find_first_of(':');
+        if(colonPosition == string::npos) {
+            throw runtime_error("Missing colon in POST request.");
+        }
+
+        // Extract the keyword and the content of this header line
+        // and store them.
+        const string keyword = line.substr(0, colonPosition);
+        const string content = line.substr(colonPosition+2);
+        headers.insert(make_pair(keyword, content));
+    }
+
+}
+
+
+size_t PostData::getContentLength() const
+{
+    // We only support POST requests that contain a content length.
+    const auto it = headers.find("Content-Length");
+    if(it == headers.end()) {
+        throw runtime_error("POST request without content length is not supported.");
+    }
+    return lexical_cast<size_t>(it->second);
+
+}
+
+void PostData::readContent(istream& s)
+{
+    const size_t contentLength = getContentLength();
+    // cout << "POST content length is " << contentLength << endl;
+
+    content.resize(contentLength, '\0');
+    s.read(&content.front(), content.size());
+
+    // cout << "POST content:" << endl;
+    // cout << content;
+}
+
+
+
+// Get the content boundary defined in the Content-Type header.
+// The actual boundary used to separate form data in the content
+// is this, prepended with two dashes.
+string PostData::getBoundary() const
+{
+    // Locate the data in the "Content-Type" header.
+    const auto it = headers.find("Content-Type");
+    if(it == headers.end()) {
+        throw runtime_error("POST request without content type header is not supported.");
+    }
+    const string& contentTypeData = it->second;
+
+    const string target = "boundary=";
+    size_t begin = contentTypeData.find(target);
+    if(begin == string::npos) {
+        throw runtime_error("POST request without boundary in connent type header is not supported.");
+    }
+    begin += target.size();
+    size_t end = contentTypeData.find_first_of(' ', begin);
+    if(end == string::npos) {
+        end = contentTypeData.size();
+    }
+    return contentTypeData.substr(begin, end);
+
+}
+
+
+void PostData::constructFormData()
+{
+    // Get the content boundary defined in the Content-Type header.
+    string boundary = getBoundary();
+    // cout << "Boundary ***" << boundary << "***" << endl;
+
+    // The actual boundary used to separate form data in the content
+    // is this, prepended with two dashes.
+    boundary = "--" + boundary;
+
+    // Look for occurrences of the boundary in the content.
+    vector<size_t> boundaryPositions;
+    size_t startPosition = 0;
+    while(startPosition < content.size()) {
+        const size_t nextPosition = content.find(boundary, startPosition);
+        if(nextPosition == string::npos) {
+            break;
+        }
+        boundaryPositions.push_back(nextPosition);
+        startPosition = nextPosition + boundary.size();
+    }
+
+
+
+    // Process each of the form data.
+    const size_t formDataCount = boundaryPositions.size() - 1;
+    // cout << "Found " << formDataCount << " form data items." << endl;
+    for(size_t i=0; i<formDataCount; i++) {
+
+        // Locate the header for this form data.
+        const size_t headerBegin = boundaryPositions[i] + boundary.size();
+        const size_t headerEnd = content.find("\r\n\r\n", headerBegin) + 4;
+
+        // Locate the actual data for this form data.
+        const size_t dataBegin = headerEnd;
+        const size_t dataEnd = boundaryPositions[i+1] - 2; // Because of "\r\n"
+
+        /*
+        cout << "Form data item " << i << " header:" << endl;
+        cout << content.substr(headerBegin, headerEnd-headerBegin);
+        cout << "Form data item " << i << " data:" << endl;
+        cout << content.substr(dataBegin, dataEnd-dataBegin) << endl;
+        */
+
+        // Locate the name.
+        const string target = "name=\"";
+        const size_t nameBegin = content.find(target, headerBegin) + target.size();
+        const size_t nameEnd = content.find_first_of('"', nameBegin);
+        const string name = content.substr(nameBegin, nameEnd-nameBegin);
+        // cout << "Name is ***" << name << "***" << endl;
+
+        formData.insert(make_pair(name, MemoryAsContainer<const char>(
+            content.data() + dataBegin,
+            content.data() + dataEnd)));
+
+        /*
+        cout << "Data length is " << formData.size() << ". Data follows:" << endl;
+        for(char c: formData) {
+            cout << c;
+        }
+        cout << endl;
+        */
+    }
+
+    /*
+    cout << "Received the following POST data:" << endl;
+    for(const auto& p: formData) {
+        cout << p.first << " of length " << p.second.size() << endl;
+        for(const char c: p.second) {
+            cout << c;
+        }
+        cout << endl;
+    }
+    */
+}
+
+
+// If the derived class wants to process POST requests, it should override this.
+void HttpServer::processPostRequest(
+    const PostData&,
+    ostream& html)
+{
+    html << "POST request ignored.";
+    cout << "\nPOST request ignored." << endl;
+}
 

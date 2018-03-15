@@ -10,11 +10,18 @@
 namespace ChanZuckerberg {
     namespace ExpressionMatrix2 {
 
+        // With quoting and escaping.
         void tokenize(
             const string& separators,
             const string& inputString,
             vector<string>& tokens,
             bool removeLeadingAndTrailingBlanks = false);
+
+        // Without quoting and escaping.
+        void tokenizeBare(
+            const string& separators,
+            const string& inputString,
+            vector<string>& tokens);
 
         void tokenizeFile(
             const string& fileName,

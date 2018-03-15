@@ -266,6 +266,11 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("jsonString")
        )
        .def("addCells",
+           (
+               void (ExpressionMatrix::*)
+               (const string&, const string&, const string&, const string&,
+                   const vector< pair<string, string> >&)
+           )
            &ExpressionMatrix::addCells,
            "Adds cells to the system, reading expression counts and cell meta data from files. "
            "See `here <../../../PythonApi.html#addCells>`__ for more information. .",
