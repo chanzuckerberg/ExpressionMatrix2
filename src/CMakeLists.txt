@@ -102,6 +102,15 @@ message(STATUS
 
 
 
+# Option to build with Python (shared library becomes a Python module).
+option(BUILD_WITH_PYTHON "Build with Python (shared library becomes a Python module." ON)
+message(STATUS "BUILD_WITH_PYTHON=" ${BUILD_WITH_PYTHON})
+if(BUILD_WITH_PYTHON)
+    add_definitions(-DCZI_EXPRESSION_MATRIX2_BUILD_WITH_PYTHON)
+endif(BUILD_WITH_PYTHON)
+
+
+
 # Option to turn off hdf5 functionality (to eliminate
 # dependency on hdf5 include files and libraries).
 option(BUILD_WITH_HDF5 "Include HDF5 functionality in the build." ON)
@@ -118,7 +127,9 @@ if(NOT PYTHON_INCLUDE_PATH)
     # Default value for ubuntu16 and Python 3.
     set(PYTHON_INCLUDE_PATH /usr/include/python3.5m)
 endif(NOT PYTHON_INCLUDE_PATH)
-include_directories(${PYTHON_INCLUDE_PATH})
+if(BUILD_WITH_PYTHON)
+    include_directories(${PYTHON_INCLUDE_PATH})
+endif(BUILD_WITH_PYTHON)
 message(STATUS "PYTHON_INCLUDE_PATH=" ${PYTHON_INCLUDE_PATH})
 
 
@@ -128,7 +139,9 @@ if(NOT PYBIND11_INCLUDE_PATH)
     # Default value for ubuntu16 and Python 3.
     set(PYBIND11_INCLUDE_PATH /usr/local/include/python3.5)
 endif(NOT PYBIND11_INCLUDE_PATH)
-include_directories(${PYBIND11_INCLUDE_PATH})
+if(BUILD_WITH_PYTHON)
+    include_directories(${PYBIND11_INCLUDE_PATH})
+endif(BUILD_WITH_PYTHON)
 message(STATUS "PYBIND11_INCLUDE_PATH=" ${PYBIND11_INCLUDE_PATH})
 
 

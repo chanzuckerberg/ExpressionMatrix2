@@ -1,3 +1,5 @@
+#if CZI_EXPRESSION_MATRIX2_BUILD_WITH_PYTHON
+
 // This file uses the pybind11 library to export portions of
 // the C++ API to Python.
 // If something is added or changed here, corresponding documentation
@@ -1265,3 +1267,7 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
     module.def("fileName", ExpressionMatrix2::filesystem::fileName);
 #endif
 }
+
+
+#endif
+
