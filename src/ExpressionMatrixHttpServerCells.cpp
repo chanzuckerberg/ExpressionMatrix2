@@ -2,6 +2,7 @@
 // of class ExpressionMatrix related to cells.
 
 #include "ExpressionMatrix.hpp"
+#include "filesystem.hpp"
 #include "orderPairs.hpp"
 #include "SimilarPairs.hpp"
 #include "uuid.hpp"
@@ -351,6 +352,11 @@ void ExpressionMatrix::addCells(const PostData& postData, ostream& html)
 
     html << "<p><form id=Continue action=index><input type=submit value=Continue></form>";
     html << "<script>window.location.href='addCells#Continue'</script>";
+
+    // Remove the files.
+    using filesystem::remove;
+    remove(expressionCountsFileName);
+    remove(cellMetaDataFileName);
 }
 
 
