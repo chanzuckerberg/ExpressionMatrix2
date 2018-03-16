@@ -290,7 +290,6 @@ void ExpressionMatrix::addCellsDialog(
 void ExpressionMatrix::addCells(const PostData& postData, ostream& html)
 {
     html << "<h1>Adding cells</h1>";
-    html << "<p>ExpressionMatrix::addCells not implemented.";
 
     // Extract the expression counts data.
     const auto itExpressionCountsFile = postData.formData.find("expressionCountsFile");
@@ -350,6 +349,8 @@ void ExpressionMatrix::addCells(const PostData& postData, ostream& html)
         );
     html << "</pre>";
 
+    html << "<p><form id=Continue action=index><input type=submit value=Continue></form>";
+    html << "<script>window.location.href='addCells#Continue'</script>";
 }
 
 
