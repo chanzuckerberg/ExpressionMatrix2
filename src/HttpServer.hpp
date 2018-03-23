@@ -31,7 +31,7 @@ public:
 
     // This function puts the server into an endless loop
     // of processing requests.
-    void explore(uint16_t port);
+    void explore(uint16_t port, bool localOnly=false);
 
     // The destructor needs to be virtual for clean destruction of
     // the derived class.

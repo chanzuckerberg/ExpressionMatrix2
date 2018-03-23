@@ -28,12 +28,16 @@ using namespace ip;
 // This function puts the server into an endless loop
 // of processing requests.
 // This is trhe function that the base class should call to start the server.
-void HttpServer::explore(uint16_t port)
+void HttpServer::explore(uint16_t port, bool localOnly)
 {
     // Create the acceptor, making sure to accept both ipv4 and ipv6 ip addresses.
     io_service service;
     tcp::acceptor acceptor(service);
-    tcp::endpoint endpoint(tcp::v6(), port);
+    tcp::endpoint endpoint = (
+        localOnly ?
+        tcp::endpoint(ip::address::from_string("::ffff:127.0.0.1"), port) :
+        tcp::endpoint(tcp::v6(), port)
+    );
     acceptor.open(endpoint.protocol());
     v6_only ipv6Option(false);
     acceptor.set_option(ipv6Option);

@@ -543,15 +543,16 @@ function makeAllTablesSelectableByDoubleClick()
 
 
 
-ServerParameters::ServerParameters(uint16_t port, string docDirectory) :
+ServerParameters::ServerParameters(uint16_t port, string docDirectory, bool localOnly) :
     port(port),
-    docDirectory(docDirectory)
+    docDirectory(docDirectory),
+    localOnly(localOnly)
 {
 }
 
-void ExpressionMatrix::explore(uint16_t port, const string& docDirectory)
+void ExpressionMatrix::explore(uint16_t port, const string& docDirectory, bool localOnly)
 {
-    ServerParameters serverParameters(port, docDirectory);
+    ServerParameters serverParameters(port, docDirectory, localOnly);
     explore(serverParameters);
 
 }
@@ -576,7 +577,7 @@ void ExpressionMatrix::explore(const ServerParameters& serverParameters)
     }
 
     // Invoke the base class.
-    HttpServer::explore(serverParameters.port);
+    HttpServer::explore(serverParameters.port, serverParameters.localOnly);
 }
 
 

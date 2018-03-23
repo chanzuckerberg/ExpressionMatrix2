@@ -1164,13 +1164,17 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        .def("explore",
            (
                void (ExpressionMatrix::*)
-               (uint16_t, const string&)
+               (uint16_t, const string&, bool)
            )
            &ExpressionMatrix::explore,
            "Starts an http server that can be used, in conjunction with a Web browser, "
-           "to interact with the ExpressionMatrix object. ",
+           "to interact with the ExpressionMatrix object. "
+           "The localOnly argument can be used to control whether the server will accept "
+           "connections from everywhere (default) or only from the same machine "
+           "on which the server is running.",
            arg("port") = 17100,
-           arg("docDirectory") = ""
+           arg("docDirectory") = "",
+           arg("localOnly") = false
        )
 
 
