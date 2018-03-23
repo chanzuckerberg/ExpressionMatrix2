@@ -62,6 +62,11 @@ void HttpServer::explore(uint16_t port, bool localOnly)
     // The acceptor is bound to this port. Start listening for connections.
     acceptor.listen();
     cout << "Listening for http requests on port " << port << endl;
+    if(localOnly) {
+        cout << "Only accepting local connections." << endl;
+    } else {
+        cout << "Accepting connections from all hosts." << endl;
+    }
 
     // Endless loop over incoming connections.
     while(true) {
