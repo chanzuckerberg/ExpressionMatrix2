@@ -966,7 +966,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
        .def("findSimilarGenePairs0",
            (
                void (ExpressionMatrix::*)
-               (const string&, const string&, NormalizationMethod, const string&, size_t, double)
+               (const string&, const string&, NormalizationMethod, const string&,
+                   size_t, double, bool)
            )
            &ExpressionMatrix::findSimilarGenePairs0,
            arg("geneSetName") = "AllGenes",
@@ -974,7 +975,8 @@ PYBIND11_MODULE(ExpressionMatrix2, module)
            arg("normalizationMethod") = NormalizationMethod::L2,
            arg("similarGenePairsName"),
            arg("k") = 100,
-           arg("similarityThreshold") = 0.2
+           arg("similarityThreshold") = 0.2,
+           arg("writeCsv") = false
        )
 
 

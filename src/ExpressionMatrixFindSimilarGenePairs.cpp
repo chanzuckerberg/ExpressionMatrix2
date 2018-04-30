@@ -7,6 +7,7 @@
 using namespace ChanZuckerberg;
 using namespace ExpressionMatrix2;
 
+#include "fstream.hpp"
 #include <numeric>
 
 
@@ -18,11 +19,13 @@ void ExpressionMatrix::findSimilarGenePairs0(
     NormalizationMethod normalizationMethod,
     const string& similarGenePairsName,
     size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
-    double similarityThreshold
+    double similarityThreshold,
+    bool writeCsv
     )
 {
     findSimilarGenePairs0(cout, geneSetName, cellSetName,
-        normalizationMethod, similarGenePairsName, k, similarityThreshold);
+        normalizationMethod, similarGenePairsName, k, similarityThreshold,
+        writeCsv);
 }
 void ExpressionMatrix::findSimilarGenePairs0(
     ostream& s,
@@ -31,7 +34,8 @@ void ExpressionMatrix::findSimilarGenePairs0(
     NormalizationMethod normalizationMethod,
     const string& similarGenePairsName,
     size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
-    double similarityThreshold
+    double similarityThreshold,
+    bool writeCsv
     )
 {
     s << timestamp << "ExpressionMatrix::findSimilarGenePairs0 begins." << endl;
@@ -134,7 +138,11 @@ void ExpressionMatrix::findSimilarGenePairs0(
     // Vectors to store the similar genes for each gene.
     vector< vector< pair<GeneId, float> > > similarGenes(geneCount);
 
-
+    // Open the csv file, if requested.
+    ofstream csv;
+    if(writeCsv) {
+        csv.open(similarGenePairsName + ".csv");
+    }
 
     // Loop over gene pairs.
     size_t pairsDone = 0;
@@ -156,6 +164,14 @@ void ExpressionMatrix::findSimilarGenePairs0(
                 ++pairsStored;
                 similarGenes[geneId0].push_back(make_pair(geneId1, r));
                 similarGenes[geneId1].push_back(make_pair(geneId0, r));
+            }
+            if(writeCsv) {
+                csv << geneNames[geneId0] << ",";
+                csv << geneNames[geneId1] << ",";
+                csv << r << "\n";
+                csv << geneNames[geneId1] << ",";
+                csv << geneNames[geneId0] << ",";
+                csv << r << "\n";
             }
         }
     }

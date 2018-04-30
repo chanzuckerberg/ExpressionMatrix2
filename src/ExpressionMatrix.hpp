@@ -605,7 +605,8 @@ public:
         NormalizationMethod,
         const string& similarGenePairsName,
         size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
-        double similarityThreshold
+        double similarityThreshold,
+        bool writeCsv
         );
     void findSimilarGenePairs0(
         const string& geneSetName,
@@ -613,7 +614,8 @@ public:
         NormalizationMethod,
         const string& similarGenePairsName,
         size_t k,                   // The maximum number of similar genes pairs to be stored for each gene.
-        double similarityThreshold
+        double similarityThreshold,
+        bool writeCsv
         );
 
     // Remove a similar gene pairs object given its name.

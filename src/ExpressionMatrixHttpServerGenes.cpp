@@ -1255,7 +1255,7 @@ void ExpressionMatrix::createSimilarGenePairs(const vector<string>& request, ost
     findSimilarGenePairs0(html,
         geneSetName, cellSetName,
         normalizationMethod, similarGenePairsName,
-        maxConnectivity, similarityThreshold);
+        maxConnectivity, similarityThreshold, false);
     html << "</pre>";
 
     html <<
