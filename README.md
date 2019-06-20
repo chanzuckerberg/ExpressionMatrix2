@@ -17,4 +17,7 @@ The screenshot below is from that case study.
 
 ![](https://chanzuckerberg.github.io/ExpressionMatrix2/doc/CaseStudy1/Screenshot-CellGraph-AllHighInfo2.png)
 
+## Contributing
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/chanzuckerberg/.github/tree/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to opensource@chanzuckerberg.com.
+
 
